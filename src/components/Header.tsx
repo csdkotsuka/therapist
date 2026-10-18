@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useApp, PRESET_LOCATIONS } from '@/context/AppContext';
+import { AuthModal } from '@/components/auth/AuthModal';
 import {
   Sparkles,
   Users,
@@ -12,6 +13,8 @@ import {
   UserCheck,
   Activity,
   HeartPulse,
+  KeyRound,
+  Database,
 } from 'lucide-react';
 
 export const Header: React.FC = () => {
@@ -23,10 +26,13 @@ export const Header: React.FC = () => {
     setUserLocation,
     resetToMock,
     bookings,
+    isLiveSupabase,
+    isLoadingDb,
   } = useApp();
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isLocationMenuOpen, setIsLocationMenuOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   // 未承認予約のリクエスト数（セラピスト用バッジ）
   const pendingRequestsCount = bookings.filter(
@@ -62,6 +68,18 @@ export const Header: React.FC = () => {
                 <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 bg-emerald-50 text-emerald-600 rounded border border-emerald-200">
                   出張・店舗
                 </span>
+
+                {/* Supabase 接続中ステータスバッジ */}
+                {isLiveSupabase ? (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-300 shadow-2xs">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                    <span>Supabase LIVE</span>
+                  </span>
+                ) : (
+                  <span className="text-[10px] text-slate-400 border border-slate-200 px-1.5 py-0.5 rounded">
+                    Mock Mode
+                  </span>
+                )}
               </div>
               <p className="text-xs text-slate-500 hidden sm:block">
                 ヘルスケア＆ボディケア・オンデマンド
@@ -70,7 +88,17 @@ export const Header: React.FC = () => {
           </div>
 
           {/* Right Action Bar */}
-          <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Supabase Auth ログインボタン */}
+            <button
+              onClick={() => setIsAuthModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-xs font-bold text-emerald-800 transition shadow-2xs"
+              title="Supabase Auth 認証ログイン"
+            >
+              <KeyRound className="w-3.5 h-3.5 text-emerald-600" />
+              <span className="hidden sm:inline">Auth ログイン</span>
+            </button>
+
             {/* 顧客ロール時の現在地切替セレクター */}
             {currentUser.role === 'customer' && (
               <div className="relative">
@@ -191,10 +219,10 @@ export const Header: React.FC = () => {
                   </div>
 
                   <div className="p-2 border-t border-slate-100 bg-slate-50/50 flex justify-between items-center text-xs">
-                    <span className="text-[11px] text-slate-400">プロトタイプ状態</span>
+                    <span className="text-[11px] text-slate-400">キャッシュ操作</span>
                     <button
                       onClick={() => {
-                        if (confirm('モックデータを初期状態にリセットしますか？')) {
+                        if (confirm('ローカルキャッシュをリセットしますか？')) {
                           resetToMock();
                           setIsUserMenuOpen(false);
                         }
@@ -211,6 +239,9 @@ export const Header: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Supabase Auth Modal */}
+      {isAuthModalOpen && <AuthModal onClose={() => setIsAuthModalOpen(false)} />}
     </header>
   );
 };
