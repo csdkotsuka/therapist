@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { Booking, TherapistProfile, Profile } from '@/types';
 import { useApp } from '@/context/AppContext';
 import { formatPrice, formatDate, calculateDistanceKm, estimateTravelTimeMinutes } from '@/lib/geo';
@@ -19,6 +20,18 @@ import {
   Activity,
   HeartPulse,
 } from 'lucide-react';
+
+const TrackingLeafletMap = dynamic(
+  () => import('./TrackingLeafletMap').then((m) => m.TrackingLeafletMap),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full bg-slate-950 flex items-center justify-center text-slate-400 text-xs font-bold">
+        リアルタイムGPS追跡マップを起動中...
+      </div>
+    ),
+  }
+);
 
 interface LiveTrackingModalProps {
   booking: Booking;
@@ -44,6 +57,10 @@ export const LiveTrackingModal: React.FC<LiveTrackingModalProps> = ({
   const destLat = booking.lat || 35.6600;
   const destLng = booking.lng || 139.7050;
 
+  // 現在のセラピストの推定座標
+  const curLat = originLat + (destLat - originLat) * (progress / 100);
+  const curLng = originLng + (destLng - originLng) * (progress / 100);
+
   // 移動シミュレーション
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -55,10 +72,9 @@ export const LiveTrackingModal: React.FC<LiveTrackingModalProps> = ({
             return 100;
           }
           const next = prev + 5;
-          // セラピストの座標を補間
-          const curLat = originLat + (destLat - originLat) * (next / 100);
-          const curLng = originLng + (destLng - originLng) * (next / 100);
-          updateTherapistLocation(booking.id, curLat, curLng);
+          const nextLat = originLat + (destLat - originLat) * (next / 100);
+          const nextLng = originLng + (destLng - originLng) * (next / 100);
+          updateTherapistLocation(booking.id, nextLat, nextLng);
           return next;
         });
       }, 1000);
@@ -66,12 +82,7 @@ export const LiveTrackingModal: React.FC<LiveTrackingModalProps> = ({
     return () => clearInterval(interval);
   }, [isSimulatingMove, originLat, originLng, destLat, destLng, booking.id, updateTherapistLocation]);
 
-  const currentDist = calculateDistanceKm(
-    originLat + (destLat - originLat) * (progress / 100),
-    originLng + (destLng - originLng) * (progress / 100),
-    destLat,
-    destLng
-  );
+  const currentDist = calculateDistanceKm(curLat, curLng, destLat, destLng);
   const etaMinutes = Math.max(1, Math.round(estimateTravelTimeMinutes(currentDist) * (1 - progress / 100)));
 
   return (
@@ -93,66 +104,20 @@ export const LiveTrackingModal: React.FC<LiveTrackingModalProps> = ({
           </button>
         </div>
 
-        {/* Live Radar/Map View */}
-        <div className="relative h-64 bg-slate-950 border-b border-slate-800 overflow-hidden flex items-center justify-center">
-          {/* グリッドとレーダー同心円 */}
-          <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] opacity-60"></div>
-          <div className="absolute w-48 h-48 border border-sky-500/20 rounded-full animate-ping pointer-events-none"></div>
-          <div className="absolute w-80 h-80 border border-slate-800 rounded-full pointer-events-none"></div>
-
-          {/* 移動経路ライン */}
-          <svg className="absolute inset-0 w-full h-full pointer-events-none">
-            <line
-              x1="25%"
-              y1="50%"
-              x2="75%"
-              y2="50%"
-              stroke="#334155"
-              strokeWidth="4"
-              strokeDasharray="6 6"
-            />
-            <line
-              x1="25%"
-              y1="50%"
-              x2={`${25 + progress * 0.5}%`}
-              y2="50%"
-              stroke="#10b981"
-              strokeWidth="4"
-            />
-          </svg>
-
-          {/* 出発地ピン（拠点） */}
-          <div className="absolute left-[25%] top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-            <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-400 text-xs shadow-md">
-              拠点
-            </div>
-          </div>
-
-          {/* セラピストの現在地ピン（移動中） */}
-          <div
-            className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 transition-all duration-700 z-10 flex flex-col items-center"
-            style={{ left: `${25 + progress * 0.5}%` }}
-          >
-            <div className="relative">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-500 border-2 border-white shadow-xl flex items-center justify-center text-white ring-4 ring-emerald-500/30">
-                <Car className="w-6 h-6 animate-bounce" />
-              </div>
-              <div className="absolute -top-7 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-emerald-600 text-[10px] font-bold rounded-md whitespace-nowrap shadow-md">
-                移動中
-              </div>
-            </div>
-          </div>
-
-          {/* 目的地（顧客宅）ピン */}
-          <div className="absolute left-[75%] top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-            <div className="w-10 h-10 rounded-2xl bg-sky-600 border border-sky-400 flex items-center justify-center text-white shadow-lg">
-              <Home className="w-5 h-5" />
-            </div>
-            <span className="text-[10px] text-sky-300 font-bold mt-1">ご自宅</span>
-          </div>
+        {/* Live Map View (Leaflet) */}
+        <div className="relative h-72 w-full border-b border-slate-800 overflow-hidden">
+          <TrackingLeafletMap
+            originLat={originLat}
+            originLng={originLng}
+            destLat={destLat}
+            destLng={destLng}
+            curLat={curLat}
+            curLng={curLng}
+            progress={progress}
+          />
 
           {/* 到着時間オーバーレイ */}
-          <div className="absolute top-3 right-3 bg-slate-900/90 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-slate-700 text-right shadow-xl">
+          <div className="absolute top-3 right-3 z-10 bg-slate-900/90 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-slate-700 text-right shadow-xl">
             <span className="text-[10px] text-slate-400 block font-semibold">到着予定 (ETA)</span>
             <div className="flex items-baseline gap-1 text-emerald-400 font-black text-xl">
               <span>あと約 {etaMinutes}</span>
@@ -161,10 +126,10 @@ export const LiveTrackingModal: React.FC<LiveTrackingModalProps> = ({
           </div>
 
           {/* シミュレーション進行ボタン */}
-          <div className="absolute bottom-3 left-3 z-20">
+          <div className="absolute bottom-3 left-3 z-10">
             <button
               onClick={() => setIsSimulatingMove(!isSimulatingMove)}
-              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl text-[11px] font-bold text-slate-200 transition flex items-center gap-1.5 shadow"
+              className="px-3 py-1.5 bg-slate-900/90 backdrop-blur-md hover:bg-slate-800 border border-slate-600 rounded-xl text-[11px] font-bold text-slate-200 transition flex items-center gap-1.5 shadow-lg"
             >
               <Navigation className="w-3.5 h-3.5 text-emerald-400" />
               {isSimulatingMove ? 'シミュレーション一時停止' : 'GPS移動をシミュレート'}

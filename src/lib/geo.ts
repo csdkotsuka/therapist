@@ -52,3 +52,94 @@ export function formatDate(isoString: string): string {
     minute: '2-digit',
   }).format(date);
 }
+
+/**
+ * ブラウザのGPS APIから現在地を取得 (navigator.geolocation)
+ */
+export function getCurrentGpsPosition(): Promise<{ lat: number; lng: number }> {
+  return new Promise((resolve, reject) => {
+    if (typeof window === 'undefined' || !navigator.geolocation) {
+      reject(new Error('お使いのブラウザはGPS位置情報に対応していません'));
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        resolve({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+      },
+      (error) => {
+        let msg = '位置情報の取得に失敗しました';
+        if (error.code === error.PERMISSION_DENIED) {
+          msg = '位置情報の利用が許可されていません。ブラウザの設定で位置情報を許可してください。';
+        } else if (error.code === error.POSITION_UNAVAILABLE) {
+          msg = '現在地を取得できませんでした';
+        } else if (error.code === error.TIMEOUT) {
+          msg = '位置情報の取得がタイムアウトしました';
+        }
+        reject(new Error(msg));
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 60000,
+      }
+    );
+  });
+}
+
+/**
+ * 緯度経度から市区町村名・地名を取得する逆ジオコーディング (無料・キー不要)
+ */
+export async function reverseGeocode(lat: number, lng: number): Promise<string> {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=14&addressdetails=1`,
+      {
+        headers: {
+          'Accept-Language': 'ja',
+        },
+      }
+    );
+    if (!res.ok) throw new Error('Geocoding request failed');
+    const data = await res.json();
+    const addr = data.address;
+    if (addr) {
+      const city = addr.city || addr.ward || addr.town || addr.village || addr.suburb || addr.province || '';
+      const state = addr.province || addr.state || '';
+      return `${state} ${city}`.trim() || data.display_name.split(',')[0];
+    }
+    return `現在地 (${lat.toFixed(2)}, ${lng.toFixed(2)})`;
+  } catch (e) {
+    return `現在地 (${lat.toFixed(2)}, ${lng.toFixed(2)})`;
+  }
+}
+
+/**
+ * 住所から緯度経度を取得するジオコーディング (無料・キー不要)
+ */
+export async function geocodeAddress(address: string): Promise<{ lat: number; lng: number } | null> {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`,
+      {
+        headers: {
+          'Accept-Language': 'ja',
+        },
+      }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data && data.length > 0) {
+      return {
+        lat: parseFloat(data[0].lat),
+        lng: parseFloat(data[0].lon),
+      };
+    }
+    return null;
+  } catch (e) {
+    return null;
+  }
+}

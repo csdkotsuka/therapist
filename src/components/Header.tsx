@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useApp, PRESET_LOCATIONS } from '@/context/AppContext';
 import { AuthModal } from '@/components/auth/AuthModal';
+import { getCurrentGpsPosition, reverseGeocode } from '@/lib/geo';
 import {
   Sparkles,
   Users,
@@ -15,6 +16,8 @@ import {
   HeartPulse,
   KeyRound,
   Database,
+  Navigation,
+  Loader2,
 } from 'lucide-react';
 
 export const Header: React.FC = () => {
@@ -33,11 +36,30 @@ export const Header: React.FC = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isLocationMenuOpen, setIsLocationMenuOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isGettingGps, setIsGettingGps] = useState(false);
 
   // 未承認予約のリクエスト数（セラピスト用バッジ）
   const pendingRequestsCount = bookings.filter(
     (b) => b.therapist_id === currentUser.id && b.status === 'pending'
   ).length;
+
+  const handleGetDeviceGps = async () => {
+    setIsGettingGps(true);
+    try {
+      const coords = await getCurrentGpsPosition();
+      const placeName = await reverseGeocode(coords.lat, coords.lng);
+      setUserLocation({
+        name: `${placeName} (現在地)`,
+        lat: coords.lat,
+        lng: coords.lng,
+      });
+      setIsLocationMenuOpen(false);
+    } catch (err: any) {
+      alert(err.message || '位置情報の取得に失敗しました');
+    } finally {
+      setIsGettingGps(false);
+    }
+  };
 
   const getRoleBadge = (role: string) => {
     switch (role) {
@@ -116,9 +138,28 @@ export const Header: React.FC = () => {
                 </button>
 
                 {isLocationMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-1.5 z-50">
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50">
+                    {/* 実端末GPS取得ボタン */}
+                    <div className="px-2 pb-2 mb-1 border-b border-slate-100">
+                      <button
+                        onClick={handleGetDeviceGps}
+                        disabled={isGettingGps}
+                        className="w-full text-left px-3 py-2 bg-sky-50 hover:bg-sky-100 text-sky-800 rounded-xl text-xs font-bold flex items-center justify-between transition shadow-2xs"
+                      >
+                        <div className="flex items-center gap-1.5">
+                          {isGettingGps ? (
+                            <Loader2 className="w-3.5 h-3.5 text-sky-600 animate-spin" />
+                          ) : (
+                            <Navigation className="w-3.5 h-3.5 text-sky-600" />
+                          )}
+                          <span>{isGettingGps ? 'GPS測位中...' : '実端末の現在地を使用'}</span>
+                        </div>
+                        <span className="text-[10px] bg-sky-600 text-white px-1.5 py-0.2 rounded font-bold">GPS</span>
+                      </button>
+                    </div>
+
                     <div className="px-3 py-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                      現在地シミュレーション
+                      プリセット地点
                     </div>
                     {PRESET_LOCATIONS.map((loc) => (
                       <button

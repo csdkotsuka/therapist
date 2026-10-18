@@ -1,12 +1,25 @@
 'use client';
 
 import React, { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useApp } from '@/context/AppContext';
 import { formatPrice, calculateDistanceKm, estimateTravelTimeMinutes, formatDate } from '@/lib/geo';
 import { InteractiveMap } from './InteractiveMap';
 import { BookingModal } from './BookingModal';
 import { LiveTrackingModal } from './LiveTrackingModal';
 import { ReviewModal } from './ReviewModal';
+
+const RealLeafletMap = dynamic(
+  () => import('./RealLeafletMap').then((m) => m.RealLeafletMap),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[500px] bg-slate-900 rounded-3xl animate-pulse flex items-center justify-center text-slate-400 text-xs font-bold border border-slate-800">
+        地図を読み込み中...
+      </div>
+    ),
+  }
+);
 import {
   Search,
   SlidersHorizontal,
@@ -254,7 +267,7 @@ export const CustomerView: React.FC = () => {
 
           {/* ビューの描画 (マップ表示 or リスト表示) */}
           {viewMode === 'map' ? (
-            <InteractiveMap
+            <RealLeafletMap
               onSelectTherapist={(id) => setBookingTherapistId(id)}
               filterType={filterStyle}
             />

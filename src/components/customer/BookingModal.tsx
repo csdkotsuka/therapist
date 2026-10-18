@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
-import { formatPrice, calculateDistanceKm, estimateTravelTimeMinutes } from '@/lib/geo';
+import { formatPrice, calculateDistanceKm, estimateTravelTimeMinutes, geocodeAddress } from '@/lib/geo';
 import {
   X,
   Star,
@@ -88,6 +88,21 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       const [hours, minutes] = selectedTimeSlot.split(':').map(Number);
       targetDate.setHours(hours, minutes, 0, 0);
 
+      // 出張先住所のジオコーディング (緯度経度特定)
+      let bookingLat = userLocation.lat;
+      let bookingLng = userLocation.lng;
+      if (bookingType === 'visit' && visitAddress.trim()) {
+        try {
+          const geocoded = await geocodeAddress(visitAddress);
+          if (geocoded) {
+            bookingLat = geocoded.lat;
+            bookingLng = geocoded.lng;
+          }
+        } catch (e) {
+          // fallback to userLocation
+        }
+      }
+
       const booking = await createBooking({
         customer_id: currentUser.id,
         therapist_id: therapist.user_id,
@@ -96,8 +111,8 @@ export const BookingModal: React.FC<BookingModalProps> = ({
         scheduled_at: targetDate.toISOString(),
         total_amount: currentService.price,
         stripe_payment_intent_id: `pi_mock_${Date.now()}`,
-        lat: userLocation.lat,
-        lng: userLocation.lng,
+        lat: bookingLat,
+        lng: bookingLng,
         visit_address: bookingType === 'visit' ? visitAddress : therapist.address,
         customer_notes: notes,
       });
