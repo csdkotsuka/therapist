@@ -106,7 +106,7 @@ create index if not exists services_therapist_idx on public.services (therapist_
 create index if not exists reviews_therapist_idx on public.reviews (therapist_id);
 
 -- ========================================================
--- Row Level Security (RLS) ポリシー
+-- Row Level Security (RLS) ポリシー (何度でも再実行可能)
 -- ========================================================
 
 alter table public.profiles enable row level security;
@@ -117,34 +117,42 @@ alter table public.reviews enable row level security;
 alter table public.platform_settings enable row level security;
 
 -- profiles ポリシー
--- 認証済み/匿名ユーザー含め閲覧可能 (一覧や詳細表示のため)
+drop policy if exists "profiles_select_policy" on public.profiles;
 create policy "profiles_select_policy" on public.profiles
   for select using (true);
 
+drop policy if exists "profiles_insert_policy" on public.profiles;
 create policy "profiles_insert_policy" on public.profiles
   for insert with check (auth.uid() = id or (select role from public.profiles where id = auth.uid()) = 'admin');
 
+drop policy if exists "profiles_update_policy" on public.profiles;
 create policy "profiles_update_policy" on public.profiles
   for update using (auth.uid() = id or (select role from public.profiles where id = auth.uid()) = 'admin');
 
 -- therapist_profiles ポリシー
+drop policy if exists "therapist_profiles_select_policy" on public.therapist_profiles;
 create policy "therapist_profiles_select_policy" on public.therapist_profiles
   for select using (true);
 
+drop policy if exists "therapist_profiles_insert_policy" on public.therapist_profiles;
 create policy "therapist_profiles_insert_policy" on public.therapist_profiles
   for insert with check (auth.uid() = user_id or (select role from public.profiles where id = auth.uid()) = 'admin');
 
+drop policy if exists "therapist_profiles_update_policy" on public.therapist_profiles;
 create policy "therapist_profiles_update_policy" on public.therapist_profiles
   for update using (auth.uid() = user_id or (select role from public.profiles where id = auth.uid()) = 'admin');
 
 -- services ポリシー
+drop policy if exists "services_select_policy" on public.services;
 create policy "services_select_policy" on public.services
   for select using (true);
 
+drop policy if exists "services_manage_policy" on public.services;
 create policy "services_manage_policy" on public.services
   for all using (auth.uid() = therapist_id or (select role from public.profiles where id = auth.uid()) = 'admin');
 
 -- bookings ポリシー
+drop policy if exists "bookings_select_policy" on public.bookings;
 create policy "bookings_select_policy" on public.bookings
   for select using (
     auth.uid() = customer_id or
@@ -152,12 +160,14 @@ create policy "bookings_select_policy" on public.bookings
     (select role from public.profiles where id = auth.uid()) = 'admin'
   );
 
+drop policy if exists "bookings_insert_policy" on public.bookings;
 create policy "bookings_insert_policy" on public.bookings
   for insert with check (
     auth.uid() = customer_id or
     (select role from public.profiles where id = auth.uid()) = 'admin'
   );
 
+drop policy if exists "bookings_update_policy" on public.bookings;
 create policy "bookings_update_policy" on public.bookings
   for update using (
     auth.uid() = customer_id or
@@ -166,15 +176,18 @@ create policy "bookings_update_policy" on public.bookings
   );
 
 -- reviews ポリシー
+drop policy if exists "reviews_select_policy" on public.reviews;
 create policy "reviews_select_policy" on public.reviews
   for select using (true);
 
+drop policy if exists "reviews_insert_policy" on public.reviews;
 create policy "reviews_insert_policy" on public.reviews
   for insert with check (
     auth.uid() = customer_id or
     (select role from public.profiles where id = auth.uid()) = 'admin'
   );
 
+drop policy if exists "reviews_delete_policy" on public.reviews;
 create policy "reviews_delete_policy" on public.reviews
   for delete using (
     auth.uid() = customer_id or
@@ -182,9 +195,11 @@ create policy "reviews_delete_policy" on public.reviews
   );
 
 -- platform_settings ポリシー
+drop policy if exists "platform_settings_select_policy" on public.platform_settings;
 create policy "platform_settings_select_policy" on public.platform_settings
   for select using (true);
 
+drop policy if exists "platform_settings_all_policy" on public.platform_settings;
 create policy "platform_settings_all_policy" on public.platform_settings
   for all using (
     (select role from public.profiles where id = auth.uid()) = 'admin'
@@ -278,6 +293,7 @@ begin
 end;
 $$;
 
-create or replace trigger trigger_update_therapist_rating
+drop trigger if exists trigger_update_therapist_rating on public.reviews;
+create trigger trigger_update_therapist_rating
 after insert or update or delete on public.reviews
 for each row execute function public.update_therapist_rating();
