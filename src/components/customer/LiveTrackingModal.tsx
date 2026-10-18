@@ -4,7 +4,13 @@ import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { Booking, TherapistProfile, Profile } from '@/types';
 import { useApp } from '@/context/AppContext';
-import { formatPrice, formatDate, calculateDistanceKm, estimateTravelTimeMinutes } from '@/lib/geo';
+import {
+  formatPrice,
+  formatDate,
+  calculateDistanceKm,
+  estimateTravelTimeMinutes,
+  fetchRouteDistanceAndDuration,
+} from '@/lib/geo';
 import {
   X,
   MapPin,
@@ -19,6 +25,7 @@ import {
   Star,
   Activity,
   HeartPulse,
+  Sparkles,
 } from 'lucide-react';
 
 const TrackingLeafletMap = dynamic(
@@ -57,9 +64,48 @@ export const LiveTrackingModal: React.FC<LiveTrackingModalProps> = ({
   const destLat = booking.lat || 35.6600;
   const destLng = booking.lng || 139.7050;
 
-  // 現在のセラピストの推定座標
-  const curLat = originLat + (destLat - originLat) * (progress / 100);
-  const curLng = originLng + (destLng - originLng) * (progress / 100);
+  // Google Routes API からの取得結果
+  const [routeInfo, setRouteInfo] = useState<{
+    distanceKm: number;
+    durationMinutes: number;
+    polylinePoints: [number, number][] | null;
+    provider: string;
+  }>({
+    distanceKm: calculateDistanceKm(originLat, originLng, destLat, destLng),
+    durationMinutes: estimateTravelTimeMinutes(calculateDistanceKm(originLat, originLng, destLat, destLng)),
+    polylinePoints: null,
+    provider: 'calculating',
+  });
+
+  // 初回マウント時に Google Routes API を呼び出して実道路ルート・所要時間を取得
+  useEffect(() => {
+    fetchRouteDistanceAndDuration(
+      { lat: originLat, lng: originLng },
+      { lat: destLat, lng: destLng }
+    ).then((res) => {
+      setRouteInfo(res);
+    });
+  }, [originLat, originLng, destLat, destLng]);
+
+  // 車両の現在地座標の算出 (道路ポリラインがあればその上を走行、なければ直線補間)
+  const getInterpolatedCoord = (p: number) => {
+    if (routeInfo.polylinePoints && routeInfo.polylinePoints.length > 1) {
+      const idx = Math.min(
+        routeInfo.polylinePoints.length - 1,
+        Math.floor((p / 100) * (routeInfo.polylinePoints.length - 1))
+      );
+      return {
+        lat: routeInfo.polylinePoints[idx][0],
+        lng: routeInfo.polylinePoints[idx][1],
+      };
+    }
+    return {
+      lat: originLat + (destLat - originLat) * (p / 100),
+      lng: originLng + (destLng - originLng) * (p / 100),
+    };
+  };
+
+  const currentCoord = getInterpolatedCoord(progress);
 
   // 移動シミュレーション
   useEffect(() => {
@@ -72,18 +118,16 @@ export const LiveTrackingModal: React.FC<LiveTrackingModalProps> = ({
             return 100;
           }
           const next = prev + 5;
-          const nextLat = originLat + (destLat - originLat) * (next / 100);
-          const nextLng = originLng + (destLng - originLng) * (next / 100);
-          updateTherapistLocation(booking.id, nextLat, nextLng);
+          const coord = getInterpolatedCoord(next);
+          updateTherapistLocation(booking.id, coord.lat, coord.lng);
           return next;
         });
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [isSimulatingMove, originLat, originLng, destLat, destLng, booking.id, updateTherapistLocation]);
+  }, [isSimulatingMove, originLat, originLng, destLat, destLng, booking.id, updateTherapistLocation, routeInfo.polylinePoints]);
 
-  const currentDist = calculateDistanceKm(curLat, curLng, destLat, destLng);
-  const etaMinutes = Math.max(1, Math.round(estimateTravelTimeMinutes(currentDist) * (1 - progress / 100)));
+  const etaMinutes = Math.max(1, Math.round(routeInfo.durationMinutes * (1 - progress / 100)));
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
@@ -92,9 +136,16 @@ export const LiveTrackingModal: React.FC<LiveTrackingModalProps> = ({
         <div className="px-5 py-4 border-b border-slate-800/80 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-            <h3 className="font-bold text-sm text-slate-100">
-              リアルタイム出張追跡 (Live GPS)
-            </h3>
+            <div>
+              <h3 className="font-bold text-sm text-slate-100 flex items-center gap-2">
+                <span>リアルタイム出張追跡 (Live GPS)</span>
+                {routeInfo.provider === 'google_routes' && (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    Google Routes 渋滞考慮
+                  </span>
+                )}
+              </h3>
+            </div>
           </div>
           <button
             onClick={onClose}
@@ -104,16 +155,17 @@ export const LiveTrackingModal: React.FC<LiveTrackingModalProps> = ({
           </button>
         </div>
 
-        {/* Live Map View (Leaflet) */}
+        {/* Live Map View (Leaflet + Google Routes Polyline) */}
         <div className="relative h-72 w-full border-b border-slate-800 overflow-hidden">
           <TrackingLeafletMap
             originLat={originLat}
             originLng={originLng}
             destLat={destLat}
             destLng={destLng}
-            curLat={curLat}
-            curLng={curLng}
+            curLat={currentCoord.lat}
+            curLng={currentCoord.lng}
             progress={progress}
+            routePolyline={routeInfo.polylinePoints}
           />
 
           {/* 到着時間オーバーレイ */}
@@ -123,6 +175,9 @@ export const LiveTrackingModal: React.FC<LiveTrackingModalProps> = ({
               <span>あと約 {etaMinutes}</span>
               <span className="text-xs font-normal">分</span>
             </div>
+            <span className="text-[9px] text-slate-400 block mt-0.5">
+              実走行 {routeInfo.distanceKm} km
+            </span>
           </div>
 
           {/* シミュレーション進行ボタン */}

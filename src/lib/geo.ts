@@ -91,7 +91,7 @@ export function getCurrentGpsPosition(): Promise<{ lat: number; lng: number }> {
 }
 
 /**
- * 緯度経度から市区町村名・地名を取得する逆ジオコーディング (無料・キー不要)
+ * 緯度経度から市区町村名・地名を取得する逆ジオコーディング
  */
 export async function reverseGeocode(lat: number, lng: number): Promise<string> {
   try {
@@ -118,7 +118,7 @@ export async function reverseGeocode(lat: number, lng: number): Promise<string> 
 }
 
 /**
- * 住所から緯度経度を取得するジオコーディング (無料・キー不要)
+ * 住所から緯度経度を取得するジオコーディング
  */
 export async function geocodeAddress(address: string): Promise<{ lat: number; lng: number } | null> {
   try {
@@ -141,5 +141,81 @@ export async function geocodeAddress(address: string): Promise<{ lat: number; ln
     return null;
   } catch (e) {
     return null;
+  }
+}
+
+/**
+ * Google Polyline アルゴリズムのデコーダー (エンコードされた道路ルート座標を [lat, lng][] に変換)
+ */
+export function decodePolyline(encoded: string): [number, number][] {
+  const points: [number, number][] = [];
+  let index = 0;
+  const len = encoded.length;
+  let lat = 0;
+  let lng = 0;
+
+  while (index < len) {
+    let b: number;
+    let shift = 0;
+    let result = 0;
+    do {
+      b = encoded.charCodeAt(index++) - 63;
+      result |= (b & 0x1f) << shift;
+      shift += 5;
+    } while (b >= 0x20);
+    const dlat = (result & 1) !== 0 ? ~(result >> 1) : result >> 1;
+    lat += dlat;
+
+    shift = 0;
+    result = 0;
+    do {
+      b = encoded.charCodeAt(index++) - 63;
+      result |= (b & 0x1f) << shift;
+      shift += 5;
+    } while (b >= 0x20);
+    const dlng = (result & 1) !== 0 ? ~(result >> 1) : result >> 1;
+    lng += dlng;
+
+    points.push([lat / 1e5, lng / 1e5]);
+  }
+  return points;
+}
+
+/**
+ * Google Routes API を呼び出して走行距離・渋滞考慮所要時間・道路ルート座標を取得
+ */
+export async function fetchRouteDistanceAndDuration(
+  origin: { lat: number; lng: number },
+  destination: { lat: number; lng: number }
+): Promise<{
+  distanceKm: number;
+  durationMinutes: number;
+  polylinePoints: [number, number][] | null;
+  provider: 'google_routes' | 'fallback_haversine' | 'fallback';
+}> {
+  try {
+    const res = await fetch('/api/routes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ origin, destination }),
+    });
+
+    if (!res.ok) throw new Error('Route API failed');
+    const data = await res.json();
+
+    return {
+      distanceKm: data.distanceKm,
+      durationMinutes: data.durationMinutes,
+      polylinePoints: data.encodedPolyline ? decodePolyline(data.encodedPolyline) : null,
+      provider: data.provider,
+    };
+  } catch (e) {
+    const dist = calculateDistanceKm(origin.lat, origin.lng, destination.lat, destination.lng);
+    return {
+      distanceKm: dist,
+      durationMinutes: estimateTravelTimeMinutes(dist),
+      polylinePoints: null,
+      provider: 'fallback',
+    };
   }
 }

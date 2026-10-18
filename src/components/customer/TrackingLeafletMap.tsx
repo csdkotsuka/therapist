@@ -11,6 +11,7 @@ interface TrackingLeafletMapProps {
   curLat: number;
   curLng: number;
   progress: number;
+  routePolyline?: [number, number][] | null;
 }
 
 export const TrackingLeafletMap: React.FC<TrackingLeafletMapProps> = ({
@@ -21,6 +22,7 @@ export const TrackingLeafletMap: React.FC<TrackingLeafletMapProps> = ({
   curLat,
   curLng,
   progress,
+  routePolyline,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -43,25 +45,25 @@ export const TrackingLeafletMap: React.FC<TrackingLeafletMapProps> = ({
       zoomControl: false,
     });
 
-    // スタイリッシュなダークモード風またはボイジャー地図タイル
+    // スタイリッシュなボイジャー地図タイル
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
       maxZoom: 19,
       subdomains: 'abcd',
     }).addTo(map);
 
-    // 1. ルート線 (Polyline)
-    L.polyline(
-      [
-        [originLat, originLng],
-        [destLat, destLng],
-      ],
-      {
-        color: '#059669',
-        weight: 4,
-        dashArray: '8, 8',
-        opacity: 0.8,
-      }
-    ).addTo(map);
+    // 1. ルート線 (Google実道路ルートがあればそれを使用、なければ直線)
+    const latLngs: [number, number][] = routePolyline && routePolyline.length > 0
+      ? routePolyline
+      : [
+          [originLat, originLng],
+          [destLat, destLng],
+        ];
+
+    L.polyline(latLngs, {
+      color: '#059669',
+      weight: 5,
+      opacity: 0.85,
+    }).addTo(map);
 
     // 2. 出発地（拠点）マーカー
     const originIcon = L.divIcon({
@@ -109,11 +111,8 @@ export const TrackingLeafletMap: React.FC<TrackingLeafletMapProps> = ({
     const carMarker = L.marker([curLat, curLng], { icon: carIcon }).addTo(map);
     carMarkerRef.current = carMarker;
 
-    // 両地点が収まるようにズーム調整
-    map.fitBounds([
-      [originLat, originLng],
-      [destLat, destLng],
-    ], { padding: [40, 40] });
+    // ルート全体が収まるようにズーム調整
+    map.fitBounds(latLngs, { padding: [40, 40] });
 
     mapInstanceRef.current = map;
 
@@ -121,13 +120,12 @@ export const TrackingLeafletMap: React.FC<TrackingLeafletMapProps> = ({
       map.remove();
       mapInstanceRef.current = null;
     };
-  }, [originLat, originLng, destLat, destLng]);
+  }, [originLat, originLng, destLat, destLng, routePolyline]);
 
   // 車の位置が更新されたときのアニメーション
   useEffect(() => {
     if (carMarkerRef.current) {
       carMarkerRef.current.setLatLng([curLat, curLng]);
-      // アイコンのプログレスラベルも更新
       const carIcon = L.divIcon({
         html: `
           <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px;">
