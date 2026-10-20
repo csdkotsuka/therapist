@@ -35,6 +35,8 @@ export const AdminView: React.FC = () => {
     setPlatformFeeRate,
     toggleTherapistApproval,
     updateBookingStatus,
+    refreshFromSupabase,
+    isLoadingDb,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'kpi' | 'bookings' | 'users' | 'reviews' | 'settings'>('kpi');
@@ -321,60 +323,86 @@ export const AdminView: React.FC = () => {
       {/* タブ 3: セラピスト・ユーザー審査 */}
       {activeTab === 'users' && (
         <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-100">
-            <h4 className="font-bold text-slate-900 text-sm">セラピスト登録審査 & パートナー管理</h4>
+          <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+            <div>
+              <h4 className="font-bold text-slate-900 text-sm">セラピスト登録審査 & パートナー管理</h4>
+              <p className="text-[11px] text-slate-500">全 {therapists.length} 名のセラピスト</p>
+            </div>
+            <button
+              onClick={() => refreshFromSupabase()}
+              disabled={isLoadingDb}
+              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-1.5 disabled:opacity-50"
+            >
+              <span>{isLoadingDb ? '同期中...' : '最新データを取得'}</span>
+            </button>
           </div>
 
           <div className="divide-y divide-slate-100">
-            {therapists.map((th) => {
-              const tp = therapistProfiles[th.id];
-              const isApproved = tp?.is_approved ?? false;
+            {therapists.length === 0 ? (
+              <div className="p-8 text-center text-slate-400 text-xs">
+                登録されているセラピストがいません
+              </div>
+            ) : (
+              therapists.map((th) => {
+                const tp = therapistProfiles[th.id];
+                const isApproved = tp?.is_approved ?? false;
 
-              return (
-                <div key={th.id} className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    <img
-                      src={th.avatar_url}
-                      alt={th.name}
-                      className="w-14 h-14 rounded-2xl object-cover ring-2 ring-emerald-500/20"
-                    />
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-bold text-slate-900 text-sm">{th.name}</h4>
-                        <span className="text-xs text-slate-400 font-mono">{th.email}</span>
-                      </div>
-                      <p className="text-xs text-slate-500 mt-1 max-w-xl">{tp?.bio}</p>
-                      <div className="flex flex-wrap gap-1.5 mt-2">
-                        {tp?.specialities.map((spec) => (
-                          <span key={spec} className="px-2 py-0.5 rounded-md bg-slate-100 text-[10px] text-slate-600 font-medium">
-                            {spec}
-                          </span>
-                        ))}
+                return (
+                  <div key={th.id} className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <img
+                        src={th.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(th.name)}`}
+                        alt={th.name}
+                        className="w-14 h-14 rounded-2xl object-cover ring-2 ring-emerald-500/20"
+                      />
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-bold text-slate-900 text-sm">{th.name}</h4>
+                          <span className="text-xs text-slate-400 font-mono">{th.email}</span>
+                          {!isApproved && (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                              新規・審査中
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-500 mt-1 max-w-xl">
+                          {tp?.bio || '新規登録セラピストです。管理者による審査待ちです。'}
+                        </p>
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {(tp?.specialities && tp.specialities.length > 0
+                            ? tp.specialities
+                            : ['ボディケア', '整体']
+                          ).map((spec) => (
+                            <span key={spec} className="px-2 py-0.5 rounded-md bg-slate-100 text-[10px] text-slate-600 font-medium">
+                              {spec}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* 承認トグルスイッチ */}
-                  <div className="flex items-center gap-3 shrink-0">
-                    <span className={`text-xs font-bold ${isApproved ? 'text-emerald-600' : 'text-slate-400'}`}>
-                      {isApproved ? '審査承認済み (公開中)' : '審査中 / 停止中'}
-                    </span>
-                    <button
-                      onClick={() => toggleTherapistApproval(th.id)}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        isApproved ? 'bg-emerald-600' : 'bg-slate-300'
-                      }`}
-                    >
-                      <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                          isApproved ? 'translate-x-6' : 'translate-x-1'
+                    {/* 承認トグルスイッチ */}
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className={`text-xs font-bold ${isApproved ? 'text-emerald-600' : 'text-slate-400'}`}>
+                        {isApproved ? '審査承認済み (公開中)' : '審査中 / 停止中'}
+                      </span>
+                      <button
+                        onClick={() => toggleTherapistApproval(th.id)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                          isApproved ? 'bg-emerald-600' : 'bg-slate-300'
                         }`}
-                      />
-                    </button>
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            isApproved ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </div>
       )}

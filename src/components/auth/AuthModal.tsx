@@ -22,7 +22,7 @@ interface AuthModalProps {
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
-  const { allUsers, switchUser } = useApp();
+  const { allUsers, switchUser, addCustomerUser, addTherapistUser, refreshFromSupabase } = useApp();
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [email, setEmail] = useState('tanaka@example.com');
   const [password, setPassword] = useState('password123');
@@ -86,12 +86,38 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
           },
         });
 
-        if (error) {
+        if (error && !error.message.includes('already registered')) {
           setErrorMsg(error.message);
-        } else {
-          setSuccessMsg('アカウントを作成しました！確認メールをお送りしました。');
-          setTimeout(() => onClose(), 1800);
+          return;
         }
+
+        const newUserId = data?.user?.id || `user_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+        const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name || 'User')}`;
+
+        const newProfile = {
+          id: newUserId,
+          role,
+          name: name.trim() || '新規ユーザー',
+          email,
+          avatar_url: avatarUrl,
+        };
+
+        if (role === 'therapist') {
+          await addTherapistUser(newProfile, {
+            bio: '新規登録セラピストです。管理者による審査待ちです。',
+            specialities: ['ボディケア', '整体', 'リラクゼーション'],
+            is_approved: false, // 審査待ち
+            is_store_based: true,
+            is_visit_based: true,
+          });
+          setSuccessMsg('セラピストアカウントを作成しました！管理本部で審査が行われます。');
+        } else {
+          addCustomerUser(newProfile);
+          setSuccessMsg('顧客アカウントを作成しました！');
+        }
+
+        await refreshFromSupabase();
+        setTimeout(() => onClose(), 1500);
       }
     } catch (err: any) {
       setErrorMsg(err.message || '認証中にエラーが発生しました');

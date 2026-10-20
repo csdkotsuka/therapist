@@ -55,6 +55,7 @@ interface AppContextType {
   refreshFromSupabase: () => Promise<void>;
   resetToMock: () => void;
   addCustomerUser: (user: Profile) => void;
+  addTherapistUser: (user: Profile, therapistData?: Partial<TherapistProfile>) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -88,8 +89,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       // 2. therapist_profiles
       const { data: dbTherapists, error: tErr } = await supabase.from('therapist_profiles').select('*');
+      const mapped: Record<string, TherapistProfile> = {};
       if (!tErr && dbTherapists && dbTherapists.length > 0) {
-        const mapped: Record<string, TherapistProfile> = {};
         dbTherapists.forEach((t: any) => {
           const fallback = initialTherapistProfiles[t.user_id] || initialTherapistProfiles['therapist-001'];
           mapped[t.user_id] = {
@@ -98,8 +99,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             lng: t.lng || fallback.lng,
           };
         });
-        setTherapistProfiles((prev) => ({ ...prev, ...mapped }));
       }
+
+      // profiles に therapist として存在するが therapist_profiles に未登録のユーザーを自動補完
+      if (dbProfiles) {
+        dbProfiles
+          .filter((p: any) => p.role === 'therapist')
+          .forEach((tpUser: any) => {
+            if (!mapped[tpUser.id]) {
+              mapped[tpUser.id] = {
+                user_id: tpUser.id,
+                bio: '新規登録セラピストです。管理本部による審査待ちです。',
+                specialities: ['ボディケア', 'リラクゼーション'],
+                is_store_based: true,
+                is_visit_based: true,
+                address: tpUser.address || '東京都内',
+                lat: tpUser.lat || 35.6666,
+                lng: tpUser.lng || 139.7092,
+                visit_radius_km: 10,
+                rating_avg: 5.0,
+                reviews_count: 0,
+                is_approved: false, // デフォルト審査中
+              };
+            }
+          });
+      }
+      setTherapistProfiles((prev) => ({ ...prev, ...mapped }));
 
       // 3. services
       const { data: dbServices, error: sErr } = await supabase.from('services').select('*');
@@ -272,8 +297,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const toggleTherapistApproval = async (userId: string) => {
-    const current = therapistProfiles[userId];
-    if (!current) return;
+    const current = therapistProfiles[userId] || {
+      user_id: userId,
+      bio: '新規登録セラピストです。よろしくお願いいたします。',
+      specialities: ['ボディケア', 'リラクゼーション'],
+      is_store_based: true,
+      is_visit_based: true,
+      address: '東京都内',
+      lat: 35.6666,
+      lng: 139.7092,
+      visit_radius_km: 10,
+      rating_avg: 5.0,
+      reviews_count: 0,
+      is_approved: false,
+    };
     const newStatus = !current.is_approved;
 
     setTherapistProfiles((prev) => ({
@@ -288,8 +325,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       try {
         await supabase
           .from('therapist_profiles')
-          .update({ is_approved: newStatus })
-          .eq('user_id', userId);
+          .upsert({
+            user_id: userId,
+            is_approved: newStatus,
+            bio: current.bio,
+            specialities: current.specialities,
+            address: current.address,
+            is_store_based: current.is_store_based,
+            is_visit_based: current.is_visit_based,
+          });
       } catch (err) {
         console.warn('Supabase therapist approval update warning:', err);
       }
@@ -384,6 +428,76 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCurrentUser(newUser);
   };
 
+  const addTherapistUser = async (
+    newUser: Profile,
+    therapistData?: Partial<TherapistProfile>
+  ) => {
+    // 1. allUsers に追加
+    setAllUsers((prev) => {
+      const exists = prev.some((u) => u.id === newUser.id);
+      if (exists) {
+        return prev.map((u) => (u.id === newUser.id ? { ...u, ...newUser, role: 'therapist' as const } : u));
+      }
+      return [...prev, { ...newUser, role: 'therapist' as const }];
+    });
+
+    // 2. therapistProfiles に追加（デフォルト審査中）
+    const initialTp: TherapistProfile = {
+      user_id: newUser.id,
+      bio: therapistData?.bio || '新規登録セラピストです。管理者による審査待ちです。',
+      specialities: therapistData?.specialities || ['ボディケア', 'リラクゼーション'],
+      is_store_based: therapistData?.is_store_based ?? true,
+      is_visit_based: therapistData?.is_visit_based ?? true,
+      address: therapistData?.address || newUser.address || '東京都内',
+      lat: therapistData?.lat || newUser.lat || 35.6666,
+      lng: therapistData?.lng || newUser.lng || 139.7092,
+      visit_radius_km: therapistData?.visit_radius_km || 10,
+      rating_avg: 5.0,
+      reviews_count: 0,
+      is_approved: therapistData?.is_approved ?? false, // 審査中
+    };
+
+    setTherapistProfiles((prev) => ({
+      ...prev,
+      [newUser.id]: initialTp,
+    }));
+
+    setCurrentUser({ ...newUser, role: 'therapist' });
+
+    // 3. Supabase が利用可能な場合は profiles と therapist_profiles に保存
+    if (supabase && isSupabaseConfigured) {
+      try {
+        await supabase.from('profiles').upsert({
+          id: newUser.id,
+          role: 'therapist',
+          name: newUser.name,
+          email: newUser.email,
+          phone: newUser.phone,
+          avatar_url: newUser.avatar_url,
+          address: initialTp.address,
+          lat: initialTp.lat,
+          lng: initialTp.lng,
+          updated_at: new Date().toISOString(),
+        });
+
+        await supabase.from('therapist_profiles').upsert({
+          user_id: newUser.id,
+          bio: initialTp.bio,
+          specialities: initialTp.specialities,
+          is_store_based: initialTp.is_store_based,
+          is_visit_based: initialTp.is_visit_based,
+          address: initialTp.address,
+          is_approved: initialTp.is_approved,
+          visit_radius_km: initialTp.visit_radius_km,
+          rating_avg: initialTp.rating_avg,
+          reviews_count: initialTp.reviews_count,
+        });
+      } catch (err) {
+        console.warn('Supabase therapist add warning:', err);
+      }
+    }
+  };
+
   const resetToMock = () => {
     localStorage.removeItem(STORAGE_KEY);
     setAllUsers(initialProfiles);
@@ -421,6 +535,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         refreshFromSupabase: fetchSupabaseData,
         resetToMock,
         addCustomerUser,
+        addTherapistUser,
       }}
     >
       {children}
