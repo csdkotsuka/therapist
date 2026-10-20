@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { formatPrice, formatDate } from '@/lib/geo';
 import {
@@ -25,6 +26,7 @@ import {
 import { BookingStatus } from '@/types';
 
 export const AdminView: React.FC = () => {
+  const router = useRouter();
   const {
     allUsers,
     therapistProfiles,
@@ -397,7 +399,10 @@ export const AdminView: React.FC = () => {
                     {/* 承認トグルスイッチ & 視点切り替えボタン */}
                     <div className="flex flex-wrap items-center gap-3 shrink-0">
                       <button
-                        onClick={() => switchUser(th.id)}
+                        onClick={() => {
+                          switchUser(th.id);
+                          router.push('/therapist');
+                        }}
                         className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-xs"
                         title="このセラピストの視点で操作画面を表示"
                       >
@@ -490,7 +495,10 @@ export const AdminView: React.FC = () => {
                     {/* この顧客として表示（視点切り替え）ボタン */}
                     <div className="flex items-center gap-2 w-full sm:w-auto shrink-0 border-t sm:border-t-0 pt-2 sm:pt-0">
                       <button
-                        onClick={() => switchUser(c.id)}
+                        onClick={() => {
+                          switchUser(c.id);
+                          router.push('/');
+                        }}
                         className="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm"
                         title="この顧客の視点に切り替えて操作する"
                       >

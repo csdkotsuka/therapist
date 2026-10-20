@@ -26,10 +26,13 @@ interface UserLocation {
 }
 
 export const PRESET_LOCATIONS: UserLocation[] = [
-  { name: '渋谷・表参道 (現在地)', lat: 35.6620, lng: 139.7030 },
-  { name: '新宿駅東口', lat: 35.6910, lng: 139.7020 },
-  { name: '六本木ヒルズ', lat: 35.6604, lng: 139.7292 },
-  { name: '銀座・有楽町', lat: 35.6719, lng: 139.7648 },
+  { name: '松山市駅・大街道 (松山中心部)', lat: 33.8392, lng: 132.7656 },
+  { name: '道後温泉本館前 (松山)', lat: 33.8520, lng: 132.7865 },
+  { name: '今治駅前 (今治)', lat: 34.0660, lng: 132.9976 },
+  { name: '新居浜駅前 (新居浜)', lat: 33.9602, lng: 133.2831 },
+  { name: '西条駅前 (西条)', lat: 33.9182, lng: 133.1818 },
+  { name: '宇和島駅前 (南予・宇和島)', lat: 33.2263, lng: 132.5658 },
+  { name: '大洲駅前 (大洲)', lat: 33.5074, lng: 132.5447 },
 ];
 
 interface AppContextType {
@@ -61,10 +64,11 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'therapist_platform_state_v1';
+const STORAGE_KEY = 'therapist_platform_state_ehime_v2';
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<Profile>(initialProfiles[4]); // 田中 太郎 (customer)
+  const initialCustomer = initialProfiles.find((p) => p.role === 'customer') || initialProfiles[0];
+  const [currentUser, setCurrentUser] = useState<Profile>(initialCustomer);
   const [allUsers, setAllUsers] = useState<Profile[]>(initialProfiles);
   const [therapistProfiles, setTherapistProfiles] = useState<Record<string, TherapistProfile>>(initialTherapistProfiles);
   const [services, setServices] = useState<Service[]>(initialServices);

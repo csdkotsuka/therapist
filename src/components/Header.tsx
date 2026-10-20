@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useApp, PRESET_LOCATIONS } from '@/context/AppContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { getCurrentGpsPosition, reverseGeocode } from '@/lib/geo';
@@ -20,9 +21,12 @@ import {
   Navigation,
   Loader2,
   UserPlus,
+  LayoutDashboard,
+  Store,
 } from 'lucide-react';
 
 export const Header: React.FC = () => {
+  const pathname = usePathname();
   const {
     currentUser,
     allUsers,
@@ -80,35 +84,77 @@ export const Header: React.FC = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo & App Title */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-500 to-emerald-400 flex items-center justify-center text-white shadow-md shadow-emerald-500/20">
-              <HeartPulse className="w-6 h-6" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xl font-black bg-gradient-to-r from-teal-700 via-emerald-600 to-teal-800 bg-clip-text text-transparent">
-                  CareHub
-                </span>
-                <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 bg-emerald-50 text-emerald-600 rounded border border-emerald-200">
-                  出張・店舗
-                </span>
-
-                {/* Supabase 接続中ステータスバッジ */}
-                {isLiveSupabase ? (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-300 shadow-2xs">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-                    <span>Supabase LIVE</span>
-                  </span>
-                ) : (
-                  <span className="text-[10px] text-slate-400 border border-slate-200 px-1.5 py-0.5 rounded">
-                    Mock Mode
-                  </span>
-                )}
+            <Link href="/" className="flex items-center gap-2.5 group">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-500 to-emerald-400 flex items-center justify-center text-white shadow-md shadow-emerald-500/20 group-hover:scale-105 transition">
+                <HeartPulse className="w-6 h-6" />
               </div>
-              <p className="text-xs text-slate-500 hidden sm:block">
-                ヘルスケア＆ボディケア・オンデマンド
-              </p>
-            </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl font-black bg-gradient-to-r from-teal-700 via-emerald-600 to-teal-800 bg-clip-text text-transparent">
+                    CareHub
+                  </span>
+                  <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 bg-emerald-50 text-emerald-600 rounded border border-emerald-200">
+                    愛媛エリア
+                  </span>
+
+                  {/* Supabase 接続中ステータスバッジ */}
+                  {isLiveSupabase ? (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-300 shadow-2xs">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                      <span>Supabase LIVE</span>
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-slate-400 border border-slate-200 px-1.5 py-0.5 rounded">
+                      Mock Mode
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-slate-500 hidden sm:block">
+                  出張・店舗オンデマンドヘルスケア
+                </p>
+              </div>
+            </Link>
           </div>
+
+          {/* Center Navigation Tabs (独立URL切替) */}
+          <nav className="hidden md:flex items-center gap-1 bg-slate-100/80 p-1 rounded-xl border border-slate-200">
+            <Link
+              href="/"
+              prefetch={true}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                pathname === '/'
+                  ? 'bg-white text-emerald-700 shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <span>🏠 顧客画面</span>
+            </Link>
+            <Link
+              href="/therapist"
+              prefetch={true}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                pathname === '/therapist'
+                  ? 'bg-white text-emerald-700 shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <span>💆‍♀️ セラピスト画面</span>
+              {pendingRequestsCount > 0 && (
+                <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+              )}
+            </Link>
+            <Link
+              href="/admin"
+              prefetch={true}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                pathname === '/admin'
+                  ? 'bg-white text-purple-700 shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <span>⚙️ 管理本部</span>
+            </Link>
+          </nav>
 
           {/* Right Action Bar */}
           <div className="flex items-center gap-2 sm:gap-3">
@@ -122,8 +168,8 @@ export const Header: React.FC = () => {
               <span className="hidden sm:inline">Auth ログイン</span>
             </button>
 
-            {/* 顧客ロール時の現在地切替セレクター */}
-            {currentUser.role === 'customer' && (
+            {/* 顧客画面時の現在地切替セレクター */}
+            {pathname === '/' && (
               <div className="relative">
                 <button
                   onClick={() => {
@@ -138,7 +184,7 @@ export const Header: React.FC = () => {
                 </button>
 
                 {isLocationMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50">
+                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50">
                     {/* 実端末GPS取得ボタン */}
                     <div className="px-2 pb-2 mb-1 border-b border-slate-100">
                       <button
@@ -159,7 +205,7 @@ export const Header: React.FC = () => {
                     </div>
 
                     <div className="px-3 py-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                      プリセット地点
+                      愛媛県内プリセット地点
                     </div>
                     {PRESET_LOCATIONS.map((loc) => (
                       <button
@@ -195,18 +241,29 @@ export const Header: React.FC = () => {
               <span className="sm:hidden">登録</span>
             </Link>
 
-            {/* 管理本部への切り替えボタン (現在が管理者でない場合) */}
-            {currentUser.role !== 'admin' && (
-              <button
-                onClick={() => switchUser('admin-001')}
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-purple-200 bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-bold transition shadow-2xs"
-                title="管理者視点ページを開く"
-              >
-                <span>⚙️ 管理本部</span>
-              </button>
-            )}
+            {/* モバイル用URLショートカット */}
+            <div className="flex md:hidden items-center gap-1">
+              {pathname !== '/therapist' && (
+                <Link
+                  href="/therapist"
+                  className="p-1.5 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 text-xs font-bold"
+                  title="セラピスト画面へ"
+                >
+                  💆
+                </Link>
+              )}
+              {pathname !== '/admin' && (
+                <Link
+                  href="/admin"
+                  className="p-1.5 rounded-lg border border-purple-200 bg-purple-50 text-purple-700 text-xs font-bold"
+                  title="管理本部へ"
+                >
+                  ⚙️
+                </Link>
+              )}
+            </div>
 
-            {/* 現在ログイン中のユーザー表示 (リスト表示なし) */}
+            {/* 現在ログイン中のユーザー表示 */}
             <div className="flex items-center gap-2.5 p-1.5 sm:px-3 sm:py-1.5 rounded-xl border border-slate-200 bg-white shadow-2xs">
               <div className="relative">
                 <img
