@@ -78,6 +78,33 @@ export const CustomerView: React.FC = () => {
     { id: 'beauty', label: '小顔・ヘッドスパ' },
   ];
 
+  // 各カテゴリに該当する人数を計算
+  const getCategoryCount = (catId: string) => {
+    return Object.values(therapistProfiles).filter((tp) => {
+      if (!tp.is_approved) return false;
+      if (filterStyle === 'visit' && !tp.is_visit_based) return false;
+      if (filterStyle === 'store' && !tp.is_store_based) return false;
+
+      const user = allUsers.find((u) => u.id === tp.user_id);
+      const userServices = services.filter((s) => s.therapist_id === tp.user_id);
+
+      if (catId !== 'all') {
+        const hasCat = userServices.some((s) => s.category === catId);
+        if (!hasCat) return false;
+      }
+
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchesName = user?.name.toLowerCase().includes(q);
+        const matchesBio = tp.bio.toLowerCase().includes(q);
+        const matchesSpeciality = tp.specialities.some((s) => s.toLowerCase().includes(q));
+        if (!matchesName && !matchesBio && !matchesSpeciality) return false;
+      }
+
+      return true;
+    }).length;
+  };
+
   // セラピスト一覧のフィルタリングとソート
   const therapistsList = Object.values(therapistProfiles)
     .filter((tp) => {
@@ -264,19 +291,31 @@ export const CustomerView: React.FC = () => {
 
           {/* カテゴリピル */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition ${
-                  selectedCategory === cat.id
-                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-300 shadow-2xs'
-                    : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
+            {categories.map((cat) => {
+              const count = getCategoryCount(cat.id);
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition flex items-center gap-1.5 ${
+                    selectedCategory === cat.id
+                      ? 'bg-emerald-600 text-white shadow-xs font-bold'
+                      : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'
+                  }`}
+                >
+                  <span>{cat.label}</span>
+                  <span
+                    className={`text-[11px] px-1.5 py-0.2 rounded-full font-bold ${
+                      selectedCategory === cat.id
+                        ? 'bg-emerald-700/80 text-white'
+                        : 'bg-slate-100 text-slate-500'
+                    }`}
+                  >
+                    ({count})
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
           {/* ビューの描画 (マップ表示 or リスト表示) */}

@@ -25,6 +25,7 @@ import {
   Car,
 } from 'lucide-react';
 import { Service } from '@/types';
+import { TherapistProfileEdit } from './TherapistProfileEdit';
 
 export const TherapistView: React.FC = () => {
   const {
@@ -42,8 +43,8 @@ export const TherapistView: React.FC = () => {
   const myServices = services.filter((s) => s.therapist_id === currentUser.id);
   const myBookings = bookings.filter((b) => b.therapist_id === currentUser.id);
 
-  // タブ管理: 'requests' (予約リクエスト・管理) | 'schedule' (シフト・エリア) | 'services' (メニュー設定) | 'earnings' (売上・Stripe)
-  const [activeTab, setActiveTab] = useState<'requests' | 'schedule' | 'services' | 'earnings'>('requests');
+  // タブ管理: 'requests' | 'schedule' | 'services' | 'earnings' | 'profile'
+  const [activeTab, setActiveTab] = useState<'requests' | 'schedule' | 'services' | 'earnings' | 'profile'>('requests');
 
   // スケジュール設定状態
   const [selectedDays, setSelectedDays] = useState<string[]>(['mon', 'tue', 'wed', 'thu', 'fri', 'sat']);
@@ -215,6 +216,18 @@ export const TherapistView: React.FC = () => {
         >
           <DollarSign className="w-4 h-4" />
           <span>売上・振込明細</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('profile')}
+          className={`px-4 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap ${
+            activeTab === 'profile'
+              ? 'bg-slate-900 text-white shadow-md'
+              : 'text-slate-600 hover:bg-slate-100'
+          }`}
+        >
+          <User className="w-4 h-4" />
+          <span>👤 プロフィール設定</span>
         </button>
       </div>
 
@@ -706,6 +719,9 @@ export const TherapistView: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* タブ 5: プロフィール・登録情報編集 */}
+      {activeTab === 'profile' && <TherapistProfileEdit />}
     </div>
   );
 };

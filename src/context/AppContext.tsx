@@ -60,6 +60,7 @@ interface AppContextType {
   addCustomerUser: (user: Profile) => void;
   addTherapistUser: (user: Profile, therapistData?: Partial<TherapistProfile>) => Promise<void>;
   updateUserProfile: (userId: string, data: Partial<Profile>) => Promise<void>;
+  updateTherapistInfo: (userId: string, profileData: Partial<Profile>, therapistData: Partial<TherapistProfile>) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -549,6 +550,54 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const updateTherapistInfo = async (
+    userId: string,
+    profileData: Partial<Profile>,
+    therapistData: Partial<TherapistProfile>
+  ) => {
+    // 1. プロフィールの更新
+    await updateUserProfile(userId, profileData);
+
+    // 2. セラピスト詳細プロフィールの更新
+    setTherapistProfiles((prev) => {
+      const existing = prev[userId] || ({} as TherapistProfile);
+      return {
+        ...prev,
+        [userId]: {
+          ...existing,
+          ...therapistData,
+          address: profileData.address || therapistData.address || existing.address,
+          lat: profileData.lat !== undefined ? profileData.lat : (therapistData.lat !== undefined ? therapistData.lat : existing.lat),
+          lng: profileData.lng !== undefined ? profileData.lng : (therapistData.lng !== undefined ? therapistData.lng : existing.lng),
+        },
+      };
+    });
+
+    // 3. Supabase therapist_profiles テーブルの更新
+    if (supabase && isSupabaseConfigured) {
+      try {
+        const updatePayload: Record<string, any> = {
+          updated_at: new Date().toISOString(),
+        };
+        if (therapistData.bio !== undefined) updatePayload.bio = therapistData.bio;
+        if (therapistData.specialities !== undefined) updatePayload.specialities = therapistData.specialities;
+        if (therapistData.is_store_based !== undefined) updatePayload.is_store_based = therapistData.is_store_based;
+        if (therapistData.is_visit_based !== undefined) updatePayload.is_visit_based = therapistData.is_visit_based;
+        if (therapistData.visit_radius_km !== undefined) updatePayload.visit_radius_km = therapistData.visit_radius_km;
+        if (profileData.address || therapistData.address) {
+          updatePayload.address = profileData.address || therapistData.address;
+        }
+
+        await supabase
+          .from('therapist_profiles')
+          .update(updatePayload)
+          .eq('user_id', userId);
+      } catch (err) {
+        console.warn('Supabase therapist_profiles update warning:', err);
+      }
+    }
+  };
+
   const resetToMock = () => {
     localStorage.removeItem(STORAGE_KEY);
     setAllUsers(initialProfiles);
@@ -588,6 +637,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addCustomerUser,
         addTherapistUser,
         updateUserProfile,
+        updateTherapistInfo,
       }}
     >
       {children}
