@@ -22,6 +22,9 @@ import {
   Home,
   ShieldCheck,
   Activity,
+  Search,
+  Filter,
+  RotateCcw,
 } from 'lucide-react';
 import { BookingStatus } from '@/types';
 
@@ -46,6 +49,17 @@ export const AdminView: React.FC = () => {
   const [feeInput, setFeeInput] = useState<number>(platformFeeRate);
   const [feeSaveMessage, setFeeSaveMessage] = useState(false);
 
+  // セラピスト審査・管理の絞り込み状態
+  const [thSearch, setThSearch] = useState('');
+  const [thApprovalFilter, setThApprovalFilter] = useState<'all' | 'approved' | 'pending'>('all');
+  const [thAreaFilter, setThAreaFilter] = useState<string>('all');
+  const [thStyleFilter, setThStyleFilter] = useState<'all' | 'visit' | 'store'>('all');
+
+  // 顧客一覧の絞り込み状態
+  const [custSearch, setCustSearch] = useState('');
+  const [custAreaFilter, setCustAreaFilter] = useState<string>('all');
+  const [custBookingFilter, setCustBookingFilter] = useState<'all' | 'has_bookings' | 'no_bookings'>('all');
+
   // 全体メトリクス
   const totalGMV = bookings
     .filter((b) => b.status === 'completed' || b.status === 'confirmed')
@@ -58,6 +72,75 @@ export const AdminView: React.FC = () => {
   const pendingBookingsCount = bookings.filter((b) => b.status === 'pending').length;
   const therapists = allUsers.filter((u) => u.role === 'therapist');
   const customers = allUsers.filter((u) => u.role === 'customer');
+
+  // 絞り込み後のセラピスト一覧
+  const filteredTherapists = therapists.filter((th) => {
+    const tp = therapistProfiles[th.id];
+    const isApproved = tp?.is_approved ?? false;
+
+    // 1. 承認ステータス
+    if (thApprovalFilter === 'approved' && !isApproved) return false;
+    if (thApprovalFilter === 'pending' && isApproved) return false;
+
+    // 2. エリア
+    if (thAreaFilter !== 'all') {
+      const addr = th.address || tp?.address || '';
+      if (thAreaFilter === 'その他') {
+        const mainCities = ['松山市', '今治市', '新居浜市', '西条市', '四国中央市', '宇和島市'];
+        if (mainCities.some((c) => addr.includes(c))) return false;
+      } else {
+        if (!addr.includes(thAreaFilter)) return false;
+      }
+    }
+
+    // 3. 施術形態
+    if (thStyleFilter === 'visit' && !tp?.is_visit_based) return false;
+    if (thStyleFilter === 'store' && !tp?.is_store_based) return false;
+
+    // 4. キーワード検索
+    if (thSearch.trim()) {
+      const q = thSearch.toLowerCase();
+      const nameMatch = th.name.toLowerCase().includes(q);
+      const phoneMatch = th.phone?.toLowerCase().includes(q) ?? false;
+      const addrMatch = (th.address || tp?.address || '').toLowerCase().includes(q);
+      const specMatch = tp?.specialities?.some((s) => s.toLowerCase().includes(q)) ?? false;
+      if (!nameMatch && !phoneMatch && !addrMatch && !specMatch) return false;
+    }
+
+    return true;
+  });
+
+  // 絞り込み後の顧客一覧
+  const filteredCustomers = customers.filter((c) => {
+    const customerBookings = bookings.filter((b) => b.customer_id === c.id);
+
+    // 1. エリア
+    if (custAreaFilter !== 'all') {
+      const addr = c.address || '';
+      if (custAreaFilter === 'その他') {
+        const mainCities = ['松山市', '今治市', '新居浜市', '西条市', '四国中央市', '宇和島市'];
+        if (mainCities.some((city) => addr.includes(city))) return false;
+      } else {
+        if (!addr.includes(custAreaFilter)) return false;
+      }
+    }
+
+    // 2. 予約実績
+    if (custBookingFilter === 'has_bookings' && customerBookings.length === 0) return false;
+    if (custBookingFilter === 'no_bookings' && customerBookings.length > 0) return false;
+
+    // 3. キーワード検索
+    if (custSearch.trim()) {
+      const q = custSearch.toLowerCase();
+      const nameMatch = c.name.toLowerCase().includes(q);
+      const emailMatch = c.email?.toLowerCase().includes(q) ?? false;
+      const phoneMatch = c.phone?.toLowerCase().includes(q) ?? false;
+      const addrMatch = (c.address || '').toLowerCase().includes(q);
+      if (!nameMatch && !emailMatch && !phoneMatch && !addrMatch) return false;
+    }
+
+    return true;
+  });
 
   const handleSaveFee = () => {
     setPlatformFeeRate(Number(feeInput));
@@ -129,7 +212,13 @@ export const AdminView: React.FC = () => {
           }`}
         >
           <ShieldCheck className="w-4 h-4" />
-          <span>セラピスト審査・管理 ({therapists.length})</span>
+          <span>
+            セラピスト審査・管理 (
+            {filteredTherapists.length !== therapists.length
+              ? `${filteredTherapists.length}/`
+              : ''}
+            {therapists.length})
+          </span>
         </button>
 
         <button
@@ -141,7 +230,13 @@ export const AdminView: React.FC = () => {
           }`}
         >
           <Users className="w-4 h-4" />
-          <span>顧客一覧 & 視点切替 ({customers.length})</span>
+          <span>
+            顧客一覧 & 視点切替 (
+            {filteredCustomers.length !== customers.length
+              ? `${filteredCustomers.length}/`
+              : ''}
+            {customers.length})
+          </span>
         </button>
 
         <button
@@ -341,7 +436,9 @@ export const AdminView: React.FC = () => {
           <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
             <div>
               <h4 className="font-bold text-slate-900 text-sm">セラピスト登録審査 & パートナー管理</h4>
-              <p className="text-[11px] text-slate-500">全 {therapists.length} 名のセラピスト</p>
+              <p className="text-[11px] text-slate-500">
+                該当 {filteredTherapists.length} 名 / 全 {therapists.length} 名
+              </p>
             </div>
             <button
               onClick={() => refreshFromSupabase()}
@@ -352,13 +449,86 @@ export const AdminView: React.FC = () => {
             </button>
           </div>
 
+          {/* 絞り込みフィルターバー */}
+          <div className="p-4 bg-slate-50 border-b border-slate-100 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+            {/* キーワード検索 */}
+            <div className="relative flex-1 max-w-md">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={thSearch}
+                onChange={(e) => setThSearch(e.target.value)}
+                placeholder="セラピスト名、住所、専門分野で検索..."
+                className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-emerald-500 shadow-2xs"
+              />
+            </div>
+
+            {/* フィルターセレクト群 */}
+            <div className="flex flex-wrap items-center gap-2">
+              {/* 審査ステータス */}
+              <select
+                value={thApprovalFilter}
+                onChange={(e) => setThApprovalFilter(e.target.value as any)}
+                className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-emerald-500 shadow-2xs"
+              >
+                <option value="all">審査: すべて</option>
+                <option value="approved">承認済のみ</option>
+                <option value="pending">審査中のみ</option>
+              </select>
+
+              {/* エリア */}
+              <select
+                value={thAreaFilter}
+                onChange={(e) => setThAreaFilter(e.target.value)}
+                className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-emerald-500 shadow-2xs"
+              >
+                <option value="all">エリア: 全域</option>
+                <option value="松山市">松山市</option>
+                <option value="今治市">今治市</option>
+                <option value="新居浜市">新居浜市</option>
+                <option value="西条市">西条市</option>
+                <option value="四国中央市">四国中央市</option>
+                <option value="宇和島市">宇和島市</option>
+                <option value="その他">その他市町</option>
+              </select>
+
+              {/* 施術形態 */}
+              <select
+                value={thStyleFilter}
+                onChange={(e) => setThStyleFilter(e.target.value as any)}
+                className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-emerald-500 shadow-2xs"
+              >
+                <option value="all">形態: すべて</option>
+                <option value="visit">出張対応</option>
+                <option value="store">店舗あり</option>
+              </select>
+
+              {/* リセットボタン */}
+              {(thSearch || thApprovalFilter !== 'all' || thAreaFilter !== 'all' || thStyleFilter !== 'all') && (
+                <button
+                  onClick={() => {
+                    setThSearch('');
+                    setThApprovalFilter('all');
+                    setThAreaFilter('all');
+                    setThStyleFilter('all');
+                  }}
+                  className="px-2.5 py-2 text-xs text-slate-500 hover:text-slate-800 bg-white border border-slate-200 rounded-xl flex items-center gap-1 transition"
+                  title="条件をクリア"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  <span>クリア</span>
+                </button>
+              )}
+            </div>
+          </div>
+
           <div className="divide-y divide-slate-100">
-            {therapists.length === 0 ? (
+            {filteredTherapists.length === 0 ? (
               <div className="p-8 text-center text-slate-400 text-xs">
-                登録されているセラピストがいません
+                条件に一致するセラピストが見つかりませんでした
               </div>
             ) : (
-              therapists.map((th) => {
+              filteredTherapists.map((th) => {
                 const tp = therapistProfiles[th.id];
                 const isApproved = tp?.is_approved ?? false;
 
@@ -441,7 +611,9 @@ export const AdminView: React.FC = () => {
           <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
             <div>
               <h4 className="font-bold text-slate-900 text-sm">登録顧客一覧 & 視点切り替え</h4>
-              <p className="text-[11px] text-slate-500">全 {customers.length} 名の登録顧客</p>
+              <p className="text-[11px] text-slate-500">
+                該当 {filteredCustomers.length} 名 / 全 {customers.length} 名
+              </p>
             </div>
             <button
               onClick={() => refreshFromSupabase()}
@@ -452,13 +624,74 @@ export const AdminView: React.FC = () => {
             </button>
           </div>
 
+          {/* 絞り込みフィルターバー */}
+          <div className="p-4 bg-slate-50 border-b border-slate-100 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+            {/* キーワード検索 */}
+            <div className="relative flex-1 max-w-md">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={custSearch}
+                onChange={(e) => setCustSearch(e.target.value)}
+                placeholder="顧客氏名、電話番号、メール、住所で検索..."
+                className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-emerald-500 shadow-2xs"
+              />
+            </div>
+
+            {/* フィルターセレクト群 */}
+            <div className="flex flex-wrap items-center gap-2">
+              {/* エリア */}
+              <select
+                value={custAreaFilter}
+                onChange={(e) => setCustAreaFilter(e.target.value)}
+                className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-emerald-500 shadow-2xs"
+              >
+                <option value="all">エリア: 全域</option>
+                <option value="松山市">松山市</option>
+                <option value="今治市">今治市</option>
+                <option value="新居浜市">新居浜市</option>
+                <option value="西条市">西条市</option>
+                <option value="四国中央市">四国中央市</option>
+                <option value="宇和島市">宇和島市</option>
+                <option value="その他">その他市町</option>
+              </select>
+
+              {/* 予約実績 */}
+              <select
+                value={custBookingFilter}
+                onChange={(e) => setCustBookingFilter(e.target.value as any)}
+                className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-emerald-500 shadow-2xs"
+              >
+                <option value="all">予約実績: すべて</option>
+                <option value="has_bookings">予約利用あり</option>
+                <option value="no_bookings">未利用（0件）</option>
+              </select>
+
+              {/* リセットボタン */}
+              {(custSearch || custAreaFilter !== 'all' || custBookingFilter !== 'all') && (
+                <button
+                  onClick={() => {
+                    setCustSearch('');
+                    setCustAreaFilter('all');
+                    setCustBookingFilter('all');
+                  }}
+                  className="px-2.5 py-2 text-xs text-slate-500 hover:text-slate-800 bg-white border border-slate-200 rounded-xl flex items-center gap-1 transition"
+                  title="条件をクリア"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  <span>クリア</span>
+                </button>
+              )}
+            </div>
+          </div>
+
           <div className="divide-y divide-slate-100">
-            {customers.length === 0 ? (
+            {filteredCustomers.length === 0 ? (
               <div className="p-8 text-center text-slate-400 text-xs">
-                登録されている顧客がいません
+                条件に一致する顧客が見つかりませんでした
               </div>
             ) : (
-              customers.map((c) => {
+              filteredCustomers.map((c) => {
                 const customerBookings = bookings.filter((b) => b.customer_id === c.id);
 
                 return (
