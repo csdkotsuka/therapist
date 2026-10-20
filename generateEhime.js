@@ -1,4 +1,5 @@
 const fs = require('fs');
+const crypto = require('crypto');
 
 // 愛媛県 15市町のデータ（中心座標と代表的な町名）
 const CITIES = [
@@ -139,7 +140,6 @@ const CITIES = [
   },
 ];
 
-// 日本人姓と名（愛媛県に多い姓も含める）
 const SURNAMES = [
   '越智', '村上', '渡部', '高橋', '井上', '伊藤', '山本', '中村', '菅', '藤原',
   '白石', '佐々木', '松本', '池内', '門田', '河野', '近藤', '石川', '矢野', '岡田',
@@ -193,7 +193,6 @@ const THERAPIST_SPECIALTIES = [
   },
 ];
 
-// アバター画像URLプール
 const MALE_AVATARS = [
   'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150',
   'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150',
@@ -228,12 +227,18 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// データ生成
-console.log('Generating Ehime comprehensive dataset...');
+// RFC 4122 v4 UUID 生成
+function genUUID() {
+  return crypto.randomUUID();
+}
 
+console.log('Generating RFC 4122 v4 UUID-based Ehime dataset & Supabase SQL seed...');
+
+// 1. 管理者（Admin）
+const adminId = genUUID();
 const profiles = [
   {
-    id: 'admin-001',
+    id: adminId,
     role: 'admin',
     name: '愛媛プラットフォーム運営本部',
     email: 'admin@carehub.ehime.jp',
@@ -248,23 +253,23 @@ const profiles = [
 
 const therapistProfiles = {};
 const services = [];
-let therapistIndex = 1;
-let serviceIndex = 1;
+const therapistList = [];
 
-// セラピスト生成
+let thSeq = 1;
+
+// 2. セラピスト生成（36名）
 CITIES.forEach((city) => {
   for (let i = 0; i < city.therapistCount; i++) {
     const isMale = Math.random() > 0.5;
     const surname = getRandomItem(SURNAMES);
     const firstName = getRandomItem(isMale ? MALE_NAMES : FEMALE_NAMES);
     const fullName = `${surname} ${firstName}`;
-    const therapistId = `therapist-${String(therapistIndex).padStart(3, '0')}`;
+    const therapistId = genUUID();
     const avatar = getRandomItem(isMale ? MALE_AVATARS : FEMALE_AVATARS);
     const town = getRandomItem(city.towns);
     const block = `${getRandomInt(1, 5)}-${getRandomInt(1, 25)}`;
     const address = `愛媛県${city.name}${town}${block}`;
     
-    // 微小な緯度経度オフセット（約500m〜2kmの分散）
     const latOffset = getRandomFloat(-0.015, 0.015, 6);
     const lngOffset = getRandomFloat(-0.018, 0.018, 6);
     const lat = parseFloat((city.lat + latOffset).toFixed(6));
@@ -272,22 +277,25 @@ CITIES.forEach((city) => {
 
     const specProfile = getRandomItem(THERAPIST_SPECIALTIES);
     const isStore = Math.random() > 0.3;
-    const isVisit = Math.random() > 0.2; // ほとんどが出張対応
+    const isVisit = Math.random() > 0.15; // ほとんどが出張対応
 
-    profiles.push({
+    const profileObj = {
       id: therapistId,
       role: 'therapist',
       name: fullName,
-      email: `therapist${therapistIndex}@carehub.ehime.jp`,
+      email: `therapist.${thSeq}@carehub.ehime.jp`,
       phone: `089-${getRandomInt(900, 999)}-${getRandomInt(1000, 9999)}`,
       avatar_url: avatar,
       address,
       postal_code: city.postal,
       lat,
       lng,
-    });
+    };
 
-    therapistProfiles[therapistId] = {
+    profiles.push(profileObj);
+    therapistList.push(profileObj);
+
+    const tpObj = {
       user_id: therapistId,
       bio: specProfile.bio,
       specialities: specProfile.specs,
@@ -297,11 +305,13 @@ CITIES.forEach((city) => {
       lat,
       lng,
       visit_radius_km: getRandomInt(10, 30),
-      rating_avg: getRandomFloat(4.65, 5.0, 2),
+      rating_avg: getRandomFloat(4.70, 5.0, 2),
       reviews_count: getRandomInt(8, 48),
       is_approved: true,
-      stripe_account_id: `acct_ehime_${therapistId}`,
+      stripe_account_id: `acct_ehime_${therapistId.replace(/-/g, '').slice(0, 16)}`,
     };
+
+    therapistProfiles[therapistId] = tpObj;
 
     // メニュー（サービス）を2〜3件生成
     const serviceTemplates = [
@@ -313,9 +323,8 @@ CITIES.forEach((city) => {
     const numSrv = getRandomInt(2, 3);
     for (let s = 0; s < numSrv; s++) {
       const srvTpl = serviceTemplates[s];
-      const srvId = `srv-${String(serviceIndex).padStart(3, '0')}`;
       services.push({
-        id: srvId,
+        id: genUUID(),
         therapist_id: therapistId,
         title: srvTpl.title,
         description: srvTpl.desc,
@@ -324,16 +333,15 @@ CITIES.forEach((city) => {
         category: srvTpl.cat,
         is_active: true,
       });
-      serviceIndex++;
     }
 
-    therapistIndex++;
+    thSeq++;
   }
 });
 
-// 顧客生成（合計100名）
-let customerIndex = 1;
+// 3. 顧客生成（100名）
 const customers = [];
+let custSeq = 1;
 
 CITIES.forEach((city) => {
   for (let i = 0; i < city.customerCount; i++) {
@@ -341,7 +349,7 @@ CITIES.forEach((city) => {
     const surname = getRandomItem(SURNAMES);
     const firstName = getRandomItem(isMale ? MALE_NAMES : FEMALE_NAMES);
     const fullName = `${surname} ${firstName}`;
-    const customerId = `customer-${String(customerIndex).padStart(3, '0')}`;
+    const customerId = genUUID();
     const avatar = getRandomItem(isMale ? MALE_AVATARS : FEMALE_AVATARS);
     const town = getRandomItem(city.towns);
     const block = `${getRandomInt(1, 8)}-${getRandomInt(1, 30)}`;
@@ -357,7 +365,7 @@ CITIES.forEach((city) => {
       id: customerId,
       role: 'customer',
       name: fullName,
-      email: `customer${customerIndex}@example.com`,
+      email: `customer.${custSeq}@example.com`,
       phone: `080-${getRandomInt(1000, 9999)}-${getRandomInt(1000, 9999)}`,
       avatar_url: avatar,
       address,
@@ -368,25 +376,21 @@ CITIES.forEach((city) => {
 
     profiles.push(custObj);
     customers.push(custObj);
-    customerIndex++;
+    custSeq++;
   }
 });
 
-// 予約（Bookings）の生成（進行中、確認済み、完了など）
+// 4. 予約（Bookings）とレビュー（Reviews）の生成
 const bookings = [];
 const reviews = [];
-let bookingIndex = 1;
-let reviewIndex = 1;
 
-// 各種予約ステータスの作成
-// 1. 出張中でリアルタイムマップ追跡可能な予約（confirmed）数件
-for (let i = 1; i <= 4; i++) {
-  const cust = customers[i - 1];
-  const thId = `therapist-${String(i).padStart(3, '0')}`;
-  const th = therapistProfiles[thId];
-  const srv = services.find(s => s.therapist_id === thId) || services[0];
+// (1) 出張中でリアルタイムマップ追跡可能な予約（confirmed）4件
+for (let i = 0; i < 4; i++) {
+  const cust = customers[i];
+  const th = therapistList[i];
+  const thProfile = therapistProfiles[th.id];
+  const srv = services.find(s => s.therapist_id === th.id) || services[0];
   
-  // セラピストの現在地（顧客宅に向かって移動中の座標）
   const currLat = parseFloat((cust.lat + (th.lat - cust.lat) * 0.4).toFixed(6));
   const currLng = parseFloat((cust.lng + (th.lng - cust.lng) * 0.4).toFixed(6));
   
@@ -394,11 +398,10 @@ for (let i = 1; i <= 4; i++) {
   const fee = Math.floor(total * 0.2);
   const earn = total - fee;
 
-  const bId = `book-${String(bookingIndex).padStart(3, '0')}`;
   bookings.push({
-    id: bId,
+    id: genUUID(),
     customer_id: cust.id,
-    therapist_id: thId,
+    therapist_id: th.id,
     service_id: srv.id,
     booking_type: 'visit',
     scheduled_at: new Date(Date.now() + 3600000 * 2).toISOString(),
@@ -414,23 +417,21 @@ for (let i = 1; i <= 4; i++) {
     therapist_current_lng: currLng,
     created_at: new Date(Date.now() - 3600000 * 4).toISOString(),
   });
-  bookingIndex++;
 }
 
-// 2. 申請中（pending）の予約
-for (let i = 5; i <= 9; i++) {
-  const cust = customers[i - 1];
-  const thId = `therapist-${String(getRandomInt(1, 10)).padStart(3, '0')}`;
-  const srv = services.find(s => s.therapist_id === thId) || services[0];
+// (2) 申請中（pending）の予約 5件
+for (let i = 4; i < 9; i++) {
+  const cust = customers[i];
+  const th = getRandomItem(therapistList);
+  const srv = services.find(s => s.therapist_id === th.id) || services[0];
   const total = srv.price;
   const fee = Math.floor(total * 0.2);
   const earn = total - fee;
 
-  const bId = `book-${String(bookingIndex).padStart(3, '0')}`;
   bookings.push({
-    id: bId,
+    id: genUUID(),
     customer_id: cust.id,
-    therapist_id: thId,
+    therapist_id: th.id,
     service_id: srv.id,
     booking_type: 'visit',
     scheduled_at: new Date(Date.now() + 86400000 * getRandomInt(1, 3)).toISOString(),
@@ -444,10 +445,9 @@ for (let i = 5; i <= 9; i++) {
     customer_notes: '肩甲骨まわりが非常に重いです。強めの指圧を希望します。',
     created_at: new Date(Date.now() - 3600000 * getRandomInt(1, 10)).toISOString(),
   });
-  bookingIndex++;
 }
 
-// 3. 完了済み（completed）の予約とレビュー
+// (3) 完了済み（completed）の予約 16件 & レビュー
 const REVIEW_COMMENTS = [
   '出張で自宅まで来ていただけるのが本当にありがたいです。技術も素晴らしく、終わった瞬間に身体が軽くなりました！',
   'とても丁寧なカウンセリングと施術でした。愛媛でこんなハイレベルな出張ケアを受けられるのは最高です。',
@@ -457,23 +457,23 @@ const REVIEW_COMMENTS = [
   '予約から到着までとてもスムーズでした。マップで現在地がリアルタイムにわかるのも安心感があります。',
 ];
 
-for (let i = 10; i <= 25; i++) {
-  const cust = customers[getRandomInt(0, customers.length - 1)];
-  const thId = `therapist-${String(getRandomInt(1, 20)).padStart(3, '0')}`;
-  const th = therapistProfiles[thId];
-  const srv = services.find(s => s.therapist_id === thId) || services[0];
+for (let i = 9; i < 25; i++) {
+  const cust = getRandomItem(customers);
+  const th = getRandomItem(therapistList);
+  const thProfile = therapistProfiles[th.id];
+  const srv = services.find(s => s.therapist_id === th.id) || services[0];
   const total = srv.price;
   const fee = Math.floor(total * 0.2);
   const earn = total - fee;
 
-  const bId = `book-${String(bookingIndex).padStart(3, '0')}`;
+  const bId = genUUID();
   const isStore = Math.random() > 0.6;
   const scheduledTime = new Date(Date.now() - 86400000 * getRandomInt(2, 20)).toISOString();
 
   bookings.push({
     id: bId,
     customer_id: cust.id,
-    therapist_id: thId,
+    therapist_id: th.id,
     service_id: srv.id,
     booking_type: isStore ? 'store' : 'visit',
     scheduled_at: scheduledTime,
@@ -488,24 +488,22 @@ for (let i = 10; i <= 25; i++) {
     created_at: new Date(Date.now() - 86400000 * 25).toISOString(),
   });
 
-  // レビューを追加
-  const revId = `rev-${String(reviewIndex).padStart(3, '0')}`;
   reviews.push({
-    id: revId,
+    id: genUUID(),
     booking_id: bId,
     customer_id: cust.id,
-    therapist_id: thId,
+    therapist_id: th.id,
     rating: getRandomInt(4, 5),
     comment: getRandomItem(REVIEW_COMMENTS),
     created_at: new Date(Date.now() - 86400000 * getRandomInt(1, 19)).toISOString(),
   });
-  reviewIndex++;
-  bookingIndex++;
 }
 
-// TypeScriptコードとして出力
-const outputCode = `// 愛媛県シミュレーションデータセット（愛媛県15市町・人口比率ベース）
-// セラピスト: ${therapistIndex - 1}名, 顧客: ${customers.length}名, 運営本部: 1名
+// ==========================================
+// A. TypeScript コード（src/lib/mockData.ts）の出力
+// ==========================================
+const outputCode = `// 愛媛県シミュレーションデータセット（愛媛県15市町・人口比率ベース・RFC 4122 v4 UUID準拠）
+// セラピスト: ${therapistList.length}名, 顧客: ${customers.length}名, 運営本部: 1名
 import { Profile, TherapistProfile, Service, Booking, Review } from '@/types';
 
 export const initialProfiles: Profile[] = ${JSON.stringify(profiles, null, 2)};
@@ -520,8 +518,201 @@ export const initialReviews: Review[] = ${JSON.stringify(reviews, null, 2)};
 `;
 
 fs.writeFileSync('src/lib/mockData.ts', outputCode, 'utf8');
-console.log(`Successfully generated Ehime mock data:`);
-console.log(`- Profiles: ${profiles.length} (Therapists: ${therapistIndex - 1}, Customers: ${customers.length}, Admin: 1)`);
-console.log(`- Services: ${services.length}`);
-console.log(`- Bookings: ${bookings.length}`);
-console.log(`- Reviews: ${reviews.length}`);
+console.log('Generated src/lib/mockData.ts with valid UUIDv4');
+
+// ==========================================
+// B. Supabase SQL シードスクリプト（supabase/seed_ehime.sql）の出力
+// ==========================================
+function esc(str) {
+  if (str === null || str === undefined) return 'NULL';
+  return `'${String(str).replace(/'/g, "''")}'`;
+}
+
+function escArr(arr) {
+  if (!arr || arr.length === 0) return "'{}'::text[]";
+  const elements = arr.map(item => `"${String(item).replace(/"/g, '\\"')}"`).join(',');
+  return `'${elements}'::text[]`;
+}
+
+let sql = `-- ========================================================
+-- 愛媛県シミュレーション初期データ (Seed Data - RFC 4122 v4 UUID 完全対応)
+-- セラピスト: 36名 (県内人口比) / 顧客: 100名 / 運営本部: 1名
+-- ========================================================
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+CREATE EXTENSION IF NOT EXISTS postgis;
+
+-- 既存のダミーデータをクリーンアップ（必要に応じて有効化）
+-- TRUNCATE TABLE public.reviews, public.bookings, public.services, public.therapist_profiles, public.profiles CASCADE;
+
+-- ========================================================
+-- 1. auth.users (Supabase 認証ユーザーの投入)
+-- パスワードは共通で 'TestUser2026!'
+-- ========================================================
+INSERT INTO auth.users (
+  instance_id,
+  id,
+  aud,
+  role,
+  email,
+  encrypted_password,
+  email_confirmed_at,
+  raw_app_meta_data,
+  raw_user_meta_data,
+  created_at,
+  updated_at
+)
+VALUES
+`;
+
+const authRows = profiles.map(p => {
+  return `  ('00000000-0000-0000-0000-000000000000', '${p.id}', 'authenticated', 'authenticated', ${esc(p.email)}, crypt('TestUser2026!', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', ${esc(JSON.stringify({ name: p.name, role: p.role }))}, now(), now())`;
+});
+
+sql += authRows.join(',\n') + '\nON CONFLICT (id) DO NOTHING;\n\n';
+
+// 2. public.profiles
+sql += `-- ========================================================
+-- 2. public.profiles (ユーザープロファイル)
+-- ========================================================
+INSERT INTO public.profiles (id, role, name, email, phone, avatar_url, address, postal_code, lat, lng)
+VALUES
+`;
+
+const profileRows = profiles.map(p => {
+  return `  ('${p.id}', '${p.role}', ${esc(p.name)}, ${esc(p.email)}, ${esc(p.phone)}, ${esc(p.avatar_url)}, ${esc(p.address)}, ${esc(p.postal_code)}, ${p.lat}, ${p.lng})`;
+});
+
+sql += profileRows.join(',\n') + `
+ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  role = EXCLUDED.role,
+  phone = EXCLUDED.phone,
+  avatar_url = EXCLUDED.avatar_url,
+  address = EXCLUDED.address,
+  postal_code = EXCLUDED.postal_code,
+  lat = EXCLUDED.lat,
+  lng = EXCLUDED.lng;
+
+`;
+
+// 3. public.therapist_profiles
+sql += `-- ========================================================
+-- 3. public.therapist_profiles (セラピスト詳細情報 & PostGIS 位置情報)
+-- ========================================================
+INSERT INTO public.therapist_profiles (
+  user_id, bio, specialities, is_store_based, is_visit_based,
+  address, location, visit_radius_km, rating_avg, reviews_count,
+  is_approved, stripe_account_id
+)
+VALUES
+`;
+
+const tpRows = Object.values(therapistProfiles).map(tp => {
+  const locGeom = `ST_SetSRID(ST_MakePoint(${tp.lng}, ${tp.lat}), 4326)::geography`;
+  return `  ('${tp.user_id}', ${esc(tp.bio)}, ${escArr(tp.specialities)}, ${tp.is_store_based}, ${tp.is_visit_based}, ${esc(tp.address)}, ${locGeom}, ${tp.visit_radius_km}, ${tp.rating_avg}, ${tp.reviews_count}, ${tp.is_approved}, ${esc(tp.stripe_account_id)})`;
+});
+
+sql += tpRows.join(',\n') + `
+ON CONFLICT (user_id) DO UPDATE SET
+  bio = EXCLUDED.bio,
+  specialities = EXCLUDED.specialities,
+  is_store_based = EXCLUDED.is_store_based,
+  is_visit_based = EXCLUDED.is_visit_based,
+  address = EXCLUDED.address,
+  location = EXCLUDED.location,
+  visit_radius_km = EXCLUDED.visit_radius_km,
+  rating_avg = EXCLUDED.rating_avg,
+  reviews_count = EXCLUDED.reviews_count,
+  is_approved = EXCLUDED.is_approved;
+
+`;
+
+// 4. public.services
+sql += `-- ========================================================
+-- 4. public.services (施術メニュー)
+-- ========================================================
+INSERT INTO public.services (id, therapist_id, title, description, price, duration_minutes, category, is_active)
+VALUES
+`;
+
+const srvRows = services.map(s => {
+  return `  ('${s.id}', '${s.therapist_id}', ${esc(s.title)}, ${esc(s.description)}, ${s.price}, ${s.duration_minutes}, ${esc(s.category)}, ${s.is_active})`;
+});
+
+sql += srvRows.join(',\n') + `
+ON CONFLICT (id) DO UPDATE SET
+  title = EXCLUDED.title,
+  description = EXCLUDED.description,
+  price = EXCLUDED.price,
+  duration_minutes = EXCLUDED.duration_minutes,
+  category = EXCLUDED.category,
+  is_active = EXCLUDED.is_active;
+
+`;
+
+// 5. public.bookings
+sql += `-- ========================================================
+-- 5. public.bookings (予約・出張トラッキング)
+-- ========================================================
+INSERT INTO public.bookings (
+  id, customer_id, therapist_id, service_id, booking_type, scheduled_at,
+  status, total_amount, platform_fee, therapist_earnings, location,
+  visit_address, customer_notes, therapist_current_lat, therapist_current_lng, created_at
+)
+VALUES
+`;
+
+const bkRows = bookings.map(b => {
+  const locGeom = `ST_SetSRID(ST_MakePoint(${b.lng}, ${b.lat}), 4326)::geography`;
+  const tLat = b.therapist_current_lat !== undefined ? b.therapist_current_lat : 'NULL';
+  const tLng = b.therapist_current_lng !== undefined ? b.therapist_current_lng : 'NULL';
+  return `  ('${b.id}', '${b.customer_id}', '${b.therapist_id}', '${b.service_id}', '${b.booking_type}', '${b.scheduled_at}', '${b.status}', ${b.total_amount}, ${b.platform_fee}, ${b.therapist_earnings}, ${locGeom}, ${esc(b.visit_address)}, ${esc(b.customer_notes)}, ${tLat}, ${tLng}, '${b.created_at}')`;
+});
+
+sql += bkRows.join(',\n') + `
+ON CONFLICT (id) DO UPDATE SET
+  status = EXCLUDED.status,
+  therapist_current_lat = EXCLUDED.therapist_current_lat,
+  therapist_current_lng = EXCLUDED.therapist_current_lng;
+
+`;
+
+// 6. public.reviews
+sql += `-- ========================================================
+-- 6. public.reviews (口コミ・レビュー)
+-- ========================================================
+INSERT INTO public.reviews (id, booking_id, customer_id, therapist_id, rating, comment, created_at)
+VALUES
+`;
+
+const revRows = reviews.map(r => {
+  return `  ('${r.id}', '${r.booking_id}', '${r.customer_id}', '${r.therapist_id}', ${r.rating}, ${esc(r.comment)}, '${r.created_at}')`;
+});
+
+sql += revRows.join(',\n') + `
+ON CONFLICT (id) DO UPDATE SET
+  rating = EXCLUDED.rating,
+  comment = EXCLUDED.comment;
+
+`;
+
+// 7. public.platform_settings
+sql += `-- ========================================================
+-- 7. public.platform_settings (手数料設定)
+-- ========================================================
+INSERT INTO public.platform_settings (key, value)
+VALUES
+  ('fee_rate', '{"percentage": 20}'::jsonb)
+ON CONFLICT (key) DO UPDATE SET
+  value = EXCLUDED.value;
+`;
+
+fs.writeFileSync('supabase/seed_ehime.sql', sql, 'utf8');
+console.log('Generated supabase/seed_ehime.sql');
+
+console.log(`\n=== SUMMARY ===`);
+console.log(`Profiles: ${profiles.length} (Therapists: ${therapistList.length}, Customers: ${customers.length}, Admin: 1)`);
+console.log(`Services: ${services.length}`);
+console.log(`Bookings: ${bookings.length}`);
+console.log(`Reviews: ${reviews.length}`);

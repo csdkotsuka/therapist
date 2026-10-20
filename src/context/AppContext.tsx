@@ -97,7 +97,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const mapped: Record<string, TherapistProfile> = {};
       if (!tErr && dbTherapists && dbTherapists.length > 0) {
         dbTherapists.forEach((t: any) => {
-          const fallback = initialTherapistProfiles[t.user_id] || initialTherapistProfiles['therapist-001'];
+          const firstTherapistKey = Object.keys(initialTherapistProfiles)[0];
+          const fallback = initialTherapistProfiles[t.user_id] || (firstTherapistKey ? initialTherapistProfiles[firstTherapistKey] : { lat: 33.8392, lng: 132.7656 });
           mapped[t.user_id] = {
             ...t,
             lat: t.lat || fallback.lat,
