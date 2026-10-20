@@ -232,9 +232,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const fee = Math.round(bookingData.total_amount * (platformFeeRate / 100));
     const earnings = bookingData.total_amount - fee;
 
+    const serialNum = bookingData.serial_number || `BK-${String(bookings.length + 1).padStart(4, '0')}`;
     const newBooking: Booking = {
       ...bookingData,
-      id: `book-${Date.now().toString(36)}`,
+      id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `book-${Date.now().toString(36)}`,
+      serial_number: serialNum,
       status: 'pending',
       platform_fee: fee,
       therapist_earnings: earnings,
@@ -248,6 +250,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (supabase && isSupabaseConfigured) {
       try {
         await supabase.from('bookings').insert({
+          id: newBooking.id,
+          serial_number: newBooking.serial_number,
           customer_id: newBooking.customer_id,
           therapist_id: newBooking.therapist_id,
           service_id: newBooking.service_id,

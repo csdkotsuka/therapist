@@ -394,6 +394,7 @@ CITIES.forEach((city) => {
 // 4. 予約（Bookings）とレビュー（Reviews）の生成
 const bookings = [];
 const reviews = [];
+let bSeq = 1;
 
 // (1) 出張中でリアルタイムマップ追跡可能な予約（confirmed）4件
 for (let i = 0; i < 4; i++) {
@@ -411,6 +412,7 @@ for (let i = 0; i < 4; i++) {
 
   bookings.push({
     id: genUUID(),
+    serial_number: `BK-${String(bSeq).padStart(4, '0')}`,
     customer_id: cust.id,
     therapist_id: th.id,
     service_id: srv.id,
@@ -428,6 +430,7 @@ for (let i = 0; i < 4; i++) {
     therapist_current_lng: currLng,
     created_at: new Date(Date.now() - 3600000 * 4).toISOString(),
   });
+  bSeq++;
 }
 
 // (2) 申請中（pending）の予約 5件
@@ -441,6 +444,7 @@ for (let i = 4; i < 9; i++) {
 
   bookings.push({
     id: genUUID(),
+    serial_number: `BK-${String(bSeq).padStart(4, '0')}`,
     customer_id: cust.id,
     therapist_id: th.id,
     service_id: srv.id,
@@ -456,6 +460,7 @@ for (let i = 4; i < 9; i++) {
     customer_notes: '肩甲骨まわりが非常に重いです。強めの指圧を希望します。',
     created_at: new Date(Date.now() - 3600000 * getRandomInt(1, 10)).toISOString(),
   });
+  bSeq++;
 }
 
 // (3) 完了済み（completed）の予約 16件 & レビュー
@@ -483,6 +488,7 @@ for (let i = 9; i < 25; i++) {
 
   bookings.push({
     id: bId,
+    serial_number: `BK-${String(bSeq).padStart(4, '0')}`,
     customer_id: cust.id,
     therapist_id: th.id,
     service_id: srv.id,
@@ -498,6 +504,7 @@ for (let i = 9; i < 25; i++) {
     customer_notes: 'いつもお世話になっております。',
     created_at: new Date(Date.now() - 86400000 * 25).toISOString(),
   });
+  bSeq++;
 
   reviews.push({
     id: genUUID(),
@@ -680,10 +687,12 @@ ON CONFLICT (id) DO UPDATE SET
 
 // 5. public.bookings
 sql += `-- ========================================================
--- 5. public.bookings (予約・出張トラッキング)
+-- 5. public.bookings (予約・出張トラッキング & シリアル番号)
 -- ========================================================
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS serial_number text;
+
 INSERT INTO public.bookings (
-  id, customer_id, therapist_id, service_id, booking_type, scheduled_at,
+  id, serial_number, customer_id, therapist_id, service_id, booking_type, scheduled_at,
   status, total_amount, platform_fee, therapist_earnings, location,
   visit_address, customer_notes, therapist_current_lat, therapist_current_lng, created_at
 )
@@ -694,11 +703,12 @@ const bkRows = bookings.map(b => {
   const locGeom = `ST_SetSRID(ST_MakePoint(${b.lng}, ${b.lat}), 4326)::geography`;
   const tLat = b.therapist_current_lat !== undefined ? b.therapist_current_lat : 'NULL';
   const tLng = b.therapist_current_lng !== undefined ? b.therapist_current_lng : 'NULL';
-  return `  ('${b.id}', '${b.customer_id}', '${b.therapist_id}', '${b.service_id}', '${b.booking_type}', '${b.scheduled_at}', '${b.status}', ${b.total_amount}, ${b.platform_fee}, ${b.therapist_earnings}, ${locGeom}, ${esc(b.visit_address)}, ${esc(b.customer_notes)}, ${tLat}, ${tLng}, '${b.created_at}')`;
+  return `  ('${b.id}', '${b.serial_number}', '${b.customer_id}', '${b.therapist_id}', '${b.service_id}', '${b.booking_type}', '${b.scheduled_at}', '${b.status}', ${b.total_amount}, ${b.platform_fee}, ${b.therapist_earnings}, ${locGeom}, ${esc(b.visit_address)}, ${esc(b.customer_notes)}, ${tLat}, ${tLng}, '${b.created_at}')`;
 });
 
 sql += bkRows.join(',\n') + `
 ON CONFLICT (id) DO UPDATE SET
+  serial_number = EXCLUDED.serial_number,
   status = EXCLUDED.status,
   therapist_current_lat = EXCLUDED.therapist_current_lat,
   therapist_current_lng = EXCLUDED.therapist_current_lng;

@@ -60,6 +60,7 @@ export interface Service {
 
 export interface Booking {
   id: string;
+  serial_number?: string; // 表示用シリアル番号 (例: BK-0001)
   customer_id: string;
   therapist_id: string;
   service_id: string;

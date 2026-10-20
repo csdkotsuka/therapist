@@ -362,7 +362,7 @@ export const AdminView: React.FC = () => {
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 border-b border-slate-100 text-slate-400 font-semibold uppercase tracking-wider text-[10px]">
                 <tr>
-                  <th className="px-6 py-3">予約ID</th>
+                  <th className="px-6 py-3">予約番号</th>
                   <th className="px-6 py-3">顧客</th>
                   <th className="px-6 py-3">セラピスト</th>
                   <th className="px-6 py-3">形態</th>
@@ -373,13 +373,17 @@ export const AdminView: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {bookings.map((b) => {
+                {bookings.map((b, idx) => {
                   const customer = allUsers.find((u) => u.id === b.customer_id);
                   const therapist = allUsers.find((u) => u.id === b.therapist_id);
 
                   return (
                     <tr key={b.id} className="hover:bg-slate-50/60 transition">
-                      <td className="px-6 py-3.5 font-mono text-[11px] text-slate-500">{b.id}</td>
+                      <td className="px-6 py-3.5">
+                        <span className="font-mono font-bold text-xs text-slate-800 bg-slate-100 px-2 py-1 rounded-md border border-slate-200">
+                          {b.serial_number || `BK-${String(idx + 1).padStart(4, '0')}`}
+                        </span>
+                      </td>
                       <td className="px-6 py-3.5 font-bold text-slate-800">{customer?.name}</td>
                       <td className="px-6 py-3.5 text-slate-700">{therapist?.name}</td>
                       <td className="px-6 py-3.5">

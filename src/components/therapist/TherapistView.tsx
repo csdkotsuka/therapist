@@ -23,6 +23,9 @@ import {
   User,
   ExternalLink,
   Car,
+  Star,
+  MessageSquare,
+  ThumbsUp,
 } from 'lucide-react';
 import { Service } from '@/types';
 import { TherapistProfileEdit } from './TherapistProfileEdit';
@@ -33,6 +36,7 @@ export const TherapistView: React.FC = () => {
     therapistProfiles,
     services,
     bookings,
+    reviews,
     updateBookingStatus,
     updateTherapistLocation,
     addService,
@@ -42,9 +46,10 @@ export const TherapistView: React.FC = () => {
   const therapist = therapistProfiles[currentUser.id];
   const myServices = services.filter((s) => s.therapist_id === currentUser.id);
   const myBookings = bookings.filter((b) => b.therapist_id === currentUser.id);
+  const myReviews = reviews.filter((r) => r.therapist_id === currentUser.id);
 
-  // タブ管理: 'requests' | 'schedule' | 'services' | 'earnings' | 'profile'
-  const [activeTab, setActiveTab] = useState<'requests' | 'schedule' | 'services' | 'earnings' | 'profile'>('requests');
+  // タブ管理: 'requests' | 'schedule' | 'services' | 'reviews' | 'earnings' | 'profile'
+  const [activeTab, setActiveTab] = useState<'requests' | 'schedule' | 'services' | 'reviews' | 'earnings' | 'profile'>('requests');
 
   // スケジュール設定状態
   const [selectedDays, setSelectedDays] = useState<string[]>(['mon', 'tue', 'wed', 'thu', 'fri', 'sat']);
@@ -230,6 +235,18 @@ export const TherapistView: React.FC = () => {
         >
           <Sliders className="w-4 h-4" />
           <span>施術メニュー管理 ({myServices.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('reviews')}
+          className={`px-4 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap ${
+            activeTab === 'reviews'
+              ? 'bg-slate-900 text-white shadow-md'
+              : 'text-slate-600 hover:bg-slate-100'
+          }`}
+        >
+          <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+          <span>お客様の評価・口コミ ({myReviews.length})</span>
         </button>
 
         <button
@@ -737,6 +754,150 @@ export const TherapistView: React.FC = () => {
                         <div className="font-black text-emerald-600 text-sm">+{formatPrice(b.therapist_earnings)}</div>
                         <div className="text-[10px] text-slate-400">総額 {formatPrice(b.total_amount)} (手数料 -{formatPrice(b.platform_fee)})</div>
                       </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* タブ 4: お客様の評価・口コミ一覧 */}
+      {activeTab === 'reviews' && (
+        <div className="space-y-6 animate-fadeIn">
+          {/* 評価サマリーカード */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {/* 総合評価スコア */}
+            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs flex flex-col items-center justify-center text-center">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                総合平均評価
+              </span>
+              <div className="flex items-center gap-2 mt-2">
+                <span className="text-4xl font-black text-slate-900">
+                  {therapist?.rating_avg ? therapist.rating_avg.toFixed(2) : '5.00'}
+                </span>
+                <div className="flex text-amber-400">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-5 h-5 fill-amber-400 text-amber-400" />
+                  ))}
+                </div>
+              </div>
+              <p className="text-xs text-slate-500 mt-2 font-medium">
+                全 {myReviews.length > 0 ? myReviews.length : therapist?.reviews_count || 0} 件のお客様評価
+              </p>
+            </div>
+
+            {/* 星の内訳 */}
+            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs md:col-span-2 space-y-2.5">
+              <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                評価の内訳
+              </h4>
+              {[5, 4, 3, 2, 1].map((starCount) => {
+                const count = myReviews.filter((r) => r.rating === starCount).length;
+                const total = Math.max(1, myReviews.length);
+                const percent = Math.round((count / total) * 100);
+                return (
+                  <div key={starCount} className="flex items-center gap-3 text-xs">
+                    <span className="w-10 font-bold text-slate-700 flex items-center gap-1">
+                      <span>★{starCount}</span>
+                    </span>
+                    <div className="flex-1 h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-amber-400 rounded-full transition-all duration-500"
+                        style={{ width: `${percent}%` }}
+                      />
+                    </div>
+                    <span className="w-12 text-right text-slate-400 text-[11px] font-mono">
+                      {count} 件
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 口コミ・レビュー詳細リスト */}
+          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                <MessageSquare className="w-4 h-4 text-emerald-600" />
+                <span>お客様からいただいた口コミ・レビュー ({myReviews.length}件)</span>
+              </h4>
+              <span className="text-xs text-slate-400">新しい順</span>
+            </div>
+
+            {myReviews.length === 0 ? (
+              <div className="py-12 text-center text-slate-400 text-xs space-y-2">
+                <Star className="w-8 h-8 mx-auto text-slate-300 stroke-1" />
+                <p>現在まだレビューはありません。</p>
+                <p className="text-[11px] text-slate-400">施術完了後にお客様から投稿された口コミがここに表示されます。</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-slate-100">
+                {myReviews.map((rev) => {
+                  const customer = allUsers.find((u) => u.id === rev.customer_id);
+                  const booking = bookings.find((b) => b.id === rev.booking_id);
+                  const service = services.find((s) => s.id === booking?.service_id);
+
+                  return (
+                    <div key={rev.id} className="py-4 space-y-2">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex items-center gap-2.5">
+                          <img
+                            src={customer?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(customer?.name || 'Customer')}`}
+                            alt={customer?.name}
+                            className="w-8 h-8 rounded-full object-cover ring-2 ring-slate-100"
+                          />
+                          <div>
+                            <span className="font-bold text-slate-900 text-xs">
+                              {customer?.name || 'お客様'} 様
+                            </span>
+                            <div className="flex items-center gap-2 text-[10px] text-slate-400">
+                              <span>{formatDate(rev.created_at)}</span>
+                              {booking && (
+                                <>
+                                  <span>•</span>
+                                  <span className="text-emerald-700 font-medium">
+                                    {booking.booking_type === 'visit' ? '出張施術' : '店舗訪問'}
+                                  </span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 星評価 */}
+                        <div className="flex items-center gap-1 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200/80">
+                          <div className="flex text-amber-400">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`w-3.5 h-3.5 ${
+                                  i < rev.rating
+                                    ? 'fill-amber-400 text-amber-400'
+                                    : 'text-slate-200'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          <span className="font-bold text-amber-900 text-xs ml-1">
+                            {rev.rating}.0
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* 施術メニュー */}
+                      {service && (
+                        <div className="text-[11px] font-semibold text-slate-600 bg-slate-50 px-3 py-1 rounded-lg inline-block">
+                          メニュー: {service.title}
+                        </div>
+                      )}
+
+                      {/* コメント本文 */}
+                      <p className="text-xs text-slate-700 leading-relaxed pl-1 pt-1">
+                        {rev.comment}
+                      </p>
                     </div>
                   );
                 })}
