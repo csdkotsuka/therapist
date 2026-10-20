@@ -529,9 +529,9 @@ function esc(str) {
 }
 
 function escArr(arr) {
-  if (!arr || arr.length === 0) return "'{}'::text[]";
-  const elements = arr.map(item => `"${String(item).replace(/"/g, '\\"')}"`).join(',');
-  return `'${elements}'::text[]`;
+  if (!arr || arr.length === 0) return "ARRAY[]::text[]";
+  const elements = arr.map(item => `'${String(item).replace(/'/g, "''")}'`).join(', ');
+  return `ARRAY[${elements}]`;
 }
 
 let sql = `-- ========================================================
