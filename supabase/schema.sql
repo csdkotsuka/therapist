@@ -6,7 +6,7 @@
 -- 1. PostGIS拡張の有効化
 create extension if not exists postgis;
 
--- 2. profiles: 共通ユーザー情報
+-- 2. profiles: 共通ユーザー情報 (顧客・セラピスト・管理者)
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   role text not null check (role in ('admin', 'therapist', 'customer')),
@@ -14,9 +14,19 @@ create table if not exists public.profiles (
   email text,
   phone text,
   avatar_url text,
+  address text,
+  postal_code text,
+  lat float,
+  lng float,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
+
+-- 既存テーブルがある場合の拡張カラム追加
+alter table public.profiles add column if not exists address text;
+alter table public.profiles add column if not exists postal_code text;
+alter table public.profiles add column if not exists lat float;
+alter table public.profiles add column if not exists lng float;
 
 -- 3. therapist_profiles: セラピスト詳細
 create table if not exists public.therapist_profiles (

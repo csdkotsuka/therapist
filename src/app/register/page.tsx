@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { useApp } from '@/context/AppContext';
+import { registerCustomerToSupabase } from '@/lib/supabase';
 import { registerCustomerToFirebase } from '@/lib/firebase';
 import {
   geocodeAddress,
@@ -27,14 +28,13 @@ import {
   CheckCircle2,
   ArrowRight,
   Sparkles,
-  Home,
   AlertCircle,
-  HelpCircle,
+  Database,
 } from 'lucide-react';
 
 export default function CustomerRegisterPage() {
   const router = useRouter();
-  const { addCustomerUser, setUserLocation } = useApp();
+  const { addCustomerUser, setUserLocation, isLiveSupabase } = useApp();
 
   // フォームステート
   const [name, setName] = useState('');
@@ -60,7 +60,7 @@ export default function CustomerRegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [firebaseStatus, setFirebaseStatus] = useState<string | null>(null);
+  const [databaseStatus, setDatabaseStatus] = useState<string | null>(null);
 
   // 郵便番号から住所を自動検索 (zipcloud API)
   const handlePostalLookup = async () => {
@@ -172,8 +172,8 @@ export default function CustomerRegisterPage() {
         finalLng = fallback.lng;
       }
 
-      // Firebase (Auth + Firestore) へ保存
-      const result = await registerCustomerToFirebase({
+      // 1. Supabase (Auth + profilesテーブル) へ保存
+      const result = await registerCustomerToSupabase({
         name: name.trim(),
         email: email.trim(),
         password,
@@ -187,7 +187,26 @@ export default function CustomerRegisterPage() {
         lng: finalLng,
       });
 
-      // AppContext への反映
+      // 2. Firebase（オプション連携）
+      try {
+        await registerCustomerToFirebase({
+          name: name.trim(),
+          email: email.trim(),
+          password,
+          phone: cleanPhone,
+          postalCode: postalCode.replace(/[^0-9]/g, ''),
+          prefecture,
+          city: city.trim(),
+          street: street.trim(),
+          building: building.trim(),
+          lat: finalLat,
+          lng: finalLng,
+        });
+      } catch {
+        // Firebase同期はオプショナル
+      }
+
+      // AppContext への即時反映
       const newCustomerProfile = {
         id: result.customer.id,
         name: result.customer.name,
@@ -207,10 +226,10 @@ export default function CustomerRegisterPage() {
         lng: finalLng,
       });
 
-      if (result.isSavedToFirebase) {
-        setFirebaseStatus('Firebase (Auth & Firestore) への登録が完了しました');
+      if (result.isSavedToSupabase) {
+        setDatabaseStatus('Supabase Database (Auth & profiles) への保存が完了しました');
       } else {
-        setFirebaseStatus('Firebase連携待機モード（ローカル保存完了）');
+        setDatabaseStatus('Supabase連携モード（ローカル保存完了）');
       }
 
       setIsSuccess(true);
@@ -246,7 +265,7 @@ export default function CustomerRegisterPage() {
                 ようこそ、{name} さん！
               </h2>
               <p className="text-sm text-slate-600 max-w-md mx-auto">
-                顧客アカウントの作成とFirebaseへの登録が完了しました。
+                顧客アカウントの作成とデータベースへの登録が完了しました。
                 ご指定の住所周辺で待機している凄腕セラピストを今すぐ探せます。
               </p>
             </div>
@@ -274,9 +293,10 @@ export default function CustomerRegisterPage() {
                   緯度 {coords.lat.toFixed(4)}, 経度 {coords.lng.toFixed(4)}
                 </span>
               </div>
-              {firebaseStatus && (
-                <div className="text-[11px] text-slate-500 pt-1 border-t border-slate-100">
-                  ☁️ {firebaseStatus}
+              {databaseStatus && (
+                <div className="text-[11px] text-slate-500 pt-1 border-t border-slate-100 flex items-center gap-1">
+                  <Database className="w-3 h-3 text-emerald-600" />
+                  <span>{databaseStatus}</span>
                 </div>
               )}
             </div>
@@ -576,7 +596,7 @@ export default function CustomerRegisterPage() {
                 {isSubmitting ? (
                   <>
                     <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                    <span>Firebase にアカウントを作成中...</span>
+                    <span>アカウントを作成中...</span>
                   </>
                 ) : (
                   <>
