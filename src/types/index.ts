@@ -15,6 +15,10 @@ export interface Profile {
   email: string;
   phone?: string;
   avatar_url?: string;
+  address?: string;
+  postal_code?: string;
+  lat?: number;
+  lng?: number;
 }
 
 export interface TherapistProfile {
