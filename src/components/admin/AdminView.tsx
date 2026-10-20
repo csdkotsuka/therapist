@@ -37,9 +37,10 @@ export const AdminView: React.FC = () => {
     updateBookingStatus,
     refreshFromSupabase,
     isLoadingDb,
+    switchUser,
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'kpi' | 'bookings' | 'users' | 'reviews' | 'settings'>('kpi');
+  const [activeTab, setActiveTab] = useState<'kpi' | 'bookings' | 'users' | 'customers' | 'reviews' | 'settings'>('kpi');
   const [feeInput, setFeeInput] = useState<number>(platformFeeRate);
   const [feeSaveMessage, setFeeSaveMessage] = useState(false);
 
@@ -125,8 +126,20 @@ export const AdminView: React.FC = () => {
               : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
+          <ShieldCheck className="w-4 h-4" />
+          <span>セラピスト審査・管理 ({therapists.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('customers')}
+          className={`px-4 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap ${
+            activeTab === 'customers'
+              ? 'bg-slate-900 text-white shadow-md'
+              : 'text-slate-600 hover:bg-slate-100'
+          }`}
+        >
           <Users className="w-4 h-4" />
-          <span>セラピスト・ユーザー審査 ({allUsers.length})</span>
+          <span>顧客一覧 & 視点切替 ({customers.length})</span>
         </button>
 
         <button
@@ -381,22 +394,108 @@ export const AdminView: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* 承認トグルスイッチ */}
-                    <div className="flex items-center gap-3 shrink-0">
-                      <span className={`text-xs font-bold ${isApproved ? 'text-emerald-600' : 'text-slate-400'}`}>
-                        {isApproved ? '審査承認済み (公開中)' : '審査中 / 停止中'}
-                      </span>
+                    {/* 承認トグルスイッチ & 視点切り替えボタン */}
+                    <div className="flex flex-wrap items-center gap-3 shrink-0">
                       <button
-                        onClick={() => toggleTherapistApproval(th.id)}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                          isApproved ? 'bg-emerald-600' : 'bg-slate-300'
-                        }`}
+                        onClick={() => switchUser(th.id)}
+                        className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-xs"
+                        title="このセラピストの視点で操作画面を表示"
                       >
-                        <span
-                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                            isApproved ? 'translate-x-6' : 'translate-x-1'
+                        <span>セラピスト視点で表示</span>
+                      </button>
+
+                      <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
+                        <span className={`text-xs font-bold ${isApproved ? 'text-emerald-600' : 'text-slate-400'}`}>
+                          {isApproved ? '承認済' : '審査中'}
+                        </span>
+                        <button
+                          onClick={() => toggleTherapistApproval(th.id)}
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                            isApproved ? 'bg-emerald-600' : 'bg-slate-300'
                           }`}
-                        />
+                        >
+                          <span
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                              isApproved ? 'translate-x-6' : 'translate-x-1'
+                            }`}
+                          />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* タブ 4: 顧客一覧 & 視点切り替え */}
+      {activeTab === 'customers' && (
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+            <div>
+              <h4 className="font-bold text-slate-900 text-sm">登録顧客一覧 & 視点切り替え</h4>
+              <p className="text-[11px] text-slate-500">全 {customers.length} 名の登録顧客</p>
+            </div>
+            <button
+              onClick={() => refreshFromSupabase()}
+              disabled={isLoadingDb}
+              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-1.5 disabled:opacity-50"
+            >
+              <span>{isLoadingDb ? '同期中...' : '最新データを取得'}</span>
+            </button>
+          </div>
+
+          <div className="divide-y divide-slate-100">
+            {customers.length === 0 ? (
+              <div className="p-8 text-center text-slate-400 text-xs">
+                登録されている顧客がいません
+              </div>
+            ) : (
+              customers.map((c) => {
+                const customerBookings = bookings.filter((b) => b.customer_id === c.id);
+
+                return (
+                  <div key={c.id} className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-slate-50/50 transition">
+                    <div className="flex items-center gap-3.5">
+                      <img
+                        src={c.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(c.name)}`}
+                        alt={c.name}
+                        className="w-12 h-12 rounded-2xl object-cover ring-2 ring-blue-500/20 shrink-0"
+                      />
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-bold text-slate-900 text-sm">{c.name}</h4>
+                          <span className="text-[11px] text-slate-400 font-mono">{c.email}</span>
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                            予約 {customerBookings.length} 件
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-slate-500">
+                          {c.phone && (
+                            <span className="inline-flex items-center gap-1 font-mono">
+                              📞 {c.phone}
+                            </span>
+                          )}
+                          {c.address && (
+                            <span className="inline-flex items-center gap-1 text-slate-600">
+                              📍 {c.address}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* この顧客として表示（視点切り替え）ボタン */}
+                    <div className="flex items-center gap-2 w-full sm:w-auto shrink-0 border-t sm:border-t-0 pt-2 sm:pt-0">
+                      <button
+                        onClick={() => switchUser(c.id)}
+                        className="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm"
+                        title="この顧客の視点に切り替えて操作する"
+                      >
+                        <Users className="w-3.5 h-3.5" />
+                        <span>この顧客として表示</span>
                       </button>
                     </div>
                   </div>

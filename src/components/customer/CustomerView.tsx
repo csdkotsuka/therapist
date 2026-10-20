@@ -8,6 +8,7 @@ import { InteractiveMap } from './InteractiveMap';
 import { BookingModal } from './BookingModal';
 import { LiveTrackingModal } from './LiveTrackingModal';
 import { ReviewModal } from './ReviewModal';
+import { CustomerProfileEdit } from './CustomerProfileEdit';
 
 const RealLeafletMap = dynamic(
   () => import('./RealLeafletMap').then((m) => m.RealLeafletMap),
@@ -38,6 +39,7 @@ import {
   Car,
   ChevronRight,
   HeartHandshake,
+  User,
 } from 'lucide-react';
 import { Booking } from '@/types';
 
@@ -52,8 +54,8 @@ export const CustomerView: React.FC = () => {
     userLocation,
   } = useApp();
 
-  // サブタブ: 'search' (セラピストを探す) | 'bookings' (マイ予約一覧)
-  const [activeMainTab, setActiveMainTab] = useState<'search' | 'bookings'>('search');
+  // サブタブ: 'search' (セラピストを探す) | 'bookings' (マイ予約一覧) | 'profile' (会員情報・住所の変更)
+  const [activeMainTab, setActiveMainTab] = useState<'search' | 'bookings' | 'profile'>('search');
 
   // フィルター
   const [filterStyle, setFilterStyle] = useState<'all' | 'visit' | 'store'>('all');
@@ -151,6 +153,18 @@ export const CustomerView: React.FC = () => {
                 {myBookings.length}
               </span>
             )}
+          </button>
+
+          <button
+            onClick={() => setActiveMainTab('profile')}
+            className={`px-4 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-2 ${
+              activeMainTab === 'profile'
+                ? 'bg-slate-900 text-white shadow-md'
+                : 'text-slate-600 hover:bg-slate-100'
+            }`}
+          >
+            <User className="w-4 h-4" />
+            <span>登録情報・住所の変更</span>
           </button>
         </div>
 
@@ -517,6 +531,11 @@ export const CustomerView: React.FC = () => {
             </div>
           )}
         </div>
+      )}
+
+      {/* タブ 3: 登録情報・住所の変更 */}
+      {activeMainTab === 'profile' && (
+        <CustomerProfileEdit />
       )}
 
       {/* 予約モーダル */}

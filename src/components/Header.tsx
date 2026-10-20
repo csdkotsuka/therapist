@@ -35,7 +35,6 @@ export const Header: React.FC = () => {
     isLoadingDb,
   } = useApp();
 
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isLocationMenuOpen, setIsLocationMenuOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isGettingGps, setIsGettingGps] = useState(false);
@@ -129,7 +128,6 @@ export const Header: React.FC = () => {
                 <button
                   onClick={() => {
                     setIsLocationMenuOpen(!isLocationMenuOpen);
-                    setIsUserMenuOpen(false);
                   }}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-medium text-slate-700 transition"
                   title="現在地を変更"
@@ -197,107 +195,38 @@ export const Header: React.FC = () => {
               <span className="sm:hidden">登録</span>
             </Link>
 
-            {/* ロール切り替えドロップダウン */}
-            <div className="relative">
+            {/* 管理本部への切り替えボタン (現在が管理者でない場合) */}
+            {currentUser.role !== 'admin' && (
               <button
-                onClick={() => {
-                  setIsUserMenuOpen(!isUserMenuOpen);
-                  setIsLocationMenuOpen(false);
-                }}
-                className="flex items-center gap-2.5 p-1.5 sm:px-3 sm:py-1.5 rounded-xl border border-slate-200 hover:border-emerald-300 bg-white hover:bg-emerald-50/30 transition shadow-2xs"
+                onClick={() => switchUser('admin-001')}
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-purple-200 bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-bold transition shadow-2xs"
+                title="管理者視点ページを開く"
               >
-                {/* User Avatar */}
-                <div className="relative">
-                  <img
-                    src={currentUser.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'}
-                    alt={currentUser.name}
-                    className="w-8 h-8 rounded-full object-cover ring-2 ring-emerald-500/20"
-                  />
-                  {pendingRequestsCount > 0 && currentUser.role === 'therapist' && (
-                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-pulse">
-                      {pendingRequestsCount}
-                    </span>
-                  )}
-                </div>
-
-                <div className="text-left hidden md:block">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-bold text-slate-800">{currentUser.name}</span>
-                    {getRoleBadge(currentUser.role)}
-                  </div>
-                </div>
-
-                <ChevronDown className="w-4 h-4 text-slate-400" />
+                <span>⚙️ 管理本部</span>
               </button>
+            )}
 
-              {/* ユーザー / ロール切り替えメニュー */}
-              {isUserMenuOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 py-2 z-50">
-                  <div className="px-4 py-2 border-b border-slate-100 flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-semibold text-slate-400">アカウント切替 / 登録</p>
-                      <p className="text-[11px] text-slate-500 mt-0.5">
-                        ロールテスト・アカウント切替
-                      </p>
-                    </div>
-                    <Link
-                      href="/register"
-                      onClick={() => setIsUserMenuOpen(false)}
-                      className="text-[11px] text-emerald-600 hover:text-emerald-700 font-bold flex items-center gap-1 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-200"
-                    >
-                      <UserPlus className="w-3 h-3" />
-                      新規作成
-                    </Link>
-                  </div>
+            {/* 現在ログイン中のユーザー表示 (リスト表示なし) */}
+            <div className="flex items-center gap-2.5 p-1.5 sm:px-3 sm:py-1.5 rounded-xl border border-slate-200 bg-white shadow-2xs">
+              <div className="relative">
+                <img
+                  src={currentUser.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'}
+                  alt={currentUser.name}
+                  className="w-8 h-8 rounded-full object-cover ring-2 ring-emerald-500/20"
+                />
+                {pendingRequestsCount > 0 && currentUser.role === 'therapist' && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-pulse">
+                    {pendingRequestsCount}
+                  </span>
+                )}
+              </div>
 
-                  <div className="max-h-80 overflow-y-auto divide-y divide-slate-50">
-                    {allUsers.map((user) => {
-                      const isSelected = user.id === currentUser.id;
-                      return (
-                        <button
-                          key={user.id}
-                          onClick={() => {
-                            switchUser(user.id);
-                            setIsUserMenuOpen(false);
-                          }}
-                          className={`w-full text-left px-4 py-2.5 flex items-center gap-3 hover:bg-slate-50 transition ${
-                            isSelected ? 'bg-emerald-50/60 font-semibold' : ''
-                          }`}
-                        >
-                          <img
-                            src={user.avatar_url}
-                            alt={user.name}
-                            className="w-9 h-9 rounded-full object-cover shrink-0 ring-1 ring-slate-200"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between gap-1">
-                              <span className="text-xs font-bold text-slate-900 truncate">{user.name}</span>
-                              {getRoleBadge(user.role)}
-                            </div>
-                            <p className="text-[11px] text-slate-500 truncate">{user.email}</p>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <div className="p-2 border-t border-slate-100 bg-slate-50/50 flex justify-between items-center text-xs">
-                    <span className="text-[11px] text-slate-400">キャッシュ操作</span>
-                    <button
-                      onClick={() => {
-                        if (confirm('ローカルキャッシュをリセットしますか？')) {
-                          resetToMock();
-                          setIsUserMenuOpen(false);
-                        }
-                      }}
-                      className="inline-flex items-center gap-1 text-[11px] text-slate-600 hover:text-rose-600 transition"
-                    >
-                      <RotateCcw className="w-3 h-3" />
-                      データをリセット
-                    </button>
-                  </div>
+              <div className="text-left hidden md:block">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-bold text-slate-800">{currentUser.name}</span>
+                  {getRoleBadge(currentUser.role)}
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </div>

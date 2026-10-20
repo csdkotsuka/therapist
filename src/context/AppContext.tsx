@@ -56,6 +56,7 @@ interface AppContextType {
   resetToMock: () => void;
   addCustomerUser: (user: Profile) => void;
   addTherapistUser: (user: Profile, therapistData?: Partial<TherapistProfile>) => Promise<void>;
+  updateUserProfile: (userId: string, data: Partial<Profile>) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -498,6 +499,51 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const updateUserProfile = async (userId: string, updateData: Partial<Profile>) => {
+    // 1. allUsers の更新
+    setAllUsers((prev) =>
+      prev.map((u) => (u.id === userId ? { ...u, ...updateData } : u))
+    );
+
+    // 2. 現在ログイン中のユーザーなら currentUser も更新
+    setCurrentUser((prev) => {
+      if (prev.id === userId) {
+        return { ...prev, ...updateData };
+      }
+      return prev;
+    });
+
+    // 3. 住所や位置情報が更新されたら userLocation も更新
+    if (updateData.lat && updateData.lng) {
+      setUserLocation({
+        name: updateData.address || '更新された現在地',
+        lat: updateData.lat,
+        lng: updateData.lng,
+      });
+    }
+
+    // 4. Supabase profiles テーブルの更新
+    if (supabase && isSupabaseConfigured) {
+      try {
+        await supabase
+          .from('profiles')
+          .update({
+            name: updateData.name,
+            phone: updateData.phone,
+            address: updateData.address,
+            postal_code: updateData.postal_code,
+            lat: updateData.lat,
+            lng: updateData.lng,
+            avatar_url: updateData.avatar_url,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', userId);
+      } catch (err) {
+        console.warn('Supabase profile update warning:', err);
+      }
+    }
+  };
+
   const resetToMock = () => {
     localStorage.removeItem(STORAGE_KEY);
     setAllUsers(initialProfiles);
@@ -536,6 +582,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         resetToMock,
         addCustomerUser,
         addTherapistUser,
+        updateUserProfile,
       }}
     >
       {children}
