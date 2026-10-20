@@ -54,6 +54,7 @@ interface AppContextType {
   createReview: (review: Omit<Review, 'id' | 'created_at'>) => Promise<void>;
   refreshFromSupabase: () => Promise<void>;
   resetToMock: () => void;
+  addCustomerUser: (user: Profile) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -372,6 +373,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const addCustomerUser = (newUser: Profile) => {
+    setAllUsers((prev) => {
+      const exists = prev.some((u) => u.id === newUser.id);
+      if (exists) {
+        return prev.map((u) => (u.id === newUser.id ? newUser : u));
+      }
+      return [...prev, newUser];
+    });
+    setCurrentUser(newUser);
+  };
+
   const resetToMock = () => {
     localStorage.removeItem(STORAGE_KEY);
     setAllUsers(initialProfiles);
@@ -408,6 +420,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         createReview,
         refreshFromSupabase: fetchSupabaseData,
         resetToMock,
+        addCustomerUser,
       }}
     >
       {children}

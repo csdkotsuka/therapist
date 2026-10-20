@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { useApp, PRESET_LOCATIONS } from '@/context/AppContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { getCurrentGpsPosition, reverseGeocode } from '@/lib/geo';
@@ -18,6 +19,7 @@ import {
   Database,
   Navigation,
   Loader2,
+  UserPlus,
 } from 'lucide-react';
 
 export const Header: React.FC = () => {
@@ -185,6 +187,16 @@ export const Header: React.FC = () => {
               </div>
             )}
 
+            {/* 顧客新規登録ボタン */}
+            <Link
+              href="/register"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold shadow-xs transition active:scale-95"
+            >
+              <UserPlus className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">顧客アカウント作成</span>
+              <span className="sm:hidden">登録</span>
+            </Link>
+
             {/* ロール切り替えドロップダウン */}
             <div className="relative">
               <button
@@ -221,11 +233,21 @@ export const Header: React.FC = () => {
               {/* ユーザー / ロール切り替えメニュー */}
               {isUserMenuOpen && (
                 <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 py-2 z-50">
-                  <div className="px-4 py-2 border-b border-slate-100">
-                    <p className="text-xs font-semibold text-slate-400">ダミーアカウント切替 (ロールテスト)</p>
-                    <p className="text-[11px] text-slate-500 mt-0.5">
-                      ワンタップでロールや別ユーザーの視点に切り替わります
-                    </p>
+                  <div className="px-4 py-2 border-b border-slate-100 flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-semibold text-slate-400">アカウント切替 / 登録</p>
+                      <p className="text-[11px] text-slate-500 mt-0.5">
+                        ロールテスト・アカウント切替
+                      </p>
+                    </div>
+                    <Link
+                      href="/register"
+                      onClick={() => setIsUserMenuOpen(false)}
+                      className="text-[11px] text-emerald-600 hover:text-emerald-700 font-bold flex items-center gap-1 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-200"
+                    >
+                      <UserPlus className="w-3 h-3" />
+                      新規作成
+                    </Link>
                   </div>
 
                   <div className="max-h-80 overflow-y-auto divide-y divide-slate-50">

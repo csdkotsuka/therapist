@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { useApp } from '@/context/AppContext';
 import {
@@ -241,30 +242,42 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
           </form>
 
           {/* Toggle Mode */}
-          <div className="text-center pt-2 text-xs text-slate-500">
-            {mode === 'signin' ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setMode('signup');
-                  setErrorMsg('');
-                }}
-                className="text-emerald-600 font-bold hover:underline"
+          <div className="text-center pt-2 text-xs text-slate-500 space-y-2">
+            <div>
+              {mode === 'signin' ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode('signup');
+                    setErrorMsg('');
+                  }}
+                  className="text-emerald-600 font-bold hover:underline"
+                >
+                  メールで新規登録
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode('signin');
+                    setErrorMsg('');
+                  }}
+                  className="text-emerald-600 font-bold hover:underline"
+                >
+                  すでにアカウントをお持ちの方（ログイン）
+                </button>
+              )}
+            </div>
+
+            <div className="pt-2 border-t border-slate-100">
+              <Link
+                href="/register"
+                onClick={onClose}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition"
               >
-                新規アカウント登録はこちら
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => {
-                  setMode('signin');
-                  setErrorMsg('');
-                }}
-                className="text-emerald-600 font-bold hover:underline"
-              >
-                すでにアカウントをお持ちの方（ログイン）
-              </button>
-            )}
+                <span>顧客アカウント作成（名前・電話・住所）</span>
+              </Link>
+            </div>
           </div>
         </div>
       </div>

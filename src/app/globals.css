@@ -47,6 +47,12 @@ body {
 .leaflet-container {
   width: 100%;
   height: 100%;
-  border-radius: 1.5rem;
   z-index: 10;
+}
+
+.tracking-origin-marker,
+.tracking-dest-marker,
+.tracking-car-marker {
+  background: transparent;
+  border: none;
 }
