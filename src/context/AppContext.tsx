@@ -587,6 +587,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (profileData.address || therapistData.address) {
           updatePayload.address = profileData.address || therapistData.address;
         }
+        if (therapistData.store_name !== undefined) updatePayload.store_name = therapistData.store_name;
+        if (therapistData.store_address !== undefined) updatePayload.store_address = therapistData.store_address;
+        if (therapistData.store_access !== undefined) updatePayload.store_access = therapistData.store_access;
+        if (therapistData.store_parking !== undefined) updatePayload.store_parking = therapistData.store_parking;
+        if (therapistData.store_hours !== undefined) updatePayload.store_hours = therapistData.store_hours;
+        if (therapistData.store_facilities !== undefined) updatePayload.store_facilities = therapistData.store_facilities;
+        if (therapistData.store_notes !== undefined) updatePayload.store_notes = therapistData.store_notes;
 
         await supabase
           .from('therapist_profiles')

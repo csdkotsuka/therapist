@@ -8,7 +8,7 @@ import { TherapistView } from '@/components/therapist/TherapistView';
 import { HeartPulse, UserCheck } from 'lucide-react';
 
 export default function TherapistPage() {
-  const { currentUser, switchUser, allUsers } = useApp();
+  const { currentUser, switchUser, allUsers, therapistProfiles } = useApp();
 
   // セラピスト一覧
   const therapists = allUsers.filter((u) => u.role === 'therapist');
@@ -46,11 +46,16 @@ export default function TherapistPage() {
               onChange={(e) => switchUser(e.target.value)}
               className="bg-emerald-950 border border-emerald-700 text-white rounded px-2 py-1 text-xs focus:outline-hidden"
             >
-              {therapists.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name} ({t.address ? t.address.replace('愛媛県', '').split('市')[0] + '市' : '愛媛'})
-                </option>
-              ))}
+              {therapists.map((t) => {
+                const tp = therapistProfiles[t.id];
+                const storeLabel = tp?.is_store_based ? ' [🏢店舗あり]' : '';
+                const cityName = t.address ? t.address.replace('愛媛県', '').split('市')[0] + '市' : '愛媛';
+                return (
+                  <option key={t.id} value={t.id}>
+                    {t.name} ({cityName}){storeLabel}
+                  </option>
+                );
+              })}
             </select>
           </div>
         </div>

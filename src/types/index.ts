@@ -35,6 +35,16 @@ export interface TherapistProfile {
   reviews_count: number;
   is_approved: boolean;
   stripe_account_id?: string;
+  // 店舗・サロン詳細情報
+  store_name?: string;
+  store_address?: string;
+  store_lat?: number;
+  store_lng?: number;
+  store_access?: string;
+  store_parking?: string;
+  store_hours?: string;
+  store_facilities?: string[];
+  store_notes?: string;
 }
 
 export interface Service {

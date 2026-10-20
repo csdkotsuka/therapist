@@ -138,14 +138,40 @@ export const TherapistView: React.FC = () => {
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-400/20 text-emerald-300 border border-emerald-400/30">
                 承認済みパートナー
               </span>
+              {therapist?.is_store_based && (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-400/20 text-teal-200 border border-teal-400/30 flex items-center gap-1">
+                  <Building className="w-3 h-3" />
+                  <span>店舗あり</span>
+                </span>
+              )}
+              {therapist?.is_visit_based && (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-400/20 text-emerald-200 border border-emerald-400/30 flex items-center gap-1">
+                  <Home className="w-3 h-3" />
+                  <span>出張対応</span>
+                </span>
+              )}
             </div>
             <p className="text-xs text-emerald-200 mt-1 line-clamp-1 max-w-md">
+              {therapist?.store_name ? `【店舗】${therapist.store_name} • ` : ''}
               {therapist?.bio || 'プロフィール設定中'}
             </p>
-            <div className="flex items-center gap-3 mt-2 text-xs text-emerald-100">
+            <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-emerald-100">
               <span>★ 評価 {therapist?.rating_avg || '5.0'} ({therapist?.reviews_count || 0}件)</span>
-              <span>•</span>
-              <span>出張対応半径: {visitRadius}km</span>
+              {therapist?.is_visit_based && (
+                <>
+                  <span>•</span>
+                  <span>出張対応半径: {visitRadius}km</span>
+                </>
+              )}
+              {therapist?.is_store_based && therapist?.store_address && (
+                <>
+                  <span>•</span>
+                  <span className="flex items-center gap-1 text-teal-200">
+                    <Building className="w-3.5 h-3.5" />
+                    <span>店舗住所: {therapist.store_address}</span>
+                  </span>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -226,8 +252,8 @@ export const TherapistView: React.FC = () => {
               : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
-          <User className="w-4 h-4" />
-          <span>👤 プロフィール設定</span>
+          <Building className="w-4 h-4 text-teal-400" />
+          <span>👤 プロフィール & 店舗情報編集</span>
         </button>
       </div>
 

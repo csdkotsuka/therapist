@@ -409,6 +409,21 @@ export const CustomerView: React.FC = () => {
                       </p>
                     </div>
 
+                    {/* 店舗ありの場合の店舗情報プレビュー */}
+                    {tp.is_store_based && (
+                      <div className="mx-5 mb-3 px-3 py-1.5 rounded-xl bg-teal-50/80 border border-teal-100 flex items-center justify-between text-[11px] text-teal-900">
+                        <span className="font-bold flex items-center gap-1.5 truncate">
+                          <Building className="w-3.5 h-3.5 text-teal-600 shrink-0" />
+                          <span className="truncate">{tp.store_name || `${user?.name} 店舗サロン`}</span>
+                        </span>
+                        {tp.store_access && (
+                          <span className="text-[10px] text-teal-600 shrink-0 truncate ml-2">
+                            {tp.store_access}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
                     {/* 代表メニュープレビュー */}
                     {leadService && (
                       <div className="mx-5 p-3 rounded-2xl bg-slate-50 border border-slate-100 text-xs">

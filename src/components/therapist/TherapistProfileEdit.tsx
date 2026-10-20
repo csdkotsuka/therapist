@@ -25,6 +25,10 @@ import {
   Plus,
   X,
   Sparkles,
+  Clock,
+  Car,
+  Compass,
+  Copy,
 } from 'lucide-react';
 
 const COMMON_SPECIALTIES = [
@@ -50,6 +54,21 @@ const COMMON_SPECIALTIES = [
   '眼精疲労ケア',
 ];
 
+const COMMON_FACILITIES = [
+  '完全個室',
+  '着替え無料貸出',
+  '専用駐車場あり',
+  '駅近（徒歩5分以内）',
+  'シャワー完備',
+  '女性専用フロア',
+  'ペア・2名同時可',
+  'クレジットカード可',
+  '電子マネー・QR決済可',
+  'バリアフリー対応',
+  'ドリンクサービス',
+  'パウダールーム完備',
+];
+
 export const TherapistProfileEdit: React.FC = () => {
   const { currentUser, therapistProfiles, updateTherapistInfo } = useApp();
   const therapist = therapistProfiles[currentUser.id];
@@ -59,20 +78,33 @@ export const TherapistProfileEdit: React.FC = () => {
   const [email, setEmail] = useState(currentUser.email || '');
   const [postalCode, setPostalCode] = useState(currentUser.postal_code || '');
 
-  // 住所・位置情報
+  // 拠点・出張出発地住所
   const [address, setAddress] = useState(therapist?.address || currentUser.address || '');
   const [coords, setCoords] = useState<{ lat: number; lng: number }>({
     lat: therapist?.lat || currentUser.lat || 33.8392,
     lng: therapist?.lng || currentUser.lng || 132.7656,
   });
 
-  // セラピスト固有設定
-  const [bio, setBio] = useState(therapist?.bio || '');
-  const [specialities, setSpecialities] = useState<string[]>(therapist?.specialities || []);
-  const [newSpecialityInput, setNewSpecialityInput] = useState('');
+  // 施術スタイル・出張設定
   const [isStoreBased, setIsStoreBased] = useState<boolean>(therapist?.is_store_based ?? true);
   const [isVisitBased, setIsVisitBased] = useState<boolean>(therapist?.is_visit_based ?? true);
   const [visitRadiusKm, setVisitRadiusKm] = useState<number>(therapist?.visit_radius_km ?? 15);
+
+  // 店舗・サロン詳細情報
+  const [storeName, setStoreName] = useState(therapist?.store_name || '');
+  const [storeAddress, setStoreAddress] = useState(therapist?.store_address || therapist?.address || '');
+  const [storeAccess, setStoreAccess] = useState(therapist?.store_access || '');
+  const [storeParking, setStoreParking] = useState(therapist?.store_parking || '');
+  const [storeHours, setStoreHours] = useState(therapist?.store_hours || '');
+  const [storeFacilities, setStoreFacilities] = useState<string[]>(
+    therapist?.store_facilities || ['完全個室', '着替え無料貸出', 'クレジットカード可']
+  );
+  const [storeNotes, setStoreNotes] = useState(therapist?.store_notes || '');
+
+  // プロフィール・専門分野
+  const [bio, setBio] = useState(therapist?.bio || '');
+  const [specialities, setSpecialities] = useState<string[]>(therapist?.specialities || []);
+  const [newSpecialityInput, setNewSpecialityInput] = useState('');
 
   const [isLoadingPostal, setIsLoadingPostal] = useState(false);
   const [isLoadingGps, setIsLoadingGps] = useState(false);
@@ -97,11 +129,20 @@ export const TherapistProfileEdit: React.FC = () => {
       setIsStoreBased(therapist.is_store_based);
       setIsVisitBased(therapist.is_visit_based);
       setVisitRadiusKm(therapist.visit_radius_km || 15);
+
+      // 店舗情報の同期
+      setStoreName(therapist.store_name || `${currentUser.name} サロン`);
+      setStoreAddress(therapist.store_address || therapist.address || currentUser.address || '');
+      setStoreAccess(therapist.store_access || '');
+      setStoreParking(therapist.store_parking || '');
+      setStoreHours(therapist.store_hours || '10:00 〜 20:00（不定休）');
+      setStoreFacilities(therapist.store_facilities || ['完全個室', '着替え無料貸出', 'クレジットカード可']);
+      setStoreNotes(therapist.store_notes || '');
     }
   }, [currentUser, therapist]);
 
   // 郵便番号からの住所検索 (zipcloud API)
-  const handlePostalLookup = async () => {
+  const handlePostalLookup = async (target: 'address' | 'storeAddress') => {
     const cleaned = postalCode.replace(/[^0-9]/g, '');
     if (cleaned.length !== 7) {
       setErrorMessage('郵便番号は7桁の数字で入力してください（例: 790-0003）');
@@ -116,9 +157,12 @@ export const TherapistProfileEdit: React.FC = () => {
       if (data.results && data.results.length > 0) {
         const result = data.results[0];
         const newAddr = `${result.address1}${result.address2}${result.address3}`;
-        setAddress(newAddr);
+        if (target === 'address') {
+          setAddress(newAddr);
+        } else {
+          setStoreAddress(newAddr);
+        }
 
-        // ジオコーディングで座標も自動取得
         const geoResult = await geocodeAddress(newAddr);
         if (geoResult) {
           setCoords({ lat: geoResult.lat, lng: geoResult.lng });
@@ -143,6 +187,7 @@ export const TherapistProfileEdit: React.FC = () => {
       const placeName = await reverseGeocode(position.lat, position.lng);
       if (placeName) {
         setAddress(placeName);
+        if (!storeAddress) setStoreAddress(placeName);
       }
     } catch (err: any) {
       setErrorMessage(err.message || 'GPS位置情報の取得に失敗しました。');
@@ -151,7 +196,7 @@ export const TherapistProfileEdit: React.FC = () => {
     }
   };
 
-  // 専門分野の追加
+  // 専門分野の追加・削除
   const handleAddSpeciality = (spec: string) => {
     const trimmed = spec.trim();
     if (trimmed && !specialities.includes(trimmed)) {
@@ -159,10 +204,24 @@ export const TherapistProfileEdit: React.FC = () => {
     }
     setNewSpecialityInput('');
   };
-
-  // 専門分野の削除
   const handleRemoveSpeciality = (spec: string) => {
     setSpecialities(specialities.filter((s) => s !== spec));
+  };
+
+  // 店舗設備の追加・トグル
+  const handleToggleFacility = (fac: string) => {
+    if (storeFacilities.includes(fac)) {
+      setStoreFacilities(storeFacilities.filter((f) => f !== fac));
+    } else {
+      setStoreFacilities([...storeFacilities, fac]);
+    }
+  };
+
+  // 拠点住所を店舗住所にコピー
+  const handleCopyAddressToStore = () => {
+    if (address) {
+      setStoreAddress(address);
+    }
   };
 
   // 保存実行
@@ -179,7 +238,11 @@ export const TherapistProfileEdit: React.FC = () => {
       return;
     }
     if (!address.trim()) {
-      setErrorMessage('拠点または店舗の住所を入力してください。');
+      setErrorMessage('拠点住所を入力してください。');
+      return;
+    }
+    if (isStoreBased && !storeAddress.trim()) {
+      setErrorMessage('店舗施術を受け付ける場合は、店舗住所を入力してください。');
       return;
     }
     if (!isStoreBased && !isVisitBased) {
@@ -191,11 +254,10 @@ export const TherapistProfileEdit: React.FC = () => {
     try {
       // 住所が変わっている場合は最新座標を再確認
       let finalCoords = coords;
-      if (!coords.lat || !coords.lng) {
-        const geoResult = await geocodeAddress(address);
-        if (geoResult) {
-          finalCoords = { lat: geoResult.lat, lng: geoResult.lng };
-        }
+      const targetAddrForCoords = isStoreBased && storeAddress.trim() ? storeAddress.trim() : address.trim();
+      const geoResult = await geocodeAddress(targetAddrForCoords);
+      if (geoResult) {
+        finalCoords = { lat: geoResult.lat, lng: geoResult.lng };
       }
 
       await updateTherapistInfo(
@@ -218,6 +280,14 @@ export const TherapistProfileEdit: React.FC = () => {
           address: address.trim(),
           lat: finalCoords.lat,
           lng: finalCoords.lng,
+          // 店舗情報
+          store_name: isStoreBased ? (storeName.trim() || `${name} サロン`) : undefined,
+          store_address: isStoreBased ? storeAddress.trim() : undefined,
+          store_access: isStoreBased ? storeAccess.trim() : undefined,
+          store_parking: isStoreBased ? storeParking.trim() : undefined,
+          store_hours: isStoreBased ? storeHours.trim() : undefined,
+          store_facilities: isStoreBased ? storeFacilities : undefined,
+          store_notes: isStoreBased ? storeNotes.trim() : undefined,
         }
       );
 
@@ -237,10 +307,10 @@ export const TherapistProfileEdit: React.FC = () => {
           <div>
             <h3 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
               <User className="w-5 h-5 text-emerald-600" />
-              <span>セラピスト基本情報・プロフィールの編集</span>
+              <span>セラピスト基本情報・店舗・出張設定</span>
             </h3>
             <p className="text-xs text-slate-500 mt-1">
-              顧客への公開プロフィール、専門分野、施術スタイル、出張対応エリア等を設定できます。
+              顧客への公開プロフィール、店舗情報、専門分野、施術スタイル、出張対応エリア等を設定できます。
             </p>
           </div>
           <span className="text-[11px] px-2.5 py-1 rounded-full font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -253,7 +323,7 @@ export const TherapistProfileEdit: React.FC = () => {
       {saveSuccess && (
         <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center gap-2 text-xs text-emerald-800 font-bold animate-fadeIn">
           <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-          <span>セラピスト情報を正常に更新しました！顧客の検索・予約画面へ即時反映されます。</span>
+          <span>セラピストおよび店舗情報を正常に更新しました！顧客の検索・予約画面へ即時反映されます。</span>
         </div>
       )}
 
@@ -276,7 +346,7 @@ export const TherapistProfileEdit: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">
-                セラピスト名 / 屋号 <span className="text-rose-500">*</span>
+                セラピスト氏名 / 屋号 <span className="text-rose-500">*</span>
               </label>
               <input
                 type="text"
@@ -323,19 +393,18 @@ export const TherapistProfileEdit: React.FC = () => {
           </div>
         </div>
 
-        {/* 施術スタイル & 出張エリア設定 */}
+        {/* 施術スタイル選択（出張 vs 店舗） */}
         <div className="p-5 bg-slate-50/70 rounded-2xl border border-slate-200/80 space-y-4">
           <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
             <Sliders className="w-3.5 h-3.5 text-slate-500" />
-            <span>施術スタイル・出張対応エリア</span>
+            <span>施術スタイルの選択</span>
           </h4>
 
-          {/* 施術スタイルのチェックボックス */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <label
               className={`p-3.5 rounded-xl border flex items-center gap-3 cursor-pointer transition ${
                 isVisitBased
-                  ? 'bg-emerald-50/60 border-emerald-300 text-emerald-900'
+                  ? 'bg-emerald-50/60 border-emerald-300 text-emerald-900 ring-1 ring-emerald-500/20'
                   : 'bg-white border-slate-200 text-slate-600'
               }`}
             >
@@ -346,10 +415,10 @@ export const TherapistProfileEdit: React.FC = () => {
                 className="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500"
               />
               <div className="flex items-center gap-2">
-                <Home className="w-4 h-4 text-emerald-600" />
+                <Home className="w-4 h-4 text-emerald-600 shrink-0" />
                 <div>
                   <span className="text-xs font-bold block">出張施術 (訪問) を受け付ける</span>
-                  <span className="text-[10px] text-slate-500">お客様のご自宅や指定場所へ伺います</span>
+                  <span className="text-[10px] text-slate-500">お客様のご自宅や滞在ホテル等へ伺います</span>
                 </div>
               </div>
             </label>
@@ -357,7 +426,7 @@ export const TherapistProfileEdit: React.FC = () => {
             <label
               className={`p-3.5 rounded-xl border flex items-center gap-3 cursor-pointer transition ${
                 isStoreBased
-                  ? 'bg-teal-50/60 border-teal-300 text-teal-900'
+                  ? 'bg-teal-50/60 border-teal-300 text-teal-900 ring-1 ring-teal-500/20'
                   : 'bg-white border-slate-200 text-slate-600'
               }`}
             >
@@ -368,24 +437,184 @@ export const TherapistProfileEdit: React.FC = () => {
                 className="w-4 h-4 text-teal-600 rounded border-slate-300 focus:ring-teal-500"
               />
               <div className="flex items-center gap-2">
-                <Building className="w-4 h-4 text-teal-600" />
+                <Building className="w-4 h-4 text-teal-600 shrink-0" />
                 <div>
                   <span className="text-xs font-bold block">店舗・サロン施術を受け付ける</span>
-                  <span className="text-[10px] text-slate-500">登録住所の拠点へお客様がご来店</span>
+                  <span className="text-[10px] text-slate-500">お客様があなたのサロン・店舗へ来店します</span>
                 </div>
               </div>
             </label>
           </div>
+        </div>
 
-          {/* 出張可能半径スライダー */}
-          {isVisitBased && (
-            <div className="pt-2 border-t border-slate-200/60">
+        {/* ======================================================== */}
+        {/* 店舗・サロン詳細情報（店舗ありの場合に強調表示） */}
+        {/* ======================================================== */}
+        {isStoreBased && (
+          <div className="p-5 bg-teal-50/50 rounded-2xl border-2 border-teal-200 space-y-4 animate-fadeIn">
+            <div className="flex items-center justify-between border-b border-teal-100 pb-2">
+              <h4 className="text-xs font-bold text-teal-900 uppercase tracking-wider flex items-center gap-1.5">
+                <Building className="w-4 h-4 text-teal-700" />
+                <span>店舗・サロン情報の詳細設定（顧客来店用）</span>
+              </h4>
+              <span className="text-[10px] bg-teal-600 text-white px-2 py-0.5 rounded-full font-bold">
+                店舗あり
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  店舗・サロン名（屋号） <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={storeName}
+                  onChange={(e) => setStoreName(e.target.value)}
+                  placeholder="例: CareHub 松山中央サロン"
+                  className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-teal-500 shadow-2xs"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  営業時間・定休日
+                </label>
+                <div className="relative">
+                  <Clock className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={storeHours}
+                    onChange={(e) => setStoreHours(e.target.value)}
+                    placeholder="例: 10:00 〜 20:00 (水曜定休)"
+                    className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-teal-500 shadow-2xs"
+                  />
+                </div>
+              </div>
+
+              {/* 店舗住所 */}
+              <div className="sm:col-span-2 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-slate-700">
+                    店舗の所在地（お客様が来店する住所） <span className="text-rose-500">*</span>
+                  </label>
+                  {address && address !== storeAddress && (
+                    <button
+                      type="button"
+                      onClick={handleCopyAddressToStore}
+                      className="text-xs text-teal-700 hover:text-teal-800 font-bold flex items-center gap-1 bg-white border border-teal-200 px-2 py-0.5 rounded-lg shadow-2xs transition"
+                    >
+                      <Copy className="w-3 h-3" />
+                      <span>拠点住所を店舗住所にコピー</span>
+                    </button>
+                  )}
+                </div>
+                <div className="relative">
+                  <MapPin className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={storeAddress}
+                    onChange={(e) => setStoreAddress(e.target.value)}
+                    placeholder="例: 愛媛県松山市大街道2丁目5-1 松山ビル2F"
+                    required={isStoreBased}
+                    className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-teal-500 shadow-2xs"
+                  />
+                </div>
+              </div>
+
+              {/* 最寄駅・アクセス */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  最寄り駅・アクセス・道順
+                </label>
+                <div className="relative">
+                  <Compass className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={storeAccess}
+                    onChange={(e) => setStoreAccess(e.target.value)}
+                    placeholder="例: 伊予鉄「大街道駅」より徒歩2分"
+                    className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-teal-500 shadow-2xs"
+                  />
+                </div>
+              </div>
+
+              {/* 駐車場情報 */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  駐車場情報
+                </label>
+                <div className="relative">
+                  <Car className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={storeParking}
+                    onChange={(e) => setStoreParking(e.target.value)}
+                    placeholder="例: 専用駐車場2台あり（無料）/ 近隣コインP提携"
+                    className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-teal-500 shadow-2xs"
+                  />
+                </div>
+              </div>
+
+              {/* 店舗設備・特徴タグ */}
+              <div className="sm:col-span-2 space-y-2">
+                <label className="block text-xs font-bold text-slate-700">
+                  店舗設備・サービス（お客様へのアピールポイント）
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {COMMON_FACILITIES.map((fac) => {
+                    const isSelected = storeFacilities.includes(fac);
+                    return (
+                      <button
+                        key={fac}
+                        type="button"
+                        onClick={() => handleToggleFacility(fac)}
+                        className={`text-xs px-3 py-1.5 rounded-xl border transition flex items-center gap-1.5 font-medium ${
+                          isSelected
+                            ? 'bg-teal-600 text-white border-teal-600 shadow-2xs font-bold'
+                            : 'bg-white text-slate-600 border-slate-200 hover:border-teal-300'
+                        }`}
+                      >
+                        {isSelected && <CheckCircle2 className="w-3.5 h-3.5" />}
+                        <span>{fac}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* ご来店時の注意事項 */}
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  ご来店時のご案内・注意事項
+                </label>
+                <textarea
+                  rows={2}
+                  value={storeNotes}
+                  onChange={(e) => setStoreNotes(e.target.value)}
+                  placeholder="例: 完全予約制のためご予約の5分前にお越しください。オートロックのため「201」をお呼び出しください。"
+                  className="w-full p-3 bg-white border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-teal-500 shadow-2xs leading-relaxed"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 出張施術・対応エリア設定（出張ありの場合） */}
+        {isVisitBased && (
+          <div className="p-5 bg-slate-50/70 rounded-2xl border border-slate-200/80 space-y-4">
+            <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+              <Home className="w-3.5 h-3.5 text-slate-500" />
+              <span>出張施術・対応エリア設定</span>
+            </h4>
+
+            <div>
               <div className="flex justify-between items-center mb-1.5">
                 <label className="text-xs font-bold text-slate-700">
-                  出張可能エリア半径: <span className="text-emerald-700 font-black text-sm">{visitRadiusKm} km</span>
+                  出張対応可能エリア半径: <span className="text-emerald-700 font-black text-sm">{visitRadiusKm} km</span>
                 </label>
                 <span className="text-[11px] text-slate-500">
-                  拠点住所から片道約 {Math.round(visitRadiusKm * 2)} 分圏内
+                  拠点から片道約 {Math.round(visitRadiusKm * 2)} 分圏内
                 </span>
               </div>
               <input
@@ -404,15 +633,15 @@ export const TherapistProfileEdit: React.FC = () => {
                 <span>50 km (広域対応)</span>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
-        {/* 拠点・店舗の所在地（住所） */}
+        {/* 拠点所在地（出張の出発拠点） */}
         <div className="p-5 bg-slate-50/70 rounded-2xl border border-slate-200/80 space-y-4">
           <div className="flex items-center justify-between">
             <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
               <MapPin className="w-3.5 h-3.5 text-slate-500" />
-              <span>拠点・店舗の所在地（出張の出発点・来店場所）</span>
+              <span>拠点所在地（出張の出発地点 / 距離計算の基準地）</span>
             </h4>
             <button
               type="button"
@@ -425,20 +654,17 @@ export const TherapistProfileEdit: React.FC = () => {
             </button>
           </div>
 
-          {/* 郵便番号自動入力 */}
           <div className="flex items-center gap-2 max-w-xs">
-            <div className="relative flex-1">
-              <input
-                type="text"
-                value={postalCode}
-                onChange={(e) => setPostalCode(e.target.value)}
-                placeholder="郵便番号 (例: 7900003)"
-                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-mono text-slate-800 focus:outline-emerald-500 shadow-2xs"
-              />
-            </div>
+            <input
+              type="text"
+              value={postalCode}
+              onChange={(e) => setPostalCode(e.target.value)}
+              placeholder="郵便番号 (例: 7900003)"
+              className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-mono text-slate-800 focus:outline-emerald-500 shadow-2xs"
+            />
             <button
               type="button"
-              onClick={handlePostalLookup}
+              onClick={() => handlePostalLookup('address')}
               disabled={isLoadingPostal}
               className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition shrink-0"
             >
@@ -448,13 +674,13 @@ export const TherapistProfileEdit: React.FC = () => {
 
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">
-              詳細住所（市町名・番地・建物名・号室） <span className="text-rose-500">*</span>
+              住所（市町名・番地・建物名・号室） <span className="text-rose-500">*</span>
             </label>
             <input
               type="text"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              placeholder="例: 愛媛県松山市三番町4丁目1-5 メディカルビル3F"
+              placeholder="例: 愛媛県松山市三番町4丁目1-5"
               required
               className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-emerald-500 shadow-2xs"
             />
@@ -492,7 +718,6 @@ export const TherapistProfileEdit: React.FC = () => {
               専門分野・得意な手技（複数選択・追加可能）
             </label>
             
-            {/* 現在設定中のタグ */}
             <div className="flex flex-wrap gap-2 mb-3">
               {specialities.map((spec) => (
                 <span
@@ -514,7 +739,6 @@ export const TherapistProfileEdit: React.FC = () => {
               )}
             </div>
 
-            {/* 代表的な候補からワンクリック追加 */}
             <div className="space-y-1.5">
               <span className="text-[11px] font-bold text-slate-500">候補からワンクリック追加:</span>
               <div className="flex flex-wrap gap-1.5">
@@ -539,7 +763,6 @@ export const TherapistProfileEdit: React.FC = () => {
               </div>
             </div>
 
-            {/* 自由追加入力 */}
             <div className="flex items-center gap-2 mt-3 max-w-sm">
               <input
                 type="text"
@@ -573,7 +796,7 @@ export const TherapistProfileEdit: React.FC = () => {
             className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
           >
             <Save className="w-4 h-4" />
-            <span>{isSubmitting ? '保存中...' : 'セラピスト情報を保存する'}</span>
+            <span>{isSubmitting ? '保存中...' : 'セラピスト・店舗情報を保存する'}</span>
           </button>
         </div>
       </form>

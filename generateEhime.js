@@ -295,11 +295,15 @@ CITIES.forEach((city) => {
     profiles.push(profileObj);
     therapistList.push(profileObj);
 
+    const isStoreBased = isStore || !isVisit;
+    const storeSuffixes = ['整体サロン', 'ボディケアルーム', 'リハビリ治療院', 'アロマサロン', 'カイロプラクティック院'];
+    const sSuffix = getRandomItem(storeSuffixes);
+
     const tpObj = {
       user_id: therapistId,
       bio: specProfile.bio,
       specialities: specProfile.specs,
-      is_store_based: isStore || !isVisit,
+      is_store_based: isStoreBased,
       is_visit_based: isVisit,
       address,
       lat,
@@ -309,6 +313,13 @@ CITIES.forEach((city) => {
       reviews_count: getRandomInt(8, 48),
       is_approved: true,
       stripe_account_id: `acct_ehime_${therapistId.replace(/-/g, '').slice(0, 16)}`,
+      store_name: isStoreBased ? `${city.name} ${fullName.split(' ')[0]} ${sSuffix}` : undefined,
+      store_address: isStoreBased ? address : undefined,
+      store_access: isStoreBased ? `${city.name}中心駅より徒歩3分` : undefined,
+      store_parking: isStoreBased ? '専用駐車場2台あり（無料）' : undefined,
+      store_hours: isStoreBased ? '10:00 〜 20:00（不定休）' : undefined,
+      store_facilities: isStoreBased ? ['完全個室', '着替え無料貸出', '専用駐車場あり', 'クレジットカード可'] : undefined,
+      store_notes: isStoreBased ? '完全予約制のため、ご予約時刻の5分前にお越しください。' : undefined,
     };
 
     therapistProfiles[therapistId] = tpObj;
@@ -598,19 +609,28 @@ ON CONFLICT (id) DO UPDATE SET
 
 // 3. public.therapist_profiles
 sql += `-- ========================================================
--- 3. public.therapist_profiles (セラピスト詳細情報 & PostGIS 位置情報)
+-- 3. public.therapist_profiles (セラピスト詳細情報 & 店舗情報 & PostGIS 位置情報)
 -- ========================================================
+ALTER TABLE public.therapist_profiles ADD COLUMN IF NOT EXISTS store_name text;
+ALTER TABLE public.therapist_profiles ADD COLUMN IF NOT EXISTS store_address text;
+ALTER TABLE public.therapist_profiles ADD COLUMN IF NOT EXISTS store_access text;
+ALTER TABLE public.therapist_profiles ADD COLUMN IF NOT EXISTS store_parking text;
+ALTER TABLE public.therapist_profiles ADD COLUMN IF NOT EXISTS store_hours text;
+ALTER TABLE public.therapist_profiles ADD COLUMN IF NOT EXISTS store_facilities text[] DEFAULT '{}';
+ALTER TABLE public.therapist_profiles ADD COLUMN IF NOT EXISTS store_notes text;
+
 INSERT INTO public.therapist_profiles (
   user_id, bio, specialities, is_store_based, is_visit_based,
   address, location, visit_radius_km, rating_avg, reviews_count,
-  is_approved, stripe_account_id
+  is_approved, stripe_account_id,
+  store_name, store_address, store_access, store_parking, store_hours, store_facilities, store_notes
 )
 VALUES
 `;
 
 const tpRows = Object.values(therapistProfiles).map(tp => {
   const locGeom = `ST_SetSRID(ST_MakePoint(${tp.lng}, ${tp.lat}), 4326)::geography`;
-  return `  ('${tp.user_id}', ${esc(tp.bio)}, ${escArr(tp.specialities)}, ${tp.is_store_based}, ${tp.is_visit_based}, ${esc(tp.address)}, ${locGeom}, ${tp.visit_radius_km}, ${tp.rating_avg}, ${tp.reviews_count}, ${tp.is_approved}, ${esc(tp.stripe_account_id)})`;
+  return `  ('${tp.user_id}', ${esc(tp.bio)}, ${escArr(tp.specialities)}, ${tp.is_store_based}, ${tp.is_visit_based}, ${esc(tp.address)}, ${locGeom}, ${tp.visit_radius_km}, ${tp.rating_avg}, ${tp.reviews_count}, ${tp.is_approved}, ${esc(tp.stripe_account_id)}, ${esc(tp.store_name)}, ${esc(tp.store_address)}, ${esc(tp.store_access)}, ${esc(tp.store_parking)}, ${esc(tp.store_hours)}, ${escArr(tp.store_facilities)}, ${esc(tp.store_notes)})`;
 });
 
 sql += tpRows.join(',\n') + `
@@ -624,7 +644,14 @@ ON CONFLICT (user_id) DO UPDATE SET
   visit_radius_km = EXCLUDED.visit_radius_km,
   rating_avg = EXCLUDED.rating_avg,
   reviews_count = EXCLUDED.reviews_count,
-  is_approved = EXCLUDED.is_approved;
+  is_approved = EXCLUDED.is_approved,
+  store_name = EXCLUDED.store_name,
+  store_address = EXCLUDED.store_address,
+  store_access = EXCLUDED.store_access,
+  store_parking = EXCLUDED.store_parking,
+  store_hours = EXCLUDED.store_hours,
+  store_facilities = EXCLUDED.store_facilities,
+  store_notes = EXCLUDED.store_notes;
 
 `;
 

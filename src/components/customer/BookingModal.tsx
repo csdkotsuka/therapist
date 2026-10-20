@@ -17,6 +17,7 @@ import {
   Sparkles,
   Info,
   Car,
+  Compass,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -249,6 +250,50 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 </div>
               )}
 
+              {/* 店舗情報案内 (店舗訪問時のみ) */}
+              {bookingType === 'store' && (
+                <div className="p-4 rounded-2xl bg-teal-50/70 border border-teal-200 space-y-2.5 text-xs animate-fadeIn">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-teal-950 flex items-center gap-1.5 text-xs">
+                      <Building className="w-4 h-4 text-teal-700" />
+                      <span>{therapist.store_name || `${user.name} サロン・店舗`}</span>
+                    </span>
+                    <span className="text-[10px] bg-teal-600 text-white px-2 py-0.5 rounded-full font-bold">
+                      ご来店先情報
+                    </span>
+                  </div>
+                  <div className="space-y-1.5 text-slate-700 pt-1.5 border-t border-teal-100">
+                    <div className="flex items-start gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-teal-600 shrink-0 mt-0.5" />
+                      <span className="font-semibold text-slate-900">{therapist.store_address || therapist.address}</span>
+                    </div>
+                    {therapist.store_access && (
+                      <div className="flex items-start gap-1.5 text-slate-600">
+                        <Compass className="w-3.5 h-3.5 text-teal-600 shrink-0 mt-0.5" />
+                        <span>{therapist.store_access}</span>
+                      </div>
+                    )}
+                    {therapist.store_parking && (
+                      <div className="flex items-start gap-1.5 text-slate-600">
+                        <Car className="w-3.5 h-3.5 text-teal-600 shrink-0 mt-0.5" />
+                        <span>{therapist.store_parking}</span>
+                      </div>
+                    )}
+                    {therapist.store_hours && (
+                      <div className="flex items-start gap-1.5 text-slate-600">
+                        <Clock className="w-3.5 h-3.5 text-teal-600 shrink-0 mt-0.5" />
+                        <span>営業時間: {therapist.store_hours}</span>
+                      </div>
+                    )}
+                    {therapist.store_notes && (
+                      <div className="p-2 bg-white rounded-lg border border-teal-100 text-[11px] text-teal-800 mt-1">
+                        {therapist.store_notes}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* メニュー選択 */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
@@ -369,7 +414,13 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 <div className="flex justify-between text-xs">
                   <span className="text-slate-500">施術形式</span>
                   <span className="font-bold text-emerald-700">
-                    {bookingType === 'visit' ? '出張施術 (ご自宅・オフィス)' : '店舗訪問'}
+                    {bookingType === 'visit' ? '出張施術 (訪問)' : `店舗訪問 (${therapist.store_name || '店舗サロン'})`}
+                  </span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-slate-500">{bookingType === 'visit' ? '訪問先' : 'ご来店先'}</span>
+                  <span className="font-medium text-slate-800 text-right max-w-[200px] truncate">
+                    {bookingType === 'visit' ? visitAddress : (therapist.store_address || therapist.address)}
                   </span>
                 </div>
                 <div className="flex justify-between text-xs">
