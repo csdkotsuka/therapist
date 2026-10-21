@@ -47,29 +47,14 @@ export const BookingChatModal: React.FC<BookingChatModalProps> = ({ booking, onC
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [bookingMessages.length]);
 
-  // クイック定型文
-  const quickTemplates = isTherapist
-    ? [
-        'ご予約ありがとうございます！よろしくお願いいたします。',
-        '現在、ご指定の住所へ向かっております。',
-        'まもなく到着いたします。',
-        '到着いたしました。よろしくお願いいたします。',
-      ]
-    : [
-        'よろしくお願いいたします！お待ちしております。',
-        'エントランスはオートロックですのでインターホンをお呼び出しください。',
-        '駐車場はお客様用スペースをご利用いただけます。',
-        '道に迷われた際はお気軽にご連絡ください。',
-      ];
-
-  const handleSend = async (textToSend?: string) => {
-    const text = (textToSend || inputText).trim();
+  const handleSend = async () => {
+    const text = inputText.trim();
     if (!text || isSending) return;
 
     setIsSending(true);
     try {
       await sendChatMessage(booking.id, partnerId, text);
-      if (!textToSend) setInputText('');
+      setInputText('');
     } catch (err) {
       console.error('Failed to send message:', err);
     } finally {
@@ -199,20 +184,6 @@ export const BookingChatModal: React.FC<BookingChatModalProps> = ({ booking, onC
             })
           )}
           <div ref={messagesEndRef} />
-        </div>
-
-        {/* クイック定型文ピル */}
-        <div className="px-3 py-1.5 bg-slate-100/90 border-t border-slate-200 overflow-x-auto flex gap-1.5 scrollbar-none shrink-0">
-          {quickTemplates.map((template, idx) => (
-            <button
-              key={idx}
-              type="button"
-              onClick={() => handleSend(template)}
-              className="px-2.5 py-1 bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border border-slate-200 hover:border-emerald-300 rounded-full text-[11px] font-medium whitespace-nowrap transition shadow-2xs"
-            >
-              + {template}
-            </button>
-          ))}
         </div>
 
         {/* 入力フォーム */}

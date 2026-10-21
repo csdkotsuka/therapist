@@ -54,6 +54,64 @@ const RealLeafletMap = dynamic(
 
 type SortOption = 'recommended' | 'rating' | 'distance' | 'price_asc' | 'price_desc';
 
+// カテゴリ用ベクターアイコン（施術内容が直感的に伝わるデザイン）
+const PhysicalTherapyCategoryIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    {/* 直立した整った姿勢と関節アライメント */}
+    <circle cx="12" cy="4" r="2.2" />
+    <path d="M12 6.5v13.5" />
+    <path d="M7.5 10.5l4.5-1.5 4.5 1.5" />
+    <path d="M9 16l3-1.5 3 1.5" />
+    <path d="M9 20l3-5 3 5" />
+  </svg>
+);
+
+const MassageCategoryIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    {/* 筋肉をもみほぐす手技 */}
+    <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v3" />
+    <path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v7" />
+    <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8" />
+    <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" />
+  </svg>
+);
+
+const AromaCategoryIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    {/* アロマオイルの雫と癒やしのリーフ */}
+    <path d="M12 2.5l5.5 5.8a7.8 7.8 0 1 1-11 0z" />
+    <path d="M12 11.5c1.8-1.8 3.5-1 3.5 1.2s-2.2 3.3-3.5 3.3" />
+  </svg>
+);
+
+const ChiropracticCategoryIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    {/* 背骨と骨盤の歪み矯正アライメント */}
+    <line x1="12" y1="2" x2="12" y2="22" strokeDasharray="1.5 2" />
+    <circle cx="12" cy="5" r="1.5" />
+    <circle cx="12" cy="9" r="1.5" />
+    <circle cx="12" cy="13" r="1.5" />
+    {/* 骨盤ウィング */}
+    <path d="M6 16c0-2.5 2.5-3.5 6-3.5s6 1 6 3.5c0 2.5-3 4-6 4s-6-1.5-6-4z" />
+    {/* 矯正矢印 */}
+    <path d="M4 9h2.5" />
+    <path d="M20 9h-2.5" />
+  </svg>
+);
+
+const HeadSpaCategoryIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    {/* フェイスラインと頭皮ヘッドスパ・ウェーブ */}
+    <path d="M5 10c0 4.5 3.1 8 7 8s7-3.5 7-8-3.1-8-7-8c-2 0-3.9.9-5.1 2.3" />
+    <path d="M9.5 11c.8 0 1.5-.7 1.5-1.5" />
+    <path d="M14.5 11c.8 0 1.5-.7 1.5-1.5" />
+    <path d="M10 14.5c1 .8 3 .8 4 0" />
+    {/* 頭頂部のヘッドスパマッサージ波動 */}
+    <path d="M9 2a3 3 0 0 1 6 0" />
+    <path d="M7 3.5a4 4 0 0 1 10 0" />
+  </svg>
+);
+
 export const CustomerView: React.FC = () => {
   const {
     currentUser,
@@ -102,7 +160,7 @@ export const CustomerView: React.FC = () => {
     };
   }, [setUserLocation]);
 
-  // カテゴリ一覧 (Lucide専用ベクターアイコン & カラーテーマ)
+  // カテゴリ一覧 (アイコン上・テキスト下、直感的な専用アイコン & Uber風デザイン)
   const categories = [
     {
       id: 'all',
@@ -114,35 +172,35 @@ export const CustomerView: React.FC = () => {
     {
       id: 'physical_therapy',
       label: '理学療法・整体',
-      icon: Bone,
+      icon: PhysicalTherapyCategoryIcon,
       iconColor: 'text-blue-600',
       bgColor: 'bg-blue-50',
     },
     {
       id: 'massage',
       label: 'もみほぐし',
-      icon: Hand,
+      icon: MassageCategoryIcon,
       iconColor: 'text-amber-600',
       bgColor: 'bg-amber-50',
     },
     {
       id: 'aroma',
       label: 'アロマ・リンパ',
-      icon: Flower2,
+      icon: AromaCategoryIcon,
       iconColor: 'text-rose-600',
       bgColor: 'bg-rose-50',
     },
     {
       id: 'chiropractic',
-      label: 'カイロ・骨盤矯正',
-      icon: Scale,
+      label: 'カイロ・骨盤',
+      icon: ChiropracticCategoryIcon,
       iconColor: 'text-indigo-600',
       bgColor: 'bg-indigo-50',
     },
     {
       id: 'beauty',
-      label: '小顔・ヘッドスパ',
-      icon: Smile,
+      label: '小顔・ヘッド',
+      icon: HeadSpaCategoryIcon,
       iconColor: 'text-pink-600',
       bgColor: 'bg-pink-50',
     },
@@ -326,8 +384,8 @@ export const CustomerView: React.FC = () => {
           />
         </div>
 
-        {/* Uber風 カテゴリー選択カルーセル (分かりやすい専用ベクターアイコン) */}
-        <div className="flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-none pt-1">
+        {/* Uber風 カテゴリー選択カルーセル (アイコン上・テキスト下、横幅スリム＆専用アイコン) */}
+        <div className="flex items-center gap-1.5 sm:gap-2.5 overflow-x-auto pb-2.5 scrollbar-none pt-1">
           {categories.map((cat) => {
             const Icon = cat.icon;
             const isSelected = selectedCategory === cat.id;
@@ -336,22 +394,26 @@ export const CustomerView: React.FC = () => {
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`px-3.5 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition flex items-center gap-2 group ${
-                  isSelected
-                    ? 'bg-slate-900 text-white shadow-xs'
-                    : 'bg-white text-slate-700 border border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                className={`flex flex-col items-center justify-center min-w-[62px] sm:min-w-[70px] max-w-[76px] py-1 px-1 rounded-2xl transition group shrink-0 ${
+                  isSelected ? 'text-slate-950 font-black' : 'text-slate-600 hover:text-slate-900 font-bold'
                 }`}
               >
                 <div
-                  className={`w-6 h-6 rounded-xl flex items-center justify-center transition-colors ${
+                  className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center transition-all ${
                     isSelected
-                      ? 'bg-white/20 text-white'
-                      : `${cat.bgColor} ${cat.iconColor}`
+                      ? 'bg-slate-900 text-white shadow-md scale-105'
+                      : `${cat.bgColor} ${cat.iconColor} group-hover:scale-105 group-hover:shadow-2xs`
                   }`}
                 >
-                  <Icon className="w-3.5 h-3.5" />
+                  <Icon className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
                 </div>
-                <span>{cat.label}</span>
+                <span
+                  className={`text-[10px] sm:text-[11px] mt-1 text-center leading-tight truncate w-full tracking-tight ${
+                    isSelected ? 'text-slate-900 font-black' : 'text-slate-600'
+                  }`}
+                >
+                  {cat.label}
+                </span>
               </button>
             );
           })}

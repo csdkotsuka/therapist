@@ -57,6 +57,9 @@ export interface TherapistProfile {
     badge: string;
     title?: string;
     description?: string;
+    valid_until?: string;
+    discount_type?: 'fixed' | 'percent' | 'gift';
+    discount_value?: number;
   };
 }
 

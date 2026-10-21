@@ -180,6 +180,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (!setErr && dbSettings && dbSettings.value?.percentage) {
         setPlatformFeeRateState(Number(dbSettings.value.percentage));
       }
+
+      // 7. chat_messages (独立テーブルからチャット履歴を取得)
+      const { data: dbMessages, error: mErr } = await supabase
+        .from('chat_messages')
+        .select('*')
+        .order('created_at', { ascending: true });
+      if (!mErr && dbMessages && dbMessages.length > 0) {
+        setMessages(dbMessages as ChatMessage[]);
+      }
     } catch (e) {
       console.error('Failed to fetch data from Supabase, falling back to local cache:', e);
     } finally {
@@ -313,7 +322,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return newMessage;
   };
 
-  const markMessagesAsRead = (bookingId: string) => {
+  const markMessagesAsRead = async (bookingId: string) => {
     setMessages((prev) =>
       prev.map((m) =>
         m.booking_id === bookingId && m.receiver_id === currentUser.id
@@ -321,6 +330,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           : m
       )
     );
+
+    if (supabase && isSupabaseConfigured) {
+      try {
+        await supabase
+          .from('chat_messages')
+          .update({ is_read: true })
+          .eq('booking_id', bookingId)
+          .eq('receiver_id', currentUser.id);
+      } catch (err) {
+        console.warn('Supabase chat message mark as read warning:', err);
+      }
+    }
   };
 
   const createBooking = async (
@@ -664,15 +685,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // 2. セラピスト詳細プロフィールの更新
     setTherapistProfiles((prev) => {
       const existing = prev[userId] || ({} as TherapistProfile);
+      const updatedItem: TherapistProfile = {
+        ...existing,
+        ...therapistData,
+        address: profileData.address || therapistData.address || existing.address,
+        lat: profileData.lat !== undefined ? profileData.lat : (therapistData.lat !== undefined ? therapistData.lat : existing.lat),
+        lng: profileData.lng !== undefined ? profileData.lng : (therapistData.lng !== undefined ? therapistData.lng : existing.lng),
+      };
+      if ('campaign' in therapistData && !therapistData.campaign) {
+        delete updatedItem.campaign;
+      }
       return {
         ...prev,
-        [userId]: {
-          ...existing,
-          ...therapistData,
-          address: profileData.address || therapistData.address || existing.address,
-          lat: profileData.lat !== undefined ? profileData.lat : (therapistData.lat !== undefined ? therapistData.lat : existing.lat),
-          lng: profileData.lng !== undefined ? profileData.lng : (therapistData.lng !== undefined ? therapistData.lng : existing.lng),
-        },
+        [userId]: updatedItem,
       };
     });
 
@@ -703,7 +728,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (therapistData.is_separate_store_hours !== undefined) updatePayload.is_separate_store_hours = therapistData.is_separate_store_hours;
         if (therapistData.store_hours_start !== undefined) updatePayload.store_hours_start = therapistData.store_hours_start;
         if (therapistData.store_hours_end !== undefined) updatePayload.store_hours_end = therapistData.store_hours_end;
-        if (therapistData.campaign !== undefined) updatePayload.campaign = therapistData.campaign;
+        if ('campaign' in therapistData) updatePayload.campaign = therapistData.campaign || null;
 
         await supabase
           .from('therapist_profiles')

@@ -31,6 +31,9 @@ import {
   ThumbsUp,
   MessageCircle,
   Layers,
+  Gift,
+  Tag,
+  Sparkles,
 } from 'lucide-react';
 
 export const TherapistView: React.FC = () => {
@@ -53,11 +56,21 @@ export const TherapistView: React.FC = () => {
   const myBookings = bookings.filter((b) => b.therapist_id === currentUser.id);
   const myReviews = reviews.filter((r) => r.therapist_id === currentUser.id);
 
-  // タブ管理: 'requests' | 'schedule' | 'services' | 'reviews' | 'earnings' | 'profile'
-  const [activeTab, setActiveTab] = useState<'requests' | 'schedule' | 'services' | 'reviews' | 'earnings' | 'profile'>('requests');
+  // タブ管理: 'requests' | 'schedule' | 'campaign' | 'services' | 'reviews' | 'earnings' | 'profile'
+  const [activeTab, setActiveTab] = useState<'requests' | 'schedule' | 'campaign' | 'services' | 'reviews' | 'earnings' | 'profile'>('requests');
 
   // チャットモーダル状態
   const [chatBooking, setChatBooking] = useState<Booking | null>(null);
+
+  // 特典・キャンペーン設定状態
+  const [campEnabled, setCampEnabled] = useState<boolean>(Boolean(therapist?.campaign));
+  const [campBadge, setCampBadge] = useState<string>(therapist?.campaign?.badge || '初回1,000円引');
+  const [campTitle, setCampTitle] = useState<string>(therapist?.campaign?.title || '【初回限定】1,000円割引キャンペーン');
+  const [campDesc, setCampDesc] = useState<string>(therapist?.campaign?.description || '当店を初めてご利用の方限定で、施術代金より1,000円割引いたします。');
+  const [campType, setCampType] = useState<'fixed' | 'percent' | 'gift'>(therapist?.campaign?.discount_type || 'fixed');
+  const [campVal, setCampVal] = useState<number>(therapist?.campaign?.discount_value ?? 1000);
+  const [campValidUntil, setCampValidUntil] = useState<string>(therapist?.campaign?.valid_until || '');
+  const [campSavedToast, setCampSavedToast] = useState(false);
 
   // スケジュール・営業時間設定状態
   const [selectedDays, setSelectedDays] = useState<string[]>(
@@ -146,6 +159,27 @@ export const TherapistView: React.FC = () => {
     }, 800);
   };
 
+  const handleSaveCampaign = async () => {
+    await updateTherapistInfo(
+      currentUser.id,
+      {},
+      {
+        campaign: campEnabled
+          ? {
+              badge: campBadge.trim() || '特典あり',
+              title: campTitle.trim() || campBadge.trim(),
+              description: campDesc.trim(),
+              valid_until: campValidUntil || undefined,
+              discount_type: campType,
+              discount_value: Number(campVal) || 0,
+            }
+          : undefined,
+      }
+    );
+    setCampSavedToast(true);
+    setTimeout(() => setCampSavedToast(false), 3000);
+  };
+
   return (
     <div className="space-y-6">
       {/* セラピストステータスバナー */}
@@ -174,6 +208,12 @@ export const TherapistView: React.FC = () => {
                   <span>出張対応</span>
                 </span>
               )}
+              {therapist?.campaign && (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-rose-500 to-amber-500 text-white flex items-center gap-1 shadow-xs">
+                  <Gift className="w-3 h-3" />
+                  <span>特典掲載中: {therapist.campaign.badge}</span>
+                </span>
+              )}
             </div>
             <p className="text-xs text-emerald-200 mt-1 line-clamp-1 max-w-md">
               {therapist?.store_name ? `【店舗】${therapist.store_name} • ` : ''}
@@ -196,6 +236,14 @@ export const TherapistView: React.FC = () => {
                   </span>
                 </>
               )}
+              <span>•</span>
+              <button
+                onClick={() => setActiveTab('campaign')}
+                className="text-[11px] underline underline-offset-2 text-amber-200 hover:text-white flex items-center gap-1 font-bold"
+              >
+                <Gift className="w-3.5 h-3.5" />
+                <span>{therapist?.campaign ? '特典を変更する' : '特典・キャンペーンを追加する'}</span>
+              </button>
             </div>
           </div>
         </div>
@@ -242,6 +290,25 @@ export const TherapistView: React.FC = () => {
         >
           <Clock className="w-4 h-4" />
           <span>営業時間・シフト・出張設定</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('campaign')}
+          className={`px-4 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap ${
+            activeTab === 'campaign'
+              ? 'bg-gradient-to-r from-rose-600 to-amber-600 text-white shadow-md'
+              : 'text-slate-600 hover:bg-slate-100'
+          }`}
+        >
+          <Gift className={`w-4 h-4 ${activeTab === 'campaign' ? 'text-white' : 'text-rose-500'}`} />
+          <span>特典・キャンペーン設定</span>
+          {therapist?.campaign ? (
+            <span className="px-1.5 py-0.2 rounded-full text-[9px] font-black bg-rose-500 text-white">
+              掲載中
+            </span>
+          ) : (
+            <span className="w-2 h-2 rounded-full bg-slate-300"></span>
+          )}
         </button>
 
         <button
@@ -769,6 +836,236 @@ export const TherapistView: React.FC = () => {
               className="ml-auto px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold shadow-md transition active:scale-95"
             >
               スケジュール・営業時間を保存
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* タブ: 特典・キャンペーン設定 */}
+      {activeTab === 'campaign' && (
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-500 to-amber-500 text-white flex items-center justify-center shadow-md">
+                <Gift className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
+                  <span>特典・キャンペーン設定</span>
+                  <span className="text-[10px] bg-rose-500 text-white font-black px-2 py-0.5 rounded-full">
+                    集客・成約率UP
+                  </span>
+                </h3>
+                <p className="text-xs text-slate-500">
+                  お客様のトップ検索画面で「🎁 特典・キャンペーン」絞り込みにヒットし、目立つバッジが表示されます。
+                </p>
+              </div>
+            </div>
+
+            {/* トグルスイッチ */}
+            <label className="relative inline-flex items-center cursor-pointer shrink-0">
+              <input
+                type="checkbox"
+                checked={campEnabled}
+                onChange={(e) => setCampEnabled(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-12 h-6.5 bg-slate-200 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-500"></div>
+              <span className="ml-3 text-xs font-bold text-slate-800">
+                {campEnabled ? 'キャンペーン掲載中' : 'キャンペーン停止中'}
+              </span>
+            </label>
+          </div>
+
+          {campEnabled ? (
+            <div className="space-y-5">
+              {/* かんたんプリセット */}
+              <div className="p-4 bg-amber-50/60 rounded-2xl border border-amber-200">
+                <span className="text-xs font-bold text-amber-900 block mb-2">
+                  💡 よく使われる人気のキャンペーン（タップで簡単セット）:
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    {
+                      badge: '初回1,000円引',
+                      title: '【初回限定】1,000円割引キャンペーン',
+                      desc: '当店のご利用が初めてのお客様限定！全メニュー1,000円OFFでプロの施術をご体感いただけます。',
+                      type: 'fixed' as const,
+                      val: 1000,
+                    },
+                    {
+                      badge: 'OPEN記念20%OFF',
+                      title: 'OPEN記念！全メニュー20%割引',
+                      desc: 'オープンを記念して期間限定で全施術料金を20%割引にてご提供いたします。',
+                      type: 'percent' as const,
+                      val: 20,
+                    },
+                    {
+                      badge: 'ヘッドスパ10分無料',
+                      title: '極上ドライヘッドスパ（10分）無料プレゼント',
+                      desc: '60分以上の施術をご予約いただいた方に、眼精疲労に効くヘッドスパを無料で延長サービス！',
+                      type: 'gift' as const,
+                      val: 0,
+                    },
+                    {
+                      badge: '出張費無料',
+                      title: '出張交通費0円キャンペーン',
+                      desc: 'ご指定の場所（ご自宅・オフィス・ホテル等）への出張訪問費が全額無料となります。',
+                      type: 'gift' as const,
+                      val: 0,
+                    },
+                    {
+                      badge: '骨盤診断無料',
+                      title: '専門セラピストによる骨盤・姿勢診断プレゼント',
+                      desc: '施術前に骨盤の歪みや姿勢バランスを丁寧に測定・アドバイスいたします。',
+                      type: 'gift' as const,
+                      val: 0,
+                    },
+                  ].map((preset, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        setCampBadge(preset.badge);
+                        setCampTitle(preset.title);
+                        setCampDesc(preset.desc);
+                        setCampType(preset.type);
+                        setCampVal(preset.val);
+                      }}
+                      className="px-3 py-1.5 bg-white hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-xl text-xs font-bold transition shadow-2xs flex items-center gap-1.5 active:scale-95"
+                    >
+                      <Tag className="w-3.5 h-3.5 text-amber-600" />
+                      <span>{preset.badge}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 入力フォーム */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    バッジ表示テキスト <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={campBadge}
+                    onChange={(e) => setCampBadge(e.target.value)}
+                    placeholder="例: 初回1,000円引、20%OFF、ヘッドスパ無料"
+                    className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-rose-600 focus:outline-rose-500 shadow-2xs"
+                  />
+                  <p className="text-[11px] text-slate-400 mt-1">※写真カードの上にタグとして表示されます（全角10〜12文字推奨）</p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    キャンペーン名・見出し <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={campTitle}
+                    onChange={(e) => setCampTitle(e.target.value)}
+                    placeholder="例: 【初回限定】1,000円割引キャンペーン実施中！"
+                    className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-emerald-500 shadow-2xs"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">特典の形態</label>
+                  <select
+                    value={campType}
+                    onChange={(e) => setCampType(e.target.value as any)}
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-emerald-500"
+                  >
+                    <option value="fixed">定額値引き (円)</option>
+                    <option value="percent">定率値引き (%)</option>
+                    <option value="gift">無料サービス・特典プレゼント</option>
+                  </select>
+                </div>
+
+                {campType !== 'gift' && (
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      {campType === 'fixed' ? '割引金額 (円)' : '割引率 (%)'}
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={campVal}
+                      onChange={(e) => setCampVal(Number(e.target.value))}
+                      placeholder={campType === 'fixed' ? '1000' : '20'}
+                      className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:outline-emerald-500"
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    有効期限（空欄なら無期限）
+                  </label>
+                  <input
+                    type="date"
+                    value={campValidUntil}
+                    onChange={(e) => setCampValidUntil(e.target.value)}
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-emerald-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  特典の詳細説明・対象条件
+                </label>
+                <textarea
+                  rows={3}
+                  value={campDesc}
+                  onChange={(e) => setCampDesc(e.target.value)}
+                  placeholder="例: 初めて当店をご利用のお客様限定。全施術メニューから1,000円割引いたします。"
+                  className="w-full p-3 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 focus:outline-emerald-500 shadow-2xs leading-relaxed"
+                />
+              </div>
+
+              {/* プレビュー表示 */}
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                <span className="text-[11px] font-bold text-slate-400 block mb-2">お客様の検索画面での表示イメージ:</span>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-rose-500 to-amber-500 text-white text-xs font-black shadow-xs">
+                  <Gift className="w-3.5 h-3.5" />
+                  <span>{campBadge || '特典あり'}</span>
+                </div>
+                {campTitle && (
+                  <p className="text-xs font-bold text-slate-900 mt-2">{campTitle}</p>
+                )}
+                {campDesc && (
+                  <p className="text-[11px] text-slate-600 mt-1 leading-relaxed">{campDesc}</p>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="py-8 text-center text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+              <Gift className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+              <p className="text-xs font-bold text-slate-600">現在、特典・キャンペーンは停止中です</p>
+              <p className="text-[11px] text-slate-400 mt-1 max-w-sm mx-auto">
+                右上の「キャンペーン掲載中」スイッチをオンにすると、初回割引や無料延長などの特典を設定・公開できます。
+              </p>
+            </div>
+          )}
+
+          {/* 保存ボタン */}
+          <div className="pt-4 flex items-center justify-between border-t border-slate-100">
+            {campSavedToast && (
+              <span className="text-xs font-bold text-emerald-600 flex items-center gap-1.5 animate-fadeIn">
+                <CheckCircle2 className="w-4 h-4" />
+                <span>特典・キャンペーン設定を保存しました（即時公開中）</span>
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={handleSaveCampaign}
+              className="ml-auto px-6 py-2.5 bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white rounded-xl text-xs font-bold shadow-md transition active:scale-95"
+            >
+              特典・キャンペーンを保存する
             </button>
           </div>
         </div>

@@ -94,7 +94,21 @@ create table if not exists public.reviews (
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- 7. platform_settings: 管理者プラットフォーム設定
+-- 7. chat_messages: 予約ごとのメッセージ・チャット履歴 (独立テーブル)
+create table if not exists public.chat_messages (
+  id uuid primary key default gen_random_uuid(),
+  booking_id uuid not null references public.bookings(id) on delete cascade,
+  sender_id uuid not null references public.profiles(id) on delete cascade,
+  receiver_id uuid not null references public.profiles(id) on delete cascade,
+  content text not null,
+  is_read boolean not null default false,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- therapist_profiles にキャンペーン・特典情報カラム追加
+alter table public.therapist_profiles add column if not exists campaign jsonb;
+
+-- 8. platform_settings: 管理者プラットフォーム設定
 create table if not exists public.platform_settings (
   key text primary key,
   value jsonb not null,
@@ -106,7 +120,7 @@ insert into public.platform_settings (key, value)
 values ('fee_rate', '{"percentage": 20}'::jsonb)
 on conflict (key) do nothing;
 
--- 8. インデックスの作成
+-- 9. インデックスの作成
 create index if not exists therapist_profiles_location_idx on public.therapist_profiles using gist (location);
 create index if not exists bookings_location_idx on public.bookings using gist (location);
 create index if not exists bookings_customer_idx on public.bookings (customer_id);
@@ -114,6 +128,8 @@ create index if not exists bookings_therapist_idx on public.bookings (therapist_
 create index if not exists bookings_scheduled_idx on public.bookings (scheduled_at);
 create index if not exists services_therapist_idx on public.services (therapist_id);
 create index if not exists reviews_therapist_idx on public.reviews (therapist_id);
+create index if not exists chat_messages_booking_idx on public.chat_messages (booking_id);
+create index if not exists chat_messages_created_at_idx on public.chat_messages (created_at asc);
 
 -- ========================================================
 -- Row Level Security (RLS) ポリシー (何度でも再実行可能)
@@ -124,6 +140,7 @@ alter table public.therapist_profiles enable row level security;
 alter table public.services enable row level security;
 alter table public.bookings enable row level security;
 alter table public.reviews enable row level security;
+alter table public.chat_messages enable row level security;
 alter table public.platform_settings enable row level security;
 
 -- profiles ポリシー
@@ -201,6 +218,30 @@ drop policy if exists "reviews_delete_policy" on public.reviews;
 create policy "reviews_delete_policy" on public.reviews
   for delete using (
     auth.uid() = customer_id or
+    (select role from public.profiles where id = auth.uid()) = 'admin'
+  );
+
+-- chat_messages ポリシー (当事者である予約の顧客・セラピストのみ送受信可能)
+drop policy if exists "chat_messages_select_policy" on public.chat_messages;
+create policy "chat_messages_select_policy" on public.chat_messages
+  for select using (
+    auth.uid() = sender_id or
+    auth.uid() = receiver_id or
+    (select role from public.profiles where id = auth.uid()) = 'admin'
+  );
+
+drop policy if exists "chat_messages_insert_policy" on public.chat_messages;
+create policy "chat_messages_insert_policy" on public.chat_messages
+  for insert with check (
+    auth.uid() = sender_id or
+    (select role from public.profiles where id = auth.uid()) = 'admin'
+  );
+
+drop policy if exists "chat_messages_update_policy" on public.chat_messages;
+create policy "chat_messages_update_policy" on public.chat_messages
+  for update using (
+    auth.uid() = receiver_id or
+    auth.uid() = sender_id or
     (select role from public.profiles where id = auth.uid()) = 'admin'
   );
 
@@ -307,3 +348,16 @@ drop trigger if exists trigger_update_therapist_rating on public.reviews;
 create trigger trigger_update_therapist_rating
 after insert or update or delete on public.reviews
 for each row execute function public.update_therapist_rating();
+
+-- ========================================================
+-- Supabase Realtime 有効化 (チャットのリアルタイム受信)
+-- ========================================================
+do $$
+begin
+  if exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
+    alter publication supabase_realtime add table public.chat_messages;
+  end if;
+exception when others then
+  -- すでに登録済み等の場合はスキップ
+  null;
+end $$;
