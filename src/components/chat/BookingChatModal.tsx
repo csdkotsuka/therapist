@@ -47,6 +47,17 @@ export const BookingChatModal: React.FC<BookingChatModalProps> = ({ booking, onC
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [bookingMessages.length]);
 
+  // ESCキーでモーダルを閉じる
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   const handleSend = async () => {
     const text = inputText.trim();
     if (!text || isSending) return;
@@ -79,8 +90,14 @@ export const BookingChatModal: React.FC<BookingChatModalProps> = ({ booking, onC
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4">
-      <div className="bg-slate-50 w-full max-w-lg rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col h-[600px] max-h-[92vh] animate-fadeIn">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 cursor-pointer"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-slate-50 w-full max-w-lg rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col h-[600px] max-h-[92vh] animate-fadeIn cursor-default"
+      >
         {/* ヘッダー */}
         <div className="p-4 bg-white border-b border-slate-200 flex items-center justify-between shadow-2xs shrink-0">
           <div className="flex items-center gap-3 min-w-0">
