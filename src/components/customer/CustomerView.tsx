@@ -27,10 +27,16 @@ import {
   Shield,
   Tag,
   Check,
-  ArrowUpDown,
   Filter,
   BadgePercent,
   Calendar,
+  Bone,
+  Hand,
+  Flower2,
+  Scale,
+  Smile,
+  Coins,
+  Navigation,
 } from 'lucide-react';
 import { Booking } from '@/types';
 
@@ -46,7 +52,7 @@ const RealLeafletMap = dynamic(
   }
 );
 
-type SortOption = 'recommended' | 'rating' | 'price_asc' | 'price_desc' | 'distance';
+type SortOption = 'recommended' | 'rating' | 'distance' | 'price_asc' | 'price_desc';
 
 export const CustomerView: React.FC = () => {
   const {
@@ -63,7 +69,6 @@ export const CustomerView: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [filterStyle, setFilterStyle] = useState<'all' | 'visit' | 'store'>('all');
   const [onlyCampaign, setOnlyCampaign] = useState<boolean>(false); // 特典・キャンペーン有無
-  const [onlyHighRating, setOnlyHighRating] = useState<boolean>(false); // 高評価 (4.8以上)
   const [sortBy, setSortBy] = useState<SortOption>('recommended');
   const [viewMode, setViewMode] = useState<'card' | 'list' | 'map'>('card');
 
@@ -97,14 +102,50 @@ export const CustomerView: React.FC = () => {
     };
   }, [setUserLocation]);
 
-  // カテゴリ一覧
+  // カテゴリ一覧 (Lucide専用ベクターアイコン & カラーテーマ)
   const categories = [
-    { id: 'all', label: 'すべて', icon: '✨' },
-    { id: 'physical_therapy', label: '理学療法・整体', icon: '🦴' },
-    { id: 'massage', label: 'もみほぐし', icon: '💆' },
-    { id: 'aroma', label: 'アロマ・リンパ', icon: '🌿' },
-    { id: 'chiropractic', label: 'カイロ・骨盤矯正', icon: '📐' },
-    { id: 'beauty', label: '小顔・ヘッドスパ', icon: '💆‍♀️' },
+    {
+      id: 'all',
+      label: 'すべて',
+      icon: Sparkles,
+      iconColor: 'text-emerald-600',
+      bgColor: 'bg-emerald-50',
+    },
+    {
+      id: 'physical_therapy',
+      label: '理学療法・整体',
+      icon: Bone,
+      iconColor: 'text-blue-600',
+      bgColor: 'bg-blue-50',
+    },
+    {
+      id: 'massage',
+      label: 'もみほぐし',
+      icon: Hand,
+      iconColor: 'text-amber-600',
+      bgColor: 'bg-amber-50',
+    },
+    {
+      id: 'aroma',
+      label: 'アロマ・リンパ',
+      icon: Flower2,
+      iconColor: 'text-rose-600',
+      bgColor: 'bg-rose-50',
+    },
+    {
+      id: 'chiropractic',
+      label: 'カイロ・骨盤矯正',
+      icon: Scale,
+      iconColor: 'text-indigo-600',
+      bgColor: 'bg-indigo-50',
+    },
+    {
+      id: 'beauty',
+      label: '小顔・ヘッドスパ',
+      icon: Smile,
+      iconColor: 'text-pink-600',
+      bgColor: 'bg-pink-50',
+    },
   ];
 
   // セラピスト一覧のフィルタリングと複数ソート
@@ -118,9 +159,6 @@ export const CustomerView: React.FC = () => {
 
       // 特典・キャンペーン有無絞り込み
       if (onlyCampaign && !tp.campaign) return false;
-
-      // 高評価絞り込み (4.8以上)
-      if (onlyHighRating && tp.rating_avg < 4.8) return false;
 
       const user = allUsers.find((u) => u.id === tp.user_id);
       const userServices = services.filter((s) => s.therapist_id === tp.user_id);
@@ -180,11 +218,11 @@ export const CustomerView: React.FC = () => {
       }
     });
 
-  // アクティブなフィルター数をカウント
+  // アクティブなフィルター数をカウント (デフォルト条件と異なる設定の数)
   const activeFiltersCount = (onlyCampaign ? 1 : 0) +
-    (onlyHighRating ? 1 : 0) +
     (filterStyle !== 'all' ? 1 : 0) +
-    (selectedCategory !== 'all' ? 1 : 0);
+    (selectedCategory !== 'all' ? 1 : 0) +
+    (sortBy !== 'recommended' ? 1 : 0);
 
   return (
     <div className="space-y-6">
@@ -288,116 +326,163 @@ export const CustomerView: React.FC = () => {
           />
         </div>
 
-        {/* Uber風 カテゴリー選択カルーセル */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none pt-1">
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
-              className={`px-4 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition flex items-center gap-2 ${
-                selectedCategory === cat.id
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:bg-slate-50'
-              }`}
-            >
-              <span>{cat.icon}</span>
-              <span>{cat.label}</span>
-            </button>
-          ))}
+        {/* Uber風 カテゴリー選択カルーセル (分かりやすい専用ベクターアイコン) */}
+        <div className="flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-none pt-1">
+          {categories.map((cat) => {
+            const Icon = cat.icon;
+            const isSelected = selectedCategory === cat.id;
+
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id)}
+                className={`px-3.5 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition flex items-center gap-2 group ${
+                  isSelected
+                    ? 'bg-slate-900 text-white shadow-xs'
+                    : 'bg-white text-slate-700 border border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                }`}
+              >
+                <div
+                  className={`w-6 h-6 rounded-xl flex items-center justify-center transition-colors ${
+                    isSelected
+                      ? 'bg-white/20 text-white'
+                      : `${cat.bgColor} ${cat.iconColor}`
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                </div>
+                <span>{cat.label}</span>
+              </button>
+            );
+          })}
         </div>
 
-        {/* Uber風 絞り込みチップバー & ソートドロップダウン (複数選択可能) */}
-        <div className="flex flex-wrap items-center justify-between gap-2.5 pt-1 border-t border-slate-100">
-          <div className="flex flex-wrap items-center gap-2">
-            {/* 特典・キャンペーン有無 フィルター */}
+        {/* 絞り込み＆ソート ボタングループ (プルダウンを統合しすべて左側のボタンに集約！) */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-none pt-1 border-t border-slate-100">
+          {/* ソート: オススメ順 */}
+          <button
+            onClick={() => setSortBy('recommended')}
+            className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 ${
+              sortBy === 'recommended'
+                ? 'bg-slate-900 text-white shadow-xs'
+                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            <Sparkles className={`w-3.5 h-3.5 ${sortBy === 'recommended' ? 'text-amber-300' : 'text-slate-400'}`} />
+            <span>オススメ順</span>
+          </button>
+
+          {/* ソート: 評価が高い順 */}
+          <button
+            onClick={() => setSortBy('rating')}
+            className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 ${
+              sortBy === 'rating'
+                ? 'bg-amber-500 text-white shadow-xs'
+                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            <Star className={`w-3.5 h-3.5 ${sortBy === 'rating' ? 'fill-white' : 'text-amber-400 fill-amber-400'}`} />
+            <span>評価が高い順</span>
+          </button>
+
+          {/* ソート: 距離が近い順 (ボタン化) */}
+          <button
+            onClick={() => setSortBy('distance')}
+            className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 ${
+              sortBy === 'distance'
+                ? 'bg-emerald-600 text-white shadow-xs'
+                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            <Navigation className={`w-3.5 h-3.5 ${sortBy === 'distance' ? 'text-white' : 'text-emerald-600'}`} />
+            <span>距離が近い順</span>
+          </button>
+
+          {/* ソート: 料金が安い順 */}
+          <button
+            onClick={() => setSortBy('price_asc')}
+            className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 ${
+              sortBy === 'price_asc'
+                ? 'bg-slate-900 text-white shadow-xs'
+                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            <Coins className={`w-3.5 h-3.5 ${sortBy === 'price_asc' ? 'text-emerald-300' : 'text-slate-400'}`} />
+            <span>料金が安い順</span>
+          </button>
+
+          {/* ソート: 料金が高い順 */}
+          <button
+            onClick={() => setSortBy('price_desc')}
+            className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 ${
+              sortBy === 'price_desc'
+                ? 'bg-slate-900 text-white shadow-xs'
+                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            <Coins className={`w-3.5 h-3.5 ${sortBy === 'price_desc' ? 'text-emerald-300' : 'text-slate-400'}`} />
+            <span>料金が高い順</span>
+          </button>
+
+          <span className="h-4 w-px bg-slate-200 shrink-0 mx-1"></span>
+
+          {/* フィルター: 特典・キャンペーン有無 */}
+          <button
+            onClick={() => setOnlyCampaign(!onlyCampaign)}
+            className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 ${
+              onlyCampaign
+                ? 'bg-emerald-600 text-white shadow-xs ring-2 ring-emerald-600/30'
+                : 'bg-white text-slate-700 border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/50'
+            }`}
+          >
+            <BadgePercent className={`w-3.5 h-3.5 ${onlyCampaign ? 'text-white' : 'text-emerald-600'}`} />
+            <span>🎁 特典・キャンペーンあり</span>
+            {onlyCampaign && <Check className="w-3 h-3 ml-0.5" />}
+          </button>
+
+          {/* フィルター: 出張のみ */}
+          <button
+            onClick={() => setFilterStyle(filterStyle === 'visit' ? 'all' : 'visit')}
+            className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 ${
+              filterStyle === 'visit'
+                ? 'bg-teal-700 text-white shadow-xs'
+                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            <Home className="w-3.5 h-3.5 text-emerald-500" />
+            <span>出張のみ</span>
+            {filterStyle === 'visit' && <Check className="w-3 h-3 ml-0.5" />}
+          </button>
+
+          {/* フィルター: 店舗あり */}
+          <button
+            onClick={() => setFilterStyle(filterStyle === 'store' ? 'all' : 'store')}
+            className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 ${
+              filterStyle === 'store'
+                ? 'bg-teal-700 text-white shadow-xs'
+                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            <Building className="w-3.5 h-3.5 text-teal-600" />
+            <span>店舗あり</span>
+            {filterStyle === 'store' && <Check className="w-3 h-3 ml-0.5" />}
+          </button>
+
+          {/* フィルターリセットボタン */}
+          {activeFiltersCount > 0 && (
             <button
-              onClick={() => setOnlyCampaign(!onlyCampaign)}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1.5 ${
-                onlyCampaign
-                  ? 'bg-emerald-600 text-white shadow-xs ring-2 ring-emerald-600/30'
-                  : 'bg-white text-slate-700 border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/50'
-              }`}
+              onClick={() => {
+                setOnlyCampaign(false);
+                setFilterStyle('all');
+                setSelectedCategory('all');
+                setSortBy('recommended');
+                setSearchQuery('');
+              }}
+              className="text-[11px] text-slate-400 hover:text-slate-600 font-bold px-2 py-1 underline whitespace-nowrap"
             >
-              <BadgePercent className={`w-3.5 h-3.5 ${onlyCampaign ? 'text-white' : 'text-emerald-600'}`} />
-              <span>🎁 特典・キャンペーンあり</span>
-              {onlyCampaign && <Check className="w-3 h-3 ml-0.5" />}
+              条件をリセット
             </button>
-
-            {/* 出張のみ フィルター */}
-            <button
-              onClick={() => setFilterStyle(filterStyle === 'visit' ? 'all' : 'visit')}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1.5 ${
-                filterStyle === 'visit'
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
-              }`}
-            >
-              <Home className="w-3.5 h-3.5 text-emerald-500" />
-              <span>出張のみ</span>
-              {filterStyle === 'visit' && <Check className="w-3 h-3 ml-0.5" />}
-            </button>
-
-            {/* 店舗あり フィルター */}
-            <button
-              onClick={() => setFilterStyle(filterStyle === 'store' ? 'all' : 'store')}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1.5 ${
-                filterStyle === 'store'
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
-              }`}
-            >
-              <Building className="w-3.5 h-3.5 text-teal-600" />
-              <span>店舗あり</span>
-              {filterStyle === 'store' && <Check className="w-3 h-3 ml-0.5" />}
-            </button>
-
-            {/* 高評価 (4.8以上) フィルター */}
-            <button
-              onClick={() => setOnlyHighRating(!onlyHighRating)}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1.5 ${
-                onlyHighRating
-                  ? 'bg-amber-500 text-white shadow-xs'
-                  : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
-              }`}
-            >
-              <Star className={`w-3.5 h-3.5 ${onlyHighRating ? 'fill-white' : 'text-amber-500 fill-amber-400'}`} />
-              <span>4.8以上</span>
-              {onlyHighRating && <Check className="w-3 h-3 ml-0.5" />}
-            </button>
-
-            {/* フィルターリセットボタン */}
-            {activeFiltersCount > 0 && (
-              <button
-                onClick={() => {
-                  setOnlyCampaign(false);
-                  setOnlyHighRating(false);
-                  setFilterStyle('all');
-                  setSelectedCategory('all');
-                  setSearchQuery('');
-                }}
-                className="text-[11px] text-slate-400 hover:text-slate-600 font-bold px-2 py-1 underline"
-              >
-                条件をクリア
-              </button>
-            )}
-          </div>
-
-          {/* ソート順選択ドロップダウン */}
-          <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-2xl px-3 py-1 shadow-2xs">
-            <ArrowUpDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as SortOption)}
-              aria-label="並び替え順"
-              className="py-1 bg-transparent text-xs font-bold text-slate-700 focus:outline-none cursor-pointer"
-            >
-              <option value="recommended">✨ オススメ順</option>
-              <option value="rating">⭐ 評価の高い順</option>
-              <option value="price_asc">💴 料金が安い順</option>
-              <option value="price_desc">💴 料金が高い順</option>
-              <option value="distance">📍 現在地から近い順</option>
-            </select>
-          </div>
+          )}
         </div>
       </div>
 
@@ -405,8 +490,13 @@ export const CustomerView: React.FC = () => {
       <div className="flex items-center justify-between text-xs text-slate-500 px-1">
         <span className="font-medium">
           該当 <strong className="text-slate-900 font-bold">{therapistsList.length}</strong> 名のセラピスト
+          {sortBy === 'recommended' && <span className="ml-1 text-slate-500 font-bold">（オススメ順）</span>}
+          {sortBy === 'rating' && <span className="ml-1 text-amber-600 font-bold">（評価が高い順）</span>}
+          {sortBy === 'distance' && <span className="ml-1 text-emerald-600 font-bold">（現在地から近い順）</span>}
+          {sortBy === 'price_asc' && <span className="ml-1 text-indigo-600 font-bold">（料金が安い順）</span>}
+          {sortBy === 'price_desc' && <span className="ml-1 text-indigo-600 font-bold">（料金が高い順）</span>}
           {onlyCampaign && (
-            <span className="ml-1 text-emerald-600 font-bold">（特典・キャンペーン対象）</span>
+            <span className="ml-1.5 text-emerald-600 font-bold">🎁 特典・キャンペーン対象</span>
           )}
         </span>
       </div>
