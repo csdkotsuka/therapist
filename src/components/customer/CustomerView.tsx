@@ -384,8 +384,8 @@ export const CustomerView: React.FC = () => {
           />
         </div>
 
-        {/* Uber風 カテゴリー選択カルーセル (アイコン上・テキスト下、横幅スリム＆専用アイコン) */}
-        <div className="flex items-center gap-1.5 sm:gap-2.5 overflow-x-auto pb-2.5 scrollbar-none pt-1">
+        {/* カテゴリー選択 (横スクロールを排し、全メニューがパッと見渡せる改行・一覧表示) */}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 pb-2 pt-1">
           {categories.map((cat) => {
             const Icon = cat.icon;
             const isSelected = selectedCategory === cat.id;
@@ -394,7 +394,7 @@ export const CustomerView: React.FC = () => {
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`flex flex-col items-center justify-center min-w-[62px] sm:min-w-[70px] max-w-[76px] py-1 px-1 rounded-2xl transition group shrink-0 ${
+                className={`flex flex-col items-center justify-center min-w-[62px] sm:min-w-[72px] max-w-[78px] py-1 px-1 rounded-2xl transition group ${
                   isSelected ? 'text-slate-950 font-black' : 'text-slate-600 hover:text-slate-900 font-bold'
                 }`}
               >
@@ -419,12 +419,12 @@ export const CustomerView: React.FC = () => {
           })}
         </div>
 
-        {/* 絞り込み＆ソート ボタングループ (プルダウンを統合しすべて左側のボタンに集約！) */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-none pt-1 border-t border-slate-100">
+        {/* 絞り込み＆ソート ボタングループ (改行・折り返しで全ボタンが一目でわかる) */}
+        <div className="flex flex-wrap items-center gap-2 pb-1.5 pt-2 border-t border-slate-100">
           {/* ソート: オススメ順 */}
           <button
             onClick={() => setSortBy('recommended')}
-            className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 shadow-2xs ${
               sortBy === 'recommended'
                 ? 'bg-slate-900 text-white shadow-xs'
                 : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
@@ -437,7 +437,7 @@ export const CustomerView: React.FC = () => {
           {/* ソート: 評価が高い順 */}
           <button
             onClick={() => setSortBy('rating')}
-            className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 shadow-2xs ${
               sortBy === 'rating'
                 ? 'bg-amber-500 text-white shadow-xs'
                 : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
@@ -450,7 +450,7 @@ export const CustomerView: React.FC = () => {
           {/* ソート: 距離が近い順 (ボタン化) */}
           <button
             onClick={() => setSortBy('distance')}
-            className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 shadow-2xs ${
               sortBy === 'distance'
                 ? 'bg-emerald-600 text-white shadow-xs'
                 : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
@@ -463,7 +463,7 @@ export const CustomerView: React.FC = () => {
           {/* ソート: 料金が安い順 */}
           <button
             onClick={() => setSortBy('price_asc')}
-            className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 shadow-2xs ${
               sortBy === 'price_asc'
                 ? 'bg-slate-900 text-white shadow-xs'
                 : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
@@ -476,7 +476,7 @@ export const CustomerView: React.FC = () => {
           {/* ソート: 料金が高い順 */}
           <button
             onClick={() => setSortBy('price_desc')}
-            className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 shadow-2xs ${
               sortBy === 'price_desc'
                 ? 'bg-slate-900 text-white shadow-xs'
                 : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
@@ -486,12 +486,10 @@ export const CustomerView: React.FC = () => {
             <span>料金が高い順</span>
           </button>
 
-          <span className="h-4 w-px bg-slate-200 shrink-0 mx-1"></span>
-
           {/* フィルター: 特典・キャンペーン有無 */}
           <button
             onClick={() => setOnlyCampaign(!onlyCampaign)}
-            className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 ${
+            className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 shadow-2xs ${
               onlyCampaign
                 ? 'bg-emerald-600 text-white shadow-xs ring-2 ring-emerald-600/30'
                 : 'bg-white text-slate-700 border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/50'
