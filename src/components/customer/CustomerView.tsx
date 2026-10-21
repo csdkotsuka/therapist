@@ -521,6 +521,7 @@ export const CustomerView: React.FC = () => {
             <RealLeafletMap
               onSelectTherapist={(id) => setBookingTherapistId(id)}
               filterType={filterStyle}
+              therapists={therapistsList}
             />
           ) : viewMode === 'list' ? (
             /* リスト表示 (List View) */

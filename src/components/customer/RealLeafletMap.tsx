@@ -6,14 +6,18 @@ import { calculateDistanceKm, estimateTravelTimeMinutes, formatPrice } from '@/l
 import { MapPin, Navigation, Compass, Star, Clock, Home, Building, Sparkles } from 'lucide-react';
 import L from 'leaflet';
 
+import { TherapistProfile } from '@/types';
+
 interface RealLeafletMapProps {
   onSelectTherapist: (therapistId: string) => void;
-  filterType: 'all' | 'visit' | 'store';
+  filterType?: 'all' | 'visit' | 'store';
+  therapists?: (TherapistProfile & { distance?: number })[];
 }
 
 export const RealLeafletMap: React.FC<RealLeafletMapProps> = ({
   onSelectTherapist,
-  filterType,
+  filterType = 'all',
+  therapists,
 }) => {
   const { userLocation, therapistProfiles, allUsers } = useApp();
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -21,7 +25,8 @@ export const RealLeafletMap: React.FC<RealLeafletMapProps> = ({
   const markersRef = useRef<L.LayerGroup | null>(null);
   const [selectedTherapistId, setSelectedTherapistId] = useState<string | null>(null);
 
-  const therapistsList = Object.values(therapistProfiles).filter((tp) => {
+  // therapists が渡された場合は絞り込み済みリストをそのまま使用し、未指定の場合はデフォルトのフィルタリングを行う
+  const therapistsList = therapists ?? Object.values(therapistProfiles).filter((tp) => {
     if (!tp.is_approved) return false;
     if (filterType === 'visit' && !tp.is_visit_based) return false;
     if (filterType === 'store' && !tp.is_store_based) return false;
@@ -170,7 +175,7 @@ export const RealLeafletMap: React.FC<RealLeafletMapProps> = ({
 
       marker.addTo(group);
     });
-  }, [userLocation, therapistProfiles, allUsers, filterType]);
+  }, [userLocation, therapistProfiles, allUsers, filterType, therapists]);
 
   const selectedTherapist = selectedTherapistId ? therapistProfiles[selectedTherapistId] : null;
   const selectedUser = selectedTherapistId ? allUsers.find((u) => u.id === selectedTherapistId) : null;
@@ -181,10 +186,19 @@ export const RealLeafletMap: React.FC<RealLeafletMapProps> = ({
       <div ref={mapContainerRef} className="w-full h-full z-0" />
 
       {/* マップ情報バナー */}
-      <div className="absolute top-4 left-4 z-20 flex items-center gap-2 bg-white/90 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-slate-200 text-xs text-slate-700 shadow-md">
+      <div className="absolute top-4 left-4 z-20 flex items-center gap-2 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-slate-200 text-xs text-slate-700 shadow-md">
         <Compass className="w-3.5 h-3.5 text-emerald-600 animate-spin" style={{ animationDuration: '16s' }} />
-        <span className="font-bold">リアルマップ (OpenStreetMap / GPS連動)</span>
+        <span className="font-bold">リアルマップ</span>
+        <span className="text-slate-400">|</span>
+        <span className="font-bold text-emerald-600">{therapistsList.length}名表示中</span>
       </div>
+
+      {/* 0件時のアラート */}
+      {therapistsList.length === 0 && (
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-20 bg-slate-900/90 backdrop-blur-md text-white text-xs px-4 py-2 rounded-full shadow-xl border border-slate-700 font-bold">
+          絞り込み条件に一致するセラピストが見つかりませんでした
+        </div>
+      )}
 
       {/* 現在地へセンタリングするボタン */}
       <div className="absolute top-4 right-4 z-20">
