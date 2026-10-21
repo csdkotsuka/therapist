@@ -53,10 +53,9 @@ export const TrackingLeafletMap: React.FC<TrackingLeafletMapProps> = ({
       attributionControl: false,
     });
 
-    // スタイリッシュなボイジャー地図タイル（CartoDB）
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    // OpenStreetMap 標準タイル (APIキー不要・完全無料・日本語対応)
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
-      subdomains: 'abcd',
     }).addTo(map);
 
     const fixedMarkersGroup = L.layerGroup().addTo(map);

@@ -48,11 +48,10 @@ export const RealLeafletMap: React.FC<RealLeafletMapProps> = ({
     // ズームコントロールを右下に配置
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    // OpenStreetMap 日本語対応タイル（または CartoDB のスタイリッシュなモダン地図）
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    // OpenStreetMap 標準タイル (APIキー不要・完全無料・日本語対応)
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 19,
-      subdomains: 'abcd',
     }).addTo(map);
 
     const markersGroup = L.layerGroup().addTo(map);
