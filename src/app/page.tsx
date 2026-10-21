@@ -8,16 +8,16 @@ import { CustomerView } from '@/components/customer/CustomerView';
 import { HeartPulse } from 'lucide-react';
 
 export default function HomePage() {
-  const { currentUser, switchUser, allUsers } = useApp();
+  const { currentUser, switchUser, allUsers, isLoggedIn } = useApp();
 
   const customers = allUsers.filter((u) => u.role === 'customer');
 
-  // もし現在のユーザーが顧客でない場合、最初の顧客に切り替え
+  // もしログイン中かつ現在のユーザーが顧客でない場合、最初の顧客に切り替え
   useEffect(() => {
-    if (currentUser.role !== 'customer' && customers.length > 0) {
+    if (isLoggedIn && currentUser.role !== 'customer' && customers.length > 0) {
       switchUser(customers[0].id);
     }
-  }, [currentUser.role, customers, switchUser]);
+  }, [isLoggedIn, currentUser.role, customers, switchUser]);
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50/50">

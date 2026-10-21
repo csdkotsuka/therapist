@@ -46,6 +46,9 @@ interface AppContextType {
   userLocation: UserLocation;
   isLiveSupabase: boolean;
   isLoadingDb: boolean;
+  isLoggedIn: boolean;
+  login: (user: Profile) => void;
+  logout: () => void;
   setUserLocation: (loc: UserLocation) => void;
   switchUser: (userId: string) => void;
   createBooking: (booking: Omit<Booking, 'id' | 'created_at' | 'platform_fee' | 'therapist_earnings' | 'status'>) => Promise<Booking>;
@@ -88,6 +91,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
   const [isLoaded, setIsLoaded] = useState(false);
   const [isLoadingDb, setIsLoadingDb] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
 
   // Supabase からのデータ取得
   const fetchSupabaseData = useCallback(async () => {
@@ -190,6 +194,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (parsed.bookings) setBookings(parsed.bookings);
         if (parsed.reviews) setReviews(parsed.reviews);
         if (parsed.platformFeeRate) setPlatformFeeRateState(parsed.platformFeeRate);
+        if (typeof parsed.isLoggedIn === 'boolean') setIsLoggedIn(parsed.isLoggedIn);
         if (parsed.currentUserId) {
           const user = (parsed.allUsers || initialProfiles).find((u: Profile) => u.id === parsed.currentUserId);
           if (user) {
@@ -229,18 +234,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           bookings,
           reviews,
           platformFeeRate,
+          isLoggedIn,
           currentUserId: currentUser.id,
         })
       );
     } catch (e) {
       console.error('Failed to save state to localStorage', e);
     }
-  }, [allUsers, therapistProfiles, services, bookings, reviews, platformFeeRate, currentUser, isLoaded]);
+  }, [allUsers, therapistProfiles, services, bookings, reviews, platformFeeRate, currentUser, isLoggedIn, isLoaded]);
+
+  const login = (user: Profile) => {
+    setCurrentUser(user);
+    setIsLoggedIn(true);
+    if (user.lat && user.lng) {
+      setUserLocation({
+        name: user.address || `${user.name}の登録住所`,
+        lat: user.lat,
+        lng: user.lng,
+      });
+    }
+  };
+
+  const logout = () => {
+    setIsLoggedIn(false);
+  };
 
   const switchUser = (userId: string) => {
     const user = allUsers.find((u) => u.id === userId);
     if (user) {
       setCurrentUser(user);
+      setIsLoggedIn(true);
       if (user.lat && user.lng) {
         setUserLocation({
           name: user.address || `${user.name}の登録住所`,
@@ -462,6 +485,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return [...prev, newUser];
     });
     setCurrentUser(newUser);
+    setIsLoggedIn(true);
   };
 
   const addTherapistUser = async (
@@ -499,6 +523,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }));
 
     setCurrentUser({ ...newUser, role: 'therapist' });
+    setIsLoggedIn(true);
 
     // 3. Supabase が利用可能な場合は profiles と therapist_profiles に保存
     if (supabase && isSupabaseConfigured) {
@@ -659,6 +684,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         userLocation,
         isLiveSupabase: isSupabaseConfigured,
         isLoadingDb,
+        isLoggedIn,
+        login,
+        logout,
         setUserLocation,
         switchUser,
         createBooking,

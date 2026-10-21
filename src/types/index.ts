@@ -45,6 +45,12 @@ export interface TherapistProfile {
   store_hours?: string;
   store_facilities?: string[];
   store_notes?: string;
+  // 特典・キャンペーン情報
+  campaign?: {
+    badge: string;
+    title?: string;
+    description?: string;
+  };
 }
 
 export interface Service {

@@ -1668,7 +1668,12 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "rating_avg": 4.97,
     "reviews_count": 44,
     "is_approved": true,
-    "stripe_account_id": "acct_ehime_ddadeee49c54460e"
+    "stripe_account_id": "acct_ehime_ddadeee49c54460e",
+    "campaign": {
+      "badge": "初回限定 1,000円OFF",
+      "title": "初回来店・出張キャンペーン",
+      "description": "初めてCareHubからご予約いただいた方に施術代1,000円割引を実施中！"
+    }
   },
   "c5804aea-f4b7-4308-bec2-7b5de9c19a87": {
     "user_id": "c5804aea-f4b7-4308-bec2-7b5de9c19a87",
@@ -1709,6 +1714,11 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "reviews_count": 32,
     "is_approved": true,
     "stripe_account_id": "acct_ehime_963338a1a976441e",
+    "campaign": {
+      "badge": "ヘッドスパ10分無料",
+      "title": "オプション無料特典",
+      "description": "60分以上の施術をご予約で極上ヘッドスパ10分無料プレゼント！"
+    },
     "store_name": "松山市 林 リハビリ治療院",
     "store_address": "愛媛県松山市石井2-7",
     "store_access": "松山市中心駅より徒歩3分",
@@ -1741,6 +1751,11 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "reviews_count": 20,
     "is_approved": true,
     "stripe_account_id": "acct_ehime_b7edb4a273a44379",
+    "campaign": {
+      "badge": "初回20%OFF",
+      "title": "新規オープン記念割",
+      "description": "初回のご予約で全メニュー20%OFF！"
+    },
     "store_name": "松山市 清家 カイロプラクティック院",
     "store_address": "愛媛県松山市三番町4-16",
     "store_access": "松山市中心駅より徒歩3分",
@@ -1773,6 +1788,11 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "reviews_count": 36,
     "is_approved": true,
     "stripe_account_id": "acct_ehime_5b234e40610d46b2",
+    "campaign": {
+      "badge": "出張交通費無料",
+      "title": "愛媛県内出張応援",
+      "description": "松山市内・道後エリアへの出張交通費を全額無料サービス中！"
+    },
     "store_name": "松山市 河野 整体サロン",
     "store_address": "愛媛県松山市南江戸4-4",
     "store_access": "松山市中心駅より徒歩3分",
@@ -1805,6 +1825,11 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "reviews_count": 18,
     "is_approved": true,
     "stripe_account_id": "acct_ehime_39c015960a064d21",
+    "campaign": {
+      "badge": "骨盤チェック無料",
+      "title": "姿勢診断キャンペーン",
+      "description": "施術前にAI＆触診による姿勢・骨盤歪みチェックを無料サービス中！"
+    },
     "store_name": "松山市 佐々木 カイロプラクティック院",
     "store_address": "愛媛県松山市古川北2-19",
     "store_access": "松山市中心駅より徒歩3分",
@@ -1837,6 +1862,11 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "reviews_count": 41,
     "is_approved": true,
     "stripe_account_id": "acct_ehime_cdb482b256e24649",
+    "campaign": {
+      "badge": "初回来店 500円OFF",
+      "title": "国家資格者施術キャンペーン",
+      "description": "初めての方限定で500円割引を実施中！"
+    },
     "store_name": "松山市 伊藤 整体サロン",
     "store_address": "愛媛県松山市三番町5-17",
     "store_access": "松山市中心駅より徒歩3分",
