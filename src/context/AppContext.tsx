@@ -9,6 +9,7 @@ import {
   Review,
   UserRole,
   BookingStatus,
+  ChatMessage,
 } from '@/types';
 import {
   initialProfiles,
@@ -16,6 +17,7 @@ import {
   initialServices,
   initialBookings,
   initialReviews,
+  initialChatMessages,
 } from '@/lib/mockData';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
@@ -42,6 +44,7 @@ interface AppContextType {
   services: Service[];
   bookings: Booking[];
   reviews: Review[];
+  messages: ChatMessage[];
   platformFeeRate: number; // percentage (e.g. 20)
   userLocation: UserLocation;
   isLiveSupabase: boolean;
@@ -51,6 +54,8 @@ interface AppContextType {
   logout: () => void;
   setUserLocation: (loc: UserLocation) => void;
   switchUser: (userId: string) => void;
+  sendChatMessage: (bookingId: string, receiverId: string, content: string) => Promise<ChatMessage>;
+  markMessagesAsRead: (bookingId: string) => void;
   createBooking: (booking: Omit<Booking, 'id' | 'created_at' | 'platform_fee' | 'therapist_earnings' | 'status'>) => Promise<Booking>;
   updateBookingStatus: (bookingId: string, status: BookingStatus) => Promise<void>;
   updateTherapistLocation: (bookingId: string, lat: number, lng: number) => Promise<void>;
@@ -78,6 +83,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [services, setServices] = useState<Service[]>(initialServices);
   const [bookings, setBookings] = useState<Booking[]>(initialBookings);
   const [reviews, setReviews] = useState<Review[]>(initialReviews);
+  const [messages, setMessages] = useState<ChatMessage[]>(initialChatMessages);
   const [platformFeeRate, setPlatformFeeRateState] = useState<number>(20);
   const [userLocation, setUserLocation] = useState<UserLocation>(() => {
     if (initialCustomer.lat && initialCustomer.lng) {
@@ -193,6 +199,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (parsed.services) setServices(parsed.services);
         if (parsed.bookings) setBookings(parsed.bookings);
         if (parsed.reviews) setReviews(parsed.reviews);
+        if (parsed.messages) setMessages(parsed.messages);
         if (parsed.platformFeeRate) setPlatformFeeRateState(parsed.platformFeeRate);
         if (typeof parsed.isLoggedIn === 'boolean') setIsLoggedIn(parsed.isLoggedIn);
         if (parsed.currentUserId) {
@@ -233,6 +240,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           services,
           bookings,
           reviews,
+          messages,
           platformFeeRate,
           isLoggedIn,
           currentUserId: currentUser.id,
@@ -241,7 +249,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (e) {
       console.error('Failed to save state to localStorage', e);
     }
-  }, [allUsers, therapistProfiles, services, bookings, reviews, platformFeeRate, currentUser, isLoggedIn, isLoaded]);
+  }, [allUsers, therapistProfiles, services, bookings, reviews, messages, platformFeeRate, currentUser, isLoggedIn, isLoaded]);
 
   const login = (user: Profile) => {
     setCurrentUser(user);
@@ -272,6 +280,47 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         });
       }
     }
+  };
+
+  const sendChatMessage = async (bookingId: string, receiverId: string, content: string): Promise<ChatMessage> => {
+    const newMessage: ChatMessage = {
+      id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `msg-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`,
+      booking_id: bookingId,
+      sender_id: currentUser.id,
+      receiver_id: receiverId,
+      content,
+      created_at: new Date().toISOString(),
+      is_read: false,
+    };
+
+    setMessages((prev) => [...prev, newMessage]);
+
+    if (supabase && isSupabaseConfigured) {
+      try {
+        await supabase.from('chat_messages').insert({
+          id: newMessage.id,
+          booking_id: newMessage.booking_id,
+          sender_id: newMessage.sender_id,
+          receiver_id: newMessage.receiver_id,
+          content: newMessage.content,
+          is_read: newMessage.is_read,
+        });
+      } catch (err) {
+        console.warn('Supabase chat message insert warning:', err);
+      }
+    }
+
+    return newMessage;
+  };
+
+  const markMessagesAsRead = (bookingId: string) => {
+    setMessages((prev) =>
+      prev.map((m) =>
+        m.booking_id === bookingId && m.receiver_id === currentUser.id
+          ? { ...m, is_read: true }
+          : m
+      )
+    );
   };
 
   const createBooking = async (
@@ -648,6 +697,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (therapistData.store_hours !== undefined) updatePayload.store_hours = therapistData.store_hours;
         if (therapistData.store_facilities !== undefined) updatePayload.store_facilities = therapistData.store_facilities;
         if (therapistData.store_notes !== undefined) updatePayload.store_notes = therapistData.store_notes;
+        if (therapistData.available_days !== undefined) updatePayload.available_days = therapistData.available_days;
+        if (therapistData.available_hours_start !== undefined) updatePayload.available_hours_start = therapistData.available_hours_start;
+        if (therapistData.available_hours_end !== undefined) updatePayload.available_hours_end = therapistData.available_hours_end;
+        if (therapistData.is_separate_store_hours !== undefined) updatePayload.is_separate_store_hours = therapistData.is_separate_store_hours;
+        if (therapistData.store_hours_start !== undefined) updatePayload.store_hours_start = therapistData.store_hours_start;
+        if (therapistData.store_hours_end !== undefined) updatePayload.store_hours_end = therapistData.store_hours_end;
+        if (therapistData.campaign !== undefined) updatePayload.campaign = therapistData.campaign;
 
         await supabase
           .from('therapist_profiles')
@@ -666,6 +722,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setServices(initialServices);
     setBookings(initialBookings);
     setReviews(initialReviews);
+    setMessages(initialChatMessages);
     setPlatformFeeRateState(20);
     setCurrentUser(initialProfiles[4]);
     setUserLocation(PRESET_LOCATIONS[0]);
@@ -680,6 +737,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         services,
         bookings,
         reviews,
+        messages,
         platformFeeRate,
         userLocation,
         isLiveSupabase: isSupabaseConfigured,
@@ -689,6 +747,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         logout,
         setUserLocation,
         switchUser,
+        sendChatMessage,
+        markMessagesAsRead,
         createBooking,
         updateBookingStatus,
         updateTherapistLocation,

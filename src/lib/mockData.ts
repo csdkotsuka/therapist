@@ -1,6 +1,6 @@
 // 愛媛県シミュレーションデータセット（愛媛県15市町・人口比率ベース・RFC 4122 v4 UUID準拠）
 // セラピスト: 36名, 顧客: 100名, 運営本部: 1名
-import { Profile, TherapistProfile, Service, Booking, Review } from '@/types';
+import { Profile, TherapistProfile, Service, Booking, Review, ChatMessage } from '@/types';
 
 export const initialProfiles: Profile[] = [
   {
@@ -1919,6 +1919,11 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "reviews_count": 46,
     "is_approved": true,
     "stripe_account_id": "acct_ehime_469da8b079a64dd4",
+    "campaign": {
+      "badge": "初回姿勢分析無料",
+      "title": "理学療法士による全身診断",
+      "description": "初めての方に身体の歪み・姿勢チェックを無料サービス中！"
+    },
     "store_name": "松山市 井上 整体サロン",
     "store_address": "愛媛県松山市空港通3-4",
     "store_access": "松山市中心駅より徒歩3分",
@@ -1951,6 +1956,11 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "reviews_count": 35,
     "is_approved": true,
     "stripe_account_id": "acct_ehime_d951cf27d536423d",
+    "campaign": {
+      "badge": "初回1,500円OFF",
+      "title": "極上経絡ツボもみほぐし割",
+      "description": "初回来店または出張で全コース1,500円割引！"
+    },
     "store_name": "松山市 山田 カイロプラクティック院",
     "store_address": "愛媛県松山市南江戸2-21",
     "store_access": "松山市中心駅より徒歩3分",
@@ -1983,6 +1993,11 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "reviews_count": 48,
     "is_approved": true,
     "stripe_account_id": "acct_ehime_0b34a06b9ac74495",
+    "campaign": {
+      "badge": "ストレッチ15分無料",
+      "title": "タイ古式延長キャンペーン",
+      "description": "60分以上の施術で深層ストレッチ15分無料プレゼント！"
+    },
     "store_name": "松山市 門田 カイロプラクティック院",
     "store_address": "愛媛県松山市一番町2-9",
     "store_access": "松山市中心駅より徒歩3分",
@@ -2014,7 +2029,12 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "rating_avg": 4.83,
     "reviews_count": 42,
     "is_approved": true,
-    "stripe_account_id": "acct_ehime_b73de8585c8b4026"
+    "stripe_account_id": "acct_ehime_b73de8585c8b4026",
+    "campaign": {
+      "badge": "出張交通費無料",
+      "title": "松山市街地出張応援",
+      "description": "松山市街地・近郊への出張施術で出張費が無料になります！"
+    }
   },
   "f36758b7-afcb-43bd-b0bb-34a0d1f55b08": {
     "user_id": "f36758b7-afcb-43bd-b0bb-34a0d1f55b08",
@@ -2055,6 +2075,11 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "reviews_count": 21,
     "is_approved": true,
     "stripe_account_id": "acct_ehime_d78c043f59e14fa0",
+    "campaign": {
+      "badge": "初回20%OFF",
+      "title": "今治オープン記念割",
+      "description": "今治市内のサロン施術または出張で全メニュー20%割引！"
+    },
     "store_name": "今治市 林 アロマサロン",
     "store_address": "愛媛県今治市片山2-19",
     "store_access": "今治市中心駅より徒歩3分",
@@ -2087,6 +2112,11 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "reviews_count": 36,
     "is_approved": true,
     "stripe_account_id": "acct_ehime_8e50cab17b99465a",
+    "campaign": {
+      "badge": "ヘッドスパ10分無料",
+      "title": "眼精疲労スッキリ特典",
+      "description": "ボディケアコースに極上ヘッドスパ10分無料でお付けします！"
+    },
     "store_name": "今治市 井上 ボディケアルーム",
     "store_address": "愛媛県今治市美須賀町1-13",
     "store_access": "今治市中心駅より徒歩3分",
@@ -2119,6 +2149,11 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "reviews_count": 42,
     "is_approved": true,
     "stripe_account_id": "acct_ehime_d15efa938a484c11",
+    "campaign": {
+      "badge": "初回1,000円OFF",
+      "title": "骨盤リセット体験割",
+      "description": "初めての骨盤矯正コースをご予約で1,000円割引！"
+    },
     "store_name": "今治市 池内 整体サロン",
     "store_address": "愛媛県今治市旭町5-1",
     "store_access": "今治市中心駅より徒歩3分",
@@ -2223,6 +2258,11 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "reviews_count": 19,
     "is_approved": true,
     "stripe_account_id": "acct_ehime_52ce022b30cf4c7c",
+    "campaign": {
+      "badge": "初回20%OFF",
+      "title": "新居浜オープン記念割",
+      "description": "新居浜市内での施術全コースが20%OFF！"
+    },
     "store_name": "新居浜市 門田 リハビリ治療院",
     "store_address": "愛媛県新居浜市繁本町2-11",
     "store_access": "新居浜市中心駅より徒歩3分",
@@ -2255,6 +2295,11 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "reviews_count": 44,
     "is_approved": true,
     "stripe_account_id": "acct_ehime_c7a8ba5bec874ce2",
+    "campaign": {
+      "badge": "初回15分延長無料",
+      "title": "西条じっくりほぐし特典",
+      "description": "ご新規様限定で本格もみほぐしを15分無料延長いたします！"
+    },
     "store_name": "西条市 鈴木 ボディケアルーム",
     "store_address": "愛媛県西条市小松町新屋敷2-16",
     "store_access": "西条市中心駅より徒歩3分",
@@ -2411,6 +2456,11 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "reviews_count": 25,
     "is_approved": true,
     "stripe_account_id": "acct_ehime_612e22f33fe54fc8",
+    "campaign": {
+      "badge": "初回1,000円OFF",
+      "title": "南予・宇和島応援キャンペーン",
+      "description": "宇和島エリアの方限定で初回の全メニュー1,000円割引！"
+    },
     "store_name": "宇和島市 森 カイロプラクティック院",
     "store_address": "愛媛県宇和島市鶴島町5-24",
     "store_access": "宇和島市中心駅より徒歩3分",
@@ -2443,6 +2493,11 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "reviews_count": 41,
     "is_approved": true,
     "stripe_account_id": "acct_ehime_f9eeb822de264a7c",
+    "campaign": {
+      "badge": "猫背骨盤チェック無料",
+      "title": "大洲姿勢改善フェア",
+      "description": "姿勢・猫背・骨盤の歪みチェック診断を無料サービス中！"
+    },
     "store_name": "大洲市 松田 カイロプラクティック院",
     "store_address": "愛媛県大洲市若宮2-19",
     "store_access": "大洲市中心駅より徒歩3分",
@@ -2475,6 +2530,11 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "reviews_count": 18,
     "is_approved": true,
     "stripe_account_id": "acct_ehime_57af479ca2da4e59",
+    "campaign": {
+      "badge": "足つぼ10分無料",
+      "title": "八幡浜港町リフレッシュ割",
+      "description": "もみほぐしコースをご予約で台湾式足つぼリフレ10分無料！"
+    },
     "store_name": "八幡浜市 石川 リハビリ治療院",
     "store_address": "愛媛県八幡浜市昭和通3-10",
     "store_access": "八幡浜市中心駅より徒歩3分",
@@ -4158,3 +4218,34 @@ export const initialReviews: Review[] = [
     "created_at": "2026-10-11T03:12:14.361Z"
   }
 ];
+
+export const initialChatMessages: ChatMessage[] = [
+  {
+    id: "msg-001",
+    booking_id: "fd022c4b-9fbb-4449-84f5-684ad0ba6a0c",
+    sender_id: "ddadeee4-9c54-460e-b2b2-cf0b55025fea", // セラピスト
+    receiver_id: "d68b1a8b-fa70-4895-a799-e42e68e6d108", // 顧客
+    content: "ご予約ありがとうございます！松田です。当日は施術用マットやタオル等を持参してお伺いいたします。よろしくお願いいたします。",
+    created_at: "2026-10-20T10:15:00.000Z",
+    is_read: true
+  },
+  {
+    id: "msg-002",
+    booking_id: "fd022c4b-9fbb-4449-84f5-684ad0ba6a0c",
+    sender_id: "d68b1a8b-fa70-4895-a799-e42e68e6d108", // 顧客
+    receiver_id: "ddadeee4-9c54-460e-b2b2-cf0b55025fea",
+    content: "ご連絡ありがとうございます！マンションのエントランスはオートロックになっておりますので、インターホンで468号室をお呼び出しください。",
+    created_at: "2026-10-20T10:18:00.000Z",
+    is_read: true
+  },
+  {
+    id: "msg-003",
+    booking_id: "fd022c4b-9fbb-4449-84f5-684ad0ba6a0c",
+    sender_id: "ddadeee4-9c54-460e-b2b2-cf0b55025fea",
+    receiver_id: "d68b1a8b-fa70-4895-a799-e42e68e6d108",
+    content: "承知いたしました！468号室ですね。5分ほど前にお伺いいたします。",
+    created_at: "2026-10-20T10:20:00.000Z",
+    is_read: true
+  }
+];
+

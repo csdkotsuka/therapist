@@ -3,6 +3,9 @@
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { formatPrice, formatDate } from '@/lib/geo';
+import { Service, Booking } from '@/types';
+import { TherapistProfileEdit } from './TherapistProfileEdit';
+import { BookingChatModal } from '@/components/chat/BookingChatModal';
 import {
   Calendar,
   Clock,
@@ -26,9 +29,9 @@ import {
   Star,
   MessageSquare,
   ThumbsUp,
+  MessageCircle,
+  Layers,
 } from 'lucide-react';
-import { Service } from '@/types';
-import { TherapistProfileEdit } from './TherapistProfileEdit';
 
 export const TherapistView: React.FC = () => {
   const {
@@ -37,8 +40,10 @@ export const TherapistView: React.FC = () => {
     services,
     bookings,
     reviews,
+    messages,
     updateBookingStatus,
     updateTherapistLocation,
+    updateTherapistInfo,
     addService,
     allUsers,
   } = useApp();
@@ -51,10 +56,24 @@ export const TherapistView: React.FC = () => {
   // タブ管理: 'requests' | 'schedule' | 'services' | 'reviews' | 'earnings' | 'profile'
   const [activeTab, setActiveTab] = useState<'requests' | 'schedule' | 'services' | 'reviews' | 'earnings' | 'profile'>('requests');
 
-  // スケジュール設定状態
-  const [selectedDays, setSelectedDays] = useState<string[]>(['mon', 'tue', 'wed', 'thu', 'fri', 'sat']);
-  const [startTime, setStartTime] = useState<string>('09:00');
-  const [endTime, setEndTime] = useState<string>('21:00');
+  // チャットモーダル状態
+  const [chatBooking, setChatBooking] = useState<Booking | null>(null);
+
+  // スケジュール・営業時間設定状態
+  const [selectedDays, setSelectedDays] = useState<string[]>(
+    therapist?.available_days || ['mon', 'tue', 'wed', 'thu', 'fri', 'sat']
+  );
+  const [startTime, setStartTime] = useState<string>(therapist?.available_hours_start || '09:00');
+  const [endTime, setEndTime] = useState<string>(therapist?.available_hours_end || '21:00');
+  const [isSeparateStoreHours, setIsSeparateStoreHours] = useState<boolean>(
+    therapist?.is_separate_store_hours || false
+  );
+  const [storeStartTime, setStoreStartTime] = useState<string>(
+    therapist?.store_hours_start || '10:00'
+  );
+  const [storeEndTime, setStoreEndTime] = useState<string>(
+    therapist?.store_hours_end || '20:00'
+  );
   const [visitRadius, setVisitRadius] = useState<number>(therapist?.visit_radius_km || 15);
   const [scheduleSavedToast, setScheduleSavedToast] = useState(false);
 
@@ -222,7 +241,7 @@ export const TherapistView: React.FC = () => {
           }`}
         >
           <Clock className="w-4 h-4" />
-          <span>シフト・出張エリア設定</span>
+          <span>営業時間・シフト・出張設定</span>
         </button>
 
         <button
@@ -339,24 +358,37 @@ export const TherapistView: React.FC = () => {
                       </div>
 
                       {/* アクションボタン */}
-                      <div className="flex items-center gap-2 w-full md:w-auto shrink-0 justify-end border-t md:border-t-0 pt-3 md:pt-0">
+                      <div className="flex flex-wrap items-center gap-2 w-full md:w-auto shrink-0 justify-end border-t md:border-t-0 pt-3 md:pt-0">
+                        {/* メッセージボタン */}
+                        <button
+                          onClick={() => setChatBooking(b)}
+                          className="px-3.5 py-2 rounded-xl border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/50 text-slate-700 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs relative"
+                          title="お客様とメッセージで連絡"
+                        >
+                          <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>メッセージ</span>
+                          {messages.some((m) => m.booking_id === b.id && m.receiver_id === currentUser.id && !m.is_read) && (
+                            <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                          )}
+                        </button>
+
                         <button
                           onClick={() => {
                             if (confirm('このリクエストを辞退しますか？')) {
                               updateBookingStatus(b.id, 'cancelled');
                             }
                           }}
-                          className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-bold transition flex items-center gap-1"
+                          className="px-3.5 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-bold transition flex items-center gap-1"
                         >
-                          <X className="w-4 h-4 text-rose-500" />
-                          <span>辞退する</span>
+                          <X className="w-3.5 h-3.5 text-rose-500" />
+                          <span>辞退</span>
                         </button>
                         <button
                           onClick={() => updateBookingStatus(b.id, 'confirmed')}
-                          className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-md shadow-emerald-600/20 flex items-center gap-1.5"
+                          className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-md shadow-emerald-600/20 flex items-center gap-1.5"
                         >
                           <Check className="w-4 h-4" />
-                          <span>承認して予約を確定</span>
+                          <span>承認</span>
                         </button>
                       </div>
                     </div>
@@ -419,6 +451,19 @@ export const TherapistView: React.FC = () => {
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2 w-full md:w-auto shrink-0 justify-end border-t md:border-t-0 pt-3 md:pt-0">
+                        {/* メッセージボタン */}
+                        <button
+                          onClick={() => setChatBooking(b)}
+                          className="px-3.5 py-2 rounded-xl border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/50 text-slate-700 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs relative"
+                          title="お客様とメッセージで連絡"
+                        >
+                          <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>メッセージ</span>
+                          {messages.some((m) => m.booking_id === b.id && m.receiver_id === currentUser.id && !m.is_read) && (
+                            <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                          )}
+                        </button>
+
                         {/* 出張時の現在地GPS送信シミュレータ */}
                         {b.booking_type === 'visit' && (
                           <button
@@ -453,22 +498,30 @@ export const TherapistView: React.FC = () => {
         </div>
       )}
 
-      {/* タブ 2: スケジュール・出張エリア設定 */}
+      {/* タブ 2: 営業時間・シフト・出張エリア設定 */}
       {activeTab === 'schedule' && (
         <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-6 max-w-3xl">
-          <div>
-            <h3 className="font-bold text-slate-900 text-base">受付スケジュール & 出張エリア設定</h3>
+          <div className="border-b border-slate-100 pb-3">
+            <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
+              <Clock className="w-5 h-5 text-emerald-600" />
+              <span>稼働シフト・営業時間 & 出張エリア設定</span>
+            </h3>
             <p className="text-xs text-slate-500 mt-0.5">
-              顧客が予約リクエストを送れる曜日と時間帯、および出張訪問可能な半径を設定します。
+              顧客が予約できる受付曜日・時間帯を設定します。出張訪問と店舗来店は1画面で共通または個別に管理できます。
             </p>
           </div>
 
           {/* 曜日選択 */}
-          <div className="space-y-2">
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-              受付可能曜日
-            </label>
-            <div className="flex gap-2">
+          <div className="space-y-2.5">
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                受付可能曜日（稼働日） <span className="text-rose-500">*</span>
+              </label>
+              <span className="text-[11px] text-slate-400">
+                選択されていない曜日は「定休日」として自動登録されます
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
               {daysOfWeek.map((d) => {
                 const isSelected = selectedDays.includes(d.id);
                 return (
@@ -476,86 +529,246 @@ export const TherapistView: React.FC = () => {
                     key={d.id}
                     type="button"
                     onClick={() => toggleDay(d.id)}
-                    className={`w-10 h-10 rounded-2xl text-xs font-bold transition flex items-center justify-center ${
+                    className={`w-11 h-11 rounded-2xl text-xs font-black transition flex flex-col items-center justify-center gap-0.5 shadow-2xs ${
                       isSelected
-                        ? 'bg-emerald-600 text-white shadow-sm'
-                        : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                        ? 'bg-emerald-600 text-white ring-2 ring-emerald-600/30'
+                        : 'bg-slate-100 text-slate-400 hover:bg-slate-200'
                     }`}
                   >
-                    {d.label}
+                    <span>{d.label}</span>
+                    <span className="text-[9px] font-normal opacity-80">
+                      {isSelected ? '営業' : '休'}
+                    </span>
                   </button>
                 );
               })}
             </div>
           </div>
 
-          {/* 時間帯 */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                開始時間
+          {/* 出張・店舗の時間設定モード切替 */}
+          {therapist?.is_store_based && therapist?.is_visit_based && (
+            <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-between">
+              <div>
+                <span className="text-xs font-bold text-slate-800 block">
+                  出張・店舗の受付時間の一括管理
+                </span>
+                <span className="text-[11px] text-slate-500">
+                  {isSeparateStoreHours
+                    ? '出張施術と店舗施術で別々の時間帯を設定します'
+                    : '出張施術と店舗施術で同じ受付時間帯を使用します（推奨・自動連動）'}
+                </span>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isSeparateStoreHours}
+                  onChange={(e) => setIsSeparateStoreHours(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
               </label>
-              <input
-                type="time"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800"
-              />
             </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                終了時間
-              </label>
-              <input
-                type="time"
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800"
-              />
+          )}
+
+          {/* 時間帯設定 */}
+          {!isSeparateStoreHours ? (
+            /* 共通時間帯設定 (通常モード) */
+            <div className="space-y-2 p-4 bg-emerald-50/50 rounded-2xl border border-emerald-200">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs font-bold text-emerald-900 flex items-center gap-1.5">
+                  <Check className="w-4 h-4 text-emerald-600" />
+                  <span>基本の受付・営業時間（出張・店舗 共通）</span>
+                </span>
+                <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">
+                  共通連動中
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">開始時刻</label>
+                  <input
+                    type="time"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                    className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:outline-emerald-500 shadow-2xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">終了時刻</label>
+                  <input
+                    type="time"
+                    value={endTime}
+                    onChange={(e) => setEndTime(e.target.value)}
+                    className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:outline-emerald-500 shadow-2xs"
+                  />
+                </div>
+              </div>
             </div>
-          </div>
+          ) : (
+            /* 個別時間帯設定 (詳細モード: 出張 vs 店舗 を1画面で比較設定) */
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fadeIn">
+              {/* 出張の受付枠 */}
+              <div className="p-4 bg-emerald-50/60 rounded-2xl border border-emerald-200 space-y-3">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-900">
+                  <Home className="w-4 h-4 text-emerald-600" />
+                  <span>出張施術の受付時間</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[10px] text-slate-500 font-bold mb-1">開始時刻</label>
+                    <input
+                      type="time"
+                      value={startTime}
+                      onChange={(e) => setStartTime(e.target.value)}
+                      className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:outline-emerald-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-slate-500 font-bold mb-1">終了時刻</label>
+                    <input
+                      type="time"
+                      value={endTime}
+                      onChange={(e) => setEndTime(e.target.value)}
+                      className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:outline-emerald-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 店舗の営業時間 */}
+              <div className="p-4 bg-teal-50/60 rounded-2xl border border-teal-200 space-y-3">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-teal-900">
+                  <Building className="w-4 h-4 text-teal-700" />
+                  <span>店舗サロンの営業時間</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[10px] text-slate-500 font-bold mb-1">開店時刻</label>
+                    <input
+                      type="time"
+                      value={storeStartTime}
+                      onChange={(e) => setStoreStartTime(e.target.value)}
+                      className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:outline-teal-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-slate-500 font-bold mb-1">閉店時刻</label>
+                    <input
+                      type="time"
+                      value={storeEndTime}
+                      onChange={(e) => setStoreEndTime(e.target.value)}
+                      className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:outline-teal-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 自動反映プレビュー */}
+          {therapist?.is_store_based && (
+            <div className="p-3.5 bg-slate-100 rounded-2xl text-xs text-slate-600 flex items-start gap-2">
+              <Building className="w-4 h-4 text-teal-700 shrink-0 mt-0.5" />
+              <div>
+                <span className="font-bold text-slate-800 block">
+                  店舗・サロン情報の「営業時間・定休日」へ自動連動します
+                </span>
+                <span className="text-[11px] text-slate-500 mt-0.5 block">
+                  表示プレビュー: 【
+                  {selectedDays.map((d) => daysOfWeek.find((x) => x.id === d)?.label).join('・')}曜{' '}
+                  {!isSeparateStoreHours ? `${startTime} 〜 ${endTime}` : `${storeStartTime} 〜 ${storeEndTime}`}{' '}
+                  (
+                  {daysOfWeek.filter((d) => !selectedDays.includes(d.id)).length > 0
+                    ? `${daysOfWeek.filter((d) => !selectedDays.includes(d.id)).map((d) => d.label).join('・')}曜定休`
+                    : '無休'}
+                  )】
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* 出張可能エリア (半径スライダー) */}
-          <div className="space-y-3 pt-3 border-t border-slate-100">
-            <div className="flex justify-between items-center">
-              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                出張訪問可能エリア（半径）
-              </label>
-              <span className="text-sm font-black text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg">
-                拠点から {visitRadius} km
-              </span>
+          {therapist?.is_visit_based && (
+            <div className="space-y-3 pt-3 border-t border-slate-100">
+              <div className="flex justify-between items-center">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                  <Home className="w-4 h-4 text-emerald-600" />
+                  <span>出張訪問可能エリア（半径）</span>
+                </label>
+                <span className="text-sm font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                  拠点から {visitRadius} km
+                </span>
+              </div>
+              <input
+                type="range"
+                min="3"
+                max="30"
+                step="1"
+                value={visitRadius}
+                onChange={(e) => setVisitRadius(Number(e.target.value))}
+                className="w-full accent-emerald-600 cursor-pointer"
+              />
+              <div className="flex justify-between text-[11px] text-slate-400">
+                <span>3km (近隣のみ)</span>
+                <span>15km (松山市中心部・今治等)</span>
+                <span>30km (広域対応)</span>
+              </div>
             </div>
-            <input
-              type="range"
-              min="3"
-              max="30"
-              step="1"
-              value={visitRadius}
-              onChange={(e) => setVisitRadius(Number(e.target.value))}
-              className="w-full accent-emerald-600 cursor-pointer"
-            />
-            <div className="flex justify-between text-[11px] text-slate-400">
-              <span>3km (近隣のみ)</span>
-              <span>15km (都内主要区)</span>
-              <span>30km (広域対応)</span>
-            </div>
-          </div>
+          )}
 
-          <div className="pt-4 flex items-center justify-between">
+          {/* 保存ボタン */}
+          <div className="pt-4 flex items-center justify-between border-t border-slate-100">
             {scheduleSavedToast && (
-              <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
+              <span className="text-xs font-bold text-emerald-600 flex items-center gap-1.5 animate-fadeIn">
                 <CheckCircle2 className="w-4 h-4" />
-                設定を保存しました
+                <span>シフト・営業時間設定を保存しました（店舗情報にも連動反映済）</span>
               </span>
             )}
             <button
-              onClick={() => {
+              type="button"
+              onClick={async () => {
+                const dayLabelsMap: Record<string, string> = {
+                  mon: '月',
+                  tue: '火',
+                  wed: '水',
+                  thu: '木',
+                  fri: '金',
+                  sat: '土',
+                  sun: '日',
+                };
+                const openDaysStr = selectedDays.map((id) => dayLabelsMap[id]).join('・');
+                const closedDayIds = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].filter(
+                  (id) => !selectedDays.includes(id)
+                );
+                const closedDaysStr = closedDayIds.length > 0
+                  ? `${closedDayIds.map((id) => dayLabelsMap[id]).join('・')}曜定休`
+                  : '無休';
+
+                const effectiveStoreStart = isSeparateStoreHours ? storeStartTime : startTime;
+                const effectiveStoreEnd = isSeparateStoreHours ? storeEndTime : endTime;
+                const autoStoreHours = `${openDaysStr} ${effectiveStoreStart} 〜 ${effectiveStoreEnd} (${closedDaysStr})`;
+
+                await updateTherapistInfo(
+                  currentUser.id,
+                  {},
+                  {
+                    available_days: selectedDays,
+                    available_hours_start: startTime,
+                    available_hours_end: endTime,
+                    is_separate_store_hours: isSeparateStoreHours,
+                    store_hours_start: storeStartTime,
+                    store_hours_end: storeEndTime,
+                    store_hours: autoStoreHours,
+                    visit_radius_km: visitRadius,
+                  }
+                );
+
                 setScheduleSavedToast(true);
-                setTimeout(() => setScheduleSavedToast(false), 3000);
+                setTimeout(() => setScheduleSavedToast(false), 3500);
               }}
-              className="ml-auto px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md transition"
+              className="ml-auto px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold shadow-md transition active:scale-95"
             >
-              スケジュール・エリアを保存
+              スケジュール・営業時間を保存
             </button>
           </div>
         </div>
@@ -909,6 +1122,14 @@ export const TherapistView: React.FC = () => {
 
       {/* タブ 5: プロフィール・登録情報編集 */}
       {activeTab === 'profile' && <TherapistProfileEdit />}
+
+      {/* チャットモーダル */}
+      {chatBooking && (
+        <BookingChatModal
+          booking={chatBooking}
+          onClose={() => setChatBooking(null)}
+        />
+      )}
     </div>
   );
 };

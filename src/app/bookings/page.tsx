@@ -6,6 +6,7 @@ import { useApp } from '@/context/AppContext';
 import { Header } from '@/components/Header';
 import { LiveTrackingModal } from '@/components/customer/LiveTrackingModal';
 import { ReviewModal } from '@/components/customer/ReviewModal';
+import { BookingChatModal } from '@/components/chat/BookingChatModal';
 import { formatPrice, formatDate } from '@/lib/geo';
 import { Booking } from '@/types';
 import {
@@ -19,6 +20,7 @@ import {
   Search,
   Clock,
   HeartPulse,
+  MessageCircle,
 } from 'lucide-react';
 
 export default function BookingsPage() {
@@ -29,10 +31,12 @@ export default function BookingsPage() {
     allUsers,
     services,
     reviews,
+    messages,
   } = useApp();
 
   const [trackingBooking, setTrackingBooking] = useState<Booking | null>(null);
   const [reviewBooking, setReviewBooking] = useState<Booking | null>(null);
+  const [chatBooking, setChatBooking] = useState<Booking | null>(null);
 
   // ログインユーザーの予約一覧
   const myBookings = bookings.filter((b) => b.customer_id === currentUser.id);
@@ -130,6 +134,9 @@ export default function BookingsPage() {
               const therapistUser = allUsers.find((u) => u.id === b.therapist_id);
               const service = services.find((s) => s.id === b.service_id);
               const hasReviewed = reviews.some((r) => r.booking_id === b.id);
+              const unreadCount = messages.filter(
+                (m) => m.booking_id === b.id && m.receiver_id === currentUser.id && !m.is_read
+              ).length;
 
               return (
                 <div
@@ -184,6 +191,19 @@ export default function BookingsPage() {
                   </div>
 
                   <div className="flex flex-wrap sm:flex-col items-end gap-2 w-full sm:w-auto shrink-0 border-t sm:border-t-0 pt-3 sm:pt-0">
+                    {/* メッセージチャットボタン */}
+                    <button
+                      onClick={() => setChatBooking(b)}
+                      className="px-3.5 py-1.5 bg-white hover:bg-emerald-50 text-slate-800 border border-slate-300 hover:border-emerald-400 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs relative"
+                      title="セラピストとメッセージで連絡"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>メッセージ</span>
+                      {unreadCount > 0 && (
+                        <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                      )}
+                    </button>
+
                     {/* 出張施術かつ確定済みならリアルタイム追跡ボタン */}
                     {b.booking_type === 'visit' && (b.status === 'confirmed' || b.status === 'pending') && (
                       <button
@@ -257,6 +277,14 @@ export default function BookingsPage() {
         <ReviewModal
           booking={reviewBooking}
           onClose={() => setReviewBooking(null)}
+        />
+      )}
+
+      {/* メッセージチャットモーダル */}
+      {chatBooking && (
+        <BookingChatModal
+          booking={chatBooking}
+          onClose={() => setChatBooking(null)}
         />
       )}
     </div>

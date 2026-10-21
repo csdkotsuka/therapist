@@ -45,6 +45,13 @@ export interface TherapistProfile {
   store_hours?: string;
   store_facilities?: string[];
   store_notes?: string;
+  // 稼働シフト・営業時間設定
+  available_days?: string[];
+  available_hours_start?: string;
+  available_hours_end?: string;
+  is_separate_store_hours?: boolean;
+  store_hours_start?: string;
+  store_hours_end?: string;
   // 特典・キャンペーン情報
   campaign?: {
     badge: string;
@@ -99,4 +106,14 @@ export interface Review {
 
 export interface PlatformSettings {
   fee_percentage: number;
+}
+
+export interface ChatMessage {
+  id: string;
+  booking_id: string;
+  sender_id: string;
+  receiver_id: string;
+  content: string;
+  created_at: string;
+  is_read: boolean;
 }

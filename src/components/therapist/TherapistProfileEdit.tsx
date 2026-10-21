@@ -477,9 +477,14 @@ export const TherapistProfileEdit: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  営業時間・定休日
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-bold text-slate-700">
+                    営業時間・定休日
+                  </label>
+                  <span className="text-[10px] text-teal-700 bg-teal-100/70 px-1.5 py-0.2 rounded font-bold">
+                    シフト設定と連動
+                  </span>
+                </div>
                 <div className="relative">
                   <Clock className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
@@ -490,6 +495,9 @@ export const TherapistProfileEdit: React.FC = () => {
                     className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-teal-500 shadow-2xs"
                   />
                 </div>
+                <p className="text-[10px] text-slate-500 mt-1">
+                  ※「営業時間・シフト・出張設定」タブで設定した受付曜日・時間帯が自動連動して反映されます（ここでの直接微修正も可能です）。
+                </p>
               </div>
 
               {/* 店舗住所 */}
