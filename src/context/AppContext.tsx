@@ -76,7 +76,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [bookings, setBookings] = useState<Booking[]>(initialBookings);
   const [reviews, setReviews] = useState<Review[]>(initialReviews);
   const [platformFeeRate, setPlatformFeeRateState] = useState<number>(20);
-  const [userLocation, setUserLocation] = useState<UserLocation>(PRESET_LOCATIONS[0]);
+  const [userLocation, setUserLocation] = useState<UserLocation>(() => {
+    if (initialCustomer.lat && initialCustomer.lng) {
+      return {
+        name: initialCustomer.address || `${initialCustomer.name}の登録住所`,
+        lat: initialCustomer.lat,
+        lng: initialCustomer.lng,
+      };
+    }
+    return PRESET_LOCATIONS[0];
+  });
   const [isLoaded, setIsLoaded] = useState(false);
   const [isLoadingDb, setIsLoadingDb] = useState(false);
 
@@ -183,7 +192,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (parsed.platformFeeRate) setPlatformFeeRateState(parsed.platformFeeRate);
         if (parsed.currentUserId) {
           const user = (parsed.allUsers || initialProfiles).find((u: Profile) => u.id === parsed.currentUserId);
-          if (user) setCurrentUser(user);
+          if (user) {
+            setCurrentUser(user);
+            if (user.lat && user.lng) {
+              setUserLocation({
+                name: user.address || `${user.name}の登録住所`,
+                lat: user.lat,
+                lng: user.lng,
+              });
+            }
+          }
         }
       }
     } catch (e) {
@@ -223,6 +241,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const user = allUsers.find((u) => u.id === userId);
     if (user) {
       setCurrentUser(user);
+      if (user.lat && user.lng) {
+        setUserLocation({
+          name: user.address || `${user.name}の登録住所`,
+          lat: user.lat,
+          lng: user.lng,
+        });
+      }
     }
   };
 
