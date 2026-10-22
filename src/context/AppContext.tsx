@@ -147,9 +147,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setIsLoadingDb(true);
 
       // 1. profiles
+      // 1. profiles: Supabaseのデータをベースにしつつ、mockDataの新規追加ユーザーも確実にマージ
       const { data: dbProfiles, error: pErr } = await supabase.from('profiles').select('*');
       if (!pErr && dbProfiles && dbProfiles.length > 0) {
-        setAllUsers(dbProfiles as Profile[]);
+        setAllUsers((prev) => {
+          const dbIds = new Set(dbProfiles.map((p: any) => p.id));
+          const mockOnly = initialProfiles.filter((p) => !dbIds.has(p.id));
+          return [...(dbProfiles as Profile[]), ...mockOnly];
+        });
       }
 
       // 2. therapist_profiles
@@ -170,6 +175,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         });
       }
 
+      // mockData の新規専門職プロフィールで Supabase にまだないものを確実に補完
+      Object.entries(initialTherapistProfiles).forEach(([uid, tp]) => {
+        if (!mapped[uid]) {
+          mapped[uid] = tp;
+        }
+      });
+
       // profiles に therapist として存在するが therapist_profiles に未登録のユーザーを自動補完
       if (dbProfiles) {
         dbProfiles
@@ -183,9 +195,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 specialities: ['ボディケア', 'リラクゼーション'],
                 is_store_based: true,
                 is_visit_based: true,
-                address: tpUser.address || '東京都内',
-                lat: tpUser.lat || 35.6666,
-                lng: tpUser.lng || 139.7092,
+                address: tpUser.address || '愛媛県松山市',
+                lat: tpUser.lat || 33.8392,
+                lng: tpUser.lng || 132.7656,
                 visit_radius_km: 10,
                 rating_avg: 5.0,
                 reviews_count: 0,
@@ -207,10 +219,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return ensureCampaigns(merged);
       });
 
-      // 3. services
+      // 3. services: Supabaseのサービスをベースにしつつ、mockDataの新規カテゴリサービスも確実にマージ
       const { data: dbServices, error: sErr } = await supabase.from('services').select('*');
       if (!sErr && dbServices && dbServices.length > 0) {
-        setServices(dbServices as Service[]);
+        setServices((prev) => {
+          const dbIds = new Set(dbServices.map((s: any) => s.id));
+          const mockOnly = initialServices.filter((s) => !dbIds.has(s.id));
+          return [...(dbServices as Service[]), ...mockOnly];
+        });
       }
 
       // 4. bookings
