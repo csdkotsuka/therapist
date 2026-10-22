@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { formatPrice, formatDate } from '@/lib/geo';
@@ -51,7 +52,13 @@ import {
   Upload,
 } from 'lucide-react';
 
-export const AdminView: React.FC = () => {
+export type AdminSection = 'kpi' | 'bookings' | 'therapists' | 'customers' | 'reviews' | 'branding' | 'settings';
+
+interface AdminViewProps {
+  activeSection?: AdminSection;
+}
+
+export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapists' }) => {
   const router = useRouter();
   const {
     allUsers,
@@ -80,7 +87,11 @@ export const AdminView: React.FC = () => {
     rejectTherapistVerification,
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'kpi' | 'bookings' | 'users' | 'customers' | 'reviews' | 'branding' | 'settings'>('users');
+  const [activeTab, setActiveTab] = useState<AdminSection>(activeSection);
+
+  useEffect(() => {
+    setActiveTab(activeSection);
+  }, [activeSection]);
   const [feeInput, setFeeInput] = useState<number>(platformFeeRate);
   const [feeSaveMessage, setFeeSaveMessage] = useState(false);
   const [brandSaveMessage, setBrandSaveMessage] = useState<string | null>(null);
@@ -304,8 +315,8 @@ export const AdminView: React.FC = () => {
 
       {/* Tabs */}
       <div className="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
-        <button
-          onClick={() => setActiveTab('kpi')}
+        <Link
+          href="/admin/kpi"
           className={`px-4 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap ${
             activeTab === 'kpi'
               ? 'bg-slate-900 text-white shadow-md'
@@ -314,10 +325,10 @@ export const AdminView: React.FC = () => {
         >
           <TrendingUp className="w-4 h-4" />
           <span>KPI・ダッシュボード</span>
-        </button>
+        </Link>
 
-        <button
-          onClick={() => setActiveTab('bookings')}
+        <Link
+          href="/admin/bookings"
           className={`px-4 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap ${
             activeTab === 'bookings'
               ? 'bg-slate-900 text-white shadow-md'
@@ -329,12 +340,12 @@ export const AdminView: React.FC = () => {
           {pendingBookingsCount > 0 && (
             <span className="w-2 h-2 rounded-full bg-amber-500"></span>
           )}
-        </button>
+        </Link>
 
-        <button
-          onClick={() => setActiveTab('users')}
+        <Link
+          href="/admin/therapists"
           className={`px-4 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap ${
-            activeTab === 'users'
+            activeTab === 'therapists'
               ? 'bg-slate-900 text-white shadow-md'
               : 'text-slate-600 hover:bg-slate-100'
           }`}
@@ -347,10 +358,10 @@ export const AdminView: React.FC = () => {
               : ''}
             {therapists.length})
           </span>
-        </button>
+        </Link>
 
-        <button
-          onClick={() => setActiveTab('customers')}
+        <Link
+          href="/admin/customers"
           className={`px-4 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap ${
             activeTab === 'customers'
               ? 'bg-slate-900 text-white shadow-md'
@@ -365,10 +376,10 @@ export const AdminView: React.FC = () => {
               : ''}
             {customers.length})
           </span>
-        </button>
+        </Link>
 
-        <button
-          onClick={() => setActiveTab('reviews')}
+        <Link
+          href="/admin/reviews"
           className={`px-4 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap ${
             activeTab === 'reviews'
               ? 'bg-slate-900 text-white shadow-md'
@@ -377,10 +388,10 @@ export const AdminView: React.FC = () => {
         >
           <Star className="w-4 h-4" />
           <span>レビュー管理 ({reviews.length})</span>
-        </button>
+        </Link>
 
-        <button
-          onClick={() => setActiveTab('branding')}
+        <Link
+          href="/admin/branding"
           className={`px-4 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap ${
             activeTab === 'branding'
               ? 'bg-slate-900 text-white shadow-md'
@@ -389,10 +400,10 @@ export const AdminView: React.FC = () => {
         >
           <Palette className="w-4 h-4 text-emerald-500" />
           <span>🎨 アプリ名・ロゴ・ブランド設定</span>
-        </button>
+        </Link>
 
-        <button
-          onClick={() => setActiveTab('settings')}
+        <Link
+          href="/admin/settings"
           className={`px-4 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap ${
             activeTab === 'settings'
               ? 'bg-slate-900 text-white shadow-md'
@@ -401,7 +412,7 @@ export const AdminView: React.FC = () => {
         >
           <Sliders className="w-4 h-4" />
           <span>手数料率・プラットフォーム設定</span>
-        </button>
+        </Link>
       </div>
 
       {/* タブ 1: KPI ダッシュボード */}
@@ -575,7 +586,7 @@ export const AdminView: React.FC = () => {
       )}
 
       {/* タブ 3: セラピスト登録審査・4点書類提出確認 & 自動データ破棄承認 */}
-      {activeTab === 'users' && (
+      {activeTab === 'therapists' && (
         <div className="space-y-5">
           {/* 基本方針 ＆ 4ステップ審査フロー概要パネル */}
           <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-white rounded-3xl p-5 sm:p-6 shadow-lg border border-slate-700/80 space-y-4">
@@ -860,148 +871,106 @@ export const AdminView: React.FC = () => {
                   const stageMeta = STAGE_META[stage];
                   const checklist = getChecklist(tp, ob);
                   const certified = isTherapistCertified(tp);
-                  const latestLog = verificationLogs.find((l) => l.therapist_id === th.id && l.decision === 'approved');
+                  const cityName = th.address ? th.address.replace('愛媛県', '').split('市')[0] + '市' : '愛媛';
 
                   return (
                     <div
                       key={th.id}
-                      className={`p-5 sm:p-6 transition ${
+                      className={`px-4 py-2.5 sm:py-2 transition flex flex-col md:flex-row md:items-center justify-between gap-2.5 border-b border-slate-100 ${
                         stage === 'ready'
-                          ? 'bg-emerald-50/40 hover:bg-emerald-50/70'
+                          ? 'bg-emerald-50/60 hover:bg-emerald-50/90'
                           : stage === 'rejected'
-                          ? 'bg-rose-50/30 hover:bg-rose-50/50'
-                          : stage === 'in_progress' || stage === 'not_started'
-                          ? 'bg-amber-50/25 hover:bg-amber-50/50'
-                          : 'hover:bg-slate-50/60'
+                          ? 'bg-rose-50/40 hover:bg-rose-50/60'
+                          : 'hover:bg-slate-50/80'
                       }`}
                     >
-                      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
-                        {/* 左側: セラピスト基本情報 */}
-                        <div className="flex items-start gap-4">
-                          <img
-                            src={th.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(th.name)}`}
-                            alt={th.name}
-                            className="w-14 h-14 rounded-2xl object-cover ring-2 ring-emerald-500/20 shrink-0"
-                          />
-                          <div className="space-y-1">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <h4 className="font-black text-slate-900 text-sm">{th.name}</h4>
-                              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${stageMeta.badge}`}>
-                                {stageMeta.label}
+                      {/* 左側: 基本情報（アバター、名前、エリア、審査ステージバッジ） */}
+                      <div className="flex items-center gap-3 min-w-0">
+                        <img
+                          src={th.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(th.name)}`}
+                          alt={th.name}
+                          className="w-9 h-9 rounded-xl object-cover ring-1 ring-slate-200 shrink-0"
+                        />
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <span className="font-bold text-slate-900 text-xs sm:text-sm truncate">
+                              {th.name}
+                            </span>
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${stageMeta.badge}`}>
+                              {stageMeta.label}
+                            </span>
+                            {certified && (
+                              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold bg-indigo-600 text-white">
+                                <Award className="w-2.5 h-2.5" />
+                                <span>認定済</span>
                               </span>
-                              {certified && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-600 text-white shadow-2xs">
-                                  <Award className="w-3 h-3" />
-                                  <span>専門認定バッジ付与済</span>
-                                </span>
-                              )}
-                              {ob?.claimed_qualification_type && (
-                                <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-bold border border-slate-200">
-                                  申請資格: {ob.claimed_qualification_type}
-                                </span>
-                              )}
-                              <span className="text-[11px] text-slate-400 font-mono">{th.email}</span>
-                            </div>
-
-                            <p className="text-xs text-slate-600 max-w-2xl line-clamp-2">
-                              {tp?.bio || '新規登録セラピストです。管理者による審査待ちです。'}
-                            </p>
-
-                            {ob?.rejection_reason && (
-                              <div className="p-2 rounded-xl bg-rose-100/80 border border-rose-200 text-[11px] text-rose-800 font-bold flex items-center gap-1.5">
-                                <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-rose-600" />
-                                <span>差戻し理由: {ob.rejection_reason}（旧提出ファイルはStorageから自動削除済）</span>
-                              </div>
                             )}
-
-                            {latestLog && (
-                              <div className="text-[11px] text-indigo-700 font-semibold flex flex-wrap items-center gap-2">
-                                <span>✓ 承認ログ記録済: {latestLog.qualification_type}（登録番号: {latestLog.registration_number || '確認済'}）</span>
-                                <span className="text-slate-400">|</span>
-                                <span>承認日時: {formatDate(latestLog.verified_at)}</span>
-                                <span className="text-slate-400">|</span>
-                                <span className="text-rose-600 font-bold">原本ファイル {latestLog.files_deleted_count ?? 2}件 自動削除済</span>
-                              </div>
+                            {ob?.claimed_qualification_type && (
+                              <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[10px] font-medium border border-slate-200">
+                                {ob.claimed_qualification_type}
+                              </span>
                             )}
                           </div>
-                        </div>
-
-                        {/* 右側: アクションボタン群 */}
-                        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-                          <button
-                            onClick={() => openVerificationModal(th.id)}
-                            className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs cursor-pointer ${
-                              stage === 'ready'
-                                ? 'bg-emerald-600 hover:bg-emerald-500 text-white ring-2 ring-emerald-500/30'
-                                : certified
-                                ? 'bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200'
-                                : 'bg-slate-900 hover:bg-slate-800 text-white'
-                            }`}
-                          >
-                            <ClipboardCheck className="w-4 h-4" />
-                            <span>
-                              {stage === 'ready'
-                                ? '書類を照合して承認審査する'
-                                : certified
-                                ? '提出状況・承認ログを確認'
-                                : '4ステップ進捗・提出書類を確認'}
-                            </span>
-                          </button>
-
-                          <button
-                            onClick={() => {
-                              switchUser(th.id);
-                              router.push('/therapist');
-                            }}
-                            className="px-3 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition flex items-center gap-1"
-                            title="このセラピストの視点で4ステップ登録・書類提出画面を表示"
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                            <span>セラピスト画面で表示</span>
-                          </button>
+                          <div className="flex items-center gap-2 text-[10px] text-slate-500 mt-0.5">
+                            <span>{cityName}</span>
+                            {tp?.is_store_based && <span className="text-purple-600 font-semibold">🏢店舗あり</span>}
+                            <span className="text-slate-300">|</span>
+                            <span className="font-mono text-slate-400 truncate max-w-[150px]">{th.email}</span>
+                          </div>
                         </div>
                       </div>
 
-                      {/* 下段: 審査手数料 ＋ 提出書類4点の有無ステータス一覧グリッド */}
-                      <div className="mt-4 pt-3 border-t border-slate-200/70 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
-                        {checklist.map((item) => {
-                          const isDocPurged = certified && (item.key === 'qualification' || item.key === 'insurance');
-                          return (
-                            <div
-                              key={item.key}
-                              className={`px-3 py-2 rounded-xl border text-xs flex items-start gap-2 ${
-                                item.ok
-                                  ? 'bg-white border-emerald-200/90 text-slate-800'
-                                  : 'bg-slate-100/80 border-slate-200 text-slate-500'
-                              }`}
-                            >
-                              {item.ok ? (
-                                <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                              ) : (
-                                <XCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                              )}
-                              <div className="min-w-0 flex-1">
-                                <div className="flex items-center justify-between gap-1">
-                                  <span className="font-bold text-[11px] text-slate-900 truncate">{item.shortLabel}</span>
-                                  <span
-                                    className={`text-[9px] font-black px-1.5 py-0.2 rounded ${
-                                      isDocPurged
-                                        ? 'bg-indigo-100 text-indigo-800'
-                                        : item.ok
-                                        ? 'bg-emerald-100 text-emerald-800'
-                                        : 'bg-amber-100 text-amber-800'
-                                    }`}
-                                  >
-                                    {isDocPurged ? '確認・削除済' : item.ok ? '提出・確認済' : '未完了'}
-                                  </span>
-                                </div>
-                                <p className="text-[10px] text-slate-500 truncate mt-0.5" title={item.detail}>
-                                  {item.detail}
-                                </p>
-                              </div>
-                            </div>
-                          );
-                        })}
+                      {/* 右側: 5つのステータス（済/未のみ）を右寄せで並べる ＋ アクションボタン */}
+                      <div className="flex items-center justify-between md:justify-end gap-2.5 shrink-0">
+                        {/* 5つの処理状況: 枠・詳細説明なし、済/未のみ */}
+                        <div className="flex items-center gap-1 sm:gap-1.5">
+                          {checklist.map((item) => {
+                            const isDone = item.ok;
+                            return (
+                              <span
+                                key={item.key}
+                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold ${
+                                  isDone
+                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                    : 'bg-slate-100 text-slate-400 border border-slate-200'
+                                }`}
+                                title={`${item.shortLabel}: ${isDone ? '済' : '未'}`}
+                              >
+                                <span className="text-[10px] text-slate-500 font-normal">{item.shortLabel}:</span>
+                                {isDone ? (
+                                  <span className="text-emerald-700 font-black">済</span>
+                                ) : (
+                                  <span className="text-slate-400 font-bold">未</span>
+                                )}
+                              </span>
+                            );
+                          })}
+                        </div>
+
+                        {/* 審査・承認ボタン（セラピストページへ直接リンク） */}
+                        <div className="flex items-center gap-1">
+                          <Link
+                            href={`/therapist/${th.id}/verification`}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1 whitespace-nowrap shadow-xs ${
+                              stage === 'ready'
+                                ? 'bg-emerald-600 hover:bg-emerald-500 text-white ring-2 ring-emerald-500/20'
+                                : certified
+                                ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
+                                : 'bg-slate-900 hover:bg-slate-800 text-white'
+                            }`}
+                          >
+                            <ClipboardCheck className="w-3.5 h-3.5" />
+                            <span>{stage === 'ready' ? '審査・承認' : '審査状況'}</span>
+                          </Link>
+
+                          <Link
+                            href={`/therapist/${th.id}/requests`}
+                            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition"
+                            title="セラピスト画面を開く"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   );

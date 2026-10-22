@@ -72,20 +72,21 @@ const COMMON_FACILITIES = [
   'パウダールーム完備',
 ];
 
-export const TherapistProfileEdit: React.FC = () => {
-  const { currentUser, therapistProfiles, updateTherapistInfo } = useApp();
-  const therapist = therapistProfiles[currentUser.id];
+export const TherapistProfileEdit: React.FC<{ therapistId?: string }> = ({ therapistId }) => {
+  const { currentUser, allUsers, therapistProfiles, updateTherapistInfo } = useApp();
+  const targetUser = (therapistId ? allUsers.find((u) => u.id === therapistId) : null) || currentUser;
+  const therapist = therapistProfiles[targetUser.id];
 
-  const [name, setName] = useState(currentUser.name || '');
-  const [phone, setPhone] = useState(currentUser.phone || '');
-  const [email, setEmail] = useState(currentUser.email || '');
-  const [postalCode, setPostalCode] = useState(currentUser.postal_code || '');
+  const [name, setName] = useState(targetUser.name || '');
+  const [phone, setPhone] = useState(targetUser.phone || '');
+  const [email, setEmail] = useState(targetUser.email || '');
+  const [postalCode, setPostalCode] = useState(targetUser.postal_code || '');
 
   // 拠点・出張出発地住所
-  const [address, setAddress] = useState(therapist?.address || currentUser.address || '');
+  const [address, setAddress] = useState(therapist?.address || targetUser.address || '');
   const [coords, setCoords] = useState<{ lat: number; lng: number }>({
-    lat: therapist?.lat || currentUser.lat || 33.8392,
-    lng: therapist?.lng || currentUser.lng || 132.7656,
+    lat: therapist?.lat || targetUser.lat || 33.8392,
+    lng: therapist?.lng || targetUser.lng || 132.7656,
   });
 
   // 施術スタイル・出張設定
@@ -128,17 +129,17 @@ export const TherapistProfileEdit: React.FC = () => {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // currentUser や therapist が変わった時の同期
+  // targetUser や therapist が変わった時の同期
   useEffect(() => {
-    setName(currentUser.name || '');
-    setPhone(currentUser.phone || '');
-    setEmail(currentUser.email || '');
-    setPostalCode(currentUser.postal_code || '');
+    setName(targetUser.name || '');
+    setPhone(targetUser.phone || '');
+    setEmail(targetUser.email || '');
+    setPostalCode(targetUser.postal_code || '');
     if (therapist) {
-      setAddress(therapist.address || currentUser.address || '');
+      setAddress(therapist.address || targetUser.address || '');
       setCoords({
-        lat: therapist.lat || currentUser.lat || 33.8392,
-        lng: therapist.lng || currentUser.lng || 132.7656,
+        lat: therapist.lat || targetUser.lat || 33.8392,
+        lng: therapist.lng || targetUser.lng || 132.7656,
       });
       setBio(therapist.bio || '');
       setSpecialities(therapist.specialities || []);
@@ -147,8 +148,8 @@ export const TherapistProfileEdit: React.FC = () => {
       setVisitRadiusKm(therapist.visit_radius_km || 15);
 
       // 店舗情報の同期
-      setStoreName(therapist.store_name || `${currentUser.name} サロン`);
-      setStoreAddress(therapist.store_address || therapist.address || currentUser.address || '');
+      setStoreName(therapist.store_name || `${targetUser.name} サロン`);
+      setStoreAddress(therapist.store_address || therapist.address || targetUser.address || '');
       setStoreAccess(therapist.store_access || '');
       setStoreParking(therapist.store_parking || '');
       setStoreHours(therapist.store_hours || '10:00 〜 20:00（不定休）');
@@ -166,7 +167,7 @@ export const TherapistProfileEdit: React.FC = () => {
         setCampaignDiscountValue(therapist.campaign.discount_value ?? 1000);
       }
     }
-  }, [currentUser, therapist]);
+  }, [targetUser, therapist]);
 
   // 郵便番号からの住所検索 (zipcloud API)
   const handlePostalLookup = async (target: 'address' | 'storeAddress') => {
@@ -288,7 +289,7 @@ export const TherapistProfileEdit: React.FC = () => {
       }
 
       await updateTherapistInfo(
-        currentUser.id,
+        targetUser.id,
         {
           name: name.trim(),
           phone: phone.trim(),
