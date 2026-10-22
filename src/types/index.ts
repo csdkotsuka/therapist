@@ -61,6 +61,55 @@ export interface TherapistProfile {
     discount_type?: 'fixed' | 'percent' | 'gift';
     discount_value?: number;
   };
+  // 本登録審査（4ステップ）のステータス
+  payment_status?: PaymentStatus; // Step1: 審査手数料の決済
+  payment_completed_at?: string | null;
+  is_identity_verified?: boolean; // Step2: Stripe Connect eKYC 完了 (payouts_enabled)
+  identity_verified_at?: string | null;
+  identity_verified_name?: string | null; // Stripe側の認証氏名（資格証との照合用テキスト）
+  is_certified?: boolean; // Step4: 運営承認済み（専門認定バッジ）
+  certified_at?: string | null;
+}
+
+export type PaymentStatus = 'pending' | 'completed';
+
+// 提出書類の種別（temp-qualifications バケットに一時保管される2種）
+export type VerificationDocKind = 'qualification' | 'insurance';
+
+// Step3 の提出状況（誓約書の同意記録 ＋ 一時ファイルのパス）
+export interface TherapistOnboarding {
+  therapist_id: string;
+  terms_version?: string | null;
+  terms_agreed_at?: string | null;
+  terms_signature_name?: string | null;
+  claimed_qualification_type?: string | null;
+  qualification_file_path?: string | null;
+  qualification_file_name?: string | null;
+  qualification_uploaded_at?: string | null;
+  insurance_file_path?: string | null;
+  insurance_file_name?: string | null;
+  insurance_uploaded_at?: string | null;
+  rejection_reason?: string | null;
+  rejected_at?: string | null;
+  files_purged_at?: string | null;
+  updated_at?: string | null;
+}
+
+// 承認ログ（画像削除後も保持するテキストのみ）
+export interface VerificationLog {
+  id: string;
+  therapist_id: string | null;
+  therapist_name: string | null;
+  decision: 'approved' | 'rejected';
+  verified_at: string;
+  verified_by: string | null;
+  qualification_type: string | null;
+  registration_number: string | null;
+  confirmed_name: string | null;
+  insurance_confirmed: boolean;
+  reason: string | null;
+  files_deleted_count: number | null;
+  files_deleted_at: string | null;
 }
 
 export type ServiceCategory =

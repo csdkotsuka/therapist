@@ -3,9 +3,21 @@
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { formatPrice, formatDate } from '@/lib/geo';
-import { Service, Booking, ServiceCategory } from '@/types';
+import { Service, Booking, ServiceCategory, VerificationDocKind } from '@/types';
 import { TherapistProfileEdit } from './TherapistProfileEdit';
 import { BookingChatModal } from '@/components/chat/BookingChatModal';
+import {
+  REVIEW_FEE_YEN,
+  STORAGE_BUCKET,
+  QUALIFICATION_TYPES,
+  TERMS_VERSION,
+  TERMS_ITEMS,
+  getChecklist,
+  getVerificationStage,
+  STAGE_META,
+  isTherapistCertified,
+  sampleDocumentDataUrl,
+} from '@/lib/verification';
 import {
   Calendar,
   Clock,
@@ -34,6 +46,12 @@ import {
   Gift,
   Tag,
   Sparkles,
+  FileText,
+  Upload,
+  Lock,
+  Award,
+  Trash2,
+  ClipboardCheck,
 } from 'lucide-react';
 
 export const TherapistView: React.FC = () => {
@@ -49,15 +67,41 @@ export const TherapistView: React.FC = () => {
     updateTherapistInfo,
     addService,
     allUsers,
+    onboardings,
+    verificationLogs,
+    completeReviewFeePayment,
+    completeStripeEkyc,
+    submitTermsAgreement,
+    uploadVerificationDoc,
   } = useApp();
 
   const therapist = therapistProfiles[currentUser.id];
+  const onboarding = onboardings[currentUser.id];
+  const verificationStage = getVerificationStage(therapist, onboarding);
+  const stageMeta = STAGE_META[verificationStage];
+  const checklist = getChecklist(therapist, onboarding);
+  const isCertified = isTherapistCertified(therapist);
   const myServices = services.filter((s) => s.therapist_id === currentUser.id);
   const myBookings = bookings.filter((b) => b.therapist_id === currentUser.id);
   const myReviews = reviews.filter((r) => r.therapist_id === currentUser.id);
 
-  // タブ管理: 'requests' | 'schedule' | 'campaign' | 'services' | 'reviews' | 'earnings' | 'profile'
-  const [activeTab, setActiveTab] = useState<'requests' | 'schedule' | 'campaign' | 'services' | 'reviews' | 'earnings' | 'profile'>('requests');
+  // タブ管理: 未認定のセラピストは初期表示で 'verification' (4ステップ本登録・書類提出) タブを開く
+  const [activeTab, setActiveTab] = useState<'verification' | 'requests' | 'schedule' | 'campaign' | 'services' | 'reviews' | 'earnings' | 'profile'>(
+    isCertified ? 'requests' : 'verification'
+  );
+
+  // Step 3 電子誓約書・書類アップロード用ステート
+  const [checkedTerms, setCheckedTerms] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(TERMS_ITEMS.map((item) => [item.id, Boolean(onboarding?.terms_agreed_at)]))
+  );
+  const [signatureName, setSignatureName] = useState<string>(
+    onboarding?.terms_signature_name || currentUser.name.replace(/\s*\(.*?\)\s*$/, '').trim()
+  );
+  const [claimedQualification, setClaimedQualification] = useState<string>(
+    onboarding?.claimed_qualification_type || QUALIFICATION_TYPES[0]
+  );
+  const [stepFeedback, setStepFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [isStepBusy, setIsStepBusy] = useState<boolean>(false);
 
   // チャットモーダル状態
   const [chatBooking, setChatBooking] = useState<Booking | null>(null);
@@ -191,11 +235,22 @@ export const TherapistView: React.FC = () => {
             className="w-16 h-16 rounded-2xl object-cover ring-4 ring-emerald-400/30"
           />
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-lg font-bold">{currentUser.name} セラピスト</h2>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-400/20 text-emerald-300 border border-emerald-400/30">
-                承認済みパートナー
-              </span>
+              {isCertified ? (
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-400/20 text-emerald-200 border border-emerald-400/30 flex items-center gap-1">
+                  <Award className="w-3 h-3" />
+                  <span>本登録・専門認定済パートナー</span>
+                </span>
+              ) : (
+                <button
+                  onClick={() => setActiveTab('verification')}
+                  className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-400 text-slate-950 flex items-center gap-1 shadow-xs"
+                >
+                  <ClipboardCheck className="w-3 h-3" />
+                  <span>本登録審査: {stageMeta.label}（手続きへ）</span>
+                </button>
+              )}
               {therapist?.is_store_based && (
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-400/20 text-teal-200 border border-teal-400/30 flex items-center gap-1">
                   <Building className="w-3 h-3" />
@@ -358,7 +413,494 @@ export const TherapistView: React.FC = () => {
           <Building className="w-4 h-4 text-teal-500" />
           <span>👤 プロフィール & 店舗情報編集</span>
         </button>
+
+        <button
+          onClick={() => setActiveTab('verification')}
+          className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap shadow-2xs ${
+            activeTab === 'verification'
+              ? 'bg-indigo-700 text-white shadow-md'
+              : !isCertified
+              ? 'bg-amber-50 text-amber-900 border-2 border-amber-400 hover:bg-amber-100'
+              : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+          }`}
+        >
+          <ShieldCheck className="w-4 h-4 text-emerald-500" />
+          <span>📋 4ステップ本登録・資格証/保険証提出</span>
+          <span
+            className={`px-2 py-0.2 rounded-full text-[9px] font-black border ${stageMeta.badge}`}
+          >
+            {stageMeta.label}
+          </span>
+        </button>
       </div>
+
+      {/* タブ 0: 4ステップ本登録・審査手続きウィザード */}
+      {activeTab === 'verification' && (() => {
+        const feePaid = isCertified || therapist?.payment_status === 'completed';
+        const ekycDone = isCertified || Boolean(therapist?.is_identity_verified);
+        const termsDone = isCertified || Boolean(onboarding?.terms_agreed_at);
+        const qualDone = isCertified || Boolean(onboarding?.qualification_file_path);
+        const insDone = isCertified || Boolean(onboarding?.insurance_file_path);
+        const allTermsChecked = TERMS_ITEMS.every((item) => Boolean(checkedTerms[item.id]));
+        const myLogs = verificationLogs.filter((l) => l.therapist_id === currentUser.id);
+
+        const handleDocUploadChange = async (kind: VerificationDocKind, e: React.ChangeEvent<HTMLInputElement>) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          setIsStepBusy(true);
+          setStepFeedback(null);
+          try {
+            const res = await uploadVerificationDoc(currentUser.id, kind, file);
+            setStepFeedback({ type: res.ok ? 'success' : 'error', text: res.message });
+          } finally {
+            setIsStepBusy(false);
+            e.target.value = '';
+          }
+        };
+
+        const handleSampleDocUpload = async (kind: VerificationDocKind) => {
+          setIsStepBusy(true);
+          setStepFeedback(null);
+          try {
+            const cleanName = currentUser.name.replace(/\s*\(.*?\)\s*$/, '').trim();
+            const svgUrl = sampleDocumentDataUrl(kind, cleanName);
+            const r = await fetch(svgUrl);
+            const blob = await r.blob();
+            const ext = kind === 'qualification' ? 'png' : 'pdf';
+            const mime = kind === 'qualification' ? 'image/png' : 'application/pdf';
+            const sampleFile = new File(
+              [blob],
+              `${cleanName}_${kind === 'qualification' ? '国家資格免許証' : '損害賠償責任保険証明'}_サンプル.${ext}`,
+              { type: mime }
+            );
+            const res = await uploadVerificationDoc(currentUser.id, kind, sampleFile);
+            setStepFeedback({ type: res.ok ? 'success' : 'error', text: res.message });
+          } finally {
+            setIsStepBusy(false);
+          }
+        };
+
+        return (
+          <div className="space-y-6">
+            {/* 全体ステータス＆基本方針説明カード */}
+            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${stageMeta.badge}`}>
+                      現在の審査ステージ: {stageMeta.label}
+                    </span>
+                    {isCertified && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-600 text-white">
+                        <Award className="w-3.5 h-3.5" />
+                        <span>専門認定バッジ付与済</span>
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="text-base font-black text-slate-900 mt-1.5">
+                    セラピスト登録・審査の4ステップフロー
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    運転免許証等の身分証明書画像は自社DBには一切保存せず Stripe Connect の自動eKYCに完全委託しています。また、提出された資格証・保険証票ファイルは運営の承認完了と同時に Supabase Storage（{STORAGE_BUCKET}/）から自動削除されます。
+                  </p>
+                </div>
+              </div>
+
+              {onboarding?.rejection_reason && (
+                <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-900 font-bold flex items-start gap-2.5">
+                  <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="block">運営本部からの差戻し理由:</span>
+                    <p className="mt-0.5">{onboarding.rejection_reason}</p>
+                    <span className="text-[11px] text-rose-700 font-normal block mt-1">
+                      ※前回提出された一時ファイルはセキュリティ保護のため自動削除されています。Step 3 より再アップロードしてください。
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {stepFeedback && (
+                <div
+                  className={`p-4 rounded-2xl border text-xs font-bold flex items-center gap-2.5 ${
+                    stepFeedback.type === 'success'
+                      ? 'bg-emerald-50 border-emerald-300 text-emerald-900'
+                      : 'bg-rose-50 border-rose-300 text-rose-900'
+                  }`}
+                >
+                  <CheckCircle2 className="w-5 h-5 shrink-0" />
+                  <span>{stepFeedback.text}</span>
+                </div>
+              )}
+
+              {/* 5項目サマリー */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 pt-2">
+                {checklist.map((item) => (
+                  <div
+                    key={item.key}
+                    className={`p-3 rounded-2xl border text-xs ${
+                      item.ok
+                        ? 'bg-emerald-50/60 border-emerald-200 text-slate-900'
+                        : 'bg-slate-50 border-slate-200 text-slate-500'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between font-bold">
+                      <span>{item.shortLabel}</span>
+                      {item.ok ? (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      ) : (
+                        <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-100 text-amber-800">未完了</span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-slate-500 mt-1">{item.detail}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 【Step 1】アカウント仮作成 ＆ 審査手数料（覚悟料 5,000円）の決済 */}
+            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-7 h-7 rounded-xl bg-slate-900 text-white text-xs font-black flex items-center justify-center">
+                    1
+                  </span>
+                  <div>
+                    <h4 className="font-black text-slate-900 text-sm">
+                      【Step 1】アカウント開設 ＆ 審査手数料（覚悟料）の決済
+                    </h4>
+                    <p className="text-xs text-slate-500">
+                      審査手数料（{REVIEW_FEE_YEN.toLocaleString()}円 / 返金不可）を Stripe 決済すると Step 2 へ進めます。
+                    </p>
+                  </div>
+                </div>
+                {feePaid ? (
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                    ✓ 決済完了 (payment_status: completed)
+                  </span>
+                ) : (
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                    未決済
+                  </span>
+                )}
+              </div>
+
+              {!feePaid && (
+                <button
+                  disabled={isStepBusy}
+                  onClick={async () => {
+                    setIsStepBusy(true);
+                    try {
+                      const res = await completeReviewFeePayment(currentUser.id);
+                      if (res.redirectUrl) {
+                        window.location.href = res.redirectUrl;
+                        return;
+                      }
+                      setStepFeedback({ type: res.ok ? 'success' : 'error', text: res.message });
+                    } finally {
+                      setIsStepBusy(false);
+                    }
+                  }}
+                  className="px-5 py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center gap-2 shadow-sm cursor-pointer"
+                >
+                  <CreditCard className="w-4 h-4 text-emerald-400" />
+                  <span>Stripe で審査手数料（{REVIEW_FEE_YEN.toLocaleString()}円）を決済する</span>
+                </button>
+              )}
+            </div>
+
+            {/* 【Step 2】Stripe Connect による口座登録 ＆ 自動eKYC（身元確認） */}
+            <div className={`bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-4 ${!feePaid ? 'opacity-60' : ''}`}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-7 h-7 rounded-xl bg-slate-900 text-white text-xs font-black flex items-center justify-center">
+                    2
+                  </span>
+                  <div>
+                    <h4 className="font-black text-slate-900 text-sm">
+                      【Step 2】Stripe Connect による口座登録 ＆ 自動eKYC（身元確認）
+                    </h4>
+                    <p className="text-xs text-slate-500">
+                      Stripe Express オンボーディング画面にて振込口座情報および運転免許証等＋顔撮影を行います（免許証画像は自社DBに一切保存されません）。
+                    </p>
+                  </div>
+                </div>
+                {ekycDone ? (
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                    ✓ eKYC本人確認済（認証氏名: {therapist?.identity_verified_name || currentUser.name.replace(/\s*\(.*?\)\s*$/, '')}）
+                  </span>
+                ) : (
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                    未完了
+                  </span>
+                )}
+              </div>
+
+              {!ekycDone && (
+                <button
+                  disabled={!feePaid || isStepBusy}
+                  onClick={async () => {
+                    setIsStepBusy(true);
+                    try {
+                      const res = await completeStripeEkyc(currentUser.id);
+                      if (res.redirectUrl) {
+                        window.location.href = res.redirectUrl;
+                        return;
+                      }
+                      setStepFeedback({ type: res.ok ? 'success' : 'error', text: res.message });
+                    } finally {
+                      setIsStepBusy(false);
+                    }
+                  }}
+                  className="px-5 py-3 rounded-2xl bg-sky-600 hover:bg-sky-500 disabled:bg-slate-300 text-white text-xs font-bold transition flex items-center gap-2 shadow-sm cursor-pointer"
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>Stripe Express で口座登録＆自動eKYC（本人確認）を行う</span>
+                </button>
+              )}
+            </div>
+
+            {/* 【Step 3】電子誓約書同意 ＋ 資格証・保険証票のアップロード */}
+            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-7 h-7 rounded-xl bg-slate-900 text-white text-xs font-black flex items-center justify-center">
+                    3
+                  </span>
+                  <div>
+                    <h4 className="font-black text-slate-900 text-sm">
+                      【Step 3】電子誓約書同意 ＋ 保有資格証・損害賠償責任保険証票のアップロード
+                    </h4>
+                    <p className="text-xs text-slate-500">
+                      ファイルは一時保管バケット（<code className="font-mono text-indigo-700">{STORAGE_BUCKET}/</code>）へ暗号化アップロードされ、Step 4 の運営承認完了と同時に自動削除されます。
+                    </p>
+                  </div>
+                </div>
+                {termsDone && qualDone && insDone ? (
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                    ✓ Step 3 すべて提出済
+                  </span>
+                ) : (
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                    提出手続き中
+                  </span>
+                )}
+              </div>
+
+              {/* 3-A: 電子誓約書 */}
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black text-slate-900">① 電子誓約書（利用規約・直契約禁止・引き抜き禁止等への同意）</span>
+                  <span className="text-[11px] font-mono text-slate-400">Ver: {TERMS_VERSION}</span>
+                </div>
+
+                <div className="space-y-2">
+                  {TERMS_ITEMS.map((item) => (
+                    <label
+                      key={item.id}
+                      className="flex items-start gap-2.5 p-2.5 rounded-xl bg-white border border-slate-200 text-xs cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={Boolean(checkedTerms[item.id]) || termsDone}
+                        onChange={(e) =>
+                          setCheckedTerms((prev) => ({ ...prev, [item.id]: e.target.checked }))
+                        }
+                        className="w-4 h-4 accent-emerald-600 mt-0.5 rounded"
+                      />
+                      <div>
+                        <span className="font-bold text-slate-900">{item.title}: </span>
+                        <span className="text-slate-600">{item.body}</span>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">申請する保有資格種別</label>
+                    <select
+                      value={claimedQualification}
+                      onChange={(e) => setClaimedQualification(e.target.value)}
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-900"
+                    >
+                      {QUALIFICATION_TYPES.map((q) => (
+                        <option key={q} value={q}>
+                          {q}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">電子署名（本名フルネーム）</label>
+                    <input
+                      type="text"
+                      value={signatureName}
+                      onChange={(e) => setSignatureName(e.target.value)}
+                      placeholder="例: 橋本 沙織"
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-900"
+                    />
+                  </div>
+                  <div className="flex items-end">
+                    <button
+                      disabled={(!allTermsChecked && !termsDone) || isStepBusy}
+                      onClick={async () => {
+                        setIsStepBusy(true);
+                        try {
+                          const res = await submitTermsAgreement(currentUser.id, signatureName, claimedQualification);
+                          setStepFeedback({ type: res.ok ? 'success' : 'error', text: res.message });
+                        } finally {
+                          setIsStepBusy(false);
+                        }
+                      }}
+                      className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-300 text-white text-xs font-bold transition cursor-pointer"
+                    >
+                      {termsDone ? '電子署名を更新する' : '誓約事項に同意して電子署名する'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* 3-B: 資格証 & 保険証票アップロード */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* 保有資格証 */}
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black text-slate-900">③ 保有資格証（国家資格免状 PDF/画像）</span>
+                    {qualDone ? (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                        {isCertified ? '確認＆自動削除済' : '提出済'}
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                        未提出
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-slate-600">
+                    {isCertified
+                      ? '運営承認完了に伴い、一時保管バケットから完全削除されました。'
+                      : onboarding?.qualification_file_name
+                      ? `提出ファイル: ${onboarding.qualification_file_name}`
+                      : 'PT/OT/ST/助産師等の免状画像またはPDF（10MB以下）を選択してください。'}
+                  </p>
+                  {!isCertified && (
+                    <div className="flex flex-wrap items-center gap-2">
+                      <label className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition cursor-pointer inline-flex items-center gap-1.5">
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>ファイルを選択して提出</span>
+                        <input
+                          type="file"
+                          accept=".pdf,image/jpeg,image/png,image/webp"
+                          onChange={(e) => handleDocUploadChange('qualification', e)}
+                          className="hidden"
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => handleSampleDocUpload('qualification')}
+                        className="px-3 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-bold transition cursor-pointer"
+                      >
+                        サンプル免状画像を提出
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* 損害賠償責任保険の加入証明 */}
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black text-slate-900">④ 損害賠償責任保険の加入証明（PDF/画像）</span>
+                    {insDone ? (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                        {isCertified ? '確認＆自動削除済' : '提出済'}
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                        未提出
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-slate-600">
+                    {isCertified
+                      ? '運営承認完了に伴い、一時保管バケットから完全削除されました。'
+                      : onboarding?.insurance_file_name
+                      ? `提出ファイル: ${onboarding.insurance_file_name}`
+                      : '賠償責任保険の加入者証・保険証券（PDF/画像）を選択してください。'}
+                  </p>
+                  {!isCertified && (
+                    <div className="flex flex-wrap items-center gap-2">
+                      <label className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition cursor-pointer inline-flex items-center gap-1.5">
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>ファイルを選択して提出</span>
+                        <input
+                          type="file"
+                          accept=".pdf,image/jpeg,image/png,image/webp"
+                          onChange={(e) => handleDocUploadChange('insurance', e)}
+                          className="hidden"
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => handleSampleDocUpload('insurance')}
+                        className="px-3 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-bold transition cursor-pointer"
+                      >
+                        サンプル保険証票を提出
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* 【Step 4】運営管理画面でのチェック ＆ 自動データ破棄承認ステータス */}
+            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-7 h-7 rounded-xl bg-slate-900 text-white text-xs font-black flex items-center justify-center">
+                    4
+                  </span>
+                  <div>
+                    <h4 className="font-black text-slate-900 text-sm">
+                      【Step 4】運営管理画面での簡易チェック ＆ 自動データ削除付き本登録承認
+                    </h4>
+                    <p className="text-xs text-slate-500">
+                      運営本部にて Stripe 認証氏名と資格証氏名を照合後、本登録承認と同時に提出ファイルは Storage から自動削除されます。
+                    </p>
+                  </div>
+                </div>
+                <span className={`px-3 py-1 rounded-full text-xs font-bold border ${stageMeta.badge}`}>
+                  {stageMeta.label}
+                </span>
+              </div>
+
+              {myLogs.length > 0 && (
+                <div className="pt-2 space-y-2">
+                  {myLogs.map((log) => (
+                    <div
+                      key={log.id}
+                      className="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs flex flex-wrap items-center justify-between gap-2"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-slate-900">
+                          {log.decision === 'approved' ? '✓ 承認完了' : '差戻し'}
+                        </span>
+                        {log.qualification_type && (
+                          <span className="text-indigo-700 font-bold">
+                            確認資格: {log.qualification_type} ({log.registration_number || '確認済'})
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-[11px] text-slate-500">
+                        日時: {formatDate(log.verified_at)} / 一時ファイル {log.files_deleted_count ?? 2}件 自動削除済
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* タブ 1: 予約リクエスト・進行中 */}
       {activeTab === 'requests' && (

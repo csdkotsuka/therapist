@@ -1,6 +1,6 @@
 // 愛媛県シミュレーションデータセット（愛媛県15市町・人口比率ベース・RFC 4122 v4 UUID準拠）
 // セラピスト: 36名, 顧客: 100名, 運営本部: 1名
-import { Profile, TherapistProfile, Service, Booking, Review, ChatMessage } from '@/types';
+import { Profile, TherapistProfile, Service, Booking, Review, ChatMessage, TherapistOnboarding, VerificationLog } from '@/types';
 
 export const initialProfiles: Profile[] = [
   {
@@ -2440,6 +2440,67 @@ export const initialProfiles: Profile[] = [
     "address": "愛媛県今治市中浜町1丁目4-12",
     "lat": 34.067,
     "lng": 133.001
+  }
+,
+  {
+    "id": "c1d5a0f2-3b7e-4c1a-9a52-6e8f1b2d4a01",
+    "role": "therapist",
+    "name": "橋本 沙織",
+    "email": "saori.hashimoto@carehub.ehime.jp",
+    "phone": "089-941-2301",
+    "avatar_url": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150",
+    "address": "愛媛県松山市三番町6丁目3-2",
+    "postal_code": "790-0003",
+    "lat": 33.8398,
+    "lng": 132.7701
+  },
+  {
+    "id": "c1d5a0f2-3b7e-4c1a-9a52-6e8f1b2d4a02",
+    "role": "therapist",
+    "name": "岡本 大輔",
+    "email": "daisuke.okamoto@carehub.ehime.jp",
+    "phone": "089-955-7782",
+    "avatar_url": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150",
+    "address": "愛媛県今治市石井町2丁目4-9",
+    "postal_code": "794-0015",
+    "lat": 34.0668,
+    "lng": 132.9995
+  },
+  {
+    "id": "c1d5a0f2-3b7e-4c1a-9a52-6e8f1b2d4a03",
+    "role": "therapist",
+    "name": "村井 彩",
+    "email": "aya.murai@carehub.ehime.jp",
+    "phone": "0897-33-6104",
+    "avatar_url": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150",
+    "address": "愛媛県新居浜市坂井町1丁目5-7",
+    "postal_code": "792-0812",
+    "lat": 33.9546,
+    "lng": 133.2889
+  },
+  {
+    "id": "c1d5a0f2-3b7e-4c1a-9a52-6e8f1b2d4a04",
+    "role": "therapist",
+    "name": "福田 健",
+    "email": "ken.fukuda@carehub.ehime.jp",
+    "phone": "0896-24-3350",
+    "avatar_url": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150",
+    "address": "愛媛県四国中央市三島宮川1丁目2-4",
+    "postal_code": "799-0405",
+    "lat": 33.9795,
+    "lng": 133.5481
+  },
+  {
+    "id": "c1d5a0f2-3b7e-4c1a-9a52-6e8f1b2d4a05",
+    "role": "therapist",
+    "name": "石原 美咲",
+    "email": "misaki.ishihara@carehub.ehime.jp",
+    "phone": "089-947-1129",
+    "avatar_url": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150",
+    "address": "愛媛県松山市湊町3丁目8-1",
+    "postal_code": "790-0012",
+    "lat": 33.8366,
+    "lng": 132.7655
   }
 ];
 
@@ -5030,6 +5091,134 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "reviews_count": 25,
     "is_approved": true,
     "stripe_account_id": "acct_ehime_ort05"
+  }
+,
+  "c1d5a0f2-3b7e-4c1a-9a52-6e8f1b2d4a01": {
+    "user_id": "c1d5a0f2-3b7e-4c1a-9a52-6e8f1b2d4a01",
+    "bio": "作業療法士（OT）歴12年。脳血管疾患後の生活動作訓練、在宅での福祉用具選定・住宅改修のご相談に対応します。",
+    "specialities": [
+      "在宅リハビリ",
+      "生活動作訓練",
+      "福祉用具選定"
+    ],
+    "is_store_based": false,
+    "is_visit_based": true,
+    "address": "愛媛県松山市三番町6丁目3-2",
+    "lat": 33.8398,
+    "lng": 132.7701,
+    "visit_radius_km": 15,
+    "rating_avg": 0,
+    "reviews_count": 0,
+    "is_approved": false,
+    "payment_status": "completed",
+    "payment_completed_at": "2026-10-18T02:10:00.000Z",
+    "is_identity_verified": true,
+    "identity_verified_at": "2026-10-18T05:30:00.000Z",
+    "identity_verified_name": "橋本 沙織",
+    "is_certified": false,
+    "certified_at": null,
+    "stripe_account_id": "acct_demo_hashimoto"
+  },
+  "c1d5a0f2-3b7e-4c1a-9a52-6e8f1b2d4a02": {
+    "user_id": "c1d5a0f2-3b7e-4c1a-9a52-6e8f1b2d4a02",
+    "bio": "理学療法士（PT）。運動器リハビリ・スポーツ障害予防・高齢者の転倒予防プログラムを訪問でご提供します。",
+    "specialities": [
+      "運動器リハビリ",
+      "スポーツ障害予防",
+      "転倒予防"
+    ],
+    "is_store_based": false,
+    "is_visit_based": true,
+    "address": "愛媛県今治市石井町2丁目4-9",
+    "lat": 34.0668,
+    "lng": 132.9995,
+    "visit_radius_km": 15,
+    "rating_avg": 0,
+    "reviews_count": 0,
+    "is_approved": false,
+    "payment_status": "completed",
+    "payment_completed_at": "2026-10-20T03:00:00.000Z",
+    "is_identity_verified": false,
+    "identity_verified_at": null,
+    "identity_verified_name": null,
+    "is_certified": false,
+    "certified_at": null,
+    "stripe_account_id": "acct_demo_okamoto"
+  },
+  "c1d5a0f2-3b7e-4c1a-9a52-6e8f1b2d4a03": {
+    "user_id": "c1d5a0f2-3b7e-4c1a-9a52-6e8f1b2d4a03",
+    "bio": "助産師。産後ケア・母乳育児相談・新生児訪問に対応。ご自宅でゆったりご相談いただけます。",
+    "specialities": [
+      "産後ケア",
+      "母乳育児相談",
+      "新生児訪問"
+    ],
+    "is_store_based": false,
+    "is_visit_based": true,
+    "address": "愛媛県新居浜市坂井町1丁目5-7",
+    "lat": 33.9546,
+    "lng": 133.2889,
+    "visit_radius_km": 15,
+    "rating_avg": 0,
+    "reviews_count": 0,
+    "is_approved": false,
+    "payment_status": "completed",
+    "payment_completed_at": "2026-10-19T08:00:00.000Z",
+    "is_identity_verified": true,
+    "identity_verified_at": "2026-10-19T10:15:00.000Z",
+    "identity_verified_name": "村井 彩",
+    "is_certified": false,
+    "certified_at": null,
+    "stripe_account_id": "acct_demo_murai"
+  },
+  "c1d5a0f2-3b7e-4c1a-9a52-6e8f1b2d4a04": {
+    "user_id": "c1d5a0f2-3b7e-4c1a-9a52-6e8f1b2d4a04",
+    "bio": "言語聴覚士（ST）。摂食嚥下訓練・失語症リハビリを予定。仮登録済みです。",
+    "specialities": [
+      "摂食嚥下訓練",
+      "失語症リハビリ"
+    ],
+    "is_store_based": false,
+    "is_visit_based": true,
+    "address": "愛媛県四国中央市三島宮川1丁目2-4",
+    "lat": 33.9795,
+    "lng": 133.5481,
+    "visit_radius_km": 15,
+    "rating_avg": 0,
+    "reviews_count": 0,
+    "is_approved": false,
+    "payment_status": "pending",
+    "payment_completed_at": null,
+    "is_identity_verified": false,
+    "identity_verified_at": null,
+    "identity_verified_name": null,
+    "is_certified": false,
+    "certified_at": null
+  },
+  "c1d5a0f2-3b7e-4c1a-9a52-6e8f1b2d4a05": {
+    "user_id": "c1d5a0f2-3b7e-4c1a-9a52-6e8f1b2d4a05",
+    "bio": "歯科衛生士。訪問口腔ケア・オーラルフレイル予防の相談に対応します。",
+    "specialities": [
+      "訪問口腔ケア",
+      "オーラルフレイル予防"
+    ],
+    "is_store_based": false,
+    "is_visit_based": true,
+    "address": "愛媛県松山市湊町3丁目8-1",
+    "lat": 33.8366,
+    "lng": 132.7655,
+    "visit_radius_km": 15,
+    "rating_avg": 0,
+    "reviews_count": 0,
+    "is_approved": false,
+    "payment_status": "completed",
+    "payment_completed_at": "2026-10-14T02:00:00.000Z",
+    "is_identity_verified": true,
+    "identity_verified_at": "2026-10-14T04:20:00.000Z",
+    "identity_verified_name": "石原 美咲",
+    "is_certified": false,
+    "certified_at": null,
+    "stripe_account_id": "acct_demo_ishihara"
   }
 };
 
@@ -7837,3 +8026,125 @@ export const initialChatMessages: ChatMessage[] = [
   }
 ];
 
+// ========================================================
+// 本登録審査（デモ）: Step3 の提出状況と承認ログ
+// 実ファイルは存在せず、path が "demo:" で始まるものは管理画面でサンプル画像を表示する
+// ========================================================
+export const initialOnboardings: Record<string, TherapistOnboarding> = {
+  "c1d5a0f2-3b7e-4c1a-9a52-6e8f1b2d4a01": {
+    "therapist_id": "c1d5a0f2-3b7e-4c1a-9a52-6e8f1b2d4a01",
+    "terms_version": "2026-10-v1",
+    "terms_agreed_at": "2026-10-18T02:10:00.000Z",
+    "terms_signature_name": "橋本 沙織",
+    "claimed_qualification_type": "作業療法士（OT）",
+    "qualification_file_path": "demo:c1d5a0f2-3b7e-4c1a-9a52-6e8f1b2d4a01/qualification_sample.png",
+    "qualification_file_name": "資格証_サンプル.png",
+    "qualification_uploaded_at": "2026-10-19T01:20:00.000Z",
+    "insurance_file_path": "demo:c1d5a0f2-3b7e-4c1a-9a52-6e8f1b2d4a01/insurance_sample.pdf",
+    "insurance_file_name": "賠償責任保険証券_サンプル.pdf",
+    "insurance_uploaded_at": "2026-10-19T01:20:00.000Z",
+    "rejection_reason": null,
+    "rejected_at": null,
+    "files_purged_at": null,
+    "updated_at": "2026-10-19T01:20:00.000Z"
+  },
+  "c1d5a0f2-3b7e-4c1a-9a52-6e8f1b2d4a02": {
+    "therapist_id": "c1d5a0f2-3b7e-4c1a-9a52-6e8f1b2d4a02",
+    "terms_version": "2026-10-v1",
+    "terms_agreed_at": "2026-10-20T03:00:00.000Z",
+    "terms_signature_name": "岡本 大輔",
+    "claimed_qualification_type": "理学療法士（PT）",
+    "qualification_file_path": "demo:c1d5a0f2-3b7e-4c1a-9a52-6e8f1b2d4a02/qualification_sample.png",
+    "qualification_file_name": "資格証_サンプル.png",
+    "qualification_uploaded_at": "2026-10-21T00:40:00.000Z",
+    "insurance_file_path": "demo:c1d5a0f2-3b7e-4c1a-9a52-6e8f1b2d4a02/insurance_sample.pdf",
+    "insurance_file_name": "賠償責任保険証券_サンプル.pdf",
+    "insurance_uploaded_at": "2026-10-21T00:40:00.000Z",
+    "rejection_reason": null,
+    "rejected_at": null,
+    "files_purged_at": null,
+    "updated_at": "2026-10-21T00:40:00.000Z"
+  },
+  "c1d5a0f2-3b7e-4c1a-9a52-6e8f1b2d4a03": {
+    "therapist_id": "c1d5a0f2-3b7e-4c1a-9a52-6e8f1b2d4a03",
+    "terms_version": "2026-10-v1",
+    "terms_agreed_at": "2026-10-19T08:00:00.000Z",
+    "terms_signature_name": "村井 彩",
+    "claimed_qualification_type": "助産師",
+    "qualification_file_path": "demo:c1d5a0f2-3b7e-4c1a-9a52-6e8f1b2d4a03/qualification_sample.png",
+    "qualification_file_name": "資格証_サンプル.png",
+    "qualification_uploaded_at": "2026-10-20T06:00:00.000Z",
+    "insurance_file_path": null,
+    "insurance_file_name": null,
+    "insurance_uploaded_at": null,
+    "rejection_reason": null,
+    "rejected_at": null,
+    "files_purged_at": null,
+    "updated_at": "2026-10-20T06:00:00.000Z"
+  },
+  "c1d5a0f2-3b7e-4c1a-9a52-6e8f1b2d4a05": {
+    "therapist_id": "c1d5a0f2-3b7e-4c1a-9a52-6e8f1b2d4a05",
+    "terms_version": "2026-10-v1",
+    "terms_agreed_at": "2026-10-14T02:00:00.000Z",
+    "terms_signature_name": "石原 美咲",
+    "claimed_qualification_type": "歯科衛生士",
+    "qualification_file_path": null,
+    "qualification_file_name": null,
+    "qualification_uploaded_at": null,
+    "insurance_file_path": null,
+    "insurance_file_name": null,
+    "insurance_uploaded_at": null,
+    "rejection_reason": "資格証の氏名・登録番号が判読できませんでした。明るい場所で撮影し直して再提出してください。",
+    "rejected_at": "2026-10-16T03:30:00.000Z",
+    "files_purged_at": "2026-10-16T03:30:00.000Z",
+    "updated_at": "2026-10-15T01:00:00.000Z"
+  }
+};
+
+export const initialVerificationLogs: VerificationLog[] = [
+  {
+    "id": "e2a6b1c3-4d8f-4e2b-8b63-7f9a2c3e5b02",
+    "therapist_id": "10bba81d-81fe-4d3b-84ec-92bcd937c36d",
+    "therapist_name": "高橋 健吾",
+    "decision": "approved",
+    "verified_at": "2026-10-17T06:15:00.000Z",
+    "verified_by": "6ecacd4b-8d2a-4b06-8cc3-a3cca87a3f12",
+    "qualification_type": "作業療法士（OT）",
+    "registration_number": "第 48291 号",
+    "confirmed_name": "高橋 健吾",
+    "insurance_confirmed": true,
+    "reason": null,
+    "files_deleted_count": 2,
+    "files_deleted_at": "2026-10-17T06:15:02.000Z"
+  },
+  {
+    "id": "e2a6b1c3-4d8f-4e2b-8b63-7f9a2c3e5b03",
+    "therapist_id": "bd6eee2a-475a-492f-adf8-6d4c42b1a74e",
+    "therapist_name": "岡田 彩香",
+    "decision": "approved",
+    "verified_at": "2026-10-16T09:40:00.000Z",
+    "verified_by": "6ecacd4b-8d2a-4b06-8cc3-a3cca87a3f12",
+    "qualification_type": "言語聴覚士（ST）",
+    "registration_number": "第 21904 号",
+    "confirmed_name": "岡田 彩香",
+    "insurance_confirmed": true,
+    "reason": null,
+    "files_deleted_count": 2,
+    "files_deleted_at": "2026-10-16T09:40:01.000Z"
+  },
+  {
+    "id": "e2a6b1c3-4d8f-4e2b-8b63-7f9a2c3e5b01",
+    "therapist_id": "c1d5a0f2-3b7e-4c1a-9a52-6e8f1b2d4a05",
+    "therapist_name": "石原 美咲",
+    "decision": "rejected",
+    "verified_at": "2026-10-16T03:30:00.000Z",
+    "verified_by": "6ecacd4b-8d2a-4b06-8cc3-a3cca87a3f12",
+    "qualification_type": null,
+    "registration_number": null,
+    "confirmed_name": null,
+    "insurance_confirmed": false,
+    "reason": "資格証の氏名・登録番号が判読できませんでした。明るい場所で撮影し直して再提出してください。",
+    "files_deleted_count": 2,
+    "files_deleted_at": "2026-10-16T03:30:05.000Z"
+  }
+];

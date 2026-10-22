@@ -1,11 +1,22 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { formatPrice, formatDate } from '@/lib/geo';
 import { APP_BRANDS } from '@/lib/branding';
 import { AppBrandId, BookingStatus } from '@/types';
+import {
+  getChecklist,
+  getVerificationStage,
+  STAGE_META,
+  QUALIFICATION_TYPES,
+  REVIEW_FEE_YEN,
+  STORAGE_BUCKET,
+  VerificationStage,
+  sampleDocumentDataUrl,
+  isTherapistCertified,
+} from '@/lib/verification';
 import {
   ShieldAlert,
   Users,
@@ -29,6 +40,15 @@ import {
   RotateCcw,
   Palette,
   Sparkles,
+  FileText,
+  CreditCard,
+  Eye,
+  Lock,
+  Award,
+  X,
+  ClipboardCheck,
+  History,
+  Upload,
 } from 'lucide-react';
 
 export const AdminView: React.FC = () => {
@@ -49,12 +69,34 @@ export const AdminView: React.FC = () => {
     appBrand,
     currentBrand,
     setAppBrand,
+    onboardings,
+    verificationLogs,
+    completeReviewFeePayment,
+    completeStripeEkyc,
+    submitTermsAgreement,
+    uploadVerificationDoc,
+    getVerificationDocPreviewUrl,
+    approveTherapistVerification,
+    rejectTherapistVerification,
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'kpi' | 'bookings' | 'users' | 'customers' | 'reviews' | 'branding' | 'settings'>('kpi');
+  const [activeTab, setActiveTab] = useState<'kpi' | 'bookings' | 'users' | 'customers' | 'reviews' | 'branding' | 'settings'>('users');
   const [feeInput, setFeeInput] = useState<number>(platformFeeRate);
   const [feeSaveMessage, setFeeSaveMessage] = useState(false);
   const [brandSaveMessage, setBrandSaveMessage] = useState<string | null>(null);
+
+  // 審査モーダル＆監査ログ表示状態
+  const [selectedTherapistId, setSelectedTherapistId] = useState<string | null>(null);
+  const [qualPreviewUrl, setQualPreviewUrl] = useState<string | null>(null);
+  const [insPreviewUrl, setInsPreviewUrl] = useState<string | null>(null);
+  const [approvalQualificationType, setApprovalQualificationType] = useState<string>(QUALIFICATION_TYPES[0]);
+  const [approvalRegistrationNumber, setApprovalRegistrationNumber] = useState<string>('');
+  const [nameMatchConfirmed, setNameMatchConfirmed] = useState<boolean>(false);
+  const [insuranceConfirmed, setInsuranceConfirmed] = useState<boolean>(false);
+  const [rejectReasonInput, setRejectReasonInput] = useState<string>('');
+  const [verificationFeedback, setVerificationFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [isProcessingDecision, setIsProcessingDecision] = useState<boolean>(false);
+  const [showAuditLogsPanel, setShowAuditLogsPanel] = useState<boolean>(false);
 
   const handleSwitchBrand = async (brandId: AppBrandId) => {
     await setAppBrand(brandId);
@@ -67,7 +109,7 @@ export const AdminView: React.FC = () => {
 
   // セラピスト審査・管理の絞り込み状態
   const [thSearch, setThSearch] = useState('');
-  const [thApprovalFilter, setThApprovalFilter] = useState<'all' | 'approved' | 'pending'>('all');
+  const [thApprovalFilter, setThApprovalFilter] = useState<'all' | 'unapproved' | 'ready' | 'in_progress' | 'rejected' | 'certified'>('all');
   const [thAreaFilter, setThAreaFilter] = useState<string>('all');
   const [thStyleFilter, setThStyleFilter] = useState<'all' | 'visit' | 'store'>('all');
 
@@ -89,42 +131,112 @@ export const AdminView: React.FC = () => {
   const therapists = allUsers.filter((u) => u.role === 'therapist');
   const customers = allUsers.filter((u) => u.role === 'customer');
 
-  // 絞り込み後のセラピスト一覧
-  const filteredTherapists = therapists.filter((th) => {
-    const tp = therapistProfiles[th.id];
-    const isApproved = tp?.is_approved ?? false;
+  // 審査ステージ集計
+  const stagePriority: Record<VerificationStage, number> = {
+    ready: 0,
+    in_progress: 1,
+    rejected: 2,
+    not_started: 3,
+    certified: 4,
+    legacy: 5,
+  };
 
-    // 1. 承認ステータス
-    if (thApprovalFilter === 'approved' && !isApproved) return false;
-    if (thApprovalFilter === 'pending' && isApproved) return false;
+  const readyCount = therapists.filter((t) => getVerificationStage(therapistProfiles[t.id], onboardings[t.id]) === 'ready').length;
+  const inProgressCount = therapists.filter((t) => {
+    const s = getVerificationStage(therapistProfiles[t.id], onboardings[t.id]);
+    return s === 'in_progress' || s === 'not_started';
+  }).length;
+  const rejectedCount = therapists.filter((t) => getVerificationStage(therapistProfiles[t.id], onboardings[t.id]) === 'rejected').length;
+  const certifiedCount = therapists.filter((t) => getVerificationStage(therapistProfiles[t.id], onboardings[t.id]) === 'certified').length;
+  const unapprovedCount = readyCount + inProgressCount + rejectedCount;
 
-    // 2. エリア
-    if (thAreaFilter !== 'all') {
-      const addr = th.address || tp?.address || '';
-      if (thAreaFilter === 'その他') {
-        const mainCities = ['松山市', '今治市', '新居浜市', '西条市', '四国中央市', '宇和島市'];
-        if (mainCities.some((c) => addr.includes(c))) return false;
-      } else {
-        if (!addr.includes(thAreaFilter)) return false;
+  // モーダルオープン時にプレビューURLや初期選択値をセットアップ
+  const openVerificationModal = async (therapistId: string) => {
+    setSelectedTherapistId(therapistId);
+    setVerificationFeedback(null);
+    setRejectReasonInput('');
+    const ob = onboardings[therapistId];
+    const tp = therapistProfiles[therapistId];
+    const defaultQual =
+      ob?.claimed_qualification_type && (QUALIFICATION_TYPES as readonly string[]).includes(ob.claimed_qualification_type)
+        ? ob.claimed_qualification_type
+        : QUALIFICATION_TYPES[0];
+    setApprovalQualificationType(defaultQual);
+    setApprovalRegistrationNumber('第 49201 号');
+    setNameMatchConfirmed(Boolean(tp?.is_identity_verified && ob?.qualification_file_path));
+    setInsuranceConfirmed(Boolean(ob?.insurance_file_path));
+
+    const [qUrl, iUrl] = await Promise.all([
+      getVerificationDocPreviewUrl(therapistId, 'qualification'),
+      getVerificationDocPreviewUrl(therapistId, 'insurance'),
+    ]);
+    setQualPreviewUrl(qUrl);
+    setInsPreviewUrl(iUrl);
+  };
+
+  // 選択中セラピストの提出状態変化に応じてプレビューURLを再取得
+  useEffect(() => {
+    if (!selectedTherapistId) return;
+    let active = true;
+    Promise.all([
+      getVerificationDocPreviewUrl(selectedTherapistId, 'qualification'),
+      getVerificationDocPreviewUrl(selectedTherapistId, 'insurance'),
+    ]).then(([qUrl, iUrl]) => {
+      if (!active) return;
+      setQualPreviewUrl(qUrl);
+      setInsPreviewUrl(iUrl);
+    });
+    return () => {
+      active = false;
+    };
+  }, [selectedTherapistId, onboardings, getVerificationDocPreviewUrl]);
+
+  // 絞り込み・審査優先順ソート後のセラピスト一覧
+  const filteredTherapists = therapists
+    .filter((th) => {
+      const tp = therapistProfiles[th.id];
+      const ob = onboardings[th.id];
+      const stage = getVerificationStage(tp, ob);
+
+      // 1. 審査ステージフィルター
+      if (thApprovalFilter === 'unapproved' && stage === 'certified') return false;
+      if (thApprovalFilter === 'ready' && stage !== 'ready') return false;
+      if (thApprovalFilter === 'in_progress' && stage !== 'in_progress' && stage !== 'not_started') return false;
+      if (thApprovalFilter === 'rejected' && stage !== 'rejected') return false;
+      if (thApprovalFilter === 'certified' && stage !== 'certified') return false;
+
+      // 2. エリア
+      if (thAreaFilter !== 'all') {
+        const addr = th.address || tp?.address || '';
+        if (thAreaFilter === 'その他') {
+          const mainCities = ['松山市', '今治市', '新居浜市', '西条市', '四国中央市', '宇和島市'];
+          if (mainCities.some((c) => addr.includes(c))) return false;
+        } else {
+          if (!addr.includes(thAreaFilter)) return false;
+        }
       }
-    }
 
-    // 3. 施術形態
-    if (thStyleFilter === 'visit' && !tp?.is_visit_based) return false;
-    if (thStyleFilter === 'store' && !tp?.is_store_based) return false;
+      // 3. 施術形態
+      if (thStyleFilter === 'visit' && !tp?.is_visit_based) return false;
+      if (thStyleFilter === 'store' && !tp?.is_store_based) return false;
 
-    // 4. キーワード検索
-    if (thSearch.trim()) {
-      const q = thSearch.toLowerCase();
-      const nameMatch = th.name.toLowerCase().includes(q);
-      const phoneMatch = th.phone?.toLowerCase().includes(q) ?? false;
-      const addrMatch = (th.address || tp?.address || '').toLowerCase().includes(q);
-      const specMatch = tp?.specialities?.some((s) => s.toLowerCase().includes(q)) ?? false;
-      if (!nameMatch && !phoneMatch && !addrMatch && !specMatch) return false;
-    }
+      // 4. キーワード検索
+      if (thSearch.trim()) {
+        const q = thSearch.toLowerCase();
+        const nameMatch = th.name.toLowerCase().includes(q);
+        const phoneMatch = th.phone?.toLowerCase().includes(q) ?? false;
+        const addrMatch = (th.address || tp?.address || '').toLowerCase().includes(q);
+        const specMatch = tp?.specialities?.some((s) => s.toLowerCase().includes(q)) ?? false;
+        if (!nameMatch && !phoneMatch && !addrMatch && !specMatch) return false;
+      }
 
-    return true;
-  });
+      return true;
+    })
+    .sort((a, b) => {
+      const stageA = getVerificationStage(therapistProfiles[a.id], onboardings[a.id]);
+      const stageB = getVerificationStage(therapistProfiles[b.id], onboardings[b.id]);
+      return stagePriority[stageA] - stagePriority[stageB];
+    });
 
   // 絞り込み後の顧客一覧
   const filteredCustomers = customers.filter((c) => {
@@ -462,178 +574,955 @@ export const AdminView: React.FC = () => {
         </div>
       )}
 
-      {/* タブ 3: セラピスト・ユーザー審査 */}
+      {/* タブ 3: セラピスト登録審査・4点書類提出確認 & 自動データ破棄承認 */}
       {activeTab === 'users' && (
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-            <div>
-              <h4 className="font-bold text-slate-900 text-sm">セラピスト登録審査 & パートナー管理</h4>
-              <p className="text-[11px] text-slate-500">
-                該当 {filteredTherapists.length} 名 / 全 {therapists.length} 名
-              </p>
+        <div className="space-y-5">
+          {/* 基本方針 ＆ 4ステップ審査フロー概要パネル */}
+          <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-white rounded-3xl p-5 sm:p-6 shadow-lg border border-slate-700/80 space-y-4">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-[10px] font-bold">
+                  <Lock className="w-3 h-3" />
+                  <span>セキュリティ・コスト最適化 ＆ 資格確認データ即時破棄アーキテクチャ</span>
+                </div>
+                <h3 className="text-base sm:text-lg font-black mt-1.5">
+                  セラピスト4ステップ登録審査 ＆ 提出書類4点ステータス管理
+                </h3>
+                <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                  ①免許証等の身分証画像は自社DBに一切保存せず<strong>Stripe Connect 自動eKYC</strong>へ完全委託 / ②国家資格証・保険証票は承認完了と同時に<strong>Supabase Storage（<code className="text-emerald-300">{STORAGE_BUCKET}/</code>）から自動削除（Delete）</strong> / ③削除後も<strong>承認日時・管理者ID・資格名・登録番号のテキストログ</strong>のみをDBに安全保持します。
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
+                <button
+                  onClick={() => setShowAuditLogsPanel((prev) => !prev)}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border ${
+                    showAuditLogsPanel
+                      ? 'bg-emerald-500 text-slate-950 border-emerald-400 shadow-md'
+                      : 'bg-white/10 hover:bg-white/15 text-white border-white/20'
+                  }`}
+                >
+                  <History className="w-3.5 h-3.5" />
+                  <span>承認・削除ログ ({verificationLogs.length}件)</span>
+                </button>
+                <button
+                  onClick={() => refreshFromSupabase()}
+                  disabled={isLoadingDb}
+                  className="px-3.5 py-2 bg-white/10 hover:bg-white/15 text-white border border-white/20 text-xs font-bold rounded-xl transition flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>{isLoadingDb ? '同期中...' : '最新データを取得'}</span>
+                </button>
+              </div>
             </div>
-            <button
-              onClick={() => refreshFromSupabase()}
-              disabled={isLoadingDb}
-              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-1.5 disabled:opacity-50"
-            >
-              <span>{isLoadingDb ? '同期中...' : '最新データを取得'}</span>
-            </button>
+
+            {/* 4ステップフロー視覚化バー */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-1">
+              <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
+                <div className="flex items-center justify-between text-[10px] font-bold text-amber-300">
+                  <span>【Step 1】仮登録＆審査手数料</span>
+                  <CreditCard className="w-3.5 h-3.5" />
+                </div>
+                <p className="text-xs font-bold text-white mt-1">覚悟料 {REVIEW_FEE_YEN.toLocaleString()}円 Stripe決済</p>
+                <p className="text-[10px] text-slate-400 mt-0.5">payment_status = completed で Step2 解放</p>
+              </div>
+              <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
+                <div className="flex items-center justify-between text-[10px] font-bold text-sky-300">
+                  <span>【Step 2】Stripe Connect eKYC</span>
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                </div>
+                <p className="text-xs font-bold text-white mt-1">口座登録 ＋ 身分証AI自動審査</p>
+                <p className="text-[10px] text-slate-400 mt-0.5">payouts_enabled: true 連携（免許証画像は非保持）</p>
+              </div>
+              <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
+                <div className="flex items-center justify-between text-[10px] font-bold text-purple-300">
+                  <span>【Step 3】誓約書＋資格・保険証</span>
+                  <FileText className="w-3.5 h-3.5" />
+                </div>
+                <p className="text-xs font-bold text-white mt-1">電子署名 ＋ 一時バケット提出</p>
+                <p className="text-[10px] text-slate-400 mt-0.5">{STORAGE_BUCKET}/ へ一時アップロード</p>
+              </div>
+              <div className="p-3 rounded-2xl bg-emerald-500/15 border border-emerald-400/30">
+                <div className="flex items-center justify-between text-[10px] font-bold text-emerald-300">
+                  <span>【Step 4】運営照合＆自動破棄承認</span>
+                  <Trash2 className="w-3.5 h-3.5" />
+                </div>
+                <p className="text-xs font-bold text-white mt-1">氏名照合 → 承認＆Storage即時Delete</p>
+                <p className="text-[10px] text-emerald-200/80 mt-0.5">is_certified=true 更新 ＋ テキスト証跡のみ保持</p>
+              </div>
+            </div>
           </div>
 
-          {/* 絞り込みフィルターバー */}
-          <div className="p-4 bg-slate-50 border-b border-slate-100 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-            {/* キーワード検索 */}
-            <div className="relative flex-1 max-w-md">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={thSearch}
-                onChange={(e) => setThSearch(e.target.value)}
-                placeholder="セラピスト名、住所、専門分野で検索..."
-                className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-emerald-500 shadow-2xs"
-              />
+          {/* 審査ステージ別クイックフィルターカード */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+            {[
+              { id: 'all', label: '全セラピスト', count: therapists.length, desc: '一覧表示', color: 'border-slate-200 bg-white text-slate-800' },
+              { id: 'unapproved', label: '要確認・審査中', count: unapprovedCount, desc: '未承認すべて', color: 'border-amber-300 bg-amber-50/70 text-amber-900' },
+              { id: 'ready', label: 'Step4 承認待ち', count: readyCount, desc: '全4書類＋決済完了', color: 'border-emerald-300 bg-emerald-50/80 text-emerald-900' },
+              { id: 'in_progress', label: 'Step1〜3 手続き中', count: inProgressCount, desc: '決済・eKYC・書類待ち', color: 'border-sky-300 bg-sky-50/70 text-sky-900' },
+              { id: 'rejected', label: '差戻し・再提出待ち', count: rejectedCount, desc: '旧ファイル削除済', color: 'border-rose-300 bg-rose-50/70 text-rose-900' },
+              { id: 'certified', label: '本登録・専門認定済', count: certifiedCount, desc: '原本破棄済・ログ保持', color: 'border-indigo-200 bg-indigo-50/60 text-indigo-900' },
+            ].map((card) => {
+              const active = thApprovalFilter === card.id;
+              return (
+                <button
+                  key={card.id}
+                  onClick={() => setThApprovalFilter(card.id as any)}
+                  className={`p-3.5 rounded-2xl border text-left transition-all ${card.color} ${
+                    active ? 'ring-2 ring-slate-900 shadow-md -translate-y-0.5' : 'hover:shadow-xs opacity-90 hover:opacity-100'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold">{card.label}</span>
+                    {active && <span className="w-2 h-2 rounded-full bg-slate-900" />}
+                  </div>
+                  <div className="text-xl font-black mt-1">{card.count} 名</div>
+                  <span className="text-[10px] opacity-75 block mt-0.5">{card.desc}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* 承認・自動データ削除ログ（テキスト監査証跡）パネル */}
+          {showAuditLogsPanel && (
+            <div className="bg-white rounded-3xl border-2 border-indigo-200 shadow-md overflow-hidden">
+              <div className="px-6 py-4 bg-indigo-950 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <History className="w-4 h-4 text-emerald-400" />
+                    <h4 className="font-bold text-sm">審査証跡ログ（therapist_verification_logs）— 原本画像削除後も保持されるテキスト記録</h4>
+                  </div>
+                  <p className="text-[11px] text-indigo-200 mt-0.5">
+                    Supabase Storage（{STORAGE_BUCKET}/）から資格証・保険証ファイルを完全削除した後も、承認日時・管理者ID・資格名・登録番号の証跡を永続保持します。
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowAuditLogsPanel(false)}
+                  className="px-3 py-1 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold self-start sm:self-auto"
+                >
+                  閉じる
+                </button>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold text-[10px] uppercase">
+                    <tr>
+                      <th className="px-4 py-3">承認/判定日時 (verified_at)</th>
+                      <th className="px-4 py-3">対象セラピスト</th>
+                      <th className="px-4 py-3">判定</th>
+                      <th className="px-4 py-3">確認資格名 (qualification_type)</th>
+                      <th className="px-4 py-3">登録番号 (registration_number)</th>
+                      <th className="px-4 py-3">照合氏名 (Stripe eKYC)</th>
+                      <th className="px-4 py-3">管理者ID (verified_by)</th>
+                      <th className="px-4 py-3">Storage自動削除</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {verificationLogs.map((log) => (
+                      <tr key={log.id} className="hover:bg-slate-50/80">
+                        <td className="px-4 py-3 font-mono text-[11px] text-slate-600">
+                          {formatDate(log.verified_at)}
+                        </td>
+                        <td className="px-4 py-3 font-bold text-slate-900">{log.therapist_name || log.therapist_id}</td>
+                        <td className="px-4 py-3">
+                          {log.decision === 'approved' ? (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                              承認・認定付与
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300">
+                              差戻し
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 font-bold text-indigo-900">
+                          {log.qualification_type || <span className="text-slate-400 font-normal">-</span>}
+                        </td>
+                        <td className="px-4 py-3 font-mono text-slate-700">
+                          {log.registration_number || <span className="text-slate-400">-</span>}
+                        </td>
+                        <td className="px-4 py-3 text-slate-700">
+                          {log.confirmed_name || <span className="text-slate-400">-</span>}
+                        </td>
+                        <td className="px-4 py-3 font-mono text-[10px] text-slate-500">
+                          {log.verified_by ? `${log.verified_by.slice(0, 8)}...` : 'admin'}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-bold border border-slate-200">
+                            <Trash2 className="w-3 h-3 text-rose-500" />
+                            <span>{log.files_deleted_count ?? 0}件 Delete済</span>
+                          </span>
+                          {log.reason && (
+                            <span className="block text-[10px] text-rose-600 mt-0.5">理由: {log.reason}</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* メイン一覧テーブル＆カード */}
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h4 className="font-bold text-slate-900 text-sm">
+                  各セラピストの提出書類4点（電子誓約書・eKYC・資格証・賠償責任保険）＆ 審査進捗一覧
+                </h4>
+                <p className="text-[11px] text-slate-500">
+                  該当 {filteredTherapists.length} 名 / 全 {therapists.length} 名（審査待ち・未承認のセラピストが最上部に表示されます）
+                </p>
+              </div>
             </div>
 
-            {/* フィルターセレクト群 */}
-            <div className="flex flex-wrap items-center gap-2">
-              {/* 審査ステータス */}
-              <select
-                value={thApprovalFilter}
-                onChange={(e) => setThApprovalFilter(e.target.value as any)}
-                className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-emerald-500 shadow-2xs"
-              >
-                <option value="all">審査: すべて</option>
-                <option value="approved">承認済のみ</option>
-                <option value="pending">審査中のみ</option>
-              </select>
+            {/* 絞り込みフィルターバー */}
+            <div className="p-4 bg-slate-50 border-b border-slate-100 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+              <div className="relative flex-1 max-w-md">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={thSearch}
+                  onChange={(e) => setThSearch(e.target.value)}
+                  placeholder="セラピスト名、住所、専門資格で検索..."
+                  className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-emerald-500 shadow-2xs"
+                />
+              </div>
 
-              {/* エリア */}
-              <select
-                value={thAreaFilter}
-                onChange={(e) => setThAreaFilter(e.target.value)}
-                className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-emerald-500 shadow-2xs"
-              >
-                <option value="all">エリア: 全域</option>
-                <option value="松山市">松山市</option>
-                <option value="今治市">今治市</option>
-                <option value="新居浜市">新居浜市</option>
-                <option value="西条市">西条市</option>
-                <option value="四国中央市">四国中央市</option>
-                <option value="宇和島市">宇和島市</option>
-                <option value="その他">その他市町</option>
-              </select>
-
-              {/* 施術形態 */}
-              <select
-                value={thStyleFilter}
-                onChange={(e) => setThStyleFilter(e.target.value as any)}
-                className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-emerald-500 shadow-2xs"
-              >
-                <option value="all">形態: すべて</option>
-                <option value="visit">出張対応</option>
-                <option value="store">店舗あり</option>
-              </select>
-
-              {/* リセットボタン */}
-              {(thSearch || thApprovalFilter !== 'all' || thAreaFilter !== 'all' || thStyleFilter !== 'all') && (
-                <button
-                  onClick={() => {
-                    setThSearch('');
-                    setThApprovalFilter('all');
-                    setThAreaFilter('all');
-                    setThStyleFilter('all');
-                  }}
-                  className="px-2.5 py-2 text-xs text-slate-500 hover:text-slate-800 bg-white border border-slate-200 rounded-xl flex items-center gap-1 transition"
-                  title="条件をクリア"
+              <div className="flex flex-wrap items-center gap-2">
+                <select
+                  value={thApprovalFilter}
+                  onChange={(e) => setThApprovalFilter(e.target.value as any)}
+                  className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-emerald-500 shadow-2xs"
                 >
-                  <RotateCcw className="w-3 h-3" />
-                  <span>クリア</span>
-                </button>
+                  <option value="all">審査ステージ: すべて ({therapists.length})</option>
+                  <option value="unapproved">要確認・未承認のみ ({unapprovedCount})</option>
+                  <option value="ready">Step4: 最終承認待ち ({readyCount})</option>
+                  <option value="in_progress">Step1〜3: 手続き中 ({inProgressCount})</option>
+                  <option value="rejected">差戻し・再提出待ち ({rejectedCount})</option>
+                  <option value="certified">本登録・専門認定済 ({certifiedCount})</option>
+                </select>
+
+                <select
+                  value={thAreaFilter}
+                  onChange={(e) => setThAreaFilter(e.target.value)}
+                  className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-emerald-500 shadow-2xs"
+                >
+                  <option value="all">エリア: 全域</option>
+                  <option value="松山市">松山市</option>
+                  <option value="今治市">今治市</option>
+                  <option value="新居浜市">新居浜市</option>
+                  <option value="西条市">西条市</option>
+                  <option value="四国中央市">四国中央市</option>
+                  <option value="宇和島市">宇和島市</option>
+                  <option value="その他">その他市町</option>
+                </select>
+
+                <select
+                  value={thStyleFilter}
+                  onChange={(e) => setThStyleFilter(e.target.value as any)}
+                  className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-emerald-500 shadow-2xs"
+                >
+                  <option value="all">形態: すべて</option>
+                  <option value="visit">出張対応</option>
+                  <option value="store">店舗あり</option>
+                </select>
+
+                {(thSearch || thApprovalFilter !== 'all' || thAreaFilter !== 'all' || thStyleFilter !== 'all') && (
+                  <button
+                    onClick={() => {
+                      setThSearch('');
+                      setThApprovalFilter('all');
+                      setThAreaFilter('all');
+                      setThStyleFilter('all');
+                    }}
+                    className="px-2.5 py-2 text-xs text-slate-500 hover:text-slate-800 bg-white border border-slate-200 rounded-xl flex items-center gap-1 transition"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    <span>クリア</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="divide-y divide-slate-100">
+              {filteredTherapists.length === 0 ? (
+                <div className="p-8 text-center text-slate-400 text-xs">
+                  条件に一致するセラピストが見つかりませんでした
+                </div>
+              ) : (
+                filteredTherapists.map((th) => {
+                  const tp = therapistProfiles[th.id];
+                  const ob = onboardings[th.id];
+                  const stage = getVerificationStage(tp, ob);
+                  const stageMeta = STAGE_META[stage];
+                  const checklist = getChecklist(tp, ob);
+                  const certified = isTherapistCertified(tp);
+                  const latestLog = verificationLogs.find((l) => l.therapist_id === th.id && l.decision === 'approved');
+
+                  return (
+                    <div
+                      key={th.id}
+                      className={`p-5 sm:p-6 transition ${
+                        stage === 'ready'
+                          ? 'bg-emerald-50/40 hover:bg-emerald-50/70'
+                          : stage === 'rejected'
+                          ? 'bg-rose-50/30 hover:bg-rose-50/50'
+                          : stage === 'in_progress' || stage === 'not_started'
+                          ? 'bg-amber-50/25 hover:bg-amber-50/50'
+                          : 'hover:bg-slate-50/60'
+                      }`}
+                    >
+                      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+                        {/* 左側: セラピスト基本情報 */}
+                        <div className="flex items-start gap-4">
+                          <img
+                            src={th.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(th.name)}`}
+                            alt={th.name}
+                            className="w-14 h-14 rounded-2xl object-cover ring-2 ring-emerald-500/20 shrink-0"
+                          />
+                          <div className="space-y-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <h4 className="font-black text-slate-900 text-sm">{th.name}</h4>
+                              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${stageMeta.badge}`}>
+                                {stageMeta.label}
+                              </span>
+                              {certified && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-600 text-white shadow-2xs">
+                                  <Award className="w-3 h-3" />
+                                  <span>専門認定バッジ付与済</span>
+                                </span>
+                              )}
+                              {ob?.claimed_qualification_type && (
+                                <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-bold border border-slate-200">
+                                  申請資格: {ob.claimed_qualification_type}
+                                </span>
+                              )}
+                              <span className="text-[11px] text-slate-400 font-mono">{th.email}</span>
+                            </div>
+
+                            <p className="text-xs text-slate-600 max-w-2xl line-clamp-2">
+                              {tp?.bio || '新規登録セラピストです。管理者による審査待ちです。'}
+                            </p>
+
+                            {ob?.rejection_reason && (
+                              <div className="p-2 rounded-xl bg-rose-100/80 border border-rose-200 text-[11px] text-rose-800 font-bold flex items-center gap-1.5">
+                                <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-rose-600" />
+                                <span>差戻し理由: {ob.rejection_reason}（旧提出ファイルはStorageから自動削除済）</span>
+                              </div>
+                            )}
+
+                            {latestLog && (
+                              <div className="text-[11px] text-indigo-700 font-semibold flex flex-wrap items-center gap-2">
+                                <span>✓ 承認ログ記録済: {latestLog.qualification_type}（登録番号: {latestLog.registration_number || '確認済'}）</span>
+                                <span className="text-slate-400">|</span>
+                                <span>承認日時: {formatDate(latestLog.verified_at)}</span>
+                                <span className="text-slate-400">|</span>
+                                <span className="text-rose-600 font-bold">原本ファイル {latestLog.files_deleted_count ?? 2}件 自動削除済</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* 右側: アクションボタン群 */}
+                        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+                          <button
+                            onClick={() => openVerificationModal(th.id)}
+                            className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs cursor-pointer ${
+                              stage === 'ready'
+                                ? 'bg-emerald-600 hover:bg-emerald-500 text-white ring-2 ring-emerald-500/30'
+                                : certified
+                                ? 'bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200'
+                                : 'bg-slate-900 hover:bg-slate-800 text-white'
+                            }`}
+                          >
+                            <ClipboardCheck className="w-4 h-4" />
+                            <span>
+                              {stage === 'ready'
+                                ? '書類を照合して承認審査する'
+                                : certified
+                                ? '提出状況・承認ログを確認'
+                                : '4ステップ進捗・提出書類を確認'}
+                            </span>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              switchUser(th.id);
+                              router.push('/therapist');
+                            }}
+                            className="px-3 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition flex items-center gap-1"
+                            title="このセラピストの視点で4ステップ登録・書類提出画面を表示"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            <span>セラピスト画面で表示</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* 下段: 審査手数料 ＋ 提出書類4点の有無ステータス一覧グリッド */}
+                      <div className="mt-4 pt-3 border-t border-slate-200/70 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
+                        {checklist.map((item) => {
+                          const isDocPurged = certified && (item.key === 'qualification' || item.key === 'insurance');
+                          return (
+                            <div
+                              key={item.key}
+                              className={`px-3 py-2 rounded-xl border text-xs flex items-start gap-2 ${
+                                item.ok
+                                  ? 'bg-white border-emerald-200/90 text-slate-800'
+                                  : 'bg-slate-100/80 border-slate-200 text-slate-500'
+                              }`}
+                            >
+                              {item.ok ? (
+                                <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                              ) : (
+                                <XCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                              )}
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center justify-between gap-1">
+                                  <span className="font-bold text-[11px] text-slate-900 truncate">{item.shortLabel}</span>
+                                  <span
+                                    className={`text-[9px] font-black px-1.5 py-0.2 rounded ${
+                                      isDocPurged
+                                        ? 'bg-indigo-100 text-indigo-800'
+                                        : item.ok
+                                        ? 'bg-emerald-100 text-emerald-800'
+                                        : 'bg-amber-100 text-amber-800'
+                                    }`}
+                                  >
+                                    {isDocPurged ? '確認・削除済' : item.ok ? '提出・確認済' : '未完了'}
+                                  </span>
+                                </div>
+                                <p className="text-[10px] text-slate-500 truncate mt-0.5" title={item.detail}>
+                                  {item.detail}
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })
               )}
             </div>
           </div>
 
-          <div className="divide-y divide-slate-100">
-            {filteredTherapists.length === 0 ? (
-              <div className="p-8 text-center text-slate-400 text-xs">
-                条件に一致するセラピストが見つかりませんでした
-              </div>
-            ) : (
-              filteredTherapists.map((th) => {
-                const tp = therapistProfiles[th.id];
-                const isApproved = tp?.is_approved ?? false;
+          {/* ========================================================
+              Step 4: 書類照合・審査承認 ＆ Storage自動削除モーダル
+             ======================================================== */}
+          {selectedTherapistId && (() => {
+            const selUser = allUsers.find((u) => u.id === selectedTherapistId);
+            const selTp = therapistProfiles[selectedTherapistId];
+            const selOb = onboardings[selectedTherapistId];
+            if (!selUser) return null;
 
-                return (
-                  <div key={th.id} className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
+            const selStage = getVerificationStage(selTp, selOb);
+            const selStageMeta = STAGE_META[selStage];
+            const selChecklist = getChecklist(selTp, selOb);
+            const selCertified = isTherapistCertified(selTp);
+            const selLogs = verificationLogs.filter((l) => l.therapist_id === selectedTherapistId);
+
+            const handleApprove = async () => {
+              setIsProcessingDecision(true);
+              setVerificationFeedback(null);
+              try {
+                const res = await approveTherapistVerification({
+                  therapistId: selectedTherapistId,
+                  qualificationType: approvalQualificationType,
+                  registrationNumber: approvalRegistrationNumber,
+                  nameMatchConfirmed,
+                  insuranceConfirmed,
+                });
+                setVerificationFeedback({
+                  type: res.ok ? 'success' : 'error',
+                  text: res.message,
+                });
+              } finally {
+                setIsProcessingDecision(false);
+              }
+            };
+
+            const handleReject = async () => {
+              setIsProcessingDecision(true);
+              setVerificationFeedback(null);
+              try {
+                const res = await rejectTherapistVerification({
+                  therapistId: selectedTherapistId,
+                  reason: rejectReasonInput,
+                });
+                setVerificationFeedback({
+                  type: res.ok ? 'success' : 'error',
+                  text: res.message,
+                });
+                if (res.ok) setRejectReasonInput('');
+              } finally {
+                setIsProcessingDecision(false);
+              }
+            };
+
+            // デモ・検証用: 未完了のStep3書類をワンクリックでサンプル提出するヘルパー
+            const handleSimulateStep3All = async () => {
+              const cleanName = selUser.name.replace(/\s*\(.*?\)\s*$/, '').trim();
+              await submitTermsAgreement(selectedTherapistId, cleanName, approvalQualificationType);
+              // サンプルSVGからFileオブジェクトを生成して uploadVerificationDoc を呼ぶ
+              const qSvgUrl = sampleDocumentDataUrl('qualification', cleanName);
+              const iSvgUrl = sampleDocumentDataUrl('insurance', cleanName);
+              const qRes = await fetch(qSvgUrl);
+              const qBlob = await qRes.blob();
+              const qFile = new File([qBlob], `${cleanName}_国家資格免許証.png`, { type: 'image/png' });
+              await uploadVerificationDoc(selectedTherapistId, 'qualification', qFile);
+
+              const iRes = await fetch(iSvgUrl);
+              const iBlob = await iRes.blob();
+              const iFile = new File([iBlob], `${cleanName}_賠償責任保険加入証明.pdf`, { type: 'application/pdf' });
+              await uploadVerificationDoc(selectedTherapistId, 'insurance', iFile);
+
+              setNameMatchConfirmed(true);
+              setInsuranceConfirmed(true);
+              setVerificationFeedback({
+                type: 'success',
+                text: 'Step 3（電子誓約書署名 ＋ 保有資格証 ＋ 損害賠償責任保険証票）の提出をシミュレートしました。このまま Step 4 の承認＆自動削除を実行できます。',
+              });
+            };
+
+            return (
+              <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+                <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200">
+                  {/* モーダルヘッダー */}
+                  <div className="sticky top-0 z-10 bg-slate-900 text-white px-6 py-4 flex items-center justify-between border-b border-slate-800">
+                    <div className="flex items-center gap-3">
                       <img
-                        src={th.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(th.name)}`}
-                        alt={th.name}
-                        className="w-14 h-14 rounded-2xl object-cover ring-2 ring-emerald-500/20"
+                        src={selUser.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(selUser.name)}`}
+                        alt={selUser.name}
+                        className="w-11 h-11 rounded-2xl object-cover ring-2 ring-emerald-400/40"
                       />
                       <div>
                         <div className="flex items-center gap-2">
-                          <h4 className="font-bold text-slate-900 text-sm">{th.name}</h4>
-                          <span className="text-xs text-slate-400 font-mono">{th.email}</span>
-                          {!isApproved && (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
-                              新規・審査中
+                          <h3 className="font-black text-base">{selUser.name}</h3>
+                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${selStageMeta.badge}`}>
+                            {selStageMeta.label}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-400 font-mono">{selUser.email}</p>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => setSelectedTherapistId(null)}
+                      className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  <div className="p-6 space-y-6">
+                    {/* フィードバック通知 */}
+                    {verificationFeedback && (
+                      <div
+                        className={`p-4 rounded-2xl border text-xs font-bold flex items-start gap-2.5 ${
+                          verificationFeedback.type === 'success'
+                            ? 'bg-emerald-50 border-emerald-300 text-emerald-900'
+                            : 'bg-rose-50 border-rose-300 text-rose-900'
+                        }`}
+                      >
+                        {verificationFeedback.type === 'success' ? (
+                          <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                        ) : (
+                          <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+                        )}
+                        <div className="space-y-1">
+                          <p>{verificationFeedback.text}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 1. 提出書類4点＋審査手数料 チェックリスト詳細 */}
+                    <div>
+                      <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                        <ClipboardCheck className="w-4 h-4 text-emerald-600" />
+                        <span>4ステップ審査進捗 ＆ 提出書類4点の確認状況</span>
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
+                        {selChecklist.map((item) => (
+                          <div
+                            key={item.key}
+                            className={`p-3 rounded-2xl border text-xs ${
+                              item.ok
+                                ? 'bg-emerald-50/50 border-emerald-200 text-slate-800'
+                                : 'bg-amber-50/50 border-amber-200 text-slate-700'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between font-bold">
+                              <span>{item.shortLabel}</span>
+                              {item.ok ? (
+                                <CheckCircle className="w-4 h-4 text-emerald-600" />
+                              ) : (
+                                <AlertTriangle className="w-4 h-4 text-amber-500" />
+                              )}
+                            </div>
+                            <p className="text-[11px] text-slate-600 mt-1 leading-snug">{item.detail}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 未完了ステップがある場合のクイックシミュレーションバー（動作確認用） */}
+                    {!selCertified && selStage !== 'ready' && (
+                      <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="text-xs font-black text-amber-900 block">
+                              ⚡ 検証・シミュレーション操作（未完了ステップを即時進める）
                             </span>
+                            <span className="text-[11px] text-amber-700">
+                              セラピスト本人の画面（またはStripe Webhook）で行われる Step 1〜Step 3 の手続きをこの画面からワンクリックで再現できます。
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {selTp?.payment_status !== 'completed' && (
+                            <button
+                              onClick={async () => {
+                                const r = await completeReviewFeePayment(selectedTherapistId);
+                                setVerificationFeedback({ type: 'success', text: r.message });
+                              }}
+                              className="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold transition flex items-center gap-1.5"
+                            >
+                              <CreditCard className="w-3.5 h-3.5" />
+                              <span>【Step 1】審査手数料(5,000円)決済完了を反映</span>
+                            </button>
+                          )}
+                          {!selTp?.is_identity_verified && (
+                            <button
+                              onClick={async () => {
+                                const r = await completeStripeEkyc(selectedTherapistId);
+                                setVerificationFeedback({ type: r.ok ? 'success' : 'error', text: r.message });
+                              }}
+                              className="px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold transition flex items-center gap-1.5"
+                            >
+                              <ShieldCheck className="w-3.5 h-3.5" />
+                              <span>【Step 2】Stripe Webhook (payouts_enabled: true) 完了を反映</span>
+                            </button>
+                          )}
+                          {(!selOb?.terms_agreed_at || !selOb?.qualification_file_path || !selOb?.insurance_file_path) && (
+                            <button
+                              onClick={handleSimulateStep3All}
+                              className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition flex items-center gap-1.5"
+                            >
+                              <Upload className="w-3.5 h-3.5" />
+                              <span>【Step 3】電子誓約書同意＋資格証・保険証アップロードを反映</span>
+                            </button>
                           )}
                         </div>
-                        <p className="text-xs text-slate-500 mt-1 max-w-xl">
-                          {tp?.bio || '新規登録セラピストです。管理者による審査待ちです。'}
+                      </div>
+                    )}
+
+                    {/* 2. Stripe Connect 認証氏名 × 資格証・保険証票画像の照合エリア */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                      {/* 左カラム: Stripe eKYC 身分証確認結果（画像非保持） */}
+                      <div className="p-4 rounded-2xl bg-slate-900 text-white space-y-3 border border-slate-800">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-sky-400">
+                            ② 身分証明書（Stripe eKYC）
+                          </span>
+                          <Lock className="w-4 h-4 text-sky-400" />
+                        </div>
+
+                        <div className="p-3 rounded-xl bg-slate-800/90 border border-slate-700 space-y-1.5">
+                          <span className="text-[10px] text-slate-400 block">Stripe Connect 認証氏名</span>
+                          <div className="text-lg font-black text-emerald-400">
+                            {selTp?.is_identity_verified || selCertified
+                              ? selTp?.identity_verified_name || selUser.name.replace(/\s*\(.*?\)\s*$/, '')
+                              : '未認証（Step 2 待ち）'}
+                          </div>
+                          <div className="text-[10px] font-mono text-slate-400">
+                            Account: {selTp?.stripe_account_id || '未連携'}
+                          </div>
+                          <div className="text-[10px] font-mono text-emerald-300">
+                            payouts_enabled: {selTp?.is_identity_verified || selCertified ? 'true' : 'false'}
+                          </div>
+                        </div>
+
+                        <div className="p-3 rounded-xl bg-slate-800/50 border border-slate-700/70 text-[11px] text-slate-300 space-y-1">
+                          <div className="font-bold text-white">① 電子誓約書（規約同意）</div>
+                          {selOb?.terms_agreed_at || selCertified ? (
+                            <>
+                              <p className="text-emerald-300 font-bold">
+                                ✓ 電子署名: {selOb?.terms_signature_name || selUser.name.replace(/\s*\(.*?\)\s*$/, '')}
+                              </p>
+                              <p className="text-[10px] text-slate-400">
+                                規約バージョン: {selOb?.terms_version || '2026-10-v1'}（直契約禁止・引き抜き禁止同意済）
+                              </p>
+                            </>
+                          ) : (
+                            <p className="text-amber-300">未同意</p>
+                          )}
+                        </div>
+
+                        <p className="text-[10px] text-slate-400 leading-relaxed">
+                          ※セキュリティ基本方針に基づき、運転免許証・マイナンバーカード等の身分証画像は自社DB・Storageへ一切保存せず、Stripe Connectの自動eKYC判定結果と認証氏名のみを取得しています。
                         </p>
-                        <div className="flex flex-wrap gap-1.5 mt-2">
-                          {(tp?.specialities && tp.specialities.length > 0
-                            ? tp.specialities
-                            : ['ボディケア', '整体']
-                          ).map((spec) => (
-                            <span key={spec} className="px-2 py-0.5 rounded-md bg-slate-100 text-[10px] text-slate-600 font-medium">
-                              {spec}
+                      </div>
+
+                      {/* 中央カラム: ③ 保有資格証（PDF/画像）プレビュー */}
+                      <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between space-y-3">
+                        <div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-black text-slate-900">③ 保有資格証（免状画像/PDF）</span>
+                            <span className="text-[10px] font-mono text-slate-500">{STORAGE_BUCKET}/</span>
+                          </div>
+                          <p className="text-[11px] text-slate-500 mt-0.5">
+                            ファイル名: {selOb?.qualification_file_name || (selCertified ? '削除済み' : '未提出')}
+                          </p>
+                        </div>
+
+                        {selOb?.qualification_file_path && qualPreviewUrl ? (
+                          <div className="space-y-2">
+                            <div className="rounded-xl overflow-hidden border border-slate-300 bg-white shadow-2xs">
+                              <img
+                                src={qualPreviewUrl}
+                                alt="保有資格証プレビュー"
+                                className="w-full h-44 object-contain bg-amber-50/30"
+                              />
+                            </div>
+                            <span className="text-[10px] text-emerald-700 font-bold block">
+                              ✓ 一時保管中（承認ボタンを押すとStorageから自動削除されます）
                             </span>
-                          ))}
+                          </div>
+                        ) : selCertified || selOb?.files_purged_at ? (
+                          <div className="h-44 rounded-xl bg-indigo-50/70 border-2 border-dashed border-indigo-200 flex flex-col items-center justify-center p-4 text-center">
+                            <Trash2 className="w-7 h-7 text-indigo-500 mb-1.5" />
+                            <span className="text-xs font-black text-indigo-950">
+                              Storage（{STORAGE_BUCKET}/）から自動削除済み
+                            </span>
+                            <span className="text-[10px] text-indigo-700 mt-1">
+                              承認完了と同時に原本ファイルは完全破棄（Delete）されました。下の承認ログにテキスト証跡のみ保持されています。
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="h-44 rounded-xl bg-slate-100 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center p-4 text-center text-slate-400 text-xs">
+                            資格証ファイル未提出
+                          </div>
+                        )}
+                      </div>
+
+                      {/* 右カラム: ④ 損害賠償責任保険の加入証明プレビュー */}
+                      <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between space-y-3">
+                        <div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-black text-slate-900">④ 損害賠償責任保険の加入証明</span>
+                            <span className="text-[10px] font-mono text-slate-500">{STORAGE_BUCKET}/</span>
+                          </div>
+                          <p className="text-[11px] text-slate-500 mt-0.5">
+                            ファイル名: {selOb?.insurance_file_name || (selCertified ? '削除済み' : '未提出')}
+                          </p>
+                        </div>
+
+                        {selOb?.insurance_file_path && insPreviewUrl ? (
+                          <div className="space-y-2">
+                            <div className="rounded-xl overflow-hidden border border-slate-300 bg-white shadow-2xs">
+                              <img
+                                src={insPreviewUrl}
+                                alt="賠償責任保険証明プレビュー"
+                                className="w-full h-44 object-contain bg-amber-50/30"
+                              />
+                            </div>
+                            <span className="text-[10px] text-emerald-700 font-bold block">
+                              ✓ 一時保管中（承認ボタンを押すとStorageから自動削除されます）
+                            </span>
+                          </div>
+                        ) : selCertified || selOb?.files_purged_at ? (
+                          <div className="h-44 rounded-xl bg-indigo-50/70 border-2 border-dashed border-indigo-200 flex flex-col items-center justify-center p-4 text-center">
+                            <Trash2 className="w-7 h-7 text-indigo-500 mb-1.5" />
+                            <span className="text-xs font-black text-indigo-950">
+                              Storage（{STORAGE_BUCKET}/）から自動削除済み
+                            </span>
+                            <span className="text-[10px] text-indigo-700 mt-1">
+                              承認完了と同時に原本ファイルは完全破棄（Delete）されました。
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="h-44 rounded-xl bg-slate-100 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center p-4 text-center text-slate-400 text-xs">
+                            保険証票ファイル未提出
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* 3. Step 4: 運営承認フォーム（資格名・登録番号記録 ＋ 自動ファイル削除発火） */}
+                    {!selCertified ? (
+                      <div className="p-5 rounded-3xl bg-emerald-50/70 border-2 border-emerald-200 space-y-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <div>
+                            <h4 className="font-black text-slate-900 text-sm flex items-center gap-2">
+                              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                              <span>【Step 4】氏名照合チェック ＆ 自動データ破棄付き本登録承認</span>
+                            </h4>
+                            <p className="text-xs text-slate-600 mt-0.5">
+                              承認ボタン押下時: ① <code className="font-mono text-emerald-800">is_certified = true</code> 更新 ＆ 専門認定バッジ付与 → ② 審査証跡テキストログ書き込み → ③ <code className="font-mono text-rose-700">{STORAGE_BUCKET}/</code> 内の提出ファイルを完全削除（Delete）します。
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 mb-1">
+                              確認した資格名（qualification_type）*
+                            </label>
+                            <select
+                              value={approvalQualificationType}
+                              onChange={(e) => setApprovalQualificationType(e.target.value)}
+                              className="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-900"
+                            >
+                              {QUALIFICATION_TYPES.map((q) => (
+                                <option key={q} value={q}>
+                                  {q}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 mb-1">
+                              資格登録番号（registration_number・任意）
+                            </label>
+                            <input
+                              type="text"
+                              value={approvalRegistrationNumber}
+                              onChange={(e) => setApprovalRegistrationNumber(e.target.value)}
+                              placeholder="例: 第 49201 号"
+                              className="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-mono text-slate-900"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-2 pt-1">
+                          <label className="flex items-center gap-2.5 text-xs font-bold text-slate-800 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={nameMatchConfirmed}
+                              onChange={(e) => setNameMatchConfirmed(e.target.checked)}
+                              className="w-4 h-4 accent-emerald-600 rounded"
+                            />
+                            <span>
+                              Stripeから連携された「認証氏名（{selTp?.identity_verified_name || selUser.name.replace(/\s*\(.*?\)\s*$/, '')}）」と「資格証画像の氏名」を照合し、一致を確認しました
+                            </span>
+                          </label>
+
+                          <label className="flex items-center gap-2.5 text-xs font-bold text-slate-800 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={insuranceConfirmed}
+                              onChange={(e) => setInsuranceConfirmed(e.target.checked)}
+                              className="w-4 h-4 accent-emerald-600 rounded"
+                            />
+                            <span>
+                              損害賠償責任保険の加入証明を確認しました（承認と同時に資格証・保険証票の原本ファイルを自動削除します）
+                            </span>
+                          </label>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
+                          <button
+                            onClick={handleApprove}
+                            disabled={isProcessingDecision}
+                            className="flex-1 py-3 px-5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs shadow-md transition flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                          >
+                            <CheckCircle className="w-4 h-4" />
+                            <span>承認して本登録完了（提出ファイルをStorageから即時自動削除）</span>
+                          </button>
+                        </div>
+
+                        {/* 差戻しエリア */}
+                        <div className="pt-4 border-t border-emerald-200/80 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                          <input
+                            type="text"
+                            value={rejectReasonInput}
+                            onChange={(e) => setRejectReasonInput(e.target.value)}
+                            placeholder="差戻す場合の理由（例: 資格証の登録番号が見切れているため再撮影してください）"
+                            className="flex-1 px-3 py-2 bg-white border border-rose-200 rounded-xl text-xs text-slate-800"
+                          />
+                          <button
+                            onClick={handleReject}
+                            disabled={isProcessingDecision}
+                            className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition shrink-0 cursor-pointer"
+                          >
+                            差戻し＆一時ファイル削除
+                          </button>
                         </div>
                       </div>
-                    </div>
-
-                    {/* 承認トグルスイッチ & 視点切り替えボタン */}
-                    <div className="flex flex-wrap items-center gap-3 shrink-0">
-                      <button
-                        onClick={() => {
-                          switchUser(th.id);
-                          router.push('/therapist');
-                        }}
-                        className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-xs"
-                        title="このセラピストの視点で操作画面を表示"
-                      >
-                        <span>セラピスト視点で表示</span>
-                      </button>
-
-                      <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
-                        <span className={`text-xs font-bold ${isApproved ? 'text-emerald-600' : 'text-slate-400'}`}>
-                          {isApproved ? '承認済' : '審査中'}
-                        </span>
-                        <button
-                          onClick={() => toggleTherapistApproval(th.id)}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                            isApproved ? 'bg-emerald-600' : 'bg-slate-300'
-                          }`}
-                        >
-                          <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                              isApproved ? 'translate-x-6' : 'translate-x-1'
-                            }`}
-                          />
-                        </button>
+                    ) : (
+                      <div className="p-4 rounded-2xl bg-indigo-50 border border-indigo-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <Award className="w-8 h-8 text-indigo-600 shrink-0" />
+                          <div>
+                            <h4 className="text-xs font-black text-indigo-950">
+                              本登録承認・専門認定済み（is_certified = true）
+                            </h4>
+                            <p className="text-[11px] text-indigo-800">
+                              提出された資格証・保険証票ファイルは {STORAGE_BUCKET}/ バケットから自動削除済みで、以下のテキスト承認ログのみがDBに保持されています。
+                            </p>
+                          </div>
+                        </div>
                       </div>
+                    )}
+
+                    {/* 4. このセラピストの審査証跡（テキストログ）履歴 */}
+                    <div className="space-y-2">
+                      <h4 className="text-xs font-black text-slate-800 flex items-center gap-1.5">
+                        <History className="w-4 h-4 text-indigo-600" />
+                        <span>このセラピストの審査証跡ログ（画像削除後も保持されるDBテキストログ）</span>
+                      </h4>
+                      {selLogs.length === 0 ? (
+                        <p className="text-xs text-slate-400 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                          まだ承認・差戻しログはありません（または初期シード認定セラピストです）。
+                        </p>
+                      ) : (
+                        <div className="space-y-2">
+                          {selLogs.map((l) => (
+                            <div
+                              key={l.id}
+                              className="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs flex flex-wrap items-center justify-between gap-2"
+                            >
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span
+                                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                    l.decision === 'approved'
+                                      ? 'bg-emerald-100 text-emerald-800'
+                                      : 'bg-rose-100 text-rose-800'
+                                  }`}
+                                >
+                                  {l.decision === 'approved' ? '承認 (approved)' : '差戻し (rejected)'}
+                                </span>
+                                <span className="font-bold text-slate-900">
+                                  資格名: {l.qualification_type || '-'}
+                                </span>
+                                <span className="font-mono text-slate-700">
+                                  登録番号: {l.registration_number || '-'}
+                                </span>
+                                <span className="text-slate-600">
+                                  照合氏名: {l.confirmed_name || '-'}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-3 text-[11px] text-slate-500">
+                                <span>承認日時: {formatDate(l.verified_at)}</span>
+                                <span className="text-rose-600 font-bold">
+                                  Storage削除: {l.files_deleted_count ?? 0}件 ({l.files_deleted_at ? formatDate(l.files_deleted_at) : '即時'})
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
-                );
-              })
-            )}
-          </div>
+                </div>
+              </div>
+            );
+          })()}
         </div>
       )}
 

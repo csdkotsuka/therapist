@@ -12,6 +12,9 @@ import {
   ChatMessage,
   AppBrandId,
   AppBrandConfig,
+  TherapistOnboarding,
+  VerificationLog,
+  VerificationDocKind,
 } from '@/types';
 import {
   APP_BRANDS,
@@ -25,8 +28,24 @@ import {
   initialBookings,
   initialReviews,
   initialChatMessages,
+  initialOnboardings,
+  initialVerificationLogs,
 } from '@/lib/mockData';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import {
+  TERMS_VERSION,
+  validateDocFile,
+  buildStoragePath,
+  validateApproval,
+  DEMO_PATH_PREFIX,
+  sampleDocumentDataUrl,
+} from '@/lib/verification';
+import {
+  postAuthed,
+  uploadToTempBucket,
+  removeFromTempBucket,
+  createSignedViewUrl,
+} from '@/lib/verificationApi';
 
 interface UserLocation {
   name: string;
@@ -79,11 +98,30 @@ interface AppContextType {
   appBrand: AppBrandId;
   currentBrand: AppBrandConfig;
   setAppBrand: (brandId: AppBrandId) => Promise<void>;
+  // 本登録審査（4ステップ）・提出書類確認・承認＆Storage自動削除
+  onboardings: Record<string, TherapistOnboarding>;
+  verificationLogs: VerificationLog[];
+  completeReviewFeePayment: (therapistId: string) => Promise<{ ok: boolean; redirectUrl?: string; message: string }>;
+  completeStripeEkyc: (therapistId: string, verifiedName?: string) => Promise<{ ok: boolean; redirectUrl?: string; message: string }>;
+  submitTermsAgreement: (therapistId: string, signatureName: string, claimedQualificationType?: string) => Promise<{ ok: boolean; message: string }>;
+  uploadVerificationDoc: (therapistId: string, kind: VerificationDocKind, file: File) => Promise<{ ok: boolean; message: string }>;
+  getVerificationDocPreviewUrl: (therapistId: string, kind: VerificationDocKind) => Promise<string | null>;
+  approveTherapistVerification: (params: {
+    therapistId: string;
+    qualificationType: string;
+    registrationNumber?: string;
+    nameMatchConfirmed: boolean;
+    insuranceConfirmed: boolean;
+  }) => Promise<{ ok: boolean; message: string; deletedFilesCount: number }>;
+  rejectTherapistVerification: (params: {
+    therapistId: string;
+    reason: string;
+  }) => Promise<{ ok: boolean; message: string; deletedFilesCount: number }>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'therapist_platform_state_ehime_v4';
+const STORAGE_KEY = 'therapist_platform_state_ehime_v5';
 
 // セラピスト全体の約2〜3割に特典・キャンペーンが確実に設定されている状態を保証するヘルパー関数
 const ensureCampaigns = (profiles: Record<string, TherapistProfile>): Record<string, TherapistProfile> => {
@@ -117,6 +155,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [bookings, setBookings] = useState<Booking[]>(initialBookings);
   const [reviews, setReviews] = useState<Review[]>(initialReviews);
   const [messages, setMessages] = useState<ChatMessage[]>(initialChatMessages);
+  const [onboardings, setOnboardings] = useState<Record<string, TherapistOnboarding>>(initialOnboardings);
+  const [verificationLogs, setVerificationLogs] = useState<VerificationLog[]>(initialVerificationLogs);
+  const [localDocPreviews, setLocalDocPreviews] = useState<Record<string, string>>({});
   const [platformFeeRate, setPlatformFeeRateState] = useState<number>(20);
   const [appBrand, setAppBrandState] = useState<AppBrandId>(DEFAULT_BRAND_ID);
   const currentBrand = APP_BRANDS[appBrand] || APP_BRANDS[DEFAULT_BRAND_ID];
@@ -268,6 +309,35 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (!mErr && dbMessages && dbMessages.length > 0) {
         setMessages(dbMessages as ChatMessage[]);
       }
+
+      // 8. therapist_onboarding (本登録審査 Step3 提出書類・誓約書同意)
+      const { data: dbOnboardings, error: obErr } = await supabase
+        .from('therapist_onboarding')
+        .select('*');
+      if (!obErr && dbOnboardings && dbOnboardings.length > 0) {
+        const obMap: Record<string, TherapistOnboarding> = {};
+        dbOnboardings.forEach((row: any) => {
+          obMap[row.therapist_id] = row as TherapistOnboarding;
+        });
+        setOnboardings((prev) => ({
+          ...initialOnboardings,
+          ...prev,
+          ...obMap,
+        }));
+      }
+
+      // 9. therapist_verification_logs (承認・差戻しテキストログ)
+      const { data: dbLogs, error: logErr } = await supabase
+        .from('therapist_verification_logs')
+        .select('*')
+        .order('verified_at', { ascending: false });
+      if (!logErr && dbLogs && dbLogs.length > 0) {
+        setVerificationLogs((prev) => {
+          const dbIds = new Set(dbLogs.map((l: any) => l.id));
+          const mockOnly = prev.filter((l) => !dbIds.has(l.id));
+          return [...(dbLogs as VerificationLog[]), ...mockOnly];
+        });
+      }
     } catch (e) {
       console.error('Failed to fetch data from Supabase, falling back to local cache:', e);
     } finally {
@@ -303,6 +373,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           setReviews([...(parsed.reviews as Review[]), ...missingReviews]);
         }
         if (parsed.messages) setMessages(parsed.messages);
+        if (parsed.onboardings) {
+          setOnboardings({ ...initialOnboardings, ...parsed.onboardings });
+        }
+        if (parsed.verificationLogs) {
+          const savedLogIds = new Set((parsed.verificationLogs as VerificationLog[]).map((l) => l.id));
+          const missingLogs = initialVerificationLogs.filter((l) => !savedLogIds.has(l.id));
+          setVerificationLogs([...(parsed.verificationLogs as VerificationLog[]), ...missingLogs]);
+        }
         if (parsed.platformFeeRate) setPlatformFeeRateState(parsed.platformFeeRate);
         if (parsed.appBrand && APP_BRANDS[parsed.appBrand as AppBrandId]) {
           setAppBrandState(parsed.appBrand as AppBrandId);
@@ -347,6 +425,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           bookings,
           reviews,
           messages,
+          onboardings,
+          verificationLogs,
           platformFeeRate,
           appBrand,
           isLoggedIn,
@@ -356,7 +436,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (e) {
       console.error('Failed to save state to localStorage', e);
     }
-  }, [allUsers, therapistProfiles, services, bookings, reviews, messages, platformFeeRate, appBrand, currentUser, isLoggedIn, isLoaded]);
+  }, [allUsers, therapistProfiles, services, bookings, reviews, messages, onboardings, verificationLogs, platformFeeRate, appBrand, currentUser, isLoggedIn, isLoaded]);
 
   const login = (user: Profile) => {
     setCurrentUser(user);
@@ -669,20 +749,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return [...prev, { ...newUser, role: 'therapist' as const }];
     });
 
-    // 2. therapistProfiles に追加（デフォルト審査中）
+    // 2. therapistProfiles に追加（デフォルト審査中・Step 1未決済）
     const initialTp: TherapistProfile = {
       user_id: newUser.id,
       bio: therapistData?.bio || '新規登録セラピストです。管理者による審査待ちです。',
       specialities: therapistData?.specialities || ['ボディケア', 'リラクゼーション'],
       is_store_based: therapistData?.is_store_based ?? true,
       is_visit_based: therapistData?.is_visit_based ?? true,
-      address: therapistData?.address || newUser.address || '東京都内',
-      lat: therapistData?.lat || newUser.lat || 35.6666,
-      lng: therapistData?.lng || newUser.lng || 139.7092,
+      address: therapistData?.address || newUser.address || '愛媛県松山市',
+      lat: therapistData?.lat || newUser.lat || 33.8392,
+      lng: therapistData?.lng || newUser.lng || 132.7656,
       visit_radius_km: therapistData?.visit_radius_km || 10,
       rating_avg: 5.0,
       reviews_count: 0,
       is_approved: therapistData?.is_approved ?? false, // 審査中
+      payment_status: therapistData?.payment_status ?? 'pending',
+      payment_completed_at: therapistData?.payment_completed_at ?? null,
+      is_identity_verified: therapistData?.is_identity_verified ?? false,
+      identity_verified_at: therapistData?.identity_verified_at ?? null,
+      identity_verified_name: therapistData?.identity_verified_name ?? null,
+      is_certified: therapistData?.is_certified ?? false,
+      certified_at: therapistData?.certified_at ?? null,
     };
 
     setTherapistProfiles((prev) => ({
@@ -856,6 +943,591 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  // ========================================================
+  // 本登録審査（4ステップ）・提出書類確認・自動削除承認ロジック
+  // ========================================================
+
+  // 【Step 1】アカウント開設・審査手数料（5,000円 / 返金不可）の決済完了処理
+  const completeReviewFeePayment = async (
+    therapistId: string
+  ): Promise<{ ok: boolean; redirectUrl?: string; message: string }> => {
+    // 認証セッションがある場合は Stripe Checkout セッション発行を試行
+    const res = await postAuthed<{ url?: string }>('/api/stripe/review-fee', {});
+    if (res.ok && res.data?.url) {
+      return {
+        ok: true,
+        redirectUrl: res.data.url,
+        message: 'Stripe Checkout 決済画面へ移動します。',
+      };
+    }
+
+    // Stripe 未設定時またはデモ・管理確認モード時は即時決済完了（Webhook 相当）を更新
+    const now = new Date().toISOString();
+    setTherapistProfiles((prev) => {
+      const current = prev[therapistId] || ({ user_id: therapistId } as TherapistProfile);
+      return {
+        ...prev,
+        [therapistId]: {
+          ...current,
+          payment_status: 'completed',
+          payment_completed_at: now,
+        },
+      };
+    });
+
+    if (supabase && isSupabaseConfigured) {
+      try {
+        await supabase
+          .from('therapist_profiles')
+          .update({
+            payment_status: 'completed',
+            payment_completed_at: now,
+            updated_at: now,
+          })
+          .eq('user_id', therapistId);
+      } catch (err) {
+        console.warn('Supabase payment_status update warning:', err);
+      }
+    }
+
+    return {
+      ok: true,
+      message: '審査手数料（5,000円）のStripe決済が完了しました。Step 2（口座登録・eKYC）へ進めます。',
+    };
+  };
+
+  // 【Step 2】Stripe Connect Express 口座登録 ＆ 自動eKYC（身元確認）完了処理
+  const completeStripeEkyc = async (
+    therapistId: string,
+    verifiedName?: string
+  ): Promise<{ ok: boolean; redirectUrl?: string; message: string }> => {
+    const tp = therapistProfiles[therapistId];
+    if (tp?.payment_status !== 'completed') {
+      return {
+        ok: false,
+        message: '先に Step 1（審査手数料 5,000円の決済）を完了してください。',
+      };
+    }
+
+    // 認証セッションがある場合は Stripe Connect オンボーディング URL 発行を試行
+    const res = await postAuthed<{ url?: string; account_id?: string }>('/api/stripe/connect', {});
+    if (res.ok && res.data?.url) {
+      return {
+        ok: true,
+        redirectUrl: res.data.url,
+        message: 'Stripe Express オンボーディング画面へ移動します。',
+      };
+    }
+
+    // Stripe Connect Webhook (`account.updated`, `payouts_enabled: true`) 通知受信のシミュレーション
+    // ※ 運転免許証等の身分証画像は自社DB/Storageに一切保存せず、認証結果フラグと認証氏名のみ反映
+    const now = new Date().toISOString();
+    const userObj = allUsers.find((u) => u.id === therapistId);
+    const cleanName = (verifiedName || userObj?.name || '本人確認済ユーザー').replace(/\s*\(.*?\)\s*$/, '').trim();
+    const acctId = tp?.stripe_account_id || `acct_ehime_${therapistId.replace(/-/g, '').slice(0, 16)}`;
+
+    setTherapistProfiles((prev) => {
+      const current = prev[therapistId] || ({ user_id: therapistId } as TherapistProfile);
+      return {
+        ...prev,
+        [therapistId]: {
+          ...current,
+          stripe_account_id: acctId,
+          is_identity_verified: true,
+          identity_verified_at: now,
+          identity_verified_name: cleanName,
+        },
+      };
+    });
+
+    if (supabase && isSupabaseConfigured) {
+      try {
+        await supabase
+          .from('therapist_profiles')
+          .update({
+            stripe_account_id: acctId,
+            is_identity_verified: true,
+            identity_verified_at: now,
+            identity_verified_name: cleanName,
+            updated_at: now,
+          })
+          .eq('user_id', therapistId);
+      } catch (err) {
+        console.warn('Supabase is_identity_verified update warning:', err);
+      }
+    }
+
+    return {
+      ok: true,
+      message: `Stripe Connect 自動eKYCが完了しました（認証氏名: ${cleanName} / 身分証画像は自社DB非保持）。`,
+    };
+  };
+
+  // 【Step 3-A】電子誓約書への同意・電子署名
+  const submitTermsAgreement = async (
+    therapistId: string,
+    signatureName: string,
+    claimedQualificationType?: string
+  ): Promise<{ ok: boolean; message: string }> => {
+    const trimmed = signatureName.trim();
+    if (!trimmed) {
+      return { ok: false, message: '電子署名（氏名）を入力してください。' };
+    }
+
+    const now = new Date().toISOString();
+    const existing = onboardings[therapistId] || { therapist_id: therapistId };
+    const updatedOb: TherapistOnboarding = {
+      ...existing,
+      therapist_id: therapistId,
+      terms_version: TERMS_VERSION,
+      terms_agreed_at: now,
+      terms_signature_name: trimmed,
+      claimed_qualification_type: claimedQualificationType || existing.claimed_qualification_type || null,
+      updated_at: now,
+    };
+
+    setOnboardings((prev) => ({
+      ...prev,
+      [therapistId]: updatedOb,
+    }));
+
+    if (supabase && isSupabaseConfigured) {
+      try {
+        await supabase.from('therapist_onboarding').upsert({
+          therapist_id: therapistId,
+          terms_version: updatedOb.terms_version,
+          terms_agreed_at: updatedOb.terms_agreed_at,
+          terms_signature_name: updatedOb.terms_signature_name,
+          claimed_qualification_type: updatedOb.claimed_qualification_type,
+          updated_at: now,
+        });
+      } catch (err) {
+        console.warn('Supabase therapist_onboarding terms upsert warning:', err);
+      }
+    }
+
+    return { ok: true, message: '電子誓約書への同意・署名を記録しました。' };
+  };
+
+  // 【Step 3-B】保有資格証・損害賠償責任保険証票のアップロード（temp-qualifications 一時バケット）
+  const uploadVerificationDoc = async (
+    therapistId: string,
+    kind: VerificationDocKind,
+    file: File
+  ): Promise<{ ok: boolean; message: string }> => {
+    const validationErr = validateDocFile(file);
+    if (validationErr) {
+      return { ok: false, message: validationErr };
+    }
+
+    const storagePath = buildStoragePath(therapistId, kind, file.type);
+    const now = new Date().toISOString();
+    const existing = onboardings[therapistId] || { therapist_id: therapistId };
+    const prevPath = kind === 'qualification' ? existing.qualification_file_path : existing.insurance_file_path;
+
+    // プレビュー用のローカルDataURLを保持（Storage未構築環境でも管理画面で照合プレビュー可能にする）
+    try {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : '');
+        reader.onerror = () => reject(new Error('File read error'));
+        reader.readAsDataURL(file);
+      });
+      if (dataUrl) {
+        setLocalDocPreviews((prev) => ({ ...prev, [storagePath]: dataUrl }));
+      }
+    } catch {
+      // ignore preview error
+    }
+
+    // Supabase Storage (temp-qualifications) へのアップロード試行
+    if (supabase && isSupabaseConfigured) {
+      try {
+        if (prevPath && !prevPath.startsWith(DEMO_PATH_PREFIX)) {
+          await removeFromTempBucket(prevPath);
+        }
+        await uploadToTempBucket(storagePath, file);
+      } catch (err) {
+        console.warn('Supabase temp-qualifications upload warning:', err);
+      }
+    }
+
+    const updatedOb: TherapistOnboarding = {
+      ...existing,
+      therapist_id: therapistId,
+      ...(kind === 'qualification'
+        ? {
+            qualification_file_path: storagePath,
+            qualification_file_name: file.name,
+            qualification_uploaded_at: now,
+          }
+        : {
+            insurance_file_path: storagePath,
+            insurance_file_name: file.name,
+            insurance_uploaded_at: now,
+          }),
+      rejection_reason: null,
+      rejected_at: null,
+      files_purged_at: null,
+      updated_at: now,
+    };
+
+    setOnboardings((prev) => ({
+      ...prev,
+      [therapistId]: updatedOb,
+    }));
+
+    if (supabase && isSupabaseConfigured) {
+      try {
+        await supabase.from('therapist_onboarding').upsert({
+          therapist_id: therapistId,
+          terms_version: updatedOb.terms_version ?? null,
+          terms_agreed_at: updatedOb.terms_agreed_at ?? null,
+          terms_signature_name: updatedOb.terms_signature_name ?? null,
+          claimed_qualification_type: updatedOb.claimed_qualification_type ?? null,
+          qualification_file_path: updatedOb.qualification_file_path ?? null,
+          qualification_file_name: updatedOb.qualification_file_name ?? null,
+          qualification_uploaded_at: updatedOb.qualification_uploaded_at ?? null,
+          insurance_file_path: updatedOb.insurance_file_path ?? null,
+          insurance_file_name: updatedOb.insurance_file_name ?? null,
+          insurance_uploaded_at: updatedOb.insurance_uploaded_at ?? null,
+          rejection_reason: null,
+          rejected_at: null,
+          files_purged_at: null,
+          updated_at: now,
+        });
+      } catch (err) {
+        console.warn('Supabase therapist_onboarding file upsert warning:', err);
+      }
+    }
+
+    return {
+      ok: true,
+      message: `${kind === 'qualification' ? '保有資格証' : '損害賠償責任保険の加入証明'}（${file.name}）を一時保管領域（temp-qualifications）へアップロードしました。`,
+    };
+  };
+
+  // 管理画面での提出書類プレビューURL取得（署名付きURL または サンプル/ローカルプレビュー）
+  const getVerificationDocPreviewUrl = async (
+    therapistId: string,
+    kind: VerificationDocKind
+  ): Promise<string | null> => {
+    const ob = onboardings[therapistId];
+    const path = kind === 'qualification' ? ob?.qualification_file_path : ob?.insurance_file_path;
+    if (!path) return null;
+
+    if (localDocPreviews[path]) {
+      return localDocPreviews[path];
+    }
+
+    const userObj = allUsers.find((u) => u.id === therapistId);
+    const ownerName = (
+      therapistProfiles[therapistId]?.identity_verified_name ||
+      ob?.terms_signature_name ||
+      userObj?.name ||
+      '申請者'
+    )
+      .replace(/\s*\(.*?\)\s*$/, '')
+      .trim();
+
+    if (path.startsWith(DEMO_PATH_PREFIX)) {
+      return sampleDocumentDataUrl(kind, ownerName);
+    }
+
+    const signedUrl = await createSignedViewUrl(path);
+    if (signedUrl) return signedUrl;
+
+    // 署名URLが取得できない場合（Storageバケット未作成等）はサンプルプレビューへフォールバック
+    return sampleDocumentDataUrl(kind, ownerName);
+  };
+
+  // 【Step 4】運営管理画面でのチェック ＆ 自動データ破棄（Storage Delete）付き本登録承認
+  const approveTherapistVerification = async (params: {
+    therapistId: string;
+    qualificationType: string;
+    registrationNumber?: string;
+    nameMatchConfirmed: boolean;
+    insuranceConfirmed: boolean;
+  }): Promise<{ ok: boolean; message: string; deletedFilesCount: number }> => {
+    const { therapistId, qualificationType, registrationNumber, nameMatchConfirmed, insuranceConfirmed } = params;
+    const tp = therapistProfiles[therapistId];
+    const ob = onboardings[therapistId];
+
+    const validationErr = validateApproval(tp, ob, {
+      qualificationType,
+      nameMatchConfirmed,
+      insuranceConfirmed,
+    });
+    if (validationErr) {
+      return { ok: false, message: validationErr, deletedFilesCount: 0 };
+    }
+
+    const now = new Date().toISOString();
+    const userObj = allUsers.find((u) => u.id === therapistId);
+    const cleanName = (tp?.identity_verified_name || ob?.terms_signature_name || userObj?.name || '').replace(/\s*\(.*?\)\s*$/, '').trim();
+
+    // 削除対象の一時ファイル数をカウント
+    const pathsToDelete = [ob?.qualification_file_path, ob?.insurance_file_path].filter(
+      (p): p is string => Boolean(p)
+    );
+    let deletedCount = pathsToDelete.length;
+
+    // 1. サーバーAPI（service_role によるトランザクションRPC + Storage自動削除）の呼び出し試行
+    const apiRes = await postAuthed<{ deleted_count?: number }>('/api/admin/verification-decision', {
+      decision: 'approve',
+      therapist_id: therapistId,
+      qualification_type: qualificationType.trim(),
+      registration_number: registrationNumber?.trim() || '',
+      name_match_confirmed: nameMatchConfirmed,
+      insurance_confirmed: insuranceConfirmed,
+    });
+    if (apiRes.ok && typeof apiRes.data?.deleted_count === 'number') {
+      deletedCount = Math.max(deletedCount, apiRes.data.deleted_count);
+    }
+
+    // 2. クライアント側からも temp-qualifications バケットの該当ファイルを確実に Delete & ローカルキャッシュ破棄
+    for (const p of pathsToDelete) {
+      if (!p.startsWith(DEMO_PATH_PREFIX)) {
+        try {
+          await removeFromTempBucket(p);
+        } catch {
+          // ignore
+        }
+      }
+    }
+    setLocalDocPreviews((prev) => {
+      const next = { ...prev };
+      pathsToDelete.forEach((p) => delete next[p]);
+      return next;
+    });
+
+    // 3. therapist_profiles の is_certified = true, is_approved = true 更新
+    setTherapistProfiles((prev) => {
+      const current = prev[therapistId] || ({ user_id: therapistId } as TherapistProfile);
+      return {
+        ...prev,
+        [therapistId]: {
+          ...current,
+          is_approved: true,
+          is_certified: true,
+          certified_at: now,
+        },
+      };
+    });
+
+    // 4. therapist_onboarding の一時ファイルパスを NULL クリアし files_purged_at を記録
+    setOnboardings((prev) => {
+      const current = prev[therapistId] || { therapist_id: therapistId };
+      return {
+        ...prev,
+        [therapistId]: {
+          ...current,
+          claimed_qualification_type: qualificationType.trim(),
+          qualification_file_path: null,
+          qualification_file_name: null,
+          qualification_uploaded_at: null,
+          insurance_file_path: null,
+          insurance_file_name: null,
+          insurance_uploaded_at: null,
+          rejection_reason: null,
+          rejected_at: null,
+          files_purged_at: now,
+          updated_at: now,
+        },
+      };
+    });
+
+    // 5. 審査証跡（テキストログのみ）を verificationLogs に記録
+    const newLog: VerificationLog = {
+      id:
+        typeof crypto !== 'undefined' && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `vlog-${Date.now().toString(36)}`,
+      therapist_id: therapistId,
+      therapist_name: cleanName || userObj?.name || therapistId,
+      decision: 'approved',
+      verified_at: now,
+      verified_by: currentUser.id,
+      qualification_type: qualificationType.trim(),
+      registration_number: registrationNumber?.trim() || null,
+      confirmed_name: cleanName || null,
+      insurance_confirmed: true,
+      reason: null,
+      files_deleted_count: deletedCount,
+      files_deleted_at: now,
+    };
+    setVerificationLogs((prev) => [newLog, ...prev]);
+
+    // 6. Supabase テーブルへの直接同期（API未経由時のフォールバック）
+    if (!apiRes.ok && supabase && isSupabaseConfigured) {
+      try {
+        await supabase
+          .from('therapist_profiles')
+          .update({
+            is_approved: true,
+            is_certified: true,
+            certified_at: now,
+            updated_at: now,
+          })
+          .eq('user_id', therapistId);
+
+        await supabase
+          .from('therapist_onboarding')
+          .update({
+            qualification_file_path: null,
+            qualification_file_name: null,
+            qualification_uploaded_at: null,
+            insurance_file_path: null,
+            insurance_file_name: null,
+            insurance_uploaded_at: null,
+            rejection_reason: null,
+            rejected_at: null,
+            files_purged_at: now,
+            updated_at: now,
+          })
+          .eq('therapist_id', therapistId);
+
+        await supabase.from('therapist_verification_logs').insert(newLog);
+      } catch (err) {
+        console.warn('Supabase verification approve sync warning:', err);
+      }
+    }
+
+    return {
+      ok: true,
+      deletedFilesCount: deletedCount,
+      message: `${cleanName} さんの本登録を承認し、専門認定バッジを付与しました。temp-qualifications バケット内の提出ファイル（${deletedCount}件）を自動削除し、テキスト承認ログを保存しました。`,
+    };
+  };
+
+  // 【Step 4 差戻し】提出書類の自動削除 ＆ 差戻し理由の記録
+  const rejectTherapistVerification = async (params: {
+    therapistId: string;
+    reason: string;
+  }): Promise<{ ok: boolean; message: string; deletedFilesCount: number }> => {
+    const { therapistId, reason } = params;
+    const trimmedReason = reason.trim();
+    if (!trimmedReason) {
+      return { ok: false, message: '差戻し理由を入力してください。', deletedFilesCount: 0 };
+    }
+
+    const ob = onboardings[therapistId];
+    const now = new Date().toISOString();
+    const userObj = allUsers.find((u) => u.id === therapistId);
+    const cleanName = (userObj?.name || '').replace(/\s*\(.*?\)\s*$/, '').trim();
+
+    const pathsToDelete = [ob?.qualification_file_path, ob?.insurance_file_path].filter(
+      (p): p is string => Boolean(p)
+    );
+    let deletedCount = pathsToDelete.length;
+
+    const apiRes = await postAuthed<{ deleted_count?: number }>('/api/admin/verification-decision', {
+      decision: 'reject',
+      therapist_id: therapistId,
+      reason: trimmedReason,
+    });
+    if (apiRes.ok && typeof apiRes.data?.deleted_count === 'number') {
+      deletedCount = Math.max(deletedCount, apiRes.data.deleted_count);
+    }
+
+    for (const p of pathsToDelete) {
+      if (!p.startsWith(DEMO_PATH_PREFIX)) {
+        try {
+          await removeFromTempBucket(p);
+        } catch {
+          // ignore
+        }
+      }
+    }
+    setLocalDocPreviews((prev) => {
+      const next = { ...prev };
+      pathsToDelete.forEach((p) => delete next[p]);
+      return next;
+    });
+
+    setTherapistProfiles((prev) => {
+      const current = prev[therapistId] || ({ user_id: therapistId } as TherapistProfile);
+      return {
+        ...prev,
+        [therapistId]: {
+          ...current,
+          is_approved: false,
+          is_certified: false,
+          certified_at: null,
+        },
+      };
+    });
+
+    setOnboardings((prev) => {
+      const current = prev[therapistId] || { therapist_id: therapistId };
+      return {
+        ...prev,
+        [therapistId]: {
+          ...current,
+          qualification_file_path: null,
+          qualification_file_name: null,
+          qualification_uploaded_at: null,
+          insurance_file_path: null,
+          insurance_file_name: null,
+          insurance_uploaded_at: null,
+          rejection_reason: trimmedReason,
+          rejected_at: now,
+          files_purged_at: now,
+          updated_at: now,
+        },
+      };
+    });
+
+    const newLog: VerificationLog = {
+      id:
+        typeof crypto !== 'undefined' && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `vlog-${Date.now().toString(36)}`,
+      therapist_id: therapistId,
+      therapist_name: cleanName || userObj?.name || therapistId,
+      decision: 'rejected',
+      verified_at: now,
+      verified_by: currentUser.id,
+      qualification_type: null,
+      registration_number: null,
+      confirmed_name: null,
+      insurance_confirmed: false,
+      reason: trimmedReason,
+      files_deleted_count: deletedCount,
+      files_deleted_at: now,
+    };
+    setVerificationLogs((prev) => [newLog, ...prev]);
+
+    if (!apiRes.ok && supabase && isSupabaseConfigured) {
+      try {
+        await supabase
+          .from('therapist_onboarding')
+          .upsert({
+            therapist_id: therapistId,
+            qualification_file_path: null,
+            qualification_file_name: null,
+            qualification_uploaded_at: null,
+            insurance_file_path: null,
+            insurance_file_name: null,
+            insurance_uploaded_at: null,
+            rejection_reason: trimmedReason,
+            rejected_at: now,
+            files_purged_at: now,
+            updated_at: now,
+          });
+        await supabase.from('therapist_verification_logs').insert(newLog);
+      } catch (err) {
+        console.warn('Supabase verification reject sync warning:', err);
+      }
+    }
+
+    return {
+      ok: true,
+      deletedFilesCount: deletedCount,
+      message: `${cleanName} さんの提出書類を差戻し、一時保管ファイル（${deletedCount}件）を自動削除しました。`,
+    };
+  };
+
   const resetToMock = () => {
     localStorage.removeItem(STORAGE_KEY);
     setAllUsers(initialProfiles);
@@ -864,6 +1536,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setBookings(initialBookings);
     setReviews(initialReviews);
     setMessages(initialChatMessages);
+    setOnboardings(initialOnboardings);
+    setVerificationLogs(initialVerificationLogs);
+    setLocalDocPreviews({});
     setPlatformFeeRateState(20);
     setCurrentUser(initialProfiles[4]);
     setUserLocation(PRESET_LOCATIONS[0]);
@@ -906,6 +1581,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         appBrand,
         currentBrand,
         setAppBrand,
+        onboardings,
+        verificationLogs,
+        completeReviewFeePayment,
+        completeStripeEkyc,
+        submitTermsAgreement,
+        uploadVerificationDoc,
+        getVerificationDocPreviewUrl,
+        approveTherapistVerification,
+        rejectTherapistVerification,
       }}
     >
       {children}
