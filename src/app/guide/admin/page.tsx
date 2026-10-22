@@ -48,7 +48,7 @@ export default function AdminGuidePage() {
     }
   };
 
-  // 全12専門職のニーズ・提供サービス・市場価値マトリクス
+  // 全17専門職のニーズ・提供サービス・市場価値マトリクス (医療国家資格＋美容・運動・QOL向上プロ)
   const specialists = [
     {
       category: '理学療法士 (PT)',
@@ -181,6 +181,61 @@ export default function AdminGuidePage() {
       whyEssential: '「服を着たまま、省スペースでベッド不要」という出張の圧倒的相性の良さ。オフィス訪問やホテル出張、スキマ時間の利用に最適です。',
       priceRange: '¥5,500〜¥8,500 / 45分',
       targetCustomer: 'ビジネスパーソン、不眠に悩む全世代、経営者・エグゼクティブ',
+    },
+    {
+      category: 'エステティシャン / 美容セラピスト',
+      icon: Sparkles,
+      color: 'pink',
+      badge: '美肌・フェイシャル / ブライダル',
+      targetPain: '毛穴・くすみ・たるみ、ブライダル前の集中痩身、子育てや仕事でサロンに通えない美容ニーズ',
+      services: '美白フェイシャル、毛穴クレンジング、小顔リンパリフト、ブライダルデコルテ＆背中トリートメント',
+      whyEssential: '自費マッチングの中で最も客単価が高くリピート率も抜群。自宅が高級エステサロンに変わる感動体験で、女性ユーザーの定着を強力に牽引します。',
+      priceRange: '¥8,500〜¥15,000 / 70分',
+      targetCustomer: '美容意識の高い女性、ブライダル層、外出が難しい子育て中のママ',
+    },
+    {
+      category: 'パーソナルトレーナー / 運動コーチ',
+      icon: Activity,
+      color: 'emerald',
+      badge: '運動指導 / ボディメイク・姿勢',
+      targetPain: '自己流ダイエットの挫折、運動不足による体力低下、シニアの足腰の衰え（フレイル）、ジムに通う時間がない',
+      services: '畳1畳でできる自宅マンツーマン筋トレ、美姿勢・体幹強化エクササイズ、シニア転倒予防健康体操',
+      whyEssential: '理学療法士（PT）との境界線が近く、リハビリ終了後の運動継続受け皿として抜群の相乗効果。継続的なチケット購入・習慣化を生み出します。',
+      priceRange: '¥6,500〜¥10,000 / 60分',
+      targetCustomer: 'ボディメイク志向の働き世代、シニア層、在宅ワーカー',
+    },
+    {
+      category: 'フットケア / 巻き爪セラピスト',
+      icon: Hand,
+      color: 'cyan',
+      badge: '足爪ケア / ドイツ式フスフレーゲ',
+      targetPain: '痛い巻き爪・肥厚爪、かかとのガサガサ角質・タコ・ウオノメ、妊婦や高齢者で足元に手が届かない',
+      services: 'ドイツ式マシン角質ケア、痛くない巻き爪補正、高齢者足爪切り、外反母趾テーピング',
+      whyEssential: '歩行寿命の延伸に直結。特に足元に手が届かない高齢者や妊婦からの出張ニーズが極めて高く、リピート率90%超の隠れた超有望領域です。',
+      priceRange: '¥6,000〜¥9,000 / 50分',
+      targetCustomer: '巻き爪に悩む全世代、シニア、妊産婦、立ち仕事の多い職業',
+    },
+    {
+      category: '心理カウンセラー / メンタルコーチ',
+      icon: MessageSquare,
+      color: 'violet',
+      badge: '公認心理師・臨床心理士 / 心のケア',
+      targetPain: '職場や人間関係の過度なストレス、不眠・不安感、育児疲れ・産後うつ、キャリアの行き詰まり',
+      services: '対話カウンセリング、認知行動療法的アプローチ、マインドフルネス瞑想指導、自己肯定感コーチング',
+      whyEssential: '「身体のケア（整体・エステ）」と「心のケア（カウンセリング）」を両輪で提供することで、包括的なウェルビーイングプラットフォームとしての地位を確立。',
+      priceRange: '¥7,500〜¥12,000 / 60分',
+      targetCustomer: '働くビジネスパーソン、管理職、子育て中の父母、休職・復職検討者',
+    },
+    {
+      category: '離乳食・育児相談アドバイザー',
+      icon: Baby,
+      color: 'amber',
+      badge: '離乳食・イヤイヤ期 / 子育て伴走',
+      targetPain: '離乳食を食べてくれない、調理の手間とストレス、イヤイヤ期の接し方、夜泣きによる睡眠不足',
+      services: '自宅キッチンでの実践離乳食クッキングレクチャー、月齢別時短レシピ作成、イヤイヤ期声かけコーチング',
+      whyEssential: '助産師の新生児ケアに続く「生後5ヶ月〜3歳」までの継続ファミリー顧客をがっちり囲い込み、育児の孤立感を解消する神サービスとして口コミが爆発。',
+      priceRange: '¥6,000〜¥8,500 / 60分',
+      targetCustomer: '0〜3歳児を育てるママ・パパ、ワンオペ育児家庭、共働きファミリー',
     },
   ];
 
@@ -350,14 +405,14 @@ export default function AdminGuidePage() {
               <div>
                 <span className="text-xs font-black uppercase text-emerald-600 tracking-wider">Service Matrix</span>
                 <h2 className="text-xl sm:text-2xl font-black text-slate-900 mt-1">
-                  2. 各専門職が解決する具体的ニーズと提供価値マトリクス（12職種）
+                  2. 各専門職が解決する具体的ニーズと提供価値マトリクス（全17領域）
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-500 mt-1">
                   顧客が「誰に・どんな悩みを・いくらで依頼できるのか」を明確化し、各領域での収益インパクトを実証します。
                 </p>
               </div>
               <span className="text-xs font-bold px-3 py-1 bg-slate-100 rounded-full text-slate-600 self-start sm:self-auto">
-                登録カテゴリ: 全12職種網羅
+                登録カテゴリ: 全17専門職網羅
               </span>
             </div>
 

@@ -1191,7 +1191,12 @@ export const TherapistView: React.FC = () => {
                       <option value="massage">もみほぐし・整体</option>
                       <option value="aroma">アロマ・リンパ</option>
                       <option value="chiropractic">カイロプラクティック</option>
-                      <option value="beauty">ヘッドスパ・美容</option>
+                      <option value="beauty">睡眠・ドライヘッドスパ</option>
+                      <option value="esthetic">エステ・フェイシャル</option>
+                      <option value="personal_training">パーソナルトレーニング</option>
+                      <option value="footcare">フットケア・巻き爪・ネイル</option>
+                      <option value="counseling">心理カウンセリング・メンタル</option>
+                      <option value="parenting">離乳食・育児相談</option>
                     </select>
                   </div>
 

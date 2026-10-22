@@ -75,7 +75,12 @@ export type ServiceCategory =
   | 'massage'
   | 'aroma'
   | 'chiropractic'
-  | 'beauty';
+  | 'beauty'
+  | 'esthetic'
+  | 'personal_training'
+  | 'footcare'
+  | 'counseling'
+  | 'parenting';
 
 export interface Service {
   id: string;

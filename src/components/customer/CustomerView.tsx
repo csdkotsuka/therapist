@@ -243,6 +243,52 @@ const OrthoptistCategoryIcon: React.FC<{ className?: string }> = ({ className })
   </svg>
 );
 
+// エステ・フェイシャルアイコン (美しいフェイスラインと輝き)
+const EstheticCategoryIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M12 2a4 4 0 0 1 4 4c0 3-4 6-4 6s-4-3-4-6a4 4 0 0 1 4-4z" />
+    <path d="M9 13.5c-3 1-5 3.5-5 6.5h16c0-3-2-5.5-5-6.5" />
+    <path d="M19 3l.8 1.6L21 5.2l-1.4.6-.6 1.7-.8-1.5-1.7-.8 1.5-.7z" fill="currentColor" stroke="none" />
+  </svg>
+);
+
+// パーソナルトレーニングアイコン (ダンベル＆アクティブコンディショニング)
+const PersonalTrainingCategoryIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M6 5v14" />
+    <path d="M18 5v14" />
+    <path d="M2 9h4v6H2z" />
+    <path d="M18 9h4v6h-4z" />
+    <path d="M6 12h12" />
+  </svg>
+);
+
+// フットケア・巻き爪・ネイルアイコン (健やかな足裏と足爪ケア)
+const FootcareCategoryIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M12 4.5a2.5 2.5 0 0 0-4.96.46 2.5 2.5 0 0 0-1.98 3 2.5 2.5 0 0 0-1.32 3.8 4 4 0 0 0-.24 3.74c1.5 3.5 4.5 5 6.5 5 3.5 0 5.5-3 5.5-7.5 0-3.5-1.5-8.5-3.5-8.5z" />
+    <circle cx="10" cy="18" r="1" fill="currentColor" />
+  </svg>
+);
+
+// 心理カウンセリング・メンタルアイコン (心に寄り添うハートと対話吹き出し)
+const CounselingCategoryIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M21 14a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    <path d="M12 7.5c-1.2-1.2-3.1-.7-3.1 1 0 1.5 2.1 2.8 3.1 3.5 1-.7 3.1-2 3.1-3.5 0-1.7-1.9-2.2-3.1-1z" fill="currentColor" stroke="none" />
+  </svg>
+);
+
+// 離乳食・育児相談アイコン (離乳食ボウルとスプーン・育児サポート)
+const ParentingCategoryIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M3 13c0 4.4 3.6 8 8 8s8-3.6 8-8H3z" />
+    <path d="M12 5v5" />
+    <path d="M8 8h8" />
+    <circle cx="12" cy="3" r="1.5" />
+  </svg>
+);
+
 export const CustomerView: React.FC = () => {
   const {
     currentUser,
@@ -295,68 +341,68 @@ export const CustomerView: React.FC = () => {
   }, [setUserLocation]);
 
   // ========================================================
-  // 大ジャンル (グループ) 一覧定義
+  // 大ジャンル (4大カテゴリ) 一覧定義
   // ========================================================
   const genres = [
     {
-      id: 'rehab',
-      name: '医療・リハビリ専門職',
-      badge: '国家資格リハビリ',
-      subtitle: '関節痛・歩行・生活動作・ことばの改善',
-      description: '理学療法士・作業療法士・言語聴覚士による本格的な身体機能回復と生活自立支援',
-      icon: StethoscopeCategoryIcon,
-      themeColor: 'text-blue-700',
-      iconBg: 'bg-blue-500/15 text-blue-700',
-      cardBg: 'bg-gradient-to-br from-blue-50/95 via-sky-50/60 to-indigo-50/50',
-      borderColor: 'border-blue-200 hover:border-blue-500',
-      badgeBg: 'bg-white/95 text-blue-800 border border-blue-200/80',
-      categoryIds: ['physical_therapy', 'occupational_therapy', 'speech_therapy'],
-      highlight: '理学・作業・言語聴覚',
-    },
-    {
       id: 'bodycare',
-      name: 'リフレッシュ・ボディケア',
-      badge: '疲労回復・快眠・癒やし',
-      subtitle: '全身疲労・筋肉のコリ・骨盤矯正・極上スパ',
-      description: '手技もみほぐし、極上精油アロマ、骨盤・姿勢アライメント矯正、快眠ドライヘッドスパ',
+      name: 'ボディケア & リフレッシュ',
+      badge: '癒やし・美容',
+      subtitle: 'もみほぐし・アロマ・ヘッドスパ・エステ・カイロ骨盤',
+      description: '筋肉疲労の深層もみほぐし、極上精油アロマ、快眠スパ、美肌フェイシャルエステ、姿勢骨盤矯正',
       icon: BodyCareGroupIcon,
       themeColor: 'text-amber-700',
       iconBg: 'bg-amber-500/15 text-amber-700',
       cardBg: 'bg-gradient-to-br from-amber-50/95 via-orange-50/60 to-yellow-50/50',
       borderColor: 'border-amber-200 hover:border-amber-500',
       badgeBg: 'bg-white/95 text-amber-800 border border-amber-200/80',
-      categoryIds: ['massage', 'aroma', 'chiropractic', 'beauty'],
-      highlight: 'もみほぐし・アロマ・整体・スパ',
+      categoryIds: ['massage', 'aroma', 'beauty', 'esthetic', 'chiropractic'],
+      highlight: 'もみほぐし・アロマ・スパ・エステ・骨盤',
     },
     {
-      id: 'oriental_dental',
-      name: '東洋医学・訪問口腔ケア',
-      badge: 'ツボ温熱・自律神経・健口',
-      subtitle: '頑固な冷え・不定愁訴・訪問口腔清掃',
-      description: '国家資格の鍼灸師によるツボ温灸・自律神経調整と、歯科衛生士による訪問口腔ケア・誤嚥予防',
+      id: 'conditioning',
+      name: '専門コンディショニング & 姿勢',
+      badge: '痛みの予防・運動',
+      subtitle: '整体理学療法・作業療法・鍼灸・パーソナルトレーニング',
+      description: '国家資格保持者やプロトレーナーによる本格リハビリ・運動指導・姿勢改善・ツボ温熱治療',
+      icon: StethoscopeCategoryIcon,
+      themeColor: 'text-blue-700',
+      iconBg: 'bg-blue-500/15 text-blue-700',
+      cardBg: 'bg-gradient-to-br from-blue-50/95 via-sky-50/60 to-indigo-50/50',
+      borderColor: 'border-blue-200 hover:border-blue-500',
+      badgeBg: 'bg-white/95 text-blue-800 border border-blue-200/80',
+      categoryIds: ['physical_therapy', 'occupational_therapy', 'acupuncture', 'personal_training'],
+      highlight: '理学療法・作業療法・鍼灸・筋トレ',
+    },
+    {
+      id: 'oral_health',
+      name: 'からだ & おくちのサポート',
+      badge: '健康・生活機能',
+      subtitle: '言語聴覚・歯科衛生・視能訓練・フットケア巻き爪',
+      description: '誤嚥防止・訪問口腔ケア・ことばの訓練・目の健康・足爪のトラブル解消をトータル支援',
       icon: OrientalDentalGroupIcon,
       themeColor: 'text-teal-700',
       iconBg: 'bg-teal-500/15 text-teal-700',
       cardBg: 'bg-gradient-to-br from-teal-50/95 via-emerald-50/60 to-cyan-50/50',
       borderColor: 'border-teal-200 hover:border-teal-500',
       badgeBg: 'bg-white/95 text-teal-800 border border-teal-200/80',
-      categoryIds: ['acupuncture', 'dental_hygiene'],
-      highlight: '鍼灸・訪問歯科衛生',
+      categoryIds: ['speech_therapy', 'dental_hygiene', 'orthoptist', 'footcare'],
+      highlight: '言語・歯科衛生・目の訓練・足爪ケア',
     },
     {
-      id: 'family_lifestyle',
-      name: '女性・子育て・栄養・アイケア',
-      badge: '母子ケア・食改善・視機能',
-      subtitle: '産前産後・母乳育児・制限食・ビジョン訓練',
-      description: '助産師による母乳ケア・産後骨盤、管理栄養士の食事献立指導、視能訓練士のアイケア',
+      id: 'mama_lifestyle',
+      name: 'ママ・ベビー & 食事相談',
+      badge: 'ライフステージ',
+      subtitle: '助産師・管理栄養士・離乳食育児・心理カウンセリング',
+      description: '産前産後ケア・母乳マッサージ・持病の食事制限相談・離乳食アドバイス・心のメンタルケア',
       icon: FamilyLifestyleGroupIcon,
       themeColor: 'text-rose-700',
       iconBg: 'bg-rose-500/15 text-rose-700',
       cardBg: 'bg-gradient-to-br from-rose-50/95 via-pink-50/60 to-red-50/50',
       borderColor: 'border-rose-200 hover:border-rose-500',
       badgeBg: 'bg-white/95 text-rose-800 border border-rose-200/80',
-      categoryIds: ['midwife', 'dietitian', 'orthoptist'],
-      highlight: '助産師・管理栄養士・視能訓練士',
+      categoryIds: ['midwife', 'dietitian', 'parenting', 'counseling'],
+      highlight: '助産師・栄養指導・離乳食・メンタル',
     },
   ];
 
@@ -375,47 +421,7 @@ export const CustomerView: React.FC = () => {
       borderColor: 'border-emerald-200/90 hover:border-emerald-500',
       badgeBg: 'bg-white/95 text-emerald-800 border border-emerald-200/80',
     },
-    // --- 医療・リハビリ専門職 ---
-    {
-      id: 'physical_therapy',
-      genreId: 'rehab',
-      label: '整体・理学',
-      subtitle: '肩こり・腰痛・関節の根本改善',
-      description: '国家資格保持者による本格リハビリ・運動療法',
-      icon: PhysicalTherapyCategoryIcon,
-      iconColor: 'text-blue-700',
-      bgColor: 'bg-blue-500/15',
-      cardBg: 'bg-gradient-to-br from-blue-50/90 via-blue-50/50 to-sky-50/60',
-      borderColor: 'border-blue-200/90 hover:border-blue-500',
-      badgeBg: 'bg-white/95 text-blue-800 border border-blue-200/80',
-    },
-    {
-      id: 'occupational_therapy',
-      genreId: 'rehab',
-      label: '作業療法',
-      subtitle: '日常生活動作・自立支援',
-      description: '食事や更衣・手先の動作など生活に直結するリハビリ',
-      icon: OccupationalTherapyCategoryIcon,
-      iconColor: 'text-cyan-700',
-      bgColor: 'bg-cyan-500/15',
-      cardBg: 'bg-gradient-to-br from-cyan-50/90 via-cyan-50/50 to-sky-50/60',
-      borderColor: 'border-cyan-200/90 hover:border-cyan-500',
-      badgeBg: 'bg-white/95 text-cyan-800 border border-cyan-200/80',
-    },
-    {
-      id: 'speech_therapy',
-      genreId: 'rehab',
-      label: '言語聴覚',
-      subtitle: 'ことば・発声・嚥下ケア',
-      description: '嚥下障害や構音・コミュニケーション機能の回復訓練',
-      icon: SpeechTherapyCategoryIcon,
-      iconColor: 'text-violet-700',
-      bgColor: 'bg-violet-500/15',
-      cardBg: 'bg-gradient-to-br from-violet-50/90 via-violet-50/50 to-purple-50/60',
-      borderColor: 'border-violet-200/90 hover:border-violet-500',
-      badgeBg: 'bg-white/95 text-violet-800 border border-violet-200/80',
-    },
-    // --- リフレッシュ・ボディケア ---
+    // --- 【大カテゴリ 1】ボディケア & リフレッシュ ---
     {
       id: 'massage',
       genreId: 'bodycare',
@@ -443,11 +449,37 @@ export const CustomerView: React.FC = () => {
       badgeBg: 'bg-white/95 text-rose-800 border border-rose-200/80',
     },
     {
+      id: 'beauty',
+      genreId: 'bodycare',
+      label: '睡眠・ヘッドスパ',
+      subtitle: '脳疲労・睡眠改善・眼精疲労',
+      description: '頭皮をもみほぐし脳疲労と首肩の重さをリフレッシュするドライヘッドスパ',
+      icon: HeadSpaCategoryIcon,
+      iconColor: 'text-purple-700',
+      bgColor: 'bg-purple-500/15',
+      cardBg: 'bg-gradient-to-br from-purple-50/90 via-purple-50/50 to-pink-50/60',
+      borderColor: 'border-purple-200/90 hover:border-purple-500',
+      badgeBg: 'bg-white/95 text-purple-800 border border-purple-200/80',
+    },
+    {
+      id: 'esthetic',
+      genreId: 'bodycare',
+      label: 'エステ・美肌',
+      subtitle: 'フェイシャル・美肌・ブライダル',
+      description: '美白・毛穴洗浄・小顔リフトアップ・ブライダル痩身エステ',
+      icon: EstheticCategoryIcon,
+      iconColor: 'text-pink-700',
+      bgColor: 'bg-pink-500/15',
+      cardBg: 'bg-gradient-to-br from-pink-50/90 via-rose-50/50 to-fuchsia-50/60',
+      borderColor: 'border-pink-200/90 hover:border-pink-500',
+      badgeBg: 'bg-white/95 text-pink-800 border border-pink-200/80',
+    },
+    {
       id: 'chiropractic',
       genreId: 'bodycare',
       label: 'カイロ・骨盤',
       subtitle: '骨盤矯正・姿勢の歪みケア',
-      description: '背骨や骨盤のアライメントを整え美姿勢へ',
+      description: '背骨や骨盤のアライメントを整え美姿勢へ導く矯正手技',
       icon: ChiropracticCategoryIcon,
       iconColor: 'text-indigo-700',
       bgColor: 'bg-indigo-500/15',
@@ -455,26 +487,40 @@ export const CustomerView: React.FC = () => {
       borderColor: 'border-indigo-200/90 hover:border-indigo-500',
       badgeBg: 'bg-white/95 text-indigo-800 border border-indigo-200/80',
     },
+
+    // --- 【大カテゴリ 2】専門コンディショニング & 姿勢 ---
     {
-      id: 'beauty',
-      genreId: 'bodycare',
-      label: 'ヘッドスパ',
-      subtitle: '眼精疲労・頭痛・睡眠改善',
-      description: '頭皮をもみほぐし脳疲労と首肩の重さをリフレッシュ',
-      icon: HeadSpaCategoryIcon,
-      iconColor: 'text-pink-700',
-      bgColor: 'bg-pink-500/15',
-      cardBg: 'bg-gradient-to-br from-pink-50/90 via-pink-50/50 to-fuchsia-50/60',
-      borderColor: 'border-pink-200/90 hover:border-pink-500',
-      badgeBg: 'bg-white/95 text-pink-800 border border-pink-200/80',
+      id: 'physical_therapy',
+      genreId: 'conditioning',
+      label: '整体・理学',
+      subtitle: '肩こり・腰痛・関節の根本改善',
+      description: '国家資格保持者による本格リハビリ・運動療法',
+      icon: PhysicalTherapyCategoryIcon,
+      iconColor: 'text-blue-700',
+      bgColor: 'bg-blue-500/15',
+      cardBg: 'bg-gradient-to-br from-blue-50/90 via-blue-50/50 to-sky-50/60',
+      borderColor: 'border-blue-200/90 hover:border-blue-500',
+      badgeBg: 'bg-white/95 text-blue-800 border border-blue-200/80',
     },
-    // --- 東洋医学・訪問口腔ケア ---
+    {
+      id: 'occupational_therapy',
+      genreId: 'conditioning',
+      label: '作業療法',
+      subtitle: '日常生活動作・自立支援',
+      description: '食事や更衣・手先の動作など生活に直結する機能回復リハビリ',
+      icon: OccupationalTherapyCategoryIcon,
+      iconColor: 'text-cyan-700',
+      bgColor: 'bg-cyan-500/15',
+      cardBg: 'bg-gradient-to-br from-cyan-50/90 via-cyan-50/50 to-sky-50/60',
+      borderColor: 'border-cyan-200/90 hover:border-cyan-500',
+      badgeBg: 'bg-white/95 text-cyan-800 border border-cyan-200/80',
+    },
     {
       id: 'acupuncture',
-      genreId: 'oriental_dental',
+      genreId: 'conditioning',
       label: '鍼灸',
       subtitle: '東洋医学・ツボ刺激・自律神経',
-      description: '経穴への鍼と温灸で深部コリや自律神経・冷えを調整',
+      description: '経穴への鍼と温灸で深部コリや自律神経・冷えを根本調整',
       icon: AcupunctureCategoryIcon,
       iconColor: 'text-amber-800',
       bgColor: 'bg-amber-600/15',
@@ -483,8 +529,36 @@ export const CustomerView: React.FC = () => {
       badgeBg: 'bg-white/95 text-amber-900 border border-amber-300/80',
     },
     {
+      id: 'personal_training',
+      genreId: 'conditioning',
+      label: 'パーソナル筋トレ',
+      subtitle: '出張運動指導・ボディメイク',
+      description: '自宅でできるマンツーマン筋力トレーニング・体幹強化・シニア運動指導',
+      icon: PersonalTrainingCategoryIcon,
+      iconColor: 'text-emerald-700',
+      bgColor: 'bg-emerald-500/15',
+      cardBg: 'bg-gradient-to-br from-emerald-50/90 via-teal-50/50 to-cyan-50/60',
+      borderColor: 'border-emerald-200/90 hover:border-emerald-500',
+      badgeBg: 'bg-white/95 text-emerald-800 border border-emerald-200/80',
+    },
+
+    // --- 【大カテゴリ 3】からだ & おくちのサポート ---
+    {
+      id: 'speech_therapy',
+      genreId: 'oral_health',
+      label: '言語聴覚',
+      subtitle: 'ことば・発声・嚥下ケア',
+      description: '嚥下障害や構音・コミュニケーション機能の回復訓練',
+      icon: SpeechTherapyCategoryIcon,
+      iconColor: 'text-violet-700',
+      bgColor: 'bg-violet-500/15',
+      cardBg: 'bg-gradient-to-br from-violet-50/90 via-violet-50/50 to-purple-50/60',
+      borderColor: 'border-violet-200/90 hover:border-violet-500',
+      badgeBg: 'bg-white/95 text-violet-800 border border-violet-200/80',
+    },
+    {
       id: 'dental_hygiene',
-      genreId: 'oriental_dental',
+      genreId: 'oral_health',
       label: '歯科衛生',
       subtitle: '訪問口腔ケア・摂食支援',
       description: '誤嚥性肺炎予防・口腔内クリーニングと健口ケア',
@@ -495,10 +569,37 @@ export const CustomerView: React.FC = () => {
       borderColor: 'border-teal-200/90 hover:border-teal-500',
       badgeBg: 'bg-white/95 text-teal-800 border border-teal-200/80',
     },
-    // --- 女性・子育て・栄養・アイケア ---
+    {
+      id: 'orthoptist',
+      genreId: 'oral_health',
+      label: '視能訓練',
+      subtitle: '視機能トレーニング・アイケア',
+      description: '斜視・弱視の訓練相談や眼精疲労・視覚機能のセルフケア指導',
+      icon: OrthoptistCategoryIcon,
+      iconColor: 'text-sky-700',
+      bgColor: 'bg-sky-500/15',
+      cardBg: 'bg-gradient-to-br from-sky-50/90 via-sky-50/50 to-indigo-50/60',
+      borderColor: 'border-sky-200/90 hover:border-sky-500',
+      badgeBg: 'bg-white/95 text-sky-800 border border-sky-200/80',
+    },
+    {
+      id: 'footcare',
+      genreId: 'oral_health',
+      label: 'フットケア・巻き爪',
+      subtitle: '巻き爪補正・角質ケア・足爪',
+      description: 'ドイツ式フスフレーゲ、痛くない巻き爪補正、タコ・ウオノメ除去、高齢者足爪切り',
+      icon: FootcareCategoryIcon,
+      iconColor: 'text-cyan-700',
+      bgColor: 'bg-cyan-500/15',
+      cardBg: 'bg-gradient-to-br from-cyan-50/90 via-sky-50/50 to-teal-50/60',
+      borderColor: 'border-cyan-200/90 hover:border-cyan-500',
+      badgeBg: 'bg-white/95 text-cyan-800 border border-cyan-200/80',
+    },
+
+    // --- 【大カテゴリ 4】ママ・ベビー & 食事相談 ---
     {
       id: 'midwife',
-      genreId: 'family_lifestyle',
+      genreId: 'mama_lifestyle',
       label: '助産師',
       subtitle: '産前産後ケア・母乳・育児相談',
       description: '助産師による乳房ケア・産後骨盤・育児のメンタル相談',
@@ -511,7 +612,7 @@ export const CustomerView: React.FC = () => {
     },
     {
       id: 'dietitian',
-      genreId: 'family_lifestyle',
+      genreId: 'mama_lifestyle',
       label: '管理栄養',
       subtitle: '栄養相談・生活習慣食・献立',
       description: '持病に合わせた制限食や日々の食生活改善を伴走支援',
@@ -523,17 +624,30 @@ export const CustomerView: React.FC = () => {
       badgeBg: 'bg-white/95 text-lime-800 border border-lime-200/80',
     },
     {
-      id: 'orthoptist',
-      genreId: 'family_lifestyle',
-      label: '視能訓練',
-      subtitle: '視機能トレーニング・アイケア',
-      description: '斜視・弱視の訓練相談や眼精疲労・視覚機能のセルフケア指導',
-      icon: OrthoptistCategoryIcon,
-      iconColor: 'text-sky-700',
-      bgColor: 'bg-sky-500/15',
-      cardBg: 'bg-gradient-to-br from-sky-50/90 via-sky-50/50 to-indigo-50/60',
-      borderColor: 'border-sky-200/90 hover:border-sky-500',
-      badgeBg: 'bg-white/95 text-sky-800 border border-sky-200/80',
+      id: 'parenting',
+      genreId: 'mama_lifestyle',
+      label: '離乳食・育児相談',
+      subtitle: '離乳食クッキング・夜泣き改善',
+      description: '自宅キッチンでの離乳食実地レクチャー、偏食・食べムラ改善、イヤイヤ期コーチング',
+      icon: ParentingCategoryIcon,
+      iconColor: 'text-amber-700',
+      bgColor: 'bg-amber-500/15',
+      cardBg: 'bg-gradient-to-br from-amber-50/90 via-yellow-50/50 to-orange-50/60',
+      borderColor: 'border-amber-200/90 hover:border-amber-500',
+      badgeBg: 'bg-white/95 text-amber-800 border border-amber-200/80',
+    },
+    {
+      id: 'counseling',
+      genreId: 'mama_lifestyle',
+      label: '心理カウンセリング',
+      subtitle: 'メンタルケア・悩み相談・コーチング',
+      description: '公認心理師・臨床心理士による対話カウンセリング、ストレスマネジメント、マインドフルネス',
+      icon: CounselingCategoryIcon,
+      iconColor: 'text-violet-700',
+      bgColor: 'bg-violet-500/15',
+      cardBg: 'bg-gradient-to-br from-violet-50/90 via-purple-50/50 to-indigo-50/60',
+      borderColor: 'border-violet-200/90 hover:border-violet-500',
+      badgeBg: 'bg-white/95 text-violet-800 border border-violet-200/80',
     },
   ];
 

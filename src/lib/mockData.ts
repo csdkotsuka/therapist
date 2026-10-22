@@ -1899,6 +1899,127 @@ export const initialProfiles: Profile[] = [
     "lat": 33.4585,
     "lng": 132.4235
   }
+,
+  {
+    "id": "usr_esth_01",
+    "name": "神崎 麗華 (Reika Kanzaki)",
+    "email": "reika.kanzaki@example.com",
+    "role": "therapist",
+    "avatar_url": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&auto=format&fit=crop&q=80",
+    "phone": "089-948-1120",
+    "postal_code": "790-0004",
+    "address": "愛媛県松山市大街道2丁目5-1",
+    "lat": 33.8415,
+    "lng": 132.7712
+  },
+  {
+    "id": "usr_esth_02",
+    "name": "小林 亜美 (Ami Kobayashi)",
+    "email": "ami.kobayashi@example.com",
+    "role": "therapist",
+    "avatar_url": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
+    "phone": "0898-32-4410",
+    "postal_code": "794-0015",
+    "address": "愛媛県今治市常盤町4丁目3-8",
+    "lat": 34.0662,
+    "lng": 132.9978
+  },
+  {
+    "id": "usr_ptrain_01",
+    "name": "武田 翔太 (Shota Takeda)",
+    "email": "shota.takeda@example.com",
+    "role": "therapist",
+    "avatar_url": "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=400&auto=format&fit=crop&q=80",
+    "phone": "089-913-7721",
+    "postal_code": "790-0811",
+    "address": "愛媛県松山市本町3丁目2-15",
+    "lat": 33.8488,
+    "lng": 132.7635
+  },
+  {
+    "id": "usr_ptrain_02",
+    "name": "黒川 健吾 (Kengo Kurokawa)",
+    "email": "kengo.kurokawa@example.com",
+    "role": "therapist",
+    "avatar_url": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80",
+    "phone": "0897-41-8890",
+    "postal_code": "792-0025",
+    "address": "愛媛県新居浜市一宮町1丁目8-12",
+    "lat": 33.9592,
+    "lng": 133.2831
+  },
+  {
+    "id": "usr_foot_01",
+    "name": "白石 綾乃 (Ayano Shiraishi)",
+    "email": "ayano.shiraishi@example.com",
+    "role": "therapist",
+    "avatar_url": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&auto=format&fit=crop&q=80",
+    "phone": "089-952-6630",
+    "postal_code": "791-8013",
+    "address": "愛媛県松山市山越3丁目6-20",
+    "lat": 33.8612,
+    "lng": 132.7584
+  },
+  {
+    "id": "usr_foot_02",
+    "name": "津田 佳奈 (Kana Tsuda)",
+    "email": "kana.tsuda@example.com",
+    "role": "therapist",
+    "avatar_url": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&auto=format&fit=crop&q=80",
+    "phone": "089-964-5510",
+    "postal_code": "791-0204",
+    "address": "愛媛県東温市志津川450",
+    "lat": 33.7995,
+    "lng": 132.8682
+  },
+  {
+    "id": "usr_counsel_01",
+    "name": "日野 雅彦 (Masahiko Hino)",
+    "email": "masahiko.hino@example.com",
+    "role": "therapist",
+    "avatar_url": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&auto=format&fit=crop&q=80",
+    "phone": "089-931-8840",
+    "postal_code": "790-0003",
+    "address": "愛媛県松山市三番町4丁目9-6",
+    "lat": 33.8375,
+    "lng": 132.7668
+  },
+  {
+    "id": "usr_counsel_02",
+    "name": "森本 早紀 (Saki Morimoto)",
+    "email": "saki.morimoto@example.com",
+    "role": "therapist",
+    "avatar_url": "https://images.unsplash.com/photo-1548142813-c348350df52b?w=400&auto=format&fit=crop&q=80",
+    "phone": "089-943-3320",
+    "postal_code": "790-0807",
+    "address": "愛媛県松山市平和通2丁目4-3",
+    "lat": 33.8472,
+    "lng": 132.7725
+  },
+  {
+    "id": "usr_parent_01",
+    "name": "相原 千春 (Chiharu Aihara)",
+    "email": "chiharu.aihara@example.com",
+    "role": "therapist",
+    "avatar_url": "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?w=400&auto=format&fit=crop&q=80",
+    "phone": "089-982-1150",
+    "postal_code": "791-3120",
+    "address": "愛媛県伊予郡松前町筒井850",
+    "lat": 33.7915,
+    "lng": 132.7128
+  },
+  {
+    "id": "usr_parent_02",
+    "name": "吉野 恵美 (Emi Yoshino)",
+    "email": "emi.yoshino@example.com",
+    "role": "therapist",
+    "avatar_url": "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=400&auto=format&fit=crop&q=80",
+    "phone": "089-924-7715",
+    "postal_code": "790-0821",
+    "address": "愛媛県松山市平和通6丁目3-2",
+    "lat": 33.8502,
+    "lng": 132.7548
+  }
 ];
 
 export const initialTherapistProfiles: Record<string, TherapistProfile> = {
@@ -3462,6 +3583,237 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "is_approved": true,
     "stripe_account_id": "acct_ehime_29131f9b9e744006"
   }
+,
+  "usr_esth_01": {
+    "user_id": "usr_esth_01",
+    "bio": "CIDESCO認定インターナショナルエステティシャン歴14年。美白フェイシャル・小顔リフト・ブライダルエステをご自宅やホテル、または松山市大街道のプライベートサロンで極上のトリートメントをご提供いたします。",
+    "specialities": [
+      "美白・毛穴フェイシャル",
+      "小顔リンパリフト",
+      "ブライダル痩身",
+      "エイジングケア"
+    ],
+    "is_store_based": true,
+    "is_visit_based": true,
+    "address": "愛媛県松山市大街道2丁目5-1",
+    "lat": 33.8415,
+    "lng": 132.7712,
+    "visit_radius_km": 25,
+    "rating_avg": 4.97,
+    "reviews_count": 52,
+    "is_approved": true,
+    "stripe_account_id": "acct_ehime_esth01",
+    "campaign": {
+      "badge": "高保湿パック無料",
+      "title": "高濃度プラセンタ導入シートマスク無料サービス",
+      "description": "フェイシャルエステをご予約の方全員に、肌深部を潤す高級プラセンタパックを無料追加！",
+      "discount_type": "gift",
+      "discount_value": 0
+    }
+  },
+  "usr_esth_02": {
+    "user_id": "usr_esth_02",
+    "bio": "今治市を中心にオーガニックコスメを用いたナチュラルハーブフェイシャルをご提供。敏感肌やアトピー肌の方でも安心して受けていただける優しいハンドトリートメントです。",
+    "specialities": [
+      "オーガニックハーブピーリング",
+      "デトックスフェイシャル",
+      "背中・二の腕ケア"
+    ],
+    "is_store_based": false,
+    "is_visit_based": true,
+    "address": "愛媛県今治市常盤町4丁目3-8",
+    "lat": 34.0662,
+    "lng": 132.9978,
+    "visit_radius_km": 30,
+    "rating_avg": 4.92,
+    "reviews_count": 36,
+    "is_approved": true,
+    "stripe_account_id": "acct_ehime_esth02"
+  },
+  "usr_ptrain_01": {
+    "user_id": "usr_ptrain_01",
+    "bio": "NSCA-CPT認定パーソナルトレーナー。畳1畳あれば自宅が本格ジムに！関節に負担をかけない自重トレーニングと姿勢・体幹強化で、リバウンドしない健康的なボディメイクを伴走します。",
+    "specialities": [
+      "美姿勢・骨盤ボディメイク",
+      "出張マンツーマン筋トレ",
+      "腰痛予防の体幹強化",
+      "食事バランス管理"
+    ],
+    "is_store_based": false,
+    "is_visit_based": true,
+    "address": "愛媛県松山市本町3丁目2-15",
+    "lat": 33.8488,
+    "lng": 132.7635,
+    "visit_radius_km": 20,
+    "rating_avg": 4.95,
+    "reviews_count": 48,
+    "is_approved": true,
+    "stripe_account_id": "acct_ehime_ptrain01",
+    "campaign": {
+      "badge": "初回¥1,500引",
+      "title": "パーソナルボディメイク体験割引",
+      "description": "初めて訪問トレーニングをご予約いただいた方に、正規料金から1,500円キャッシュバック！",
+      "discount_type": "fixed",
+      "discount_value": 1500
+    }
+  },
+  "usr_ptrain_02": {
+    "user_id": "usr_ptrain_02",
+    "bio": "シニア向け運動指導・機能改善専門トレーナー。退院後の体力低下や足腰の衰え（フレイル）を自宅で楽しく改善。ご家族同席での見学・指導も歓迎です。",
+    "specialities": [
+      "シニア健康体操",
+      "転倒予防下肢筋力トレ",
+      "関節可動域ストレッチ"
+    ],
+    "is_store_based": true,
+    "is_visit_based": true,
+    "address": "愛媛県新居浜市一宮町1丁目8-12",
+    "lat": 33.9592,
+    "lng": 133.2831,
+    "visit_radius_km": 25,
+    "rating_avg": 4.89,
+    "reviews_count": 29,
+    "is_approved": true,
+    "stripe_account_id": "acct_ehime_ptrain02"
+  },
+  "usr_foot_01": {
+    "user_id": "usr_foot_01",
+    "bio": "ドイツ式フットケア（フスフレーゲ）専門セラピスト。痛くない巻き爪補正、頑固なウオノメ・タコ・かかとの角質除去をご自宅へ専用機材を持参してお伺いします。妊婦さんやシニアに大好評。",
+    "specialities": [
+      "巻き爪ケア・爪切り",
+      "タコ・ウオノメ除去",
+      "かかと角質集中ケア",
+      "外反母趾テーピング"
+    ],
+    "is_store_based": false,
+    "is_visit_based": true,
+    "address": "愛媛県松山市山越3丁目6-20",
+    "lat": 33.8612,
+    "lng": 132.7584,
+    "visit_radius_km": 30,
+    "rating_avg": 4.98,
+    "reviews_count": 64,
+    "is_approved": true,
+    "stripe_account_id": "acct_ehime_foot01",
+    "campaign": {
+      "badge": "保湿クリーム進呈",
+      "title": "高保湿尿素フットクリーム（ミニボトル）無料進呈",
+      "description": "角質ケア・巻き爪補正をご利用の方に、かかとを滑らかに保つ特製フットバームをプレゼント！",
+      "discount_type": "gift",
+      "discount_value": 0
+    }
+  },
+  "usr_foot_02": {
+    "user_id": "usr_foot_02",
+    "bio": "JNECネイリスト技能検定1級＆メディカルフットケア指導員。美爪育成ケアや足爪のトラブル解消、お年寄りの肥厚爪ケアまで幅広く丁寧に対応します。",
+    "specialities": [
+      "メディカル爪ケア",
+      "肥厚爪・変形爪ケア",
+      "美爪ハンド＆フットケア"
+    ],
+    "is_store_based": true,
+    "is_visit_based": true,
+    "address": "愛媛県東温市志津川450",
+    "lat": 33.7995,
+    "lng": 132.8682,
+    "visit_radius_km": 20,
+    "rating_avg": 4.93,
+    "reviews_count": 31,
+    "is_approved": true,
+    "stripe_account_id": "acct_ehime_foot02"
+  },
+  "usr_counsel_01": {
+    "user_id": "usr_counsel_01",
+    "bio": "公認心理師・臨床心理士。職場ストレス、人間関係、不眠、将来の不安など、安心できるプライベート空間や静かなカフェ、オンラインで対話カウンセリングを実施。守秘義務を徹底しています。",
+    "specialities": [
+      "ストレスマネジメント",
+      "認知行動療法アプローチ",
+      "職場・人間関係相談",
+      "メンタル不調の予防"
+    ],
+    "is_store_based": true,
+    "is_visit_based": true,
+    "address": "愛媛県松山市三番町4丁目9-6",
+    "lat": 33.8375,
+    "lng": 132.7668,
+    "visit_radius_km": 25,
+    "rating_avg": 4.96,
+    "reviews_count": 40,
+    "is_approved": true,
+    "stripe_account_id": "acct_ehime_counsel01",
+    "campaign": {
+      "badge": "初回15分延長無料",
+      "title": "初回カウンセリング15分じっくり延長特典",
+      "description": "初回ご利用の方に、焦らずお気持ちを話していただけるよう15分間の相談時間を無料で追加！",
+      "discount_type": "gift",
+      "discount_value": 0
+    }
+  },
+  "usr_counsel_02": {
+    "user_id": "usr_counsel_02",
+    "bio": "メンタルコーチ・産業カウンセラー。キャリアの悩み、育児と仕事の両立、自己肯定感の向上に寄り添うメンタルコーチング。前向きな一歩を踏み出す伴走をします。",
+    "specialities": [
+      "女性キャリア相談",
+      "自己肯定感アップ",
+      "マインドフルネス瞑想指導"
+    ],
+    "is_store_based": false,
+    "is_visit_based": true,
+    "address": "愛媛県松山市平和通2丁目4-3",
+    "lat": 33.8472,
+    "lng": 132.7725,
+    "visit_radius_km": 20,
+    "rating_avg": 4.91,
+    "reviews_count": 25,
+    "is_approved": true,
+    "stripe_account_id": "acct_ehime_counsel02"
+  },
+  "usr_parent_01": {
+    "user_id": "usr_parent_01",
+    "bio": "離乳食インストラクター・保育士。離乳食を食べない、進め方がわからない、夜泣きが激しいなど、0〜3歳児のリアルな悩みをママ・パパの自宅キッチンで一緒に解決します。",
+    "specialities": [
+      "出張離乳食クッキング",
+      "偏食・食べムラ相談",
+      "夜泣き・寝かしつけ改善",
+      "乳幼児発達遊び"
+    ],
+    "is_store_based": false,
+    "is_visit_based": true,
+    "address": "愛媛県伊予郡松前町筒井850",
+    "lat": 33.7915,
+    "lng": 132.7128,
+    "visit_radius_km": 30,
+    "rating_avg": 4.99,
+    "reviews_count": 58,
+    "is_approved": true,
+    "stripe_account_id": "acct_ehime_parent01",
+    "campaign": {
+      "badge": "レシピ帳無料",
+      "title": "月齢別かんたん時短離乳食レシピ集プレゼント",
+      "description": "ご訪問時に、忙しいママでも5分で作れる月齢別ストック離乳食レシピブックを無料贈呈！",
+      "discount_type": "gift",
+      "discount_value": 0
+    }
+  },
+  "usr_parent_02": {
+    "user_id": "usr_parent_02",
+    "bio": "チャイルドコーチングアドバイザー・元幼稚園教諭。イヤイヤ期の接し方や兄弟ゲンカ、幼稚園・保育園選びなど、育児の孤立感を解消するあたたかな対面相談をご提供。",
+    "specialities": [
+      "イヤイヤ期対応コーチング",
+      "子育てストレスケア",
+      "就学前知育・コミュニケーション"
+    ],
+    "is_store_based": true,
+    "is_visit_based": true,
+    "address": "愛媛県松山市平和通6丁目3-2",
+    "lat": 33.8502,
+    "lng": 132.7548,
+    "visit_radius_km": 20,
+    "rating_avg": 4.94,
+    "reviews_count": 32,
+    "is_approved": true,
+    "stripe_account_id": "acct_ehime_parent02"
+  }
 };
 
 export const initialServices: Service[] = [
@@ -4625,6 +4977,107 @@ export const initialServices: Service[] = [
     "category": "orthoptist",
     "is_active": true
   }
+,
+  {
+    "id": "svc_esth_01",
+    "therapist_id": "usr_esth_01",
+    "title": "高保湿美白フェイシャル＆デコルテアロマ",
+    "description": "クレンジング、毛穴洗浄、高濃度ビタミンC導入、デコルテ・肩首のリンパ流しを含む贅沢コース。",
+    "price": 9500,
+    "duration_minutes": 70,
+    "category": "esthetic",
+    "is_active": true
+  },
+  {
+    "id": "svc_esth_02",
+    "therapist_id": "usr_esth_02",
+    "title": "ナチュラルハーブピーリング＆小顔リフト",
+    "description": "肌本来のターンオーバーを促すハーブトリートメントとツボ刺激による小顔マッサージ。",
+    "price": 8800,
+    "duration_minutes": 60,
+    "category": "esthetic",
+    "is_active": true
+  },
+  {
+    "id": "svc_ptrain_01",
+    "therapist_id": "usr_ptrain_01",
+    "title": "出張パーソナルトレーニング＆姿勢リセット",
+    "description": "自宅の省スペースで可能。骨盤・肩甲骨を整える体幹エクササイズと個別の筋力アップ指導。",
+    "price": 7500,
+    "duration_minutes": 60,
+    "category": "personal_training",
+    "is_active": true
+  },
+  {
+    "id": "svc_ptrain_02",
+    "therapist_id": "usr_ptrain_02",
+    "title": "シニア向け足腰いきいき機能改善体操",
+    "description": "つまずき防止・立ち上がり動作のスムーズ化を目指す優しい個別運動プログラム。",
+    "price": 6500,
+    "duration_minutes": 50,
+    "category": "personal_training",
+    "is_active": true
+  },
+  {
+    "id": "svc_foot_01",
+    "therapist_id": "usr_foot_01",
+    "title": "ドイツ式メディカルフットケア（角質・巻き爪補正）",
+    "description": "ウオノメ・タコを痛みなくマシン除去。巻き爪の負担軽減と足裏全体のつるつる集中ケア。",
+    "price": 7800,
+    "duration_minutes": 60,
+    "category": "footcare",
+    "is_active": true
+  },
+  {
+    "id": "svc_foot_02",
+    "therapist_id": "usr_foot_02",
+    "title": "シニア・マタニティ向け足爪ケア＆リフレ",
+    "description": "手が届きにくい足の爪切り・肥厚爪ケアと、むくみを流すふくらはぎリンパトリートメント。",
+    "price": 6000,
+    "duration_minutes": 45,
+    "category": "footcare",
+    "is_active": true
+  },
+  {
+    "id": "svc_counsel_01",
+    "therapist_id": "usr_counsel_01",
+    "title": "公認心理師による対話メンタルカウンセリング",
+    "description": "仕事や家庭のストレス、不安、不眠について安心できる環境でじっくりお話を伺います。",
+    "price": 8000,
+    "duration_minutes": 60,
+    "category": "counseling",
+    "is_active": true
+  },
+  {
+    "id": "svc_counsel_02",
+    "therapist_id": "usr_counsel_02",
+    "title": "マインドフルネス対話＆キャリアコーチング",
+    "description": "自己理解を深め、頭の中のモヤモヤを整理して前向きな行動へ導くメンタルセッション。",
+    "price": 7000,
+    "duration_minutes": 50,
+    "category": "counseling",
+    "is_active": true
+  },
+  {
+    "id": "svc_parent_01",
+    "therapist_id": "usr_parent_01",
+    "title": "ご自宅キッチンでの実践離乳食レクチャー＆相談",
+    "description": "普段お使いの調理器具で、手軽に作れる月齢別離乳食の作り方と食べさせ方をマンツーマン指導。",
+    "price": 7500,
+    "duration_minutes": 70,
+    "category": "parenting",
+    "is_active": true
+  },
+  {
+    "id": "svc_parent_02",
+    "therapist_id": "usr_parent_02",
+    "title": "イヤイヤ期・乳幼児の子育て個別相談",
+    "description": "子どもの発達に合わせた声かけや寝かしつけのコツをあたたかくアドバイスします。",
+    "price": 6000,
+    "duration_minutes": 60,
+    "category": "parenting",
+    "is_active": true
+  }
 ];
 
 export const initialBookings: Booking[] = [
@@ -5610,6 +6063,52 @@ export const initialReviews: Review[] = [
     "rating": 5,
     "comment": "専門資格を持つプロの方にマンツーマンでじっくり診ていただき大満足です。自宅でできるケア方法も親身に教えていただきました！",
     "created_at": "2026-08-05T03:55:58.309Z"
+  }
+,
+  {
+    "id": "rev_esth_01",
+    "booking_id": "bk_dummy_esth01",
+    "customer_id": "d68b1a8b-fa70-4895-a799-e42e68e6d108",
+    "therapist_id": "usr_esth_01",
+    "rating": 5,
+    "comment": "自宅がホテルスパのようになりました！子育て中でサロンに行けなかったので、出張エステは本当にありがたいです。お肌がプルプルになりました。",
+    "created_at": "2026-09-12T04:20:00.000Z"
+  },
+  {
+    "id": "rev_ptrain_01",
+    "booking_id": "bk_dummy_ptrain01",
+    "customer_id": "9a82253f-7adb-4b9e-9905-3ab1d3b88dac",
+    "therapist_id": "usr_ptrain_01",
+    "rating": 5,
+    "comment": "自分では気づけなかった姿勢の歪みをズバリ指摘していただき、無理のない筋トレメニューを組んでくれました。翌日体が軽いです！",
+    "created_at": "2026-09-18T08:15:00.000Z"
+  },
+  {
+    "id": "rev_foot_01",
+    "booking_id": "bk_dummy_foot01",
+    "customer_id": "d68b1a8b-fa70-4895-a799-e42e68e6d108",
+    "therapist_id": "usr_foot_01",
+    "rating": 5,
+    "comment": "妊娠後期で足の爪が切れず困っていたところ、出張でケアしていただきました。巻き爪の痛みも全くなくなって感動です。",
+    "created_at": "2026-09-25T11:00:00.000Z"
+  },
+  {
+    "id": "rev_counsel_01",
+    "booking_id": "bk_dummy_counsel01",
+    "customer_id": "9a82253f-7adb-4b9e-9905-3ab1d3b88dac",
+    "therapist_id": "usr_counsel_01",
+    "rating": 5,
+    "comment": "誰にも話せなかった悩みを優しく受け止めてくださり、心がすっと軽くなりました。専門資格をお持ちの方なのでとても信頼できます。",
+    "created_at": "2026-10-02T14:30:00.000Z"
+  },
+  {
+    "id": "rev_parent_01",
+    "booking_id": "bk_dummy_parent01",
+    "customer_id": "d68b1a8b-fa70-4895-a799-e42e68e6d108",
+    "therapist_id": "usr_parent_01",
+    "rating": 5,
+    "comment": "離乳食を全然食べてくれず悩んでいましたが、食材の固さやだしの工夫を台所で一緒に教えていただき、パクパク食べてくれるようになりました！",
+    "created_at": "2026-10-08T09:45:00.000Z"
   }
 ];
 
