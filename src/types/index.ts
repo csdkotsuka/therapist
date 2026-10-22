@@ -135,17 +135,27 @@ export interface ChatMessage {
   is_read: boolean;
 }
 
-// アプリのブランド切り替え (Carea Go / Care Go / Thera Go)
-export type AppBrandId = 'carea_go' | 'care_go' | 'thera_go';
+// アプリのブランド切り替え (赤枠ロゴ4種 + 既存)
+export type AppBrandId =
+  | 'care_go_blue'       // 画像1-②: ケアゴー CARE GO (ブルーC×若葉)
+  | 'carearia_go_green'  // 画像1-⑬: ケアリアゴー CAREARIA GO (グリーン芽吹き＆人)
+  | 'careia_go_pink'     // 画像2-⑩: ケアリアゴー CAREIA GO (ピンクハート×ゴールドリーフ)
+  | 'theralink'          // 画像2-⑫: セラリンク THERALINK (オーバルリース×花びらリング)
+  | 'carea_go'           // 互換性: Carea Go
+  | 'care_go'            // 互換性: Care Go
+  | 'thera_go';          // 互換性: Thera Go
 
 export interface AppBrandConfig {
   id: AppBrandId;
   name: string;
+  japaneseName: string;
   tagline: string;
+  catchphrase: string;
   description: string;
-  logoUrl: string;
-  fullImageUrl: string;
-  faviconUrl: string;
+  logoUrl?: string;
+  fullImageUrl?: string;
+  faviconUrl?: string;
   themeColor: string;
   accentColor: string;
+  iconSvg: string; // アイコン部分だけのSVG（ファビコン及びアイコン表示用）
 }

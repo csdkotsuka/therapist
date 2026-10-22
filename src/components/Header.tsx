@@ -60,23 +60,28 @@ export const Header: React.FC = () => {
         <div className="flex items-center justify-between h-14">
           {/* Logo & モード選択プルダウン */}
           <div className="flex items-center gap-4">
-            <Link href="/" className="flex items-center gap-2 group py-1" title={currentBrand.name}>
-              {currentBrand.logoUrl ? (
-                <img
-                  src={currentBrand.logoUrl}
-                  alt={currentBrand.name}
-                  className="h-7 sm:h-8 w-auto object-contain group-hover:scale-105 transition-transform"
-                />
-              ) : (
-                <>
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-teal-500 to-emerald-400 flex items-center justify-center text-white shadow-xs group-hover:scale-105 transition">
-                    <HeartPulse className="w-5 h-5" />
-                  </div>
-                  <span className="text-lg font-black bg-gradient-to-r from-teal-700 via-emerald-600 to-teal-800 bg-clip-text text-transparent">
-                    {currentBrand.name}
+            <Link
+              href="/"
+              className="flex items-center gap-2.5 group py-1"
+              title={`${currentBrand.japaneseName} (${currentBrand.name}) - ${currentBrand.catchphrase}`}
+            >
+              <div
+                className="w-8 h-8 sm:w-9 sm:h-9 shrink-0 rounded-xl overflow-hidden shadow-xs group-hover:scale-105 transition-transform"
+                dangerouslySetInnerHTML={{ __html: currentBrand.iconSvg }}
+              />
+              <div className="flex flex-col">
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-base sm:text-lg font-black tracking-tight text-slate-900 group-hover:text-emerald-700 transition">
+                    {currentBrand.japaneseName}
                   </span>
-                </>
-              )}
+                  <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-400">
+                    {currentBrand.tagline}
+                  </span>
+                </div>
+                <span className="text-[9px] text-slate-400 line-clamp-1 hidden md:block">
+                  {currentBrand.catchphrase}
+                </span>
+              </div>
             </Link>
 
             {/* モード選択プルダウン */}

@@ -1,71 +1,271 @@
 import { AppBrandConfig, AppBrandId } from '@/types';
 
+// ========================================================
+// シンボルマーク (アイコン部分だけ) の SVG 定義
+// ※ ファビコンやヘッダー用アイコンとして、極小サイズでも視認性抜群のベクター描画
+// ========================================================
+
+/** 画像1-②: ケアゴー CARE GO (ブルーの「C」× 人型 × 若葉) */
+export const ICON_CARE_GO_BLUE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="cg_blue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7" />
+      <stop offset="100%" stop-color="#0369a1" />
+    </linearGradient>
+    <linearGradient id="cg_green" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4ade80" />
+      <stop offset="100%" stop-color="#16a34a" />
+    </linearGradient>
+  </defs>
+  <rect width="100" height="100" rx="22" fill="#f0f9ff" />
+  <!-- 外側のCアーチ -->
+  <path d="M 66 22 A 35 35 0 1 0 66 78" fill="none" stroke="url(#cg_blue)" stroke-width="11" stroke-linecap="round" />
+  <!-- 人の頭部 -->
+  <circle cx="50" cy="40" r="7.5" fill="url(#cg_blue)" />
+  <!-- 人の身体（カーブ） -->
+  <path d="M 50 51 C 50 63 43 71 36 75" fill="none" stroke="url(#cg_blue)" stroke-width="8" stroke-linecap="round" />
+  <!-- 右上の新芽・若葉 -->
+  <path d="M 53 43 C 65 33 79 28 84 32 C 84 44 73 57 59 52 Z" fill="url(#cg_green)" />
+</svg>`;
+
+/** 画像1-⑬: ケアリアゴー CAREARIA GO (新芽・若葉が人を包み込むシンボル) */
+export const ICON_CAREARIA_GO_GREEN = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="cag_g1" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#34d399" />
+    </linearGradient>
+    <linearGradient id="cag_g2" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#059669" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+    <linearGradient id="cag_head" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+  </defs>
+  <rect width="100" height="100" rx="22" fill="#ecfdf5" />
+  <!-- 中央の人頭（芽生えの頂点） -->
+  <circle cx="50" cy="28" r="8" fill="url(#cag_head)" />
+  <!-- 左側の若葉（包み込む手） -->
+  <path d="M 48 84 C 44 65 31 52 26 38 C 24 55 33 75 48 84 Z" fill="url(#cag_g1)" />
+  <!-- 右側の若葉（すっきりと伸びる葉） -->
+  <path d="M 52 84 C 56 65 69 50 74 36 C 76 55 65 77 52 84 Z" fill="url(#cag_g2)" />
+</svg>`;
+
+/** 画像2-⑩: ケアリアゴー CAREIA GO (ピンクのオープンハート × ゴールドリーフ) */
+export const ICON_CAREIA_GO_PINK = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="cip_pink" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fb7185" />
+      <stop offset="100%" stop-color="#e11d48" />
+    </linearGradient>
+    <linearGradient id="cip_gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#b45309" />
+    </linearGradient>
+  </defs>
+  <rect width="100" height="100" rx="22" fill="#fff1f2" />
+  <!-- 流麗なハートリボン（一筆書き風） -->
+  <path d="M 50 72 C 20 52 14 36 24 24 C 34 14 47 24 50 32 C 53 24 66 14 76 24 C 86 36 80 52 50 72 Z" fill="none" stroke="url(#cip_pink)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+  <!-- 右下のオリーブ・ゴールドリーフ枝 -->
+  <path d="M 50 72 C 60 74 72 78 82 80" stroke="url(#cip_gold)" stroke-width="3" stroke-linecap="round" fill="none" />
+  <path d="M 64 73 C 68 67 75 69 75 74 C 70 76 66 75 64 73 Z" fill="url(#cip_gold)" />
+  <path d="M 73 75 C 80 71 86 73 86 78 C 82 80 77 78 73 75 Z" fill="url(#cip_gold)" />
+</svg>`;
+
+/** 画像2-⑫: セラリンク THERALINK (パステルフローラルリース・つながる環) */
+export const ICON_THERALINK = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="tl_emerald" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <linearGradient id="tl_pink" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f472b6" />
+      <stop offset="100%" stop-color="#db2777" />
+    </linearGradient>
+    <linearGradient id="tl_gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+  </defs>
+  <rect width="100" height="100" rx="22" fill="#faf5ff" />
+  <!-- 左上のエメラルド葉 -->
+  <path d="M 39 23 C 28 25 21 37 23 49 C 29 47 41 36 39 23 Z" fill="url(#tl_emerald)" />
+  <!-- 左下のグリーン葉 -->
+  <path d="M 25 55 C 23 69 33 79 45 81 C 45 73 37 61 25 55 Z" fill="url(#tl_emerald)" />
+  <!-- 右上のピンク花びら -->
+  <path d="M 61 23 C 72 25 79 37 77 49 C 71 47 59 36 61 23 Z" fill="url(#tl_pink)" />
+  <!-- 右下のゴールド葉 -->
+  <path d="M 75 55 C 77 69 67 79 55 81 C 55 73 63 61 75 55 Z" fill="url(#tl_gold)" />
+  <!-- トップの輝く芽 -->
+  <circle cx="50" cy="18" r="4" fill="url(#tl_pink)" />
+</svg>`;
+
+/** 既存互換: Carea Go */
+export const ICON_CAREA_GO_CLASSIC = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="cgc_grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1d6f42" />
+      <stop offset="100%" stop-color="#2b82b8" />
+    </linearGradient>
+  </defs>
+  <rect width="100" height="100" rx="22" fill="#ecfdf5" />
+  <circle cx="50" cy="50" r="32" fill="none" stroke="url(#cgc_grad)" stroke-width="8" />
+  <path d="M 35 50 L 46 61 L 65 39" fill="none" stroke="url(#cgc_grad)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+</svg>`;
+
+/** 既存互換: Thera Go */
+export const ICON_THERA_GO_CLASSIC = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="tgc_grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#789262" />
+      <stop offset="100%" stop-color="#e59a38" />
+    </linearGradient>
+  </defs>
+  <rect width="100" height="100" rx="22" fill="#fefce8" />
+  <path d="M 50 20 C 35 38 25 55 35 75 C 45 90 55 90 65 75 C 75 55 65 38 50 20 Z" fill="url(#tgc_grad)" />
+  <path d="M 50 30 L 50 78" stroke="#ffffff" stroke-width="4" stroke-linecap="round" />
+</svg>`;
+
+// ========================================================
+// ブランド設定マスター
+// ========================================================
+
 export const APP_BRANDS: Record<AppBrandId, AppBrandConfig> = {
-  carea_go: {
-    id: 'carea_go',
-    name: 'Carea Go',
-    tagline: 'ON-DEMAND WELLNESS',
-    description: 'オンデマンドでウェルネスを届ける、地域密着型ヘルスケア＆ボディケアプラットフォーム',
-    logoUrl: '/branding/logo-carea-go.png',
-    fullImageUrl: '/branding/carea-go.jpg',
-    faviconUrl: '/branding/favicon-carea-go.png',
-    themeColor: '#1d6f42',
-    accentColor: '#2b82b8',
+  // ① 画像1-②: ケアゴー CARE GO
+  care_go_blue: {
+    id: 'care_go_blue',
+    name: 'Care Go',
+    japaneseName: 'ケアゴー',
+    tagline: 'CARE GO',
+    catchphrase: 'その一歩が、もっとキレイな未来をつくる。',
+    description: '青い「C」と人型、そして新緑の若葉が躍動する、前向きなヘルスケア＆ビューティーシンボル',
+    themeColor: '#0284c7',
+    accentColor: '#16a34a',
+    iconSvg: ICON_CARE_GO_BLUE,
   },
+
+  // ② 画像1-⑬: ケアリアゴー CAREARIA GO
+  carearia_go_green: {
+    id: 'carearia_go_green',
+    name: 'Carearia Go',
+    japaneseName: 'ケアリアゴー',
+    tagline: 'CAREARIA GO',
+    catchphrase: 'あなたの「したい」叶える場所。',
+    description: '中央の人を両側のフレッシュな若葉が包み込む、自立と成長・優しさを体現したシンボル',
+    themeColor: '#059669',
+    accentColor: '#10b981',
+    iconSvg: ICON_CAREARIA_GO_GREEN,
+  },
+
+  // ③ 画像2-⑩: ケアリアゴー CAREIA GO (ピンクハート×ゴールドリーフ)
+  careia_go_pink: {
+    id: 'careia_go_pink',
+    name: 'Careia Go',
+    japaneseName: 'ケアリアゴー',
+    tagline: 'CAREIA GO',
+    catchphrase: 'あなたのキレイと健康をプロの手で。',
+    description: '優美なオープンハートのリボンと右下に輝くゴールドリーフが織りなす上質なプロフェッショナルシンボル',
+    themeColor: '#e11d48',
+    accentColor: '#f59e0b',
+    iconSvg: ICON_CAREIA_GO_PINK,
+  },
+
+  // ④ 画像2-⑫: セラリンク THERALINK
+  theralink: {
+    id: 'theralink',
+    name: 'Theralink',
+    japaneseName: 'セラリンク',
+    tagline: 'THERALINK',
+    catchphrase: '内側から輝く、本当の美しさを。',
+    description: 'エメラルド・ローズ・ゴールドの花びらと若葉がつながる、オーガニックなリース（環）シンボル',
+    themeColor: '#059669',
+    accentColor: '#db2777',
+    iconSvg: ICON_THERALINK,
+  },
+
+  // 互換性: care_go (care_go_blueと同じ)
   care_go: {
     id: 'care_go',
     name: 'Care Go',
-    tagline: 'WELLNESS DELIVERY',
-    description: 'ハートと矢印が導く、安心と信頼のウェルネスデリバリーサービス',
-    logoUrl: '/branding/logo-care-go.png',
-    fullImageUrl: '/branding/care-go.jpg',
-    faviconUrl: '/branding/favicon-care-go.png',
-    themeColor: '#104f55',
-    accentColor: '#e04f26',
+    japaneseName: 'ケアゴー',
+    tagline: 'CARE GO',
+    catchphrase: 'その一歩が、もっとキレイな未来をつくる。',
+    description: '青い「C」と人型、そして新緑の若葉が躍動する、前向きなヘルスケア＆ビューティーシンボル',
+    themeColor: '#0284c7',
+    accentColor: '#16a34a',
+    iconSvg: ICON_CARE_GO_BLUE,
   },
+
+  // 互換性: carea_go
+  carea_go: {
+    id: 'carea_go',
+    name: 'Carea Go',
+    japaneseName: 'ケアリアゴー',
+    tagline: 'CAREA GO',
+    catchphrase: 'オンデマンドでウェルネスを届ける、地域密着型ヘルスケア＆ボディケアプラットフォーム',
+    description: '地域密着型オンデマンドヘルスケア＆ボディケアプラットフォーム',
+    themeColor: '#1d6f42',
+    accentColor: '#2b82b8',
+    iconSvg: ICON_CAREA_GO_CLASSIC,
+  },
+
+  // 互換性: thera_go
   thera_go: {
     id: 'thera_go',
     name: 'Thera Go',
-    tagline: 'THERAPIST ON DEMAND',
+    japaneseName: 'セラゴー',
+    tagline: 'THERA GO',
+    catchphrase: 'プロのセラピストをいつでもどこでも呼べるオンデマンド出張・来店サービス',
     description: 'プロのセラピストをいつでもどこでも呼べるオンデマンド出張・来店サービス',
-    logoUrl: '/branding/logo-thera-go.png',
-    fullImageUrl: '/branding/thera-go.jpg',
-    faviconUrl: '/branding/favicon-thera-go.png',
     themeColor: '#789262',
     accentColor: '#e59a38',
+    iconSvg: ICON_THERA_GO_CLASSIC,
   },
 };
 
-export const DEFAULT_BRAND_ID: AppBrandId = 'carea_go';
+export const DEFAULT_BRAND_ID: AppBrandId = 'care_go_blue';
 
 /**
  * ブラウザのタイトルおよびファビコンを現在のブランド設定に合わせて動的に更新する
+ * - アイコン部分だけの SVG を Data URI 化して link[rel="icon"] に直接設定
+ * - キャッシュや画像ロード失敗に左右されず、タブのファビコンが即時切り替わります
  */
 export function updateDocumentBranding(brand: AppBrandConfig) {
   if (typeof window === 'undefined') return;
 
   // 1. タイトル更新
-  document.title = `${brand.name} - ${brand.tagline} | 出張・店舗ヘルスケア＆ボディケア`;
+  document.title = `${brand.japaneseName} (${brand.name}) - ${brand.catchphrase}`;
 
-  // 2. ファビコン動的更新 (link[rel="icon"])
-  let iconLink = document.querySelector<HTMLLinkElement>("link[rel~='icon']");
-  if (iconLink) {
-    iconLink.href = brand.faviconUrl + '?v=' + brand.id;
-  } else {
-    iconLink = document.createElement('link');
-    iconLink.rel = 'icon';
-    iconLink.href = brand.faviconUrl + '?v=' + brand.id;
-    document.head.appendChild(iconLink);
+  // 2. アイコン部分だけの SVG を Data URI 化
+  const svgDataUri = `data:image/svg+xml;utf8,${encodeURIComponent(brand.iconSvg)}`;
+
+  // 既存のファビコン link タグを全て削除（Next.js静的生成タグやキャッシュ残骸を完全除去）
+  try {
+    const existingIcons = document.querySelectorAll("link[rel*='icon']");
+    existingIcons.forEach((el) => el.remove());
+  } catch (e) {
+    console.warn('Failed to clean existing icons', e);
   }
 
-  // 3. Apple Touch Icon も更新
-  let appleIcon = document.querySelector<HTMLLinkElement>("link[rel='apple-touch-icon']");
-  if (appleIcon) {
-    appleIcon.href = brand.faviconUrl + '?v=' + brand.id;
-  } else {
-    appleIcon = document.createElement('link');
-    appleIcon.rel = 'apple-touch-icon';
-    appleIcon.href = brand.faviconUrl + '?v=' + brand.id;
-    document.head.appendChild(appleIcon);
-  }
+  // 新しい favicon link を追加 (SVG形式)
+  const iconLink = document.createElement('link');
+  iconLink.rel = 'icon';
+  iconLink.type = 'image/svg+xml';
+  iconLink.href = svgDataUri;
+  document.head.appendChild(iconLink);
+
+  // shortcut icon / apple-touch-icon も更新
+  const shortcutLink = document.createElement('link');
+  shortcutLink.rel = 'shortcut icon';
+  shortcutLink.type = 'image/svg+xml';
+  shortcutLink.href = svgDataUri;
+  document.head.appendChild(shortcutLink);
+
+  const appleIcon = document.createElement('link');
+  appleIcon.rel = 'apple-touch-icon';
+  appleIcon.href = svgDataUri;
+  document.head.appendChild(appleIcon);
 }

@@ -70,12 +70,11 @@ export default function TherapistPage() {
       <footer className="border-t border-slate-200 bg-white py-6 mt-12 text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <img
-              src={currentBrand.faviconUrl}
-              alt={currentBrand.name}
-              className="w-5 h-5 rounded-md object-contain"
+            <div
+              className="w-5 h-5 rounded-md overflow-hidden shrink-0"
+              dangerouslySetInnerHTML={{ __html: currentBrand.iconSvg }}
             />
-            <span className="font-bold text-slate-800">{currentBrand.name}</span>
+            <span className="font-bold text-slate-800">{currentBrand.japaneseName} ({currentBrand.name})</span>
             <span className="text-[11px] text-slate-400">- セラピスト業務管理ポータル</span>
           </div>
 

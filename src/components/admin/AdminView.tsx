@@ -175,7 +175,7 @@ export const AdminView: React.FC = () => {
               Admin Console
             </span>
           </div>
-          <h2 className="text-xl font-bold mt-1">{currentBrand.name} プラットフォーム管理本部</h2>
+          <h2 className="text-xl font-bold mt-1">{currentBrand.japaneseName} ({currentBrand.name}) プラットフォーム管理本部</h2>
           <p className="text-xs text-slate-400 mt-0.5">
             全予約の監視・セラピスト承認・売上分配・手数料率・ブランドロゴ設定
           </p>
@@ -837,9 +837,13 @@ export const AdminView: React.FC = () => {
               {/* 現在適用中ステータス */}
               <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3.5 py-2 rounded-2xl shrink-0">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                <div
+                  className="w-7 h-7 rounded-lg overflow-hidden shrink-0 shadow-2xs"
+                  dangerouslySetInnerHTML={{ __html: currentBrand.iconSvg }}
+                />
                 <div className="text-xs">
                   <span className="text-slate-500 text-[10px] block">現在の適用ブランド</span>
-                  <strong className="text-emerald-800 font-black">{currentBrand.name}</strong>
+                  <strong className="text-emerald-800 font-black">{currentBrand.japaneseName} ({currentBrand.name})</strong>
                 </div>
               </div>
             </div>
@@ -853,11 +857,12 @@ export const AdminView: React.FC = () => {
             )}
           </div>
 
-          {/* 3つのブランド選択カード */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {(Object.keys(APP_BRANDS) as AppBrandId[]).map((brandKey) => {
+          {/* ブランド選択カード */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {(['care_go_blue', 'carearia_go_green', 'careia_go_pink', 'theralink', 'carea_go', 'thera_go'] as AppBrandId[]).map((brandKey) => {
               const brand = APP_BRANDS[brandKey];
-              const isSelected = appBrand === brandKey;
+              if (!brand) return null;
+              const isSelected = appBrand === brandKey || (brandKey === 'care_go_blue' && appBrand === 'care_go');
 
               return (
                 <div
@@ -869,13 +874,15 @@ export const AdminView: React.FC = () => {
                   }`}
                 >
                   <div>
-                    {/* 上部: ロゴ元デザインプレビュー画像 */}
-                    <div className="relative aspect-[16/9] bg-slate-50 border-b border-slate-100 overflow-hidden flex items-center justify-center p-3">
-                      <img
-                        src={brand.fullImageUrl}
-                        alt={brand.name}
-                        className="w-full h-full object-contain"
+                    {/* 上部: アイコン単体（シンボルマーク）プレビュー */}
+                    <div className="relative h-44 bg-gradient-to-b from-slate-50 to-slate-100/60 border-b border-slate-100 flex flex-col items-center justify-center p-4">
+                      <div
+                        className="w-20 h-20 rounded-2xl shadow-md overflow-hidden transform group-hover:scale-105 transition-transform"
+                        dangerouslySetInnerHTML={{ __html: brand.iconSvg }}
                       />
+                      <span className="text-[11px] font-bold text-slate-400 mt-2">
+                        ファビコン＆アプリアイコン
+                      </span>
                       {isSelected && (
                         <div className="absolute top-3 right-3">
                           <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-600 text-white text-[11px] font-black shadow-md">
@@ -889,18 +896,21 @@ export const AdminView: React.FC = () => {
                     {/* ブランド情報 */}
                     <div className="p-5 space-y-4">
                       <div>
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-baseline justify-between gap-2">
                           <h3 className="font-black text-xl text-slate-900 tracking-tight">
-                            {brand.name}
+                            {brand.japaneseName}
                           </h3>
                           <span
-                            className="text-[10px] font-black px-2 py-0.5 rounded-md"
+                            className="text-[11px] font-black px-2 py-0.5 rounded-md uppercase"
                             style={{ backgroundColor: `${brand.themeColor}15`, color: brand.themeColor }}
                           >
                             {brand.tagline}
                           </span>
                         </div>
-                        <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                        <p className="text-xs font-bold text-emerald-700 mt-1">
+                          「{brand.catchphrase}」
+                        </p>
+                        <p className="text-[11px] text-slate-500 mt-1.5 leading-relaxed">
                           {brand.description}
                         </p>
                       </div>
@@ -912,27 +922,29 @@ export const AdminView: React.FC = () => {
                         </span>
 
                         {/* ヘッダーロゴプレビュー */}
-                        <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
-                          <span className="text-[11px] font-bold text-slate-500">ヘッダーロゴ:</span>
-                          <div className="h-8 flex items-center px-2 py-1 bg-white rounded-lg border border-slate-200/80 shadow-2xs">
-                            <img
-                              src={brand.logoUrl}
-                              alt={brand.name}
-                              className="h-6 w-auto object-contain"
+                        <div className="p-2.5 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
+                          <span className="text-[11px] font-bold text-slate-500">ヘッダー表示:</span>
+                          <div className="flex items-center gap-2 px-2.5 py-1 bg-white rounded-lg border border-slate-200/80 shadow-2xs">
+                            <div
+                              className="w-6 h-6 rounded-md overflow-hidden shrink-0"
+                              dangerouslySetInnerHTML={{ __html: brand.iconSvg }}
                             />
+                            <div className="flex items-baseline gap-1">
+                              <span className="text-xs font-black text-slate-900">{brand.japaneseName}</span>
+                              <span className="text-[9px] font-bold text-slate-400 uppercase">{brand.tagline}</span>
+                            </div>
                           </div>
                         </div>
 
                         {/* ファビコン & タブプレビュー */}
-                        <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
+                        <div className="p-2.5 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
                           <span className="text-[11px] font-bold text-slate-500">ブラウザタブ:</span>
-                          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white rounded-lg border border-slate-200/80 shadow-2xs text-[11px] font-bold text-slate-700 max-w-[160px] truncate">
-                            <img
-                              src={brand.faviconUrl}
-                              alt="favicon"
-                              className="w-4 h-4 rounded-xs shrink-0"
+                          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white rounded-lg border border-slate-200/80 shadow-2xs text-[11px] font-bold text-slate-700 max-w-[170px] truncate">
+                            <div
+                              className="w-4 h-4 rounded-xs overflow-hidden shrink-0"
+                              dangerouslySetInnerHTML={{ __html: brand.iconSvg }}
                             />
-                            <span className="truncate">{brand.name}</span>
+                            <span className="truncate">{brand.japaneseName} - {brand.catchphrase}</span>
                           </div>
                         </div>
                       </div>
@@ -947,7 +959,7 @@ export const AdminView: React.FC = () => {
                       className={`w-full py-3 rounded-2xl font-bold text-xs transition flex items-center justify-center gap-2 ${
                         isSelected
                           ? 'bg-emerald-50 text-emerald-800 border-2 border-emerald-500/50 cursor-default font-black'
-                          : 'bg-slate-900 hover:bg-slate-800 text-white shadow-xs hover:shadow-md active:scale-98'
+                          : 'bg-slate-900 hover:bg-slate-800 text-white shadow-xs hover:shadow-md active:scale-98 cursor-pointer'
                       }`}
                     >
                       {isSelected ? (
@@ -958,7 +970,7 @@ export const AdminView: React.FC = () => {
                       ) : (
                         <>
                           <Sparkles className="w-4 h-4 text-amber-300" />
-                          <span>「{brand.name}」に切り替える</span>
+                          <span>「{brand.japaneseName}」に切り替える</span>
                         </>
                       )}
                     </button>
