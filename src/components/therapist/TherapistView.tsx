@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { formatPrice, formatDate } from '@/lib/geo';
-import { Service, Booking } from '@/types';
+import { Service, Booking, ServiceCategory } from '@/types';
 import { TherapistProfileEdit } from './TherapistProfileEdit';
 import { BookingChatModal } from '@/components/chat/BookingChatModal';
 import {
@@ -96,7 +96,7 @@ export const TherapistView: React.FC = () => {
   const [newDescription, setNewDescription] = useState('');
   const [newPrice, setNewPrice] = useState('8000');
   const [newDuration, setNewDuration] = useState('60');
-  const [newCategory, setNewCategory] = useState<'physical_therapy' | 'massage' | 'aroma' | 'chiropractic' | 'beauty'>('physical_therapy');
+  const [newCategory, setNewCategory] = useState<ServiceCategory>('physical_therapy');
 
   // GPS送信シミュレーション状態
   const [isGpsTransmitting, setIsGpsTransmitting] = useState<Record<string, boolean>>({});
@@ -1180,11 +1180,18 @@ export const TherapistView: React.FC = () => {
                       onChange={(e) => setNewCategory(e.target.value as any)}
                       className="w-full px-3 py-2 border rounded-xl bg-white"
                     >
-                      <option value="physical_therapy">理学療法</option>
-                      <option value="massage">マッサージ・整体</option>
+                      <option value="physical_therapy">理学療法 (PT)</option>
+                      <option value="occupational_therapy">作業療法 (OT)</option>
+                      <option value="speech_therapy">言語聴覚 (ST)</option>
+                      <option value="dental_hygiene">歯科衛生・訪問口腔ケア</option>
+                      <option value="acupuncture">鍼灸・経絡治療</option>
+                      <option value="dietitian">管理栄養・食事指導</option>
+                      <option value="midwife">助産・産前産後ケア</option>
+                      <option value="orthoptist">視能訓練・アイケア</option>
+                      <option value="massage">もみほぐし・整体</option>
                       <option value="aroma">アロマ・リンパ</option>
                       <option value="chiropractic">カイロプラクティック</option>
-                      <option value="beauty">美容・ヘッドスパ</option>
+                      <option value="beauty">ヘッドスパ・美容</option>
                     </select>
                   </div>
 

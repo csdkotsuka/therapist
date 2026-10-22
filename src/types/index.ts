@@ -63,6 +63,20 @@ export interface TherapistProfile {
   };
 }
 
+export type ServiceCategory =
+  | 'physical_therapy'
+  | 'occupational_therapy'
+  | 'speech_therapy'
+  | 'dental_hygiene'
+  | 'acupuncture'
+  | 'dietitian'
+  | 'midwife'
+  | 'orthoptist'
+  | 'massage'
+  | 'aroma'
+  | 'chiropractic'
+  | 'beauty';
+
 export interface Service {
   id: string;
   therapist_id: string;
@@ -70,7 +84,7 @@ export interface Service {
   description: string;
   price: number;
   duration_minutes: number;
-  category: 'physical_therapy' | 'massage' | 'aroma' | 'chiropractic' | 'beauty';
+  category: ServiceCategory;
   is_active: boolean;
 }
 

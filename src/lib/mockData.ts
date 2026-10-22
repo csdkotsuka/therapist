@@ -1646,6 +1646,258 @@ export const initialProfiles: Profile[] = [
     "postal_code": "798-4110",
     "lat": 32.974106,
     "lng": 132.573128
+  },
+  {
+    "id": "10bba81d-81fe-4d3b-84ec-92bcd937c36d",
+    "role": "therapist",
+    "name": "高橋 健吾",
+    "email": "ot.takahashi@carehub.jp",
+    "phone": "089-941-8821",
+    "avatar_url": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150",
+    "address": "愛媛県松山市一番町3-8",
+    "postal_code": "790-0001",
+    "lat": 33.8418,
+    "lng": 132.7682
+  },
+  {
+    "id": "c6b257d1-ac97-47e0-8bb7-6fddffe11785",
+    "role": "therapist",
+    "name": "伊藤 恵理",
+    "email": "ot.ito@carehub.jp",
+    "phone": "0898-32-5512",
+    "avatar_url": "https://images.unsplash.com/photo-1594824813572-c2e8a1d7f1c1?w=150",
+    "address": "愛媛県今治市常盤町4-2",
+    "postal_code": "794-0015",
+    "lat": 34.0672,
+    "lng": 132.9985
+  },
+  {
+    "id": "d5f635b8-afe4-42f7-a01e-0e8726b53263",
+    "role": "therapist",
+    "name": "渡部 拓也",
+    "email": "ot.watanabe@carehub.jp",
+    "phone": "0897-33-4188",
+    "avatar_url": "https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=150",
+    "address": "愛媛県新居浜市昭和町2-15",
+    "postal_code": "792-0025",
+    "lat": 33.9615,
+    "lng": 133.2842
+  },
+  {
+    "id": "bd6eee2a-475a-492f-adf8-6d4c42b1a74e",
+    "role": "therapist",
+    "name": "岡田 彩香",
+    "email": "st.okada@carehub.jp",
+    "phone": "089-921-6677",
+    "avatar_url": "https://images.unsplash.com/photo-1573496799652-408c2ac9fe98?w=150",
+    "address": "愛媛県松山市大街道2-5",
+    "postal_code": "790-0004",
+    "lat": 33.8405,
+    "lng": 132.7712
+  },
+  {
+    "id": "9bea875a-b28a-42ed-af27-d07856c1f514",
+    "role": "therapist",
+    "name": "中村 俊介",
+    "email": "st.nakamura@carehub.jp",
+    "phone": "0897-55-9012",
+    "avatar_url": "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150",
+    "address": "愛媛県西条市神拝甲120",
+    "postal_code": "793-0030",
+    "lat": 33.9192,
+    "lng": 133.1835
+  },
+  {
+    "id": "a1c48160-6b33-4fa3-9494-0e0a4120a42b",
+    "role": "therapist",
+    "name": "長谷川 陽子",
+    "email": "st.hasegawa@carehub.jp",
+    "phone": "089-931-4560",
+    "avatar_url": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150",
+    "address": "愛媛県松山市道後湯之町8-1",
+    "postal_code": "790-0842",
+    "lat": 33.8512,
+    "lng": 132.7856
+  },
+  {
+    "id": "e4372977-81d3-47e4-83cb-10f99d07ac47",
+    "role": "therapist",
+    "name": "佐々木 真由美",
+    "email": "dh.sasaki@carehub.jp",
+    "phone": "089-943-3321",
+    "avatar_url": "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150",
+    "address": "愛媛県松山市千舟町3-4",
+    "postal_code": "790-0011",
+    "lat": 33.8378,
+    "lng": 132.7668
+  },
+  {
+    "id": "527351c9-86eb-4e54-94af-9251a6562c39",
+    "role": "therapist",
+    "name": "藤原 奈々",
+    "email": "dh.fujiwara@carehub.jp",
+    "phone": "0898-24-7788",
+    "avatar_url": "https://images.unsplash.com/photo-1594824813572-c2e8a1d7f1c1?w=150",
+    "address": "愛媛県今治市旭町2-8",
+    "postal_code": "794-0015",
+    "lat": 34.0655,
+    "lng": 132.9968
+  },
+  {
+    "id": "017ddef2-6a54-41b7-87d0-a535d807305b",
+    "role": "therapist",
+    "name": "木村 幸子",
+    "email": "dh.kimura@carehub.jp",
+    "phone": "0895-22-1144",
+    "avatar_url": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150",
+    "address": "愛媛県宇和島市中央町1-10",
+    "postal_code": "798-0034",
+    "lat": 33.2272,
+    "lng": 132.5668
+  },
+  {
+    "id": "63765210-b1cb-4488-b473-ae902a4c3edd",
+    "role": "therapist",
+    "name": "矢野 竜一",
+    "email": "acu.yano@carehub.jp",
+    "phone": "089-947-1122",
+    "avatar_url": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150",
+    "address": "愛媛県松山市平和通2-1",
+    "postal_code": "790-0807",
+    "lat": 33.8475,
+    "lng": 132.7695
+  },
+  {
+    "id": "b8a1d5e7-005d-4c62-8f37-c9bb5c9f2e55",
+    "role": "therapist",
+    "name": "森本 志保",
+    "email": "acu.morimoto@carehub.jp",
+    "phone": "089-933-8899",
+    "avatar_url": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150",
+    "address": "愛媛県松山市勝山町1-6",
+    "postal_code": "790-0878",
+    "lat": 33.8422,
+    "lng": 132.7745
+  },
+  {
+    "id": "550d8cc1-212a-44bf-9083-8554634cd21c",
+    "role": "therapist",
+    "name": "竹内 浩二",
+    "email": "acu.takeuchi@carehub.jp",
+    "phone": "0897-37-6655",
+    "avatar_url": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150",
+    "address": "愛媛県新居浜市坂井町2-1",
+    "postal_code": "792-0025",
+    "lat": 33.9592,
+    "lng": 133.2815
+  },
+  {
+    "id": "e002ed79-ec40-46bc-ab30-a8d325771219",
+    "role": "therapist",
+    "name": "小林 友香",
+    "email": "rd.kobayashi@carehub.jp",
+    "phone": "089-915-2233",
+    "avatar_url": "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?w=150",
+    "address": "愛媛県松山市湊町4-1",
+    "postal_code": "790-0012",
+    "lat": 33.8362,
+    "lng": 132.7655
+  },
+  {
+    "id": "53d30e40-5a7e-4c98-b7c4-8033c1dfac9b",
+    "role": "therapist",
+    "name": "宮本 浩太",
+    "email": "rd.miyamoto@carehub.jp",
+    "phone": "089-925-8844",
+    "avatar_url": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150",
+    "address": "愛媛県松山市本町3-5",
+    "postal_code": "790-0811",
+    "lat": 33.8462,
+    "lng": 132.7628
+  },
+  {
+    "id": "bc572258-76eb-4c2d-a795-fa14105b7236",
+    "role": "therapist",
+    "name": "白石 美代子",
+    "email": "rd.shiraishi@carehub.jp",
+    "phone": "0897-56-1199",
+    "avatar_url": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150",
+    "address": "愛媛県西条市大町4-3",
+    "postal_code": "793-0030",
+    "lat": 33.9185,
+    "lng": 133.1842
+  },
+  {
+    "id": "c8201ddf-5fbf-43f0-a695-41af361960f1",
+    "role": "therapist",
+    "name": "神野 由香里",
+    "email": "mw.jinno@carehub.jp",
+    "phone": "089-935-7766",
+    "avatar_url": "https://images.unsplash.com/photo-1594824813572-c2e8a1d7f1c1?w=150",
+    "address": "愛媛県松山市持田町2-4",
+    "postal_code": "790-0863",
+    "lat": 33.8435,
+    "lng": 132.7792
+  },
+  {
+    "id": "7f7a9b4e-d8da-47c6-a839-3261367c9bdc",
+    "role": "therapist",
+    "name": "西村 智子",
+    "email": "mw.nishimura@carehub.jp",
+    "phone": "0898-31-8899",
+    "avatar_url": "https://images.unsplash.com/photo-1573496799652-408c2ac9fe98?w=150",
+    "address": "愛媛県今治市南大門町1-5",
+    "postal_code": "794-0027",
+    "lat": 34.0628,
+    "lng": 132.9995
+  },
+  {
+    "id": "f08794f7-3ab5-4e54-be9e-394243458f72",
+    "role": "therapist",
+    "name": "菊池 陽菜",
+    "email": "mw.kikuchi@carehub.jp",
+    "phone": "0896-23-4567",
+    "avatar_url": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150",
+    "address": "愛媛県四国中央市三島中央3-8",
+    "postal_code": "799-0405",
+    "lat": 33.9815,
+    "lng": 133.5825
+  },
+  {
+    "id": "e9c638b1-5854-4f34-a82e-91d5b4203a3a",
+    "role": "therapist",
+    "name": "藤本 翔太",
+    "email": "co.fujimoto@carehub.jp",
+    "phone": "089-932-1188",
+    "avatar_url": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150",
+    "address": "愛媛県松山市花園町2-2",
+    "postal_code": "790-0005",
+    "lat": 33.8358,
+    "lng": 132.7632
+  },
+  {
+    "id": "32bfef07-4b8d-47fc-b7a4-d129523364e3",
+    "role": "therapist",
+    "name": "安倍 奈緒美",
+    "email": "co.abe@carehub.jp",
+    "phone": "089-945-6611",
+    "avatar_url": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150",
+    "address": "愛媛県松山市南江戸3-2",
+    "postal_code": "790-0062",
+    "lat": 33.8398,
+    "lng": 132.7515
+  },
+  {
+    "id": "29131f9b-9e74-4006-9320-701f49cc9ac8",
+    "role": "therapist",
+    "name": "吉田 健二",
+    "email": "co.yoshida@carehub.jp",
+    "phone": "0894-22-9900",
+    "avatar_url": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150",
+    "address": "愛媛県八幡浜市昭和通2-4",
+    "postal_code": "796-0075",
+    "lat": 33.4585,
+    "lng": 132.4235
   }
 ];
 
@@ -2715,6 +2967,500 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
       "クレジットカード可"
     ],
     "store_notes": "完全予約制のため、ご予約時刻の5分前にお越しください。"
+  },
+  "10bba81d-81fe-4d3b-84ec-92bcd937c36d": {
+    "user_id": "10bba81d-81fe-4d3b-84ec-92bcd937c36d",
+    "bio": "作業療法士として総合病院リハビリテーション科に14年間勤務。脳卒中後遺症や骨折後の日常生活動作（ADL）訓練、手指の巧緻動作（お箸・ボタン・字を書く動作）の改善を得意としています。ご自宅での環境に合わせた実践的リハビリを提供します。",
+    "specialities": [
+      "作業療法(OT)",
+      "手指動作訓練",
+      "脳卒中リハビリ",
+      "生活動作(ADL)改善",
+      "福祉用具選定"
+    ],
+    "is_store_based": false,
+    "is_visit_based": true,
+    "address": "愛媛県松山市一番町3-8",
+    "lat": 33.8418,
+    "lng": 132.7682,
+    "visit_radius_km": 25,
+    "rating_avg": 4.96,
+    "reviews_count": 28,
+    "is_approved": true,
+    "stripe_account_id": "acct_ehime_10bba81d81fe4d3b",
+    "campaign": {
+      "badge": "リハビリ評価無料",
+      "title": "初回日常生活動作(ADL)評価",
+      "description": "ご自宅での生活動作や手指機能の専門評価＆リハビリ計画作成を無料サービス！",
+      "discount_type": "gift",
+      "discount_value": 0
+    }
+  },
+  "c6b257d1-ac97-47e0-8bb7-6fddffe11785": {
+    "user_id": "c6b257d1-ac97-47e0-8bb7-6fddffe11785",
+    "bio": "作業療法士・福祉住環境コーディネーター。手工芸やぬり絵、パズルなどのアクティビティを通じた大人の認知機能トレーニングや、手先の器用さ向上リハビリを行っています。笑顔あふれる楽しいリハビリ時間を大切にしています。",
+    "specialities": [
+      "作業療法(OT)",
+      "認知機能訓練",
+      "シニアアクティビティ",
+      "住環境改善"
+    ],
+    "is_store_based": true,
+    "is_visit_based": true,
+    "address": "愛媛県今治市常盤町4-2",
+    "lat": 34.0672,
+    "lng": 132.9985,
+    "visit_radius_km": 20,
+    "rating_avg": 4.91,
+    "reviews_count": 19,
+    "is_approved": true,
+    "stripe_account_id": "acct_ehime_c6b257d1ac9747e0",
+    "store_name": "今治 伊藤 作業療法・リハビリサロン",
+    "store_address": "愛媛県今治市常盤町4-2",
+    "store_access": "今治駅より徒歩5分",
+    "store_parking": "あり（1台）"
+  },
+  "d5f635b8-afe4-42f7-a01e-0e8726b53263": {
+    "user_id": "d5f635b8-afe4-42f7-a01e-0e8726b53263",
+    "bio": "ハンドセラピー専門の作業療法士。腱鞘炎、ばね指、手根管症候群、手首の痛みにお悩みの方へ、解剖学に基づいた徒手アプローチとストレッチ、再発予防の動作指導を実施します。",
+    "specialities": [
+      "作業療法(OT)",
+      "ハンドセラピー",
+      "腱鞘炎ケア",
+      "上肢機能回復"
+    ],
+    "is_store_based": false,
+    "is_visit_based": true,
+    "address": "愛媛県新居浜市昭和町2-15",
+    "lat": 33.9615,
+    "lng": 133.2842,
+    "visit_radius_km": 25,
+    "rating_avg": 4.88,
+    "reviews_count": 15,
+    "is_approved": true,
+    "stripe_account_id": "acct_ehime_d5f635b8afe442f7"
+  },
+  "bd6eee2a-475a-492f-adf8-6d4c42b1a74e": {
+    "user_id": "bd6eee2a-475a-492f-adf8-6d4c42b1a74e",
+    "bio": "急性期総合病院リハビリ科で12年間の経験を持つ言語聴覚士（ST）。食事中のむせ、飲み込みにくさ（嚥下障害）の改善や、誤嚥性肺炎予防のための口腔・喉の筋肉トレーニングを専門としています。最期まで口から美味しく食べる支援を全力で行います。",
+    "specialities": [
+      "言語聴覚(ST)",
+      "嚥下(飲み込み)訓練",
+      "誤嚥予防",
+      "口腔機能向上",
+      "発声練習"
+    ],
+    "is_store_based": false,
+    "is_visit_based": true,
+    "address": "愛媛県松山市大街道2-5",
+    "lat": 33.8405,
+    "lng": 132.7712,
+    "visit_radius_km": 30,
+    "rating_avg": 4.98,
+    "reviews_count": 31,
+    "is_approved": true,
+    "stripe_account_id": "acct_ehime_bd6eee2a475a492f",
+    "campaign": {
+      "badge": "嚥下チェック無料",
+      "title": "ご家族安心！飲み込み機能診断",
+      "description": "食事時のむせ・飲み込みの状態を専門評価し、安全なとろみ・食事形態アドバイスを無料提供！",
+      "discount_type": "gift",
+      "discount_value": 0
+    }
+  },
+  "9bea875a-b28a-42ed-af27-d07856c1f514": {
+    "user_id": "9bea875a-b28a-42ed-af27-d07856c1f514",
+    "bio": "言語聴覚士。脳卒中後の失語症（言葉が出にくい・理解しにくい）や構音障害（ろれつが回らない）のリハビリテーションを実施。会話カードやタブレットを用いた実践的コミュニケーション支援を行います。",
+    "specialities": [
+      "言語聴覚(ST)",
+      "失語症リハビリ",
+      "構音障害改善",
+      "発声トレーニング"
+    ],
+    "is_store_based": false,
+    "is_visit_based": true,
+    "address": "愛媛県西条市神拝甲120",
+    "lat": 33.9192,
+    "lng": 133.1835,
+    "visit_radius_km": 25,
+    "rating_avg": 4.89,
+    "reviews_count": 17,
+    "is_approved": true,
+    "stripe_account_id": "acct_ehime_9bea875ab28a42ed"
+  },
+  "a1c48160-6b33-4fa3-9494-0e0a4120a42b": {
+    "user_id": "a1c48160-6b33-4fa3-9494-0e0a4120a42b",
+    "bio": "小児から高齢者まで幅広く言葉の相談に応じる言語聴覚士。お子様のことばの発達相談や、アナウンス・接客業向けの大人の滑舌・声の響きトレーニングも対応。",
+    "specialities": [
+      "言語聴覚(ST)",
+      "ことばの発達",
+      "滑舌改善",
+      "ボイスケア"
+    ],
+    "is_store_based": true,
+    "is_visit_based": true,
+    "address": "愛媛県松山市道後湯之町8-1",
+    "lat": 33.8512,
+    "lng": 132.7856,
+    "visit_radius_km": 20,
+    "rating_avg": 4.93,
+    "reviews_count": 22,
+    "is_approved": true,
+    "stripe_account_id": "acct_ehime_a1c481606b334fa3",
+    "store_name": "道後 ことばと声のリハビリ相談室",
+    "store_address": "愛媛県松山市道後湯之町8-1"
+  },
+  "e4372977-81d3-47e4-83cb-10f99d07ac47": {
+    "user_id": "e4372977-81d3-47e4-83cb-10f99d07ac47",
+    "bio": "訪問歯科診療専門で15年間活動するベテラン歯科衛生士。要介護高齢者やお出かけが困難な方の口腔清掃、歯垢・歯石チェック、舌苔ケア、お口の乾燥を防ぐ唾液腺マッサージを実施。お口の健康から全身の健康を守ります。",
+    "specialities": [
+      "歯科衛生(DH)",
+      "訪問口腔ケア",
+      "誤嚥性肺炎予防",
+      "唾液腺マッサージ",
+      "義歯ケア"
+    ],
+    "is_store_based": false,
+    "is_visit_based": true,
+    "address": "愛媛県松山市千舟町3-4",
+    "lat": 33.8378,
+    "lng": 132.7668,
+    "visit_radius_km": 25,
+    "rating_avg": 4.97,
+    "reviews_count": 36,
+    "is_approved": true,
+    "stripe_account_id": "acct_ehime_e437297781d347e4",
+    "campaign": {
+      "badge": "口腔ケアセット贈呈",
+      "title": "プロ仕様スポンジブラシ＆保湿ジェルプレゼント",
+      "description": "初回訪問口腔ケアをご利用の方に、お口の乾燥を防ぐ保湿ケアグッズを無料進呈！",
+      "discount_type": "gift",
+      "discount_value": 0
+    }
+  },
+  "527351c9-86eb-4e54-94af-9251a6562c39": {
+    "user_id": "527351c9-86eb-4e54-94af-9251a6562c39",
+    "bio": "歯科衛生士・ホワイトニングコーディネーター。デンタルエステとして歯肉（ハグキ）マッサージやリップトリートメント、食いしばりによる咬筋のコリほぐしを提供。美しい口元とリラックスを両立します。",
+    "specialities": [
+      "歯科衛生(DH)",
+      "デンタルエステ",
+      "歯肉マッサージ",
+      "咬筋リリース"
+    ],
+    "is_store_based": true,
+    "is_visit_based": true,
+    "address": "愛媛県今治市旭町2-8",
+    "lat": 34.0655,
+    "lng": 132.9968,
+    "visit_radius_km": 20,
+    "rating_avg": 4.92,
+    "reviews_count": 24,
+    "is_approved": true,
+    "stripe_account_id": "acct_ehime_527351c986eb4e54",
+    "store_name": "今治 デンタルオーラルエステサロン",
+    "store_address": "愛媛県今治市旭町2-8"
+  },
+  "017ddef2-6a54-41b7-87d0-a535d807305b": {
+    "user_id": "017ddef2-6a54-41b7-87d0-a535d807305b",
+    "bio": "歯科衛生士・ケアマネジャー資格保持。認知症の方や寝たきりの方向けのやさしい口腔ケアや、ご家族・介護職向けの効果的な仕上げ磨きレクチャーを行っています。",
+    "specialities": [
+      "歯科衛生(DH)",
+      "在宅口腔管理",
+      "介護予防",
+      "口腔衛生指導"
+    ],
+    "is_store_based": false,
+    "is_visit_based": true,
+    "address": "愛媛県宇和島市中央町1-10",
+    "lat": 33.2272,
+    "lng": 132.5668,
+    "visit_radius_km": 25,
+    "rating_avg": 4.88,
+    "reviews_count": 14,
+    "is_approved": true,
+    "stripe_account_id": "acct_ehime_017ddef26a5441b7"
+  },
+  "63765210-b1cb-4488-b473-ae902a4c3edd": {
+    "user_id": "63765210-b1cb-4488-b473-ae902a4c3edd",
+    "bio": "国家資格はり師・きゅう師歴18年。東洋医学の経絡理論に基づき、慢性腰痛、坐骨神経痛、頑固な首肩こり、自律神経の乱れ、不眠に深層からアプローチします。使い捨てディスポーザブル鍼と心地よい温灸を使用。",
+    "specialities": [
+      "鍼灸",
+      "経絡治療",
+      "温熱温灸",
+      "自律神経調整",
+      "慢性疼痛改善"
+    ],
+    "is_store_based": true,
+    "is_visit_based": true,
+    "address": "愛媛県松山市平和通2-1",
+    "lat": 33.8475,
+    "lng": 132.7695,
+    "visit_radius_km": 30,
+    "rating_avg": 4.97,
+    "reviews_count": 42,
+    "is_approved": true,
+    "stripe_account_id": "acct_ehime_63765210b1cb4488",
+    "campaign": {
+      "badge": "お灸セット無料進呈",
+      "title": "ご自宅用アロマ温灸プレゼント",
+      "description": "ご予約の方全員に、自宅で簡単にツボを温められる煙の少ない上質お灸セットを無料プレゼント！",
+      "discount_type": "gift",
+      "discount_value": 0
+    },
+    "store_name": "松山 矢野 伝統鍼灸院",
+    "store_address": "愛媛県松山市平和通2-1"
+  },
+  "b8a1d5e7-005d-4c62-8f37-c9bb5c9f2e55": {
+    "user_id": "b8a1d5e7-005d-4c62-8f37-c9bb5c9f2e55",
+    "bio": "女性鍼灸師による完全プライベート施術。大人気の美容鍼・小顔リフトアップに加え、冷え性、生理不順、更年期症状など女性特有のお悩みにやさしい温灸と刺さない鍼で寄り添います。",
+    "specialities": [
+      "鍼灸",
+      "美容鍼灸",
+      "温活お灸",
+      "女性ホルモンバランス",
+      "美肌再生"
+    ],
+    "is_store_based": true,
+    "is_visit_based": true,
+    "address": "愛媛県松山市勝山町1-6",
+    "lat": 33.8422,
+    "lng": 132.7745,
+    "visit_radius_km": 20,
+    "rating_avg": 4.95,
+    "reviews_count": 38,
+    "is_approved": true,
+    "stripe_account_id": "acct_ehime_b8a1d5e7005d4c62",
+    "store_name": "勝山町 女性専門 美容温活鍼灸サロン",
+    "store_address": "愛媛県松山市勝山町1-6"
+  },
+  "550d8cc1-212a-44bf-9083-8554634cd21c": {
+    "user_id": "550d8cc1-212a-44bf-9083-8554634cd21c",
+    "bio": "スポーツ鍼灸・筋膜パルス鍼を得意とする鍼灸師。アスリートの筋肉疲労回復、肉離れ後の早期回復、五十肩の可動域改善に電気を流す低周波パルス鍼で対応します。",
+    "specialities": [
+      "鍼灸",
+      "スポーツ鍼灸",
+      "パルス低周波鍼",
+      "トリガーポイント"
+    ],
+    "is_store_based": false,
+    "is_visit_based": true,
+    "address": "愛媛県新居浜市坂井町2-1",
+    "lat": 33.9592,
+    "lng": 133.2815,
+    "visit_radius_km": 25,
+    "rating_avg": 4.91,
+    "reviews_count": 20,
+    "is_approved": true,
+    "stripe_account_id": "acct_ehime_550d8cc1212a44bf"
+  },
+  "e002ed79-ec40-46bc-ab30-a8d325771219": {
+    "user_id": "e002ed79-ec40-46bc-ab30-a8d325771219",
+    "bio": "病院栄養科長を務めた経験を持つ管理栄養士・糖尿病療養指導士。高血圧・糖尿病・脂質異常症の減塩＆糖質コントロール食や、高齢者の低栄養予防をご自宅でサポート。実際の冷蔵庫や調味料を拝見しながら無理のない楽しい食事療法を提案します。",
+    "specialities": [
+      "管理栄養(RD)",
+      "訪問栄養指導",
+      "生活習慣病食事療法",
+      "減塩調理法",
+      "冷蔵庫診断"
+    ],
+    "is_store_based": false,
+    "is_visit_based": true,
+    "address": "愛媛県松山市湊町4-1",
+    "lat": 33.8362,
+    "lng": 132.7655,
+    "visit_radius_km": 25,
+    "rating_avg": 4.96,
+    "reviews_count": 29,
+    "is_approved": true,
+    "stripe_account_id": "acct_ehime_e002ed79ec4046bc",
+    "campaign": {
+      "badge": "献立シート無料作成",
+      "title": "オーダーメイド1週間バランス献立表",
+      "description": "あなたの体質と好みに合わせた、美味しく続けられる1週間レシピ集を無料作成してお渡しします！",
+      "discount_type": "gift",
+      "discount_value": 0
+    }
+  },
+  "53d30e40-5a7e-4c98-b7c4-8033c1dfac9b": {
+    "user_id": "53d30e40-5a7e-4c98-b7c4-8033c1dfac9b",
+    "bio": "公認スポーツ栄養士・管理栄養士。筋力増強、体脂肪燃焼、ランナーや部活生のパフォーマンス向上を支えるPFC（タンパク質・脂質・炭水化物）バランス設計とサプリメントアドバイスを科学的に指導します。",
+    "specialities": [
+      "管理栄養(RD)",
+      "スポーツ栄養",
+      "筋力アップ",
+      "ダイエット食事設計"
+    ],
+    "is_store_based": false,
+    "is_visit_based": true,
+    "address": "愛媛県松山市本町3-5",
+    "lat": 33.8462,
+    "lng": 132.7628,
+    "visit_radius_km": 25,
+    "rating_avg": 4.92,
+    "reviews_count": 21,
+    "is_approved": true,
+    "stripe_account_id": "acct_ehime_53d30e405a7e4c98"
+  },
+  "bc572258-76eb-4c2d-a795-fa14105b7236": {
+    "user_id": "bc572258-76eb-4c2d-a795-fa14105b7236",
+    "bio": "管理栄養士・母子栄養指導員。赤ちゃんの離乳食の進め方や偏食・アレルギー相談から、高齢者の噛む力・飲み込む力に応じたやわらか食（ユニバーサルデザインフード）まで幅広く家庭料理のアドバイスを行っています。",
+    "specialities": [
+      "管理栄養(RD)",
+      "離乳食・幼児食",
+      "高齢者やわらか食",
+      "フレイル予防"
+    ],
+    "is_store_based": false,
+    "is_visit_based": true,
+    "address": "愛媛県西条市大町4-3",
+    "lat": 33.9185,
+    "lng": 133.1842,
+    "visit_radius_km": 20,
+    "rating_avg": 4.89,
+    "reviews_count": 16,
+    "is_approved": true,
+    "stripe_account_id": "acct_ehime_bc57225876eb4c2d"
+  },
+  "c8201ddf-5fbf-43f0-a695-41af361960f1": {
+    "user_id": "c8201ddf-5fbf-43f0-a695-41af361960f1",
+    "bio": "周産期母子医療センターで16年間お産と産後ケアに携わったベテラン助産師・看護師。母乳が出にくい・しこりや痛み（乳腺炎）のケア、赤ちゃんの体重増加チェック、産後ママの疲労回復やメンタルサポートまで、ご自宅にお伺いして優しく寄り添います。",
+    "specialities": [
+      "助産師(MW)",
+      "母乳ケア",
+      "乳房マッサージ",
+      "産後ケア",
+      "新生児指導",
+      "骨盤底筋ケア"
+    ],
+    "is_store_based": false,
+    "is_visit_based": true,
+    "address": "愛媛県松山市持田町2-4",
+    "lat": 33.8435,
+    "lng": 132.7792,
+    "visit_radius_km": 30,
+    "rating_avg": 4.99,
+    "reviews_count": 45,
+    "is_approved": true,
+    "stripe_account_id": "acct_ehime_c8201ddf5fbf43f0",
+    "campaign": {
+      "badge": "沐浴・授乳指導無料",
+      "title": "新米ママ応援！育児手技レクチャー",
+      "description": "乳房ケアをご利用の方に、赤ちゃんが心地よく飲める抱き方＆正しい沐浴指導を無料で追加！",
+      "discount_type": "gift",
+      "discount_value": 0
+    }
+  },
+  "7f7a9b4e-d8da-47c6-a839-3261367c9bdc": {
+    "user_id": "7f7a9b4e-d8da-47c6-a839-3261367c9bdc",
+    "bio": "助産師・ベビーマッサージ講師。妊娠中の腰痛・むくみを和らげるマタニティトリートメントや、生後1ヶ月からのベビーマッサージ指導を行っています。",
+    "specialities": [
+      "助産師(MW)",
+      "マタニティケア",
+      "ベビーマッサージ",
+      "産前産後相談"
+    ],
+    "is_store_based": true,
+    "is_visit_based": true,
+    "address": "愛媛県今治市南大門町1-5",
+    "lat": 34.0628,
+    "lng": 132.9995,
+    "visit_radius_km": 20,
+    "rating_avg": 4.94,
+    "reviews_count": 26,
+    "is_approved": true,
+    "stripe_account_id": "acct_ehime_7f7a9b4ed8da47c6",
+    "store_name": "今治 マタニティ＆母子ケアステーション",
+    "store_address": "愛媛県今治市南大門町1-5"
+  },
+  "f08794f7-3ab5-4e54-be9e-394243458f72": {
+    "user_id": "f08794f7-3ab5-4e54-be9e-394243458f72",
+    "bio": "助産師。卒乳・断乳時のトラブルのないおっぱいケアや、女性のライフステージに応じた更年期ホルモンバランス相談まで、生涯にわたる女性のヘルスケアをサポート。",
+    "specialities": [
+      "助産師(MW)",
+      "断乳・卒乳ケア",
+      "更年期相談",
+      "女性の健康"
+    ],
+    "is_store_based": false,
+    "is_visit_based": true,
+    "address": "愛媛県四国中央市三島中央3-8",
+    "lat": 33.9815,
+    "lng": 133.5825,
+    "visit_radius_km": 25,
+    "rating_avg": 4.91,
+    "reviews_count": 18,
+    "is_approved": true,
+    "stripe_account_id": "acct_ehime_f08794f73ab54e54"
+  },
+  "e9c638b1-5854-4f34-a82e-91d5b4203a3a": {
+    "user_id": "e9c638b1-5854-4f34-a82e-91d5b4203a3a",
+    "bio": "大学病院眼科クリニック出身の国家資格・視能訓練士（CO）。長時間のスマホ・PC作業による重度の眼精疲労、夕方になるとピントが合わない調節緊張（スマホ老眼）、斜位・両眼視機能の乱れを専門検査とビジョントレーニングで根本改善します。",
+    "specialities": [
+      "視能訓練(CO)",
+      "眼精疲労改善",
+      "ビジョントレーニング",
+      "両眼視機能",
+      "ピント調節改善"
+    ],
+    "is_store_based": false,
+    "is_visit_based": true,
+    "address": "愛媛県松山市花園町2-2",
+    "lat": 33.8358,
+    "lng": 132.7632,
+    "visit_radius_km": 25,
+    "rating_avg": 4.96,
+    "reviews_count": 33,
+    "is_approved": true,
+    "stripe_account_id": "acct_ehime_e9c638b158544f34",
+    "campaign": {
+      "badge": "アイパック無料贈呈",
+      "title": "遠赤外線リラクゼーションアイマスク",
+      "description": "ビジョントレーニング受講の方に、眼の周囲の血流を促す特製アイウォームパッドを進呈！",
+      "discount_type": "gift",
+      "discount_value": 0
+    }
+  },
+  "32bfef07-4b8d-47fc-b7a4-d129523364e3": {
+    "user_id": "32bfef07-4b8d-47fc-b7a4-d129523364e3",
+    "bio": "視能訓練士・小児視機能指導員。お子様の弱視・斜視のリハビリや、学校の視力検査で引っかかったお子様の見え方チェック、適切な眼鏡装用指導を行っています。",
+    "specialities": [
+      "視能訓練(CO)",
+      "小児視力発達",
+      "弱視訓練",
+      "子どもの見え方相談"
+    ],
+    "is_store_based": true,
+    "is_visit_based": true,
+    "address": "愛媛県松山市南江戸3-2",
+    "lat": 33.8398,
+    "lng": 132.7515,
+    "visit_radius_km": 20,
+    "rating_avg": 4.91,
+    "reviews_count": 22,
+    "is_approved": true,
+    "stripe_account_id": "acct_ehime_32bfef074b8d47fc",
+    "store_name": "松山 アイトレーニング・視機能相談室",
+    "store_address": "愛媛県松山市南江戸3-2"
+  },
+  "29131f9b-9e74-4006-9320-701f49cc9ac8": {
+    "user_id": "29131f9b-9e74-4006-9320-701f49cc9ac8",
+    "bio": "スポーツビジョントレーナー資格を持つ視能訓練士。球技や運転に必要な動体視力・周辺視野・深視力の向上トレーニングを指導。安全運転寿命の延伸にも注力しています。",
+    "specialities": [
+      "視能訓練(CO)",
+      "動体視力",
+      "スポーツビジョン",
+      "運転シニア視力"
+    ],
+    "is_store_based": false,
+    "is_visit_based": true,
+    "address": "愛媛県八幡浜市昭和通2-4",
+    "lat": 33.4585,
+    "lng": 132.4235,
+    "visit_radius_km": 25,
+    "rating_avg": 4.87,
+    "reviews_count": 15,
+    "is_approved": true,
+    "stripe_account_id": "acct_ehime_29131f9b9e744006"
   }
 };
 
@@ -3588,6 +4334,296 @@ export const initialServices: Service[] = [
     "duration_minutes": 45,
     "category": "massage",
     "is_active": true
+  },
+  {
+    "id": "0f56f635-5858-4fca-adba-7995e88a8590",
+    "therapist_id": "10bba81d-81fe-4d3b-84ec-92bcd937c36d",
+    "title": "訪問作業療法・手指機能回復リハビリ",
+    "description": "手のこわばり、麻痺、骨折後の手指の動きを改善し、日常生活の動作をスムーズにする専門訓練。",
+    "price": 8500,
+    "duration_minutes": 60,
+    "category": "occupational_therapy",
+    "is_active": true
+  },
+  {
+    "id": "623085da-8988-4559-b3fe-81551e592dec",
+    "therapist_id": "10bba81d-81fe-4d3b-84ec-92bcd937c36d",
+    "title": "在宅生活環境・福祉用具アドバイス付き作業療法",
+    "description": "自宅内の動線チェック、手すりや福祉用具の選定支援と合わせた充実の集中リハビリ。",
+    "price": 12000,
+    "duration_minutes": 90,
+    "category": "occupational_therapy",
+    "is_active": true
+  },
+  {
+    "id": "c8fa13eb-d03e-4b96-bcd9-79fcb4e898be",
+    "therapist_id": "c6b257d1-ac97-47e0-8bb7-6fddffe11785",
+    "title": "手工芸・アクティビティ作業療法",
+    "description": "脳の活性化と手先の連動を促すオーダーメイドアクティビティリハビリ。",
+    "price": 8000,
+    "duration_minutes": 60,
+    "category": "occupational_therapy",
+    "is_active": true
+  },
+  {
+    "id": "c92a69e6-214c-4f2a-b931-a76185167cc8",
+    "therapist_id": "d5f635b8-afe4-42f7-a01e-0e8726b53263",
+    "title": "ハンドセラピー・手関節可動域訓練",
+    "description": "手・手首・肘の痛みや動かしにくさをケアする手専門の作業療法。",
+    "price": 8500,
+    "duration_minutes": 60,
+    "category": "occupational_therapy",
+    "is_active": true
+  },
+  {
+    "id": "c2540037-4e04-46e8-b926-9d8adfb4fb65",
+    "therapist_id": "bd6eee2a-475a-492f-adf8-6d4c42b1a74e",
+    "title": "訪問摂食嚥下リハビリ・口腔体操",
+    "description": "喉の筋力強化体操と食事介助法の確認で、安全で楽しいお食事をサポート。",
+    "price": 9000,
+    "duration_minutes": 60,
+    "category": "speech_therapy",
+    "is_active": true
+  },
+  {
+    "id": "f2a3b08c-977b-4ea8-8878-f7f0c3747f2e",
+    "therapist_id": "bd6eee2a-475a-492f-adf8-6d4c42b1a74e",
+    "title": "誤嚥予防・食事介助レクチャーコース",
+    "description": "ご本人様のリハビリに加え、ご家族へ安全な食事介助・とろみ付けのコツを丁寧に指導。",
+    "price": 11000,
+    "duration_minutes": 75,
+    "category": "speech_therapy",
+    "is_active": true
+  },
+  {
+    "id": "c607bbf7-5ba3-43c3-97f6-1a1bf80fb575",
+    "therapist_id": "9bea875a-b28a-42ed-af27-d07856c1f514",
+    "title": "発声・発音リハビリテーション",
+    "description": "呼吸法・発声筋のトレーニングにより、聞き取りやすい声と言葉を取り戻すサポート。",
+    "price": 8500,
+    "duration_minutes": 60,
+    "category": "speech_therapy",
+    "is_active": true
+  },
+  {
+    "id": "43960c30-7360-45a3-9e33-75d246883348",
+    "therapist_id": "a1c48160-6b33-4fa3-9494-0e0a4120a42b",
+    "title": "ことばの発達サポート・コミュニケーション訓練",
+    "description": "遊びを通じた言葉の引き出しや、正しい発音・リズムの定着レッスン。",
+    "price": 8000,
+    "duration_minutes": 60,
+    "category": "speech_therapy",
+    "is_active": true
+  },
+  {
+    "id": "ef4fbe83-ba3d-4a07-82d6-4126302522bf",
+    "therapist_id": "e4372977-81d3-47e4-83cb-10f99d07ac47",
+    "title": "専門的訪問口腔ケア＆唾液腺マッサージ",
+    "description": "ベッドサイドでの丁寧な歯面・粘膜清掃と唾液分泌を促すリラクゼーションマッサージ。",
+    "price": 7500,
+    "duration_minutes": 60,
+    "category": "dental_hygiene",
+    "is_active": true
+  },
+  {
+    "id": "cebc9f47-ff5f-4fad-a193-1aa3442ac411",
+    "therapist_id": "e4372977-81d3-47e4-83cb-10f99d07ac47",
+    "title": "義歯洗浄・お口の爽快クリーニングコース",
+    "description": "入れ歯の超音波洗浄・適合確認とお口全体の爽快リフレッシュケア。",
+    "price": 6000,
+    "duration_minutes": 45,
+    "category": "dental_hygiene",
+    "is_active": true
+  },
+  {
+    "id": "685ccc84-7ee9-4a38-9e94-1a4424c00c57",
+    "therapist_id": "527351c9-86eb-4e54-94af-9251a6562c39",
+    "title": "デンタルエステ・歯肉リップトリートメント",
+    "description": "アロマ香るお口周りの筋膜リリースと歯肉血流促進マッサージ。",
+    "price": 8000,
+    "duration_minutes": 60,
+    "category": "dental_hygiene",
+    "is_active": true
+  },
+  {
+    "id": "bc7d0eaa-651a-4a9e-87e8-c44798a48723",
+    "therapist_id": "017ddef2-6a54-41b7-87d0-a535d807305b",
+    "title": "訪問口腔リフレッシュケア＆清掃指導",
+    "description": "お口の衛生状態改善とご家族への介助テクニックアドバイス。",
+    "price": 7000,
+    "duration_minutes": 60,
+    "category": "dental_hygiene",
+    "is_active": true
+  },
+  {
+    "id": "cee365d8-6245-4f60-8973-dc07694d5b61",
+    "therapist_id": "63765210-b1cb-4488-b473-ae902a4c3edd",
+    "title": "全身経絡鍼灸＆深層温灸治療",
+    "description": "全身のツボと経絡を整え、自律神経の不調や長年の痛みを根本から改善。",
+    "price": 9500,
+    "duration_minutes": 75,
+    "category": "acupuncture",
+    "is_active": true
+  },
+  {
+    "id": "8b42f6dd-a64b-41ea-a2a2-a6a656cb0caa",
+    "therapist_id": "63765210-b1cb-4488-b473-ae902a4c3edd",
+    "title": "局所集中鍼灸・肩こり腰痛撃退コース",
+    "description": "つらい部位の深層筋肉へピンポイントでアプローチする即効性重視の鍼灸。",
+    "price": 8000,
+    "duration_minutes": 60,
+    "category": "acupuncture",
+    "is_active": true
+  },
+  {
+    "id": "de623dd8-fcc1-4702-b4f6-720174ce8be3",
+    "therapist_id": "b8a1d5e7-005d-4c62-8f37-c9bb5c9f2e55",
+    "title": "極上美顔美容鍼＆ヘッド経絡マッサージ",
+    "description": "お顔のたるみ・くすみを改善しコラーゲン生成を促すリフトアップ美容鍼。",
+    "price": 9000,
+    "duration_minutes": 60,
+    "category": "acupuncture",
+    "is_active": true
+  },
+  {
+    "id": "b0c0779e-db4e-4f77-b7dc-191bc3a2e6ba",
+    "therapist_id": "b8a1d5e7-005d-4c62-8f37-c9bb5c9f2e55",
+    "title": "女性のための温活鍼灸＆アロマ灸",
+    "description": "骨盤内血流を改善し冷え・むくみ・疲労をリフレッシュする温活コース。",
+    "price": 9500,
+    "duration_minutes": 75,
+    "category": "acupuncture",
+    "is_active": true
+  },
+  {
+    "id": "f603408f-93a4-4d6b-b7de-8fc0c3a87c45",
+    "therapist_id": "550d8cc1-212a-44bf-9083-8554634cd21c",
+    "title": "パルス電気鍼＆トリガーポイント鍼灸",
+    "description": "筋肉の奥深くに心地よい微弱電流を流し、頑固な筋肉のコリを弛緩。",
+    "price": 8500,
+    "duration_minutes": 60,
+    "category": "acupuncture",
+    "is_active": true
+  },
+  {
+    "id": "cdf54a40-5a77-40c8-88ff-065f4964a561",
+    "therapist_id": "e002ed79-ec40-46bc-ab30-a8d325771219",
+    "title": "ご自宅訪問・オーダーメイド食事指導＆冷蔵庫診断",
+    "description": "食習慣のヒアリングと冷蔵庫の食材チェックから、実践しやすい改善プランを提示。",
+    "price": 7000,
+    "duration_minutes": 60,
+    "category": "dietitian",
+    "is_active": true
+  },
+  {
+    "id": "86ec539c-e43a-4782-8154-851de6b30449",
+    "therapist_id": "e002ed79-ec40-46bc-ab30-a8d325771219",
+    "title": "病態別（減塩・糖質制限）作り置き調理レクチャー",
+    "description": "薄味でも美味しい出汁の取り方や簡単ヘルシー作り置きレシピをその場で調理実践。",
+    "price": 11000,
+    "duration_minutes": 90,
+    "category": "dietitian",
+    "is_active": true
+  },
+  {
+    "id": "58deda77-4c02-4d4a-933f-22fd0a0c2587",
+    "therapist_id": "53d30e40-5a7e-4c98-b7c4-8033c1dfac9b",
+    "title": "筋力増強＆脂肪燃焼パーソナル栄養コンサルティング",
+    "description": "目標体重・体脂肪率に合わせた正確なカロリー＆マクロ栄養素計算と食事プラン策定。",
+    "price": 7500,
+    "duration_minutes": 60,
+    "category": "dietitian",
+    "is_active": true
+  },
+  {
+    "id": "a6ed2957-7773-4fb4-bf10-aa9bb01a021b",
+    "therapist_id": "bc572258-76eb-4c2d-a795-fa14105b7236",
+    "title": "離乳食・シニア食相談＆簡単栄養調理法",
+    "description": "家族みんなで食べられる簡単アレンジ離乳食＆シニア向け栄養補給メニュー提案。",
+    "price": 6500,
+    "duration_minutes": 60,
+    "category": "dietitian",
+    "is_active": true
+  },
+  {
+    "id": "007a57e7-4a2c-4c7b-9c3a-89926f470b95",
+    "therapist_id": "c8201ddf-5fbf-43f0-a695-41af361960f1",
+    "title": "訪問乳房マッサージ＆母乳育児トラブルケア",
+    "description": "痛みを和らげ母乳の分泌を整える専門手技と、授乳姿勢のアドバイス。",
+    "price": 8500,
+    "duration_minutes": 60,
+    "category": "midwife",
+    "is_active": true
+  },
+  {
+    "id": "7728c1d0-db8a-4a3a-a8b3-94f604e438bf",
+    "therapist_id": "c8201ddf-5fbf-43f0-a695-41af361960f1",
+    "title": "産後ママの心身トータルケア＆骨盤底筋体操",
+    "description": "産後の骨盤回復、睡眠不足や育児の不安に寄り添うトータル訪問ケア。",
+    "price": 12000,
+    "duration_minutes": 90,
+    "category": "midwife",
+    "is_active": true
+  },
+  {
+    "id": "6b874070-213c-4452-927d-aa75b76facf1",
+    "therapist_id": "7f7a9b4e-d8da-47c6-a839-3261367c9bdc",
+    "title": "マタニティ安産ケア＆むくみ緩和オイルマッサージ",
+    "description": "妊娠20週以降の妊婦さんの腰痛や足のむくみをやさしくほぐすアロマケア。",
+    "price": 9000,
+    "duration_minutes": 60,
+    "category": "midwife",
+    "is_active": true
+  },
+  {
+    "id": "28cda1ad-4eb5-4961-8fd3-93e5ef1e470a",
+    "therapist_id": "f08794f7-3ab5-4e54-be9e-394243458f72",
+    "title": "やさしい断乳・卒乳マッサージ＆セルフケア指導",
+    "description": "赤ちゃんとママが笑顔で卒乳を迎えるための計画的なケアとトラブル予防。",
+    "price": 8000,
+    "duration_minutes": 60,
+    "category": "midwife",
+    "is_active": true
+  },
+  {
+    "id": "868b32eb-267f-4dab-82fd-d30ace01a3cc",
+    "therapist_id": "e9c638b1-5854-4f34-a82e-91d5b4203a3a",
+    "title": "眼精疲労撃退！視覚機能ビジョントレーニング",
+    "description": "眼球運動とピント調節機能をチェックし、眼の奥の緊張をほぐす独自トレーニング。",
+    "price": 7500,
+    "duration_minutes": 60,
+    "category": "orthoptist",
+    "is_active": true
+  },
+  {
+    "id": "a9000fa5-2235-4f58-a997-36bf72ce68b6",
+    "therapist_id": "e9c638b1-5854-4f34-a82e-91d5b4203a3a",
+    "title": "デスクワーク疲労回復＆ピント調節機能リセット",
+    "description": "首肩の血流改善アドバイスと両眼視トレーニングを組み合わせた集中アイケア。",
+    "price": 9000,
+    "duration_minutes": 75,
+    "category": "orthoptist",
+    "is_active": true
+  },
+  {
+    "id": "2ed6d7fe-d811-46e6-bf27-df32156b1139",
+    "therapist_id": "32bfef07-4b8d-47fc-b7a4-d129523364e3",
+    "title": "子どもの視力発達トレーニング＆視機能検査相談",
+    "description": "遊びながら楽しく行う眼球運動と視力発達を促す個別サポート。",
+    "price": 7000,
+    "duration_minutes": 60,
+    "category": "orthoptist",
+    "is_active": true
+  },
+  {
+    "id": "a4ad094f-d6be-4ecb-b37c-4590a847f695",
+    "therapist_id": "29131f9b-9e74-4006-9320-701f49cc9ac8",
+    "title": "スポーツビジョントレーニング＆動体視力向上",
+    "description": "目と手の協調運動、瞬間視・深視力を鍛えパフォーマンスを高める訓練。",
+    "price": 8000,
+    "duration_minutes": 60,
+    "category": "orthoptist",
+    "is_active": true
   }
 ];
 
@@ -4196,6 +5232,384 @@ export const initialReviews: Review[] = [
     "rating": 4,
     "comment": "とても丁寧なカウンセリングと施術でした。愛媛でこんなハイレベルな出張ケアを受けられるのは最高です。",
     "created_at": "2026-10-11T03:12:14.361Z"
+  },
+  {
+    "id": "b1f9e966-4d68-4624-9bbb-65e6acab0119",
+    "booking_id": "33985cd2-f62a-4806-8bf7-1cbb9c52eb9b",
+    "customer_id": "3dab49aa-2427-4646-bcc3-ed517b695a73",
+    "therapist_id": "10bba81d-81fe-4d3b-84ec-92bcd937c36d",
+    "rating": 5,
+    "comment": "高橋 健吾先生に自宅まで来ていただき大変助かりました。専門職としての確かな技術と温かいお声がけで、家族一同安心してお任せできました。また定期的にお願いしたいです。",
+    "created_at": "2026-09-22T03:55:58.307Z"
+  },
+  {
+    "id": "31c17174-a76a-4fff-b654-d7a54548b7b1",
+    "booking_id": "1a1474d9-f99f-462b-91cb-27a92078dd82",
+    "customer_id": "3dab49aa-2427-4646-bcc3-ed517b695a73",
+    "therapist_id": "10bba81d-81fe-4d3b-84ec-92bcd937c36d",
+    "rating": 5,
+    "comment": "専門資格を持つプロの方にマンツーマンでじっくり診ていただき大満足です。自宅でできるケア方法も親身に教えていただきました！",
+    "created_at": "2026-09-10T03:55:58.309Z"
+  },
+  {
+    "id": "5ca4ee6f-1330-42a3-9cf3-3f86d3a0f5f1",
+    "booking_id": "dd3ac085-39e4-447e-acfa-5d12cd1d5a95",
+    "customer_id": "f62f5b05-fc96-4199-b3eb-9649f2e2c593",
+    "therapist_id": "c6b257d1-ac97-47e0-8bb7-6fddffe11785",
+    "rating": 5,
+    "comment": "伊藤 恵理先生に自宅まで来ていただき大変助かりました。専門職としての確かな技術と温かいお声がけで、家族一同安心してお任せできました。また定期的にお願いしたいです。",
+    "created_at": "2026-09-28T03:55:58.309Z"
+  },
+  {
+    "id": "459fd755-87f5-4ec7-b918-ea8434945b1e",
+    "booking_id": "abcdaca7-d11d-4266-9f4f-114cced75f35",
+    "customer_id": "3477b9e5-72c1-429b-8c62-814af3735e6a",
+    "therapist_id": "c6b257d1-ac97-47e0-8bb7-6fddffe11785",
+    "rating": 5,
+    "comment": "専門資格を持つプロの方にマンツーマンでじっくり診ていただき大満足です。自宅でできるケア方法も親身に教えていただきました！",
+    "created_at": "2026-07-31T03:55:58.309Z"
+  },
+  {
+    "id": "4a40180b-e525-433e-95f0-b2108f643236",
+    "booking_id": "7200a3e4-5db4-475f-80b9-3498b7e42a63",
+    "customer_id": "fd32540e-2f24-4cbc-9be0-71a9edc23128",
+    "therapist_id": "d5f635b8-afe4-42f7-a01e-0e8726b53263",
+    "rating": 5,
+    "comment": "渡部 拓也先生に自宅まで来ていただき大変助かりました。専門職としての確かな技術と温かいお声がけで、家族一同安心してお任せできました。また定期的にお願いしたいです。",
+    "created_at": "2026-09-22T03:55:58.309Z"
+  },
+  {
+    "id": "60fbf472-9908-429f-99ba-3c99333d59c9",
+    "booking_id": "dc46b1b7-6672-4d5b-befc-f972aa44f398",
+    "customer_id": "f62f5b05-fc96-4199-b3eb-9649f2e2c593",
+    "therapist_id": "d5f635b8-afe4-42f7-a01e-0e8726b53263",
+    "rating": 5,
+    "comment": "専門資格を持つプロの方にマンツーマンでじっくり診ていただき大満足です。自宅でできるケア方法も親身に教えていただきました！",
+    "created_at": "2026-08-14T03:55:58.309Z"
+  },
+  {
+    "id": "a6ba74e0-6a60-4609-940b-bab3ae85cff7",
+    "booking_id": "cc33477a-31ad-4574-9b01-ac2b1f7baf37",
+    "customer_id": "e3ff5064-3edd-491e-b51b-5ec764092eb2",
+    "therapist_id": "bd6eee2a-475a-492f-adf8-6d4c42b1a74e",
+    "rating": 5,
+    "comment": "岡田 彩香先生に自宅まで来ていただき大変助かりました。専門職としての確かな技術と温かいお声がけで、家族一同安心してお任せできました。また定期的にお願いしたいです。",
+    "created_at": "2026-10-05T03:55:58.309Z"
+  },
+  {
+    "id": "4bf53240-70ef-4696-8b24-64a2927cce06",
+    "booking_id": "640ee209-0c05-4e87-8dbb-5347dccf680b",
+    "customer_id": "cf756f75-fd66-4b4c-a661-73404a1e8ab8",
+    "therapist_id": "bd6eee2a-475a-492f-adf8-6d4c42b1a74e",
+    "rating": 5,
+    "comment": "専門資格を持つプロの方にマンツーマンでじっくり診ていただき大満足です。自宅でできるケア方法も親身に教えていただきました！",
+    "created_at": "2026-08-06T03:55:58.309Z"
+  },
+  {
+    "id": "858ec06e-cea4-4e84-9a5e-03d32078a556",
+    "booking_id": "2e7ad4ca-37df-4d4f-ba9d-ee4862a4e03d",
+    "customer_id": "001d251c-4651-45de-a35e-e4f6d6c5354d",
+    "therapist_id": "9bea875a-b28a-42ed-af27-d07856c1f514",
+    "rating": 5,
+    "comment": "中村 俊介先生に自宅まで来ていただき大変助かりました。専門職としての確かな技術と温かいお声がけで、家族一同安心してお任せできました。また定期的にお願いしたいです。",
+    "created_at": "2026-10-16T03:55:58.309Z"
+  },
+  {
+    "id": "1d4a2697-49a0-4013-91e0-ae54786555ac",
+    "booking_id": "4a98b0bb-f0e1-4b9b-8b36-a900a79d4ef6",
+    "customer_id": "da0a18fb-466d-413e-b8c3-1a1ba08dad41",
+    "therapist_id": "9bea875a-b28a-42ed-af27-d07856c1f514",
+    "rating": 5,
+    "comment": "専門資格を持つプロの方にマンツーマンでじっくり診ていただき大満足です。自宅でできるケア方法も親身に教えていただきました！",
+    "created_at": "2026-08-25T03:55:58.309Z"
+  },
+  {
+    "id": "8771cc6f-ed01-4be9-a89a-fdba84868c57",
+    "booking_id": "a8cf6e92-84ba-47fe-943b-a7df762f0b0e",
+    "customer_id": "014029a3-4028-4ea7-abab-07fbc977fbdc",
+    "therapist_id": "a1c48160-6b33-4fa3-9494-0e0a4120a42b",
+    "rating": 5,
+    "comment": "長谷川 陽子先生に自宅まで来ていただき大変助かりました。専門職としての確かな技術と温かいお声がけで、家族一同安心してお任せできました。また定期的にお願いしたいです。",
+    "created_at": "2026-10-01T03:55:58.309Z"
+  },
+  {
+    "id": "92f8f458-b6fd-41d6-9055-ee964b675043",
+    "booking_id": "3f6fd128-dff3-4237-bc02-95f14bf015e3",
+    "customer_id": "ee86c3f2-cbb0-45d6-9d03-02e900fe5bc4",
+    "therapist_id": "a1c48160-6b33-4fa3-9494-0e0a4120a42b",
+    "rating": 5,
+    "comment": "専門資格を持つプロの方にマンツーマンでじっくり診ていただき大満足です。自宅でできるケア方法も親身に教えていただきました！",
+    "created_at": "2026-08-13T03:55:58.309Z"
+  },
+  {
+    "id": "e573b462-4673-4657-a276-977141687434",
+    "booking_id": "5e7a382d-dc18-46e7-89f5-e136b60200bd",
+    "customer_id": "e3ff5064-3edd-491e-b51b-5ec764092eb2",
+    "therapist_id": "e4372977-81d3-47e4-83cb-10f99d07ac47",
+    "rating": 5,
+    "comment": "佐々木 真由美先生に自宅まで来ていただき大変助かりました。専門職としての確かな技術と温かいお声がけで、家族一同安心してお任せできました。また定期的にお願いしたいです。",
+    "created_at": "2026-10-15T03:55:58.309Z"
+  },
+  {
+    "id": "7daca99c-e720-44ef-b280-e1de4b4ed408",
+    "booking_id": "1ae4c7b8-055d-4721-8f10-ec0a0c6568fd",
+    "customer_id": "b8ef6a1a-942e-4e48-94d4-19f0fa4dc5d9",
+    "therapist_id": "e4372977-81d3-47e4-83cb-10f99d07ac47",
+    "rating": 5,
+    "comment": "専門資格を持つプロの方にマンツーマンでじっくり診ていただき大満足です。自宅でできるケア方法も親身に教えていただきました！",
+    "created_at": "2026-08-21T03:55:58.309Z"
+  },
+  {
+    "id": "c6157d63-394f-49c2-bdfb-d801b5b27537",
+    "booking_id": "6d706ae0-65fd-4128-8622-81bf52ba359c",
+    "customer_id": "077c8dbc-1304-4c91-bf27-69c8150e0bb0",
+    "therapist_id": "527351c9-86eb-4e54-94af-9251a6562c39",
+    "rating": 5,
+    "comment": "藤原 奈々先生に自宅まで来ていただき大変助かりました。専門職としての確かな技術と温かいお声がけで、家族一同安心してお任せできました。また定期的にお願いしたいです。",
+    "created_at": "2026-10-17T03:55:58.309Z"
+  },
+  {
+    "id": "2b12fed1-574d-4c01-97d2-b443588c6cbb",
+    "booking_id": "2284bd37-f75b-4933-b7b8-c194ff31354d",
+    "customer_id": "29fb2667-2d53-4a28-8715-c8e204a36f63",
+    "therapist_id": "527351c9-86eb-4e54-94af-9251a6562c39",
+    "rating": 5,
+    "comment": "専門資格を持つプロの方にマンツーマンでじっくり診ていただき大満足です。自宅でできるケア方法も親身に教えていただきました！",
+    "created_at": "2026-09-09T03:55:58.309Z"
+  },
+  {
+    "id": "aaec9037-6ce2-4cda-996d-9109ac05fa88",
+    "booking_id": "019b0773-d258-4621-b01d-22fa93a1bfd1",
+    "customer_id": "7abb014f-1f87-4f8c-989e-e0ff7bc66067",
+    "therapist_id": "017ddef2-6a54-41b7-87d0-a535d807305b",
+    "rating": 5,
+    "comment": "木村 幸子先生に自宅まで来ていただき大変助かりました。専門職としての確かな技術と温かいお声がけで、家族一同安心してお任せできました。また定期的にお願いしたいです。",
+    "created_at": "2026-09-23T03:55:58.309Z"
+  },
+  {
+    "id": "e5e9a98b-8c4e-463f-a872-0600803d4752",
+    "booking_id": "fec79592-f4c2-44b5-970b-57d6a538824a",
+    "customer_id": "d920eaea-8c06-4d00-a7e9-7194bc0476a8",
+    "therapist_id": "017ddef2-6a54-41b7-87d0-a535d807305b",
+    "rating": 5,
+    "comment": "専門資格を持つプロの方にマンツーマンでじっくり診ていただき大満足です。自宅でできるケア方法も親身に教えていただきました！",
+    "created_at": "2026-08-26T03:55:58.309Z"
+  },
+  {
+    "id": "2f063d25-a350-4914-a6bb-1c450bc236ef",
+    "booking_id": "dbffd20d-d064-45e3-9d88-d3af7c28ad90",
+    "customer_id": "1c242eaf-b56c-4d19-b02c-d3be76e63011",
+    "therapist_id": "63765210-b1cb-4488-b473-ae902a4c3edd",
+    "rating": 5,
+    "comment": "矢野 竜一先生に自宅まで来ていただき大変助かりました。専門職としての確かな技術と温かいお声がけで、家族一同安心してお任せできました。また定期的にお願いしたいです。",
+    "created_at": "2026-10-14T03:55:58.309Z"
+  },
+  {
+    "id": "d9220cb3-d5aa-4aec-85e7-3978e1f99a43",
+    "booking_id": "96db9fc3-2387-490b-aef7-111b3c78757d",
+    "customer_id": "ee86c3f2-cbb0-45d6-9d03-02e900fe5bc4",
+    "therapist_id": "63765210-b1cb-4488-b473-ae902a4c3edd",
+    "rating": 5,
+    "comment": "専門資格を持つプロの方にマンツーマンでじっくり診ていただき大満足です。自宅でできるケア方法も親身に教えていただきました！",
+    "created_at": "2026-08-29T03:55:58.309Z"
+  },
+  {
+    "id": "5c40a69d-4be1-45a3-a145-a1fcdd45a020",
+    "booking_id": "0f6acd0c-e9b6-4522-af84-7df59103cc0f",
+    "customer_id": "42bdf0eb-5624-4e9a-8886-0bfb43fa6b74",
+    "therapist_id": "b8a1d5e7-005d-4c62-8f37-c9bb5c9f2e55",
+    "rating": 5,
+    "comment": "森本 志保先生に自宅まで来ていただき大変助かりました。専門職としての確かな技術と温かいお声がけで、家族一同安心してお任せできました。また定期的にお願いしたいです。",
+    "created_at": "2026-10-07T03:55:58.309Z"
+  },
+  {
+    "id": "fb7844fb-5947-4cc5-937a-cabf3e7f5013",
+    "booking_id": "df2098f9-9a6b-4b40-b268-cdac4000dcf7",
+    "customer_id": "02d214ce-7d40-403b-ba93-c3ddecf64df9",
+    "therapist_id": "b8a1d5e7-005d-4c62-8f37-c9bb5c9f2e55",
+    "rating": 5,
+    "comment": "専門資格を持つプロの方にマンツーマンでじっくり診ていただき大満足です。自宅でできるケア方法も親身に教えていただきました！",
+    "created_at": "2026-07-31T03:55:58.309Z"
+  },
+  {
+    "id": "9187b99f-1618-4adb-bc1f-f80e589239c3",
+    "booking_id": "37d23bc5-bc7e-4051-93e7-a338de94c03e",
+    "customer_id": "da81b6b7-9301-47de-9bb7-26512804caf8",
+    "therapist_id": "550d8cc1-212a-44bf-9083-8554634cd21c",
+    "rating": 5,
+    "comment": "竹内 浩二先生に自宅まで来ていただき大変助かりました。専門職としての確かな技術と温かいお声がけで、家族一同安心してお任せできました。また定期的にお願いしたいです。",
+    "created_at": "2026-09-22T03:55:58.309Z"
+  },
+  {
+    "id": "52bb44f9-bbd2-4ec0-a6c5-fab9ec1e0e6c",
+    "booking_id": "0a8e4bd2-6637-4801-97f1-e484aeb1c01d",
+    "customer_id": "651d98df-1c72-42cd-8a9c-a933da350bf6",
+    "therapist_id": "550d8cc1-212a-44bf-9083-8554634cd21c",
+    "rating": 5,
+    "comment": "専門資格を持つプロの方にマンツーマンでじっくり診ていただき大満足です。自宅でできるケア方法も親身に教えていただきました！",
+    "created_at": "2026-07-29T03:55:58.309Z"
+  },
+  {
+    "id": "cce0f528-91d1-4667-8292-d4fb7087f09b",
+    "booking_id": "c4a6d131-31be-4784-b7cc-b09faa3cf10c",
+    "customer_id": "a5788384-12b1-4910-a805-66c0d88717ee",
+    "therapist_id": "e002ed79-ec40-46bc-ab30-a8d325771219",
+    "rating": 5,
+    "comment": "小林 友香先生に自宅まで来ていただき大変助かりました。専門職としての確かな技術と温かいお声がけで、家族一同安心してお任せできました。また定期的にお願いしたいです。",
+    "created_at": "2026-10-20T03:55:58.309Z"
+  },
+  {
+    "id": "bbb962ad-c32b-4257-a79c-1cf9642337c8",
+    "booking_id": "c77aba2a-a891-40f4-87f6-bb7369d26d65",
+    "customer_id": "014029a3-4028-4ea7-abab-07fbc977fbdc",
+    "therapist_id": "e002ed79-ec40-46bc-ab30-a8d325771219",
+    "rating": 5,
+    "comment": "専門資格を持つプロの方にマンツーマンでじっくり診ていただき大満足です。自宅でできるケア方法も親身に教えていただきました！",
+    "created_at": "2026-08-18T03:55:58.309Z"
+  },
+  {
+    "id": "ed7d6167-998c-4d01-b4a6-71c005d82dd5",
+    "booking_id": "6c02e17b-637d-4875-af98-7077801f0a78",
+    "customer_id": "501383c4-f512-4a2c-97d3-a5c3cca444a3",
+    "therapist_id": "53d30e40-5a7e-4c98-b7c4-8033c1dfac9b",
+    "rating": 5,
+    "comment": "宮本 浩太先生に自宅まで来ていただき大変助かりました。専門職としての確かな技術と温かいお声がけで、家族一同安心してお任せできました。また定期的にお願いしたいです。",
+    "created_at": "2026-10-09T03:55:58.309Z"
+  },
+  {
+    "id": "0ede6fa2-4dfb-4c7c-9e4d-593eacbe6cd2",
+    "booking_id": "e95d401b-9796-4c75-b14d-0cbf624016d0",
+    "customer_id": "794e63b2-5a2d-44cd-8001-b984c540db93",
+    "therapist_id": "53d30e40-5a7e-4c98-b7c4-8033c1dfac9b",
+    "rating": 5,
+    "comment": "専門資格を持つプロの方にマンツーマンでじっくり診ていただき大満足です。自宅でできるケア方法も親身に教えていただきました！",
+    "created_at": "2026-08-12T03:55:58.309Z"
+  },
+  {
+    "id": "53962c6d-47c0-4a01-b4a8-0b6dc59ade2c",
+    "booking_id": "87e3b047-7aa0-4234-84fd-72ab7046b55a",
+    "customer_id": "f7ac58e8-36b7-44d8-bc84-70ef22aa5e30",
+    "therapist_id": "bc572258-76eb-4c2d-a795-fa14105b7236",
+    "rating": 5,
+    "comment": "白石 美代子先生に自宅まで来ていただき大変助かりました。専門職としての確かな技術と温かいお声がけで、家族一同安心してお任せできました。また定期的にお願いしたいです。",
+    "created_at": "2026-10-02T03:55:58.309Z"
+  },
+  {
+    "id": "960597c4-dd6d-45f2-a132-ae19787c996a",
+    "booking_id": "c51ffb9d-2005-4d87-8217-e7fefdf481ca",
+    "customer_id": "2e2b4ce1-a9f3-441a-84c5-883375fd3a90",
+    "therapist_id": "bc572258-76eb-4c2d-a795-fa14105b7236",
+    "rating": 5,
+    "comment": "専門資格を持つプロの方にマンツーマンでじっくり診ていただき大満足です。自宅でできるケア方法も親身に教えていただきました！",
+    "created_at": "2026-08-20T03:55:58.309Z"
+  },
+  {
+    "id": "1912438e-0175-49f6-9075-14793886e5ee",
+    "booking_id": "4dfc8917-6b5c-4c20-a7fd-f31774ab0b6d",
+    "customer_id": "75ac81e2-f317-42dc-8ea8-1352b221a058",
+    "therapist_id": "c8201ddf-5fbf-43f0-a695-41af361960f1",
+    "rating": 5,
+    "comment": "神野 由香里先生に自宅まで来ていただき大変助かりました。専門職としての確かな技術と温かいお声がけで、家族一同安心してお任せできました。また定期的にお願いしたいです。",
+    "created_at": "2026-10-10T03:55:58.309Z"
+  },
+  {
+    "id": "ace5d5ce-8262-4fda-a6a8-38f16d20f118",
+    "booking_id": "271c5704-cf2d-48a3-8d89-8f43a8835179",
+    "customer_id": "8677ae17-fb14-4d6d-aa18-6c6f8ef2ff93",
+    "therapist_id": "c8201ddf-5fbf-43f0-a695-41af361960f1",
+    "rating": 5,
+    "comment": "専門資格を持つプロの方にマンツーマンでじっくり診ていただき大満足です。自宅でできるケア方法も親身に教えていただきました！",
+    "created_at": "2026-07-29T03:55:58.309Z"
+  },
+  {
+    "id": "01b3032f-1e98-4d1b-a2b9-e0dfb8872a2f",
+    "booking_id": "56a6e27f-5b18-4928-bc6c-64a5f76f7870",
+    "customer_id": "001d251c-4651-45de-a35e-e4f6d6c5354d",
+    "therapist_id": "7f7a9b4e-d8da-47c6-a839-3261367c9bdc",
+    "rating": 5,
+    "comment": "西村 智子先生に自宅まで来ていただき大変助かりました。専門職としての確かな技術と温かいお声がけで、家族一同安心してお任せできました。また定期的にお願いしたいです。",
+    "created_at": "2026-09-22T03:55:58.309Z"
+  },
+  {
+    "id": "9322b2c5-f8db-4efb-aef6-b076b27e8fc0",
+    "booking_id": "470df995-9069-443d-95ca-131fd747a037",
+    "customer_id": "c846ee2a-f736-419d-a82d-e99e95eb223d",
+    "therapist_id": "7f7a9b4e-d8da-47c6-a839-3261367c9bdc",
+    "rating": 5,
+    "comment": "専門資格を持つプロの方にマンツーマンでじっくり診ていただき大満足です。自宅でできるケア方法も親身に教えていただきました！",
+    "created_at": "2026-08-01T03:55:58.309Z"
+  },
+  {
+    "id": "9bb12a90-f718-487a-92e2-2c1cec3f44fd",
+    "booking_id": "2cf5b84c-8842-4a31-9f6e-2ece0b42bfcb",
+    "customer_id": "772dd6f3-9dca-4e3f-87bd-7c802917fd9b",
+    "therapist_id": "f08794f7-3ab5-4e54-be9e-394243458f72",
+    "rating": 5,
+    "comment": "菊池 陽菜先生に自宅まで来ていただき大変助かりました。専門職としての確かな技術と温かいお声がけで、家族一同安心してお任せできました。また定期的にお願いしたいです。",
+    "created_at": "2026-10-09T03:55:58.309Z"
+  },
+  {
+    "id": "31c11e51-5c46-4d31-8872-a1df8406c79a",
+    "booking_id": "9edc30ee-66e6-4000-beeb-5a1cd8fa5123",
+    "customer_id": "57ada3f0-99c0-45ab-a78e-dae5946278e9",
+    "therapist_id": "f08794f7-3ab5-4e54-be9e-394243458f72",
+    "rating": 5,
+    "comment": "専門資格を持つプロの方にマンツーマンでじっくり診ていただき大満足です。自宅でできるケア方法も親身に教えていただきました！",
+    "created_at": "2026-08-24T03:55:58.309Z"
+  },
+  {
+    "id": "9fb7e5e5-876b-4689-aec8-92a383bb032e",
+    "booking_id": "6f24f4a6-eb03-428f-930e-e80a54c048f4",
+    "customer_id": "95888550-8b96-4f49-8837-67c8c1ee6263",
+    "therapist_id": "e9c638b1-5854-4f34-a82e-91d5b4203a3a",
+    "rating": 5,
+    "comment": "藤本 翔太先生に自宅まで来ていただき大変助かりました。専門職としての確かな技術と温かいお声がけで、家族一同安心してお任せできました。また定期的にお願いしたいです。",
+    "created_at": "2026-09-26T03:55:58.309Z"
+  },
+  {
+    "id": "ed5968c6-b8f9-48be-adc7-d3656d5770b8",
+    "booking_id": "d0e5ffb9-7d72-4f67-9834-4147c00c1ca7",
+    "customer_id": "f1186f53-2c64-4d87-b2b2-38100c72df03",
+    "therapist_id": "e9c638b1-5854-4f34-a82e-91d5b4203a3a",
+    "rating": 5,
+    "comment": "専門資格を持つプロの方にマンツーマンでじっくり診ていただき大満足です。自宅でできるケア方法も親身に教えていただきました！",
+    "created_at": "2026-09-01T03:55:58.309Z"
+  },
+  {
+    "id": "0c57d062-3b89-456d-9490-2e18d448bc77",
+    "booking_id": "ef7db255-2de6-4908-a7cd-6ca768a132cc",
+    "customer_id": "db03646b-7f82-4195-b3be-a6bf90b3b893",
+    "therapist_id": "32bfef07-4b8d-47fc-b7a4-d129523364e3",
+    "rating": 5,
+    "comment": "安倍 奈緒美先生に自宅まで来ていただき大変助かりました。専門職としての確かな技術と温かいお声がけで、家族一同安心してお任せできました。また定期的にお願いしたいです。",
+    "created_at": "2026-10-18T03:55:58.309Z"
+  },
+  {
+    "id": "c844beb2-3717-4fd9-af5d-a391bef56b1b",
+    "booking_id": "e8967f01-cfb4-4bc6-8e01-954d05bcd5c3",
+    "customer_id": "da81b6b7-9301-47de-9bb7-26512804caf8",
+    "therapist_id": "32bfef07-4b8d-47fc-b7a4-d129523364e3",
+    "rating": 5,
+    "comment": "専門資格を持つプロの方にマンツーマンでじっくり診ていただき大満足です。自宅でできるケア方法も親身に教えていただきました！",
+    "created_at": "2026-08-19T03:55:58.309Z"
+  },
+  {
+    "id": "59dadb1d-ed5d-45af-9177-cefba9c5236e",
+    "booking_id": "8d1cfac2-5dfc-4c1e-96e0-5bea1e3addc6",
+    "customer_id": "d68b1a8b-fa70-4895-a799-e42e68e6d108",
+    "therapist_id": "29131f9b-9e74-4006-9320-701f49cc9ac8",
+    "rating": 5,
+    "comment": "吉田 健二先生に自宅まで来ていただき大変助かりました。専門職としての確かな技術と温かいお声がけで、家族一同安心してお任せできました。また定期的にお願いしたいです。",
+    "created_at": "2026-10-13T03:55:58.309Z"
+  },
+  {
+    "id": "e1ab7536-37c9-46fe-89c8-e6791b69ee5c",
+    "booking_id": "eb8d521d-36d0-4402-8c93-9c44dea3ba9f",
+    "customer_id": "9a82253f-7adb-4b9e-9905-3ab1d3b88dac",
+    "therapist_id": "29131f9b-9e74-4006-9320-701f49cc9ac8",
+    "rating": 5,
+    "comment": "専門資格を持つプロの方にマンツーマンでじっくり診ていただき大満足です。自宅でできるケア方法も親身に教えていただきました！",
+    "created_at": "2026-08-05T03:55:58.309Z"
   }
 ];
 

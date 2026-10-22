@@ -39,6 +39,12 @@ import {
   Smile,
   Coins,
   Navigation,
+  Activity,
+  MessageSquare,
+  Flame,
+  Utensils,
+  Baby,
+  Eye,
 } from 'lucide-react';
 import { Booking } from '@/types';
 
@@ -190,6 +196,30 @@ export const CustomerView: React.FC = () => {
       badgeBg: 'bg-white/95 text-blue-800 border border-blue-200/80',
     },
     {
+      id: 'occupational_therapy',
+      label: '作業療法',
+      subtitle: '日常生活動作・自立支援',
+      description: '食事や更衣・手先の動作など生活に直結するリハビリ',
+      icon: Activity,
+      iconColor: 'text-cyan-700',
+      bgColor: 'bg-cyan-500/15',
+      cardBg: 'bg-gradient-to-br from-cyan-50/90 via-cyan-50/50 to-sky-50/60',
+      borderColor: 'border-cyan-200/90 hover:border-cyan-500',
+      badgeBg: 'bg-white/95 text-cyan-800 border border-cyan-200/80',
+    },
+    {
+      id: 'speech_therapy',
+      label: '言語聴覚',
+      subtitle: 'ことば・発声・嚥下ケア',
+      description: '嚥下障害や構音・コミュニケーション機能の回復訓練',
+      icon: MessageSquare,
+      iconColor: 'text-violet-700',
+      bgColor: 'bg-violet-500/15',
+      cardBg: 'bg-gradient-to-br from-violet-50/90 via-violet-50/50 to-purple-50/60',
+      borderColor: 'border-violet-200/90 hover:border-violet-500',
+      badgeBg: 'bg-white/95 text-violet-800 border border-violet-200/80',
+    },
+    {
       id: 'massage',
       label: 'もみほぐし',
       subtitle: '全身疲労・筋肉のコリ解消',
@@ -200,6 +230,18 @@ export const CustomerView: React.FC = () => {
       cardBg: 'bg-gradient-to-br from-amber-50/90 via-amber-50/50 to-orange-50/60',
       borderColor: 'border-amber-200/90 hover:border-amber-500',
       badgeBg: 'bg-white/95 text-amber-800 border border-amber-200/80',
+    },
+    {
+      id: 'acupuncture',
+      label: '鍼灸',
+      subtitle: '東洋医学・ツボ刺激・自律神経',
+      description: '経穴への鍼と温灸で深部コリや自律神経・冷えを調整',
+      icon: Flame,
+      iconColor: 'text-amber-800',
+      bgColor: 'bg-amber-600/15',
+      cardBg: 'bg-gradient-to-br from-amber-50/90 via-yellow-50/50 to-orange-50/60',
+      borderColor: 'border-amber-300/90 hover:border-amber-600',
+      badgeBg: 'bg-white/95 text-amber-900 border border-amber-300/80',
     },
     {
       id: 'aroma',
@@ -236,6 +278,54 @@ export const CustomerView: React.FC = () => {
       cardBg: 'bg-gradient-to-br from-pink-50/90 via-pink-50/50 to-fuchsia-50/60',
       borderColor: 'border-pink-200/90 hover:border-pink-500',
       badgeBg: 'bg-white/95 text-pink-800 border border-pink-200/80',
+    },
+    {
+      id: 'dental_hygiene',
+      label: '歯科衛生',
+      subtitle: '訪問口腔ケア・摂食支援',
+      description: '誤嚥性肺炎予防・口腔内クリーニングと健口ケア',
+      icon: Smile,
+      iconColor: 'text-teal-700',
+      bgColor: 'bg-teal-500/15',
+      cardBg: 'bg-gradient-to-br from-teal-50/90 via-teal-50/50 to-emerald-50/60',
+      borderColor: 'border-teal-200/90 hover:border-teal-500',
+      badgeBg: 'bg-white/95 text-teal-800 border border-teal-200/80',
+    },
+    {
+      id: 'dietitian',
+      label: '管理栄養',
+      subtitle: '栄養相談・生活習慣食・献立',
+      description: '持病に合わせた制限食や日々の食生活改善を伴走支援',
+      icon: Utensils,
+      iconColor: 'text-lime-700',
+      bgColor: 'bg-lime-500/15',
+      cardBg: 'bg-gradient-to-br from-lime-50/90 via-lime-50/50 to-green-50/60',
+      borderColor: 'border-lime-200/90 hover:border-lime-500',
+      badgeBg: 'bg-white/95 text-lime-800 border border-lime-200/80',
+    },
+    {
+      id: 'midwife',
+      label: '助産師',
+      subtitle: '産前産後ケア・母乳・育児相談',
+      description: '助産師による乳房ケア・産後骨盤・育児のメンタル相談',
+      icon: Baby,
+      iconColor: 'text-rose-700',
+      bgColor: 'bg-rose-500/15',
+      cardBg: 'bg-gradient-to-br from-rose-50/90 via-pink-50/50 to-red-50/60',
+      borderColor: 'border-rose-200/90 hover:border-rose-500',
+      badgeBg: 'bg-white/95 text-rose-800 border border-rose-200/80',
+    },
+    {
+      id: 'orthoptist',
+      label: '視能訓練',
+      subtitle: '視機能トレーニング・アイケア',
+      description: '斜視・弱視の訓練相談や眼精疲労・視覚機能のセルフケア指導',
+      icon: Eye,
+      iconColor: 'text-sky-700',
+      bgColor: 'bg-sky-500/15',
+      cardBg: 'bg-gradient-to-br from-sky-50/90 via-sky-50/50 to-indigo-50/60',
+      borderColor: 'border-sky-200/90 hover:border-sky-500',
+      badgeBg: 'bg-white/95 text-sky-800 border border-sky-200/80',
     },
   ];
 
@@ -386,7 +476,7 @@ export const CustomerView: React.FC = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="セラピスト名、もみほぐし、理学療法、アロマ、特典などで検索..."
+            placeholder="セラピスト名、もみほぐし、理学・作業療法、言語、鍼灸、栄養指導、特典などで検索..."
             className="w-full pl-12 pr-14 py-3 bg-white border border-slate-200 rounded-3xl text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-emerald-500 focus:border-emerald-500 shadow-2xs transition"
           />
           {searchQuery && (
