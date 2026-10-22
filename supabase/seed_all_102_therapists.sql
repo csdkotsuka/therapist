@@ -233,11 +233,14 @@ VALUES
   ('141a10b1-19b8-48fb-af7b-8e1e8bf62d4b', 'therapist', 'shunsuke.kono@example.com', '河野 俊介 (Shunsuke Kono)', '089-941-6622', 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=400&auto=format&fit=crop&q=80', '愛媛県松山市一番町1丁目8-2', '790-0001', 33.841, 132.771),
   ('1c9b1428-0c88-454e-af9d-5efbb6fc4d27', 'therapist', 'maiko.saeki@example.com', '佐伯 舞子 (Maiko Saeki)', '0898-31-4477', 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&auto=format&fit=crop&q=80', '愛媛県今治市中浜町1丁目4-12', '794-0016', 34.067, 133.001);
 
--- 既存の auth.users に同一メールアドレスが既に存在する場合、IDの不整合を防ぐため一時テーブル側を同期
-UPDATE tmp_seed_users t
-SET id = u.id
-FROM auth.users u
-WHERE lower(u.email) = lower(t.email);
+-- 既存の auth.users に同一メールアドレスだが異なるUUIDを持つ古いレコードがある場合、
+-- メールアドレスのユニーク制約衝突を避けるため古いレコードの email を退避（リネーム）し、
+-- 本シードデータの正規UUID (ddadeee4-... 等) が 100% 確実に auth.users と profiles に登録されるようにする
+UPDATE auth.users u
+SET email = 'legacy_' || substr(u.id::text, 1, 8) || '_' || u.email
+FROM tmp_seed_users t
+WHERE lower(u.email) = lower(t.email)
+  AND u.id <> t.id;
 
 -- 1. auth.users に未登録のユーザーのみを安全にINSERT (DISTINCT ON で一時テーブル内の重複も排除し、既存も完全スキップ)
 INSERT INTO auth.users (
@@ -824,6 +827,4 @@ VALUES
   ('d2825456-8057-4c3e-a8ce-5ac67174d4b4', '5899c5a8-1c7b-4126-aac6-d859332277bd', 'd68b1a8b-fa70-4895-a799-e42e68e6d108', 'acc5712e-e2d5-4ba1-a96d-c4763e188c09', 5, '減塩でも美味しく作れるだしの活用法を教えていただきました。1週間献立表のおかげで迷わず料理できています。', '2026-10-04T12:00:00.000Z'),
   ('755ed981-0e80-4cb6-a795-60027852dd35', '79f08c23-7379-4aa2-abc9-03ac930f8048', '9a82253f-7adb-4b9e-9905-3ab1d3b88dac', '87d426d5-9d92-4095-a942-42aa98f5edcd', 5, '乳腺炎の初期症状で激痛だったおっぱいを優しくほぐしていただき、あっという間に痛みが消えました。神の手です！', '2026-10-03T09:30:00.000Z'),
   ('23a8e416-bcc1-4bf9-afc3-453ac9dfe1ac', '924bb73b-9265-4aec-a8e8-2dd30bc2e0d0', 'd68b1a8b-fa70-4895-a799-e42e68e6d108', '141a10b1-19b8-48fb-af7b-8e1e8bf62d4b', 5, 'リモートワークで限界だった目の奥の重さがスッキリ抜けました。教えてもらったピント運動を毎日続けています。', '2026-10-02T17:00:00.000Z')
-ON CONFLICT (id) DO UPDATE SET
-  rating = EXCLUDED.rating,
-  comment = EXCLUDED.comment;
+ON CONFLICT DO NOTHING;
