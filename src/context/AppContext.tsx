@@ -83,7 +83,7 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'therapist_platform_state_ehime_v2';
+const STORAGE_KEY = 'therapist_platform_state_ehime_v4';
 
 // セラピスト全体の約2〜3割に特典・キャンペーンが確実に設定されている状態を保証するヘルパー関数
 const ensureCampaigns = (profiles: Record<string, TherapistProfile>): Record<string, TherapistProfile> => {
@@ -208,14 +208,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           });
       }
       setTherapistProfiles((prev) => {
-        const merged: Record<string, TherapistProfile> = { ...prev };
-        Object.entries(mapped).forEach(([id, tp]) => {
-          merged[id] = {
-            ...prev[id],
-            ...tp,
-            campaign: prev[id]?.campaign ?? tp.campaign ?? initialTherapistProfiles[id]?.campaign,
-          };
-        });
+        const merged: Record<string, TherapistProfile> = {
+          ...initialTherapistProfiles,
+          ...prev,
+          ...mapped,
+        };
         return ensureCampaigns(merged);
       });
 
@@ -285,11 +282,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed.allUsers) setAllUsers(parsed.allUsers);
-        if (parsed.therapistProfiles) setTherapistProfiles(ensureCampaigns(parsed.therapistProfiles));
-        if (parsed.services) setServices(parsed.services);
+        if (parsed.allUsers) {
+          const savedIds = new Set((parsed.allUsers as Profile[]).map((u) => u.id));
+          const missingProfiles = initialProfiles.filter((p) => !savedIds.has(p.id));
+          setAllUsers([...(parsed.allUsers as Profile[]), ...missingProfiles]);
+        }
+        if (parsed.therapistProfiles) {
+          const mergedTp = { ...initialTherapistProfiles, ...parsed.therapistProfiles };
+          setTherapistProfiles(ensureCampaigns(mergedTp));
+        }
+        if (parsed.services) {
+          const savedSvcIds = new Set((parsed.services as Service[]).map((s) => s.id));
+          const missingServices = initialServices.filter((s) => !savedSvcIds.has(s.id));
+          setServices([...(parsed.services as Service[]), ...missingServices]);
+        }
         if (parsed.bookings) setBookings(parsed.bookings);
-        if (parsed.reviews) setReviews(parsed.reviews);
+        if (parsed.reviews) {
+          const savedRevIds = new Set((parsed.reviews as Review[]).map((r) => r.id));
+          const missingReviews = initialReviews.filter((r) => !savedRevIds.has(r.id));
+          setReviews([...(parsed.reviews as Review[]), ...missingReviews]);
+        }
         if (parsed.messages) setMessages(parsed.messages);
         if (parsed.platformFeeRate) setPlatformFeeRateState(parsed.platformFeeRate);
         if (parsed.appBrand && APP_BRANDS[parsed.appBrand as AppBrandId]) {
