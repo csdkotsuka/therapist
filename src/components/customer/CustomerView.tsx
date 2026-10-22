@@ -62,10 +62,52 @@ const RealLeafletMap = dynamic(
 
 type SortOption = 'recommended' | 'rating' | 'distance' | 'price_asc' | 'price_desc';
 
-// カテゴリ用ベクターアイコン（施術内容が直感的に伝わるデザイン）
+// ========================================================
+// 直感的で分かりやすい専用ベクターアイコン群
+// ========================================================
+
+// 1. 医療・リハビリ専門職ジャンルアイコン (聴診器＆ハートパルス)
+const StethoscopeCategoryIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M4.5 3v5a4.5 4.5 0 0 0 9 0V3" />
+    <path d="M9 12.5v3.5a4 4 0 0 0 8 0V11" />
+    <circle cx="17" cy="10" r="2" />
+    <path d="M3 3h3" />
+    <path d="M12 3h3" />
+  </svg>
+);
+
+// 2. リラクゼーション・ボディケアジャンルアイコン (手技＆癒やしの花)
+const BodyCareGroupIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M12 2a4 4 0 0 1 4 4c0 3-4 6-4 6s-4-3-4-6a4 4 0 0 1 4-4z" />
+    <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v4" />
+    <path d="M6 14v-2a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v6a7 7 0 0 0 7 7h3a7 7 0 0 0 7-7v-3" />
+  </svg>
+);
+
+// 3. 東洋医学・訪問口腔ケアジャンルアイコン (温灸の炎＆ピカピカの歯)
+const OrientalDentalGroupIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    {/* 炎とお灸 */}
+    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
+    {/* 輝く歯のアクセント */}
+    <path d="M16 4l.5 1 1 .5-1 .5-.5 1-.5-1-1-.5 1-.5z" fill="currentColor" />
+  </svg>
+);
+
+// 4. 女性・子育て・栄養・アイケアジャンルアイコン (優しく包む母子ハート＆栄養)
+const FamilyLifestyleGroupIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+    <circle cx="12" cy="10" r="2.5" />
+    <path d="M10 14a2.5 2.5 0 0 0 4 0" />
+  </svg>
+);
+
+// 理学療法・整体アイコン (直立骨格・関節アライメント)
 const PhysicalTherapyCategoryIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    {/* 直立した整った姿勢と関節アライメント */}
     <circle cx="12" cy="4" r="2.2" />
     <path d="M12 6.5v13.5" />
     <path d="M7.5 10.5l4.5-1.5 4.5 1.5" />
@@ -74,9 +116,34 @@ const PhysicalTherapyCategoryIcon: React.FC<{ className?: string }> = ({ classNa
   </svg>
 );
 
+// 作業療法士アイコン (生活動作・手先の巧緻性と自立サポート)
+const OccupationalTherapyCategoryIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    {/* 手と生活動作 */}
+    <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v4" />
+    <path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v6" />
+    <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8" />
+    <path d="M6 14v-2a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v6a7 7 0 0 0 7 7h3a7 7 0 0 0 7-7v-3a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2" />
+    {/* 動作アシスト矢印 */}
+    <path d="M19 3l2 2-2 2" />
+  </svg>
+);
+
+// 言語聴覚士アイコン (ことば・発声・会話と嚥下ケア)
+const SpeechTherapyCategoryIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    {/* 会話吹き出し */}
+    <path d="M21 14a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    {/* 発声の音波ライン */}
+    <path d="M8 8h6" />
+    <path d="M8 12h8" />
+    <circle cx="16" cy="8" r="1" fill="currentColor" />
+  </svg>
+);
+
+// もみほぐしアイコン (筋肉を深層からほぐす手技)
 const MassageCategoryIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    {/* 筋肉をもみほぐす手技 */}
     <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v3" />
     <path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v7" />
     <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8" />
@@ -84,39 +151,95 @@ const MassageCategoryIcon: React.FC<{ className?: string }> = ({ className }) =>
   </svg>
 );
 
+// アロマ・リンパアイコン (天然精油の雫と優雅なリーフ)
 const AromaCategoryIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    {/* アロマオイルの雫と癒やしのリーフ */}
     <path d="M12 2.5l5.5 5.8a7.8 7.8 0 1 1-11 0z" />
     <path d="M12 11.5c1.8-1.8 3.5-1 3.5 1.2s-2.2 3.3-3.5 3.3" />
+    <circle cx="12" cy="16" r="1.5" fill="currentColor" />
   </svg>
 );
 
+// カイロ・骨盤アイコン (背骨と骨盤のアライメント矯正)
 const ChiropracticCategoryIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    {/* 背骨と骨盤の歪み矯正アライメント */}
     <line x1="12" y1="2" x2="12" y2="22" strokeDasharray="1.5 2" />
     <circle cx="12" cy="5" r="1.5" />
     <circle cx="12" cy="9" r="1.5" />
     <circle cx="12" cy="13" r="1.5" />
-    {/* 骨盤ウィング */}
     <path d="M6 16c0-2.5 2.5-3.5 6-3.5s6 1 6 3.5c0 2.5-3 4-6 4s-6-1.5-6-4z" />
-    {/* 矯正矢印 */}
     <path d="M4 9h2.5" />
     <path d="M20 9h-2.5" />
   </svg>
 );
 
+// ヘッドスパアイコン (頭皮マッサージと快眠リフレッシュウェーブ)
 const HeadSpaCategoryIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    {/* フェイスラインと頭皮ヘッドスパ・ウェーブ */}
     <path d="M5 10c0 4.5 3.1 8 7 8s7-3.5 7-8-3.1-8-7-8c-2 0-3.9.9-5.1 2.3" />
     <path d="M9.5 11c.8 0 1.5-.7 1.5-1.5" />
     <path d="M14.5 11c.8 0 1.5-.7 1.5-1.5" />
     <path d="M10 14.5c1 .8 3 .8 4 0" />
-    {/* 頭頂部のヘッドスパマッサージ波動 */}
     <path d="M9 2a3 3 0 0 1 6 0" />
     <path d="M7 3.5a4 4 0 0 1 10 0" />
+  </svg>
+);
+
+// 鍼灸アイコン (経穴の鍼とお灸の温熱)
+const AcupunctureCategoryIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    {/* 鍼 */}
+    <path d="M5 3l13 13" />
+    <path d="M3 1l4 4" />
+    <circle cx="18" cy="16" r="1.8" fill="currentColor" />
+    {/* 温灸の煙と熱 */}
+    <path d="M15 4c0 2.5-2.5 3.5-2.5 5 0 1.4 1.1 2.5 2.5 2.5s2.5-1.1 2.5-2.5c0-1.8-2.5-2.7-2.5-5z" />
+  </svg>
+);
+
+// 歯科衛生士アイコン (白く輝く健口トゥース)
+const ToothCategoryIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M12 2C8.5 2 6.5 4 6.5 8c0 3.5 1 5.5 1.8 9.5 1 4 2.2 4.5 3.7 4.5 1.2 0 1.5-1.5 1.5-4 0-1.5.5-2 1-2s1 .5 1 2c0 2.5.3 4 1.5 4 1.5 0 2.7-.5 3.7-4.5.8-4 1.8-6 1.8-9.5 0-4-2-6-5.5-6h-4z" />
+    <path d="M9.5 6.5c1-1 3.5-1 4.5 0" />
+    {/* 輝く星 */}
+    <path d="M19 2l.7 1.5L21 4l-1.3.5L19 6l-.7-1.5L17 4l1.3-.5z" fill="currentColor" stroke="none" />
+  </svg>
+);
+
+// 管理栄養士アイコン (フォーク＆スプーンと栄養バランス)
+const DietitianCategoryIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    {/* スプーン＆フォーク */}
+    <path d="M18 2v20" />
+    <path d="M21 2v6a3 3 0 0 1-3 3" />
+    <path d="M4 2v6a3 3 0 0 0 3 3v11" />
+    <path d="M4 2v4h6V2" />
+    {/* フレッシュフルーツ */}
+    <circle cx="12.5" cy="14" r="3" />
+    <path d="M12.5 11c0-1.2.8-1.8 1.5-1.8" />
+  </svg>
+);
+
+// 助産師アイコン (赤ちゃんを優しく包む両手と愛のハート)
+const MidwifeCategoryIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+    <circle cx="12" cy="11" r="2.2" />
+    <path d="M9.5 15.5c1.2 1.2 3.8 1.2 5 0" />
+  </svg>
+);
+
+// 視能訓練士アイコン (瞳とビジョントレーニングのターゲット)
+const OrthoptistCategoryIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
+    <circle cx="12" cy="12" r="3.5" />
+    <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+    <path d="M12 2v2" />
+    <path d="M12 20v2" />
+    <path d="M2 12h2" />
+    <path d="M20 12h2" />
   </svg>
 );
 
@@ -132,7 +255,9 @@ export const CustomerView: React.FC = () => {
 
   // 検索・絞り込みフィルター（複数条件の同時適用が可能）
   const [searchQuery, setSearchQuery] = useState<string>('');
-  // 選択中のカテゴリ（初期値は null = 最初はメニュー選択画面）
+  // 選択中の大ジャンル (初期値は null = 最初は大ジャンル選択画面)
+  const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
+  // 選択中の詳細カテゴリ (初期値は null = 詳細カテゴリ選択画面)
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [filterStyle, setFilterStyle] = useState<'all' | 'visit' | 'store'>('all');
   const [onlyCampaign, setOnlyCampaign] = useState<boolean>(false); // 特典・キャンペーン有無
@@ -169,10 +294,77 @@ export const CustomerView: React.FC = () => {
     };
   }, [setUserLocation]);
 
-  // カテゴリ一覧 (アイコン、わかりやすいサブタイトル・説明・淡いカラー設定付き)
+  // ========================================================
+  // 大ジャンル (グループ) 一覧定義
+  // ========================================================
+  const genres = [
+    {
+      id: 'rehab',
+      name: '医療・リハビリ専門職',
+      badge: '国家資格リハビリ',
+      subtitle: '関節痛・歩行・生活動作・ことばの改善',
+      description: '理学療法士・作業療法士・言語聴覚士による本格的な身体機能回復と生活自立支援',
+      icon: StethoscopeCategoryIcon,
+      themeColor: 'text-blue-700',
+      iconBg: 'bg-blue-500/15 text-blue-700',
+      cardBg: 'bg-gradient-to-br from-blue-50/95 via-sky-50/60 to-indigo-50/50',
+      borderColor: 'border-blue-200 hover:border-blue-500',
+      badgeBg: 'bg-white/95 text-blue-800 border border-blue-200/80',
+      categoryIds: ['physical_therapy', 'occupational_therapy', 'speech_therapy'],
+      highlight: '理学・作業・言語聴覚',
+    },
+    {
+      id: 'bodycare',
+      name: 'リフレッシュ・ボディケア',
+      badge: '疲労回復・快眠・癒やし',
+      subtitle: '全身疲労・筋肉のコリ・骨盤矯正・極上スパ',
+      description: '手技もみほぐし、極上精油アロマ、骨盤・姿勢アライメント矯正、快眠ドライヘッドスパ',
+      icon: BodyCareGroupIcon,
+      themeColor: 'text-amber-700',
+      iconBg: 'bg-amber-500/15 text-amber-700',
+      cardBg: 'bg-gradient-to-br from-amber-50/95 via-orange-50/60 to-yellow-50/50',
+      borderColor: 'border-amber-200 hover:border-amber-500',
+      badgeBg: 'bg-white/95 text-amber-800 border border-amber-200/80',
+      categoryIds: ['massage', 'aroma', 'chiropractic', 'beauty'],
+      highlight: 'もみほぐし・アロマ・整体・スパ',
+    },
+    {
+      id: 'oriental_dental',
+      name: '東洋医学・訪問口腔ケア',
+      badge: 'ツボ温熱・自律神経・健口',
+      subtitle: '頑固な冷え・不定愁訴・訪問口腔清掃',
+      description: '国家資格の鍼灸師によるツボ温灸・自律神経調整と、歯科衛生士による訪問口腔ケア・誤嚥予防',
+      icon: OrientalDentalGroupIcon,
+      themeColor: 'text-teal-700',
+      iconBg: 'bg-teal-500/15 text-teal-700',
+      cardBg: 'bg-gradient-to-br from-teal-50/95 via-emerald-50/60 to-cyan-50/50',
+      borderColor: 'border-teal-200 hover:border-teal-500',
+      badgeBg: 'bg-white/95 text-teal-800 border border-teal-200/80',
+      categoryIds: ['acupuncture', 'dental_hygiene'],
+      highlight: '鍼灸・訪問歯科衛生',
+    },
+    {
+      id: 'family_lifestyle',
+      name: '女性・子育て・栄養・アイケア',
+      badge: '母子ケア・食改善・視機能',
+      subtitle: '産前産後・母乳育児・制限食・ビジョン訓練',
+      description: '助産師による母乳ケア・産後骨盤、管理栄養士の食事献立指導、視能訓練士のアイケア',
+      icon: FamilyLifestyleGroupIcon,
+      themeColor: 'text-rose-700',
+      iconBg: 'bg-rose-500/15 text-rose-700',
+      cardBg: 'bg-gradient-to-br from-rose-50/95 via-pink-50/60 to-red-50/50',
+      borderColor: 'border-rose-200 hover:border-rose-500',
+      badgeBg: 'bg-white/95 text-rose-800 border border-rose-200/80',
+      categoryIds: ['midwife', 'dietitian', 'orthoptist'],
+      highlight: '助産師・管理栄養士・視能訓練士',
+    },
+  ];
+
+  // 詳細カテゴリー一覧 (各職種に分かりやすい専用ベクターアイコンを付与)
   const categories = [
     {
       id: 'all',
+      genreId: 'all',
       label: 'すべて',
       subtitle: '全ジャンルから探す',
       description: 'すべての登録セラピストを一覧表示',
@@ -183,11 +375,13 @@ export const CustomerView: React.FC = () => {
       borderColor: 'border-emerald-200/90 hover:border-emerald-500',
       badgeBg: 'bg-white/95 text-emerald-800 border border-emerald-200/80',
     },
+    // --- 医療・リハビリ専門職 ---
     {
       id: 'physical_therapy',
+      genreId: 'rehab',
       label: '整体・理学',
       subtitle: '肩こり・腰痛・関節の根本改善',
-      description: '国家資格保持者による本格リハビリ・整体',
+      description: '国家資格保持者による本格リハビリ・運動療法',
       icon: PhysicalTherapyCategoryIcon,
       iconColor: 'text-blue-700',
       bgColor: 'bg-blue-500/15',
@@ -197,10 +391,11 @@ export const CustomerView: React.FC = () => {
     },
     {
       id: 'occupational_therapy',
+      genreId: 'rehab',
       label: '作業療法',
       subtitle: '日常生活動作・自立支援',
       description: '食事や更衣・手先の動作など生活に直結するリハビリ',
-      icon: Activity,
+      icon: OccupationalTherapyCategoryIcon,
       iconColor: 'text-cyan-700',
       bgColor: 'bg-cyan-500/15',
       cardBg: 'bg-gradient-to-br from-cyan-50/90 via-cyan-50/50 to-sky-50/60',
@@ -209,18 +404,21 @@ export const CustomerView: React.FC = () => {
     },
     {
       id: 'speech_therapy',
+      genreId: 'rehab',
       label: '言語聴覚',
       subtitle: 'ことば・発声・嚥下ケア',
       description: '嚥下障害や構音・コミュニケーション機能の回復訓練',
-      icon: MessageSquare,
+      icon: SpeechTherapyCategoryIcon,
       iconColor: 'text-violet-700',
       bgColor: 'bg-violet-500/15',
       cardBg: 'bg-gradient-to-br from-violet-50/90 via-violet-50/50 to-purple-50/60',
       borderColor: 'border-violet-200/90 hover:border-violet-500',
       badgeBg: 'bg-white/95 text-violet-800 border border-violet-200/80',
     },
+    // --- リフレッシュ・ボディケア ---
     {
       id: 'massage',
+      genreId: 'bodycare',
       label: 'もみほぐし',
       subtitle: '全身疲労・筋肉のコリ解消',
       description: '手技で深層筋肉をじんわりほぐすボディケア',
@@ -232,19 +430,8 @@ export const CustomerView: React.FC = () => {
       badgeBg: 'bg-white/95 text-amber-800 border border-amber-200/80',
     },
     {
-      id: 'acupuncture',
-      label: '鍼灸',
-      subtitle: '東洋医学・ツボ刺激・自律神経',
-      description: '経穴への鍼と温灸で深部コリや自律神経・冷えを調整',
-      icon: Flame,
-      iconColor: 'text-amber-800',
-      bgColor: 'bg-amber-600/15',
-      cardBg: 'bg-gradient-to-br from-amber-50/90 via-yellow-50/50 to-orange-50/60',
-      borderColor: 'border-amber-300/90 hover:border-amber-600',
-      badgeBg: 'bg-white/95 text-amber-900 border border-amber-300/80',
-    },
-    {
       id: 'aroma',
+      genreId: 'bodycare',
       label: 'アロマ・リンパ',
       subtitle: '極上の癒やし・むくみ解消',
       description: '選べる上質精油で巡りを整えるオイルトリートメント',
@@ -257,6 +444,7 @@ export const CustomerView: React.FC = () => {
     },
     {
       id: 'chiropractic',
+      genreId: 'bodycare',
       label: 'カイロ・骨盤',
       subtitle: '骨盤矯正・姿勢の歪みケア',
       description: '背骨や骨盤のアライメントを整え美姿勢へ',
@@ -269,6 +457,7 @@ export const CustomerView: React.FC = () => {
     },
     {
       id: 'beauty',
+      genreId: 'bodycare',
       label: 'ヘッドスパ',
       subtitle: '眼精疲労・頭痛・睡眠改善',
       description: '頭皮をもみほぐし脳疲労と首肩の重さをリフレッシュ',
@@ -279,36 +468,41 @@ export const CustomerView: React.FC = () => {
       borderColor: 'border-pink-200/90 hover:border-pink-500',
       badgeBg: 'bg-white/95 text-pink-800 border border-pink-200/80',
     },
+    // --- 東洋医学・訪問口腔ケア ---
+    {
+      id: 'acupuncture',
+      genreId: 'oriental_dental',
+      label: '鍼灸',
+      subtitle: '東洋医学・ツボ刺激・自律神経',
+      description: '経穴への鍼と温灸で深部コリや自律神経・冷えを調整',
+      icon: AcupunctureCategoryIcon,
+      iconColor: 'text-amber-800',
+      bgColor: 'bg-amber-600/15',
+      cardBg: 'bg-gradient-to-br from-amber-50/90 via-yellow-50/50 to-orange-50/60',
+      borderColor: 'border-amber-300/90 hover:border-amber-600',
+      badgeBg: 'bg-white/95 text-amber-900 border border-amber-300/80',
+    },
     {
       id: 'dental_hygiene',
+      genreId: 'oriental_dental',
       label: '歯科衛生',
       subtitle: '訪問口腔ケア・摂食支援',
       description: '誤嚥性肺炎予防・口腔内クリーニングと健口ケア',
-      icon: Smile,
+      icon: ToothCategoryIcon,
       iconColor: 'text-teal-700',
       bgColor: 'bg-teal-500/15',
       cardBg: 'bg-gradient-to-br from-teal-50/90 via-teal-50/50 to-emerald-50/60',
       borderColor: 'border-teal-200/90 hover:border-teal-500',
       badgeBg: 'bg-white/95 text-teal-800 border border-teal-200/80',
     },
-    {
-      id: 'dietitian',
-      label: '管理栄養',
-      subtitle: '栄養相談・生活習慣食・献立',
-      description: '持病に合わせた制限食や日々の食生活改善を伴走支援',
-      icon: Utensils,
-      iconColor: 'text-lime-700',
-      bgColor: 'bg-lime-500/15',
-      cardBg: 'bg-gradient-to-br from-lime-50/90 via-lime-50/50 to-green-50/60',
-      borderColor: 'border-lime-200/90 hover:border-lime-500',
-      badgeBg: 'bg-white/95 text-lime-800 border border-lime-200/80',
-    },
+    // --- 女性・子育て・栄養・アイケア ---
     {
       id: 'midwife',
+      genreId: 'family_lifestyle',
       label: '助産師',
       subtitle: '産前産後ケア・母乳・育児相談',
       description: '助産師による乳房ケア・産後骨盤・育児のメンタル相談',
-      icon: Baby,
+      icon: MidwifeCategoryIcon,
       iconColor: 'text-rose-700',
       bgColor: 'bg-rose-500/15',
       cardBg: 'bg-gradient-to-br from-rose-50/90 via-pink-50/50 to-red-50/60',
@@ -316,11 +510,25 @@ export const CustomerView: React.FC = () => {
       badgeBg: 'bg-white/95 text-rose-800 border border-rose-200/80',
     },
     {
+      id: 'dietitian',
+      genreId: 'family_lifestyle',
+      label: '管理栄養',
+      subtitle: '栄養相談・生活習慣食・献立',
+      description: '持病に合わせた制限食や日々の食生活改善を伴走支援',
+      icon: DietitianCategoryIcon,
+      iconColor: 'text-lime-700',
+      bgColor: 'bg-lime-500/15',
+      cardBg: 'bg-gradient-to-br from-lime-50/90 via-lime-50/50 to-green-50/60',
+      borderColor: 'border-lime-200/90 hover:border-lime-500',
+      badgeBg: 'bg-white/95 text-lime-800 border border-lime-200/80',
+    },
+    {
       id: 'orthoptist',
+      genreId: 'family_lifestyle',
       label: '視能訓練',
       subtitle: '視機能トレーニング・アイケア',
       description: '斜視・弱視の訓練相談や眼精疲労・視覚機能のセルフケア指導',
-      icon: Eye,
+      icon: OrthoptistCategoryIcon,
       iconColor: 'text-sky-700',
       bgColor: 'bg-sky-500/15',
       cardBg: 'bg-gradient-to-br from-sky-50/90 via-sky-50/50 to-indigo-50/60',
@@ -328,6 +536,15 @@ export const CustomerView: React.FC = () => {
       badgeBg: 'bg-white/95 text-sky-800 border border-sky-200/80',
     },
   ];
+
+  // 各大ジャンルに所属する承認済みセラピスト数を取得
+  const getGenreCount = (genreCatIds: string[]) => {
+    return Object.values(therapistProfiles).filter((tp) => {
+      if (!tp.is_approved) return false;
+      const userServices = services.filter((s) => s.therapist_id === tp.user_id && s.is_active);
+      return userServices.some((s) => genreCatIds.includes(s.category));
+    }).length;
+  };
 
   // 各カテゴリに所属する承認済みセラピスト数を取得
   const getCategoryCount = (catId: string) => {
@@ -343,7 +560,26 @@ export const CustomerView: React.FC = () => {
 
   // セラピスト一覧画面を表示するフラグ (メニューが選択されているか、検索クエリが入力されている場合)
   const isViewingTherapists = selectedCategory !== null || searchQuery.trim().length > 0;
-  const currentCategoryInfo = categories.find((c) => c.id === selectedCategory);
+  
+  // 現在選択中のジャンル情報
+  const currentGenreInfo = genres.find((g) => g.id === selectedGenre);
+
+  // 現在選択中のカテゴリー情報 (個別カテゴリーまたはジャンル全体)
+  const currentCategoryInfo = selectedCategory?.startsWith('genre_')
+    ? (() => {
+        const gid = selectedCategory.replace('genre_', '');
+        const g = genres.find((item) => item.id === gid);
+        if (!g) return null;
+        return {
+          id: selectedCategory,
+          label: `${g.name} (全員)`,
+          subtitle: g.subtitle,
+          icon: g.icon,
+          iconColor: g.themeColor,
+          bgColor: g.iconBg,
+        };
+      })()
+    : categories.find((c) => c.id === selectedCategory);
 
   // セラピスト一覧のフィルタリングと複数ソート
   const therapistsList = Object.values(therapistProfiles)
@@ -362,8 +598,17 @@ export const CustomerView: React.FC = () => {
 
       // カテゴリフィルター
       if (selectedCategory && selectedCategory !== 'all') {
-        const hasCat = userServices.some((s) => s.category === selectedCategory);
-        if (!hasCat) return false;
+        if (selectedCategory.startsWith('genre_')) {
+          const targetGenreId = selectedCategory.replace('genre_', '');
+          const genreObj = genres.find((g) => g.id === targetGenreId);
+          if (genreObj) {
+            const hasCat = userServices.some((s) => genreObj.categoryIds.includes(s.category));
+            if (!hasCat) return false;
+          }
+        } else {
+          const hasCat = userServices.some((s) => s.category === selectedCategory);
+          if (!hasCat) return false;
+        }
       }
 
       // フリーワード検索
@@ -492,81 +737,254 @@ export const CustomerView: React.FC = () => {
 
       {!isViewingTherapists ? (
         /* ========================================================
-           初期画面: 6つの押しやすく分かりやすいメニューボタン
+           メニュー選択画面 (2段階ステップ: ①大ジャンル選択 → ②詳細カテゴリー選択)
            ======================================================== */
-        <div className="space-y-4 pt-1 animate-fadeIn">
-          <div>
-            <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
-              施術メニューをお選びください
-            </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              気になる施術ジャンルをタップすると、対応可能なセラピスト一覧が表示されます
-            </p>
-          </div>
+        selectedGenre === null ? (
+          /* --------------------------------------------------------
+             Step 1: 大ジャンル (グループ) 選択画面
+             -------------------------------------------------------- */
+          <div className="space-y-4 pt-1 animate-fadeIn">
+            <div>
+              <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+                施術ジャンルをお選びください
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                気になるジャンルをタップすると、さらに詳しい専門カテゴリー・職種が表示されます
+              </p>
+            </div>
 
-          {/* 6つの押しやすく分かりやすいメニューボタン (淡いカラー背景 & 一回り大きな視認性の高い文字) */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3.5 sm:gap-4.5">
-            {categories.map((cat) => {
-              const Icon = cat.icon;
-              const count = getCategoryCount(cat.id);
-
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
-                  className={`group relative ${cat.cardBg} border-2 ${cat.borderColor} rounded-3xl p-4 sm:p-5 text-left shadow-xs hover:shadow-lg transition-all duration-200 active:scale-[0.98] flex flex-col justify-between min-h-[145px] sm:min-h-[160px] overflow-hidden cursor-pointer`}
-                >
-                  {/* ホバー時の微細なハイライト効果 */}
-                  <div className="absolute inset-0 bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-
-                  {/* 上部: アイコン & 在籍人数バッジ */}
-                  <div className="flex items-center justify-between gap-2 relative z-10">
-                    <div
-                      className={`w-12 h-12 sm:w-13 sm:h-13 rounded-2xl flex items-center justify-center transition-all group-hover:scale-105 shadow-2xs ${cat.bgColor} ${cat.iconColor}`}
-                    >
-                      <Icon className="w-6 h-6 sm:w-6.5 sm:h-6.5" />
-                    </div>
-                    <span className={`text-xs font-black px-2.5 py-1 rounded-full shadow-2xs ${cat.badgeBg}`}>
-                      {count}名
+            {/* クイックアクセス: すべての施術者から探す */}
+            <button
+              onClick={() => setSelectedCategory('all')}
+              className="w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-600 hover:to-teal-700 text-white p-4 sm:p-4.5 rounded-3xl shadow-sm hover:shadow-md transition-all duration-200 active:scale-[0.99] flex items-center justify-between text-left cursor-pointer group"
+            >
+              <div className="flex items-center gap-3.5">
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-white/20 flex items-center justify-center text-white shrink-0 shadow-2xs group-hover:scale-105 transition">
+                  <Sparkles className="w-6 h-6 text-amber-300" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-black text-base sm:text-lg tracking-tight">
+                      すべての登録施術者から探す
+                    </span>
+                    <span className="text-[10px] sm:text-xs font-black bg-white/20 px-2 py-0.5 rounded-full">
+                      全{getCategoryCount('all')}名
                     </span>
                   </div>
+                  <p className="text-xs text-white/90 mt-0.5 hidden sm:block">
+                    全ジャンルの施術者を、現在地からの距離順やオススメ順で一覧表示します
+                  </p>
+                </div>
+              </div>
+              <div className="w-8 h-8 rounded-full bg-white/20 group-hover:bg-white group-hover:text-emerald-800 text-white flex items-center justify-center transition shrink-0 ml-2">
+                <ChevronRight className="w-4 h-4" />
+              </div>
+            </button>
 
-                  {/* 下部: メニュー名 & サブタイトル & 矢印 */}
-                  <div className="mt-3.5 relative z-10">
-                    <div className="flex items-center justify-between gap-1">
-                      <h3 className="font-black text-base sm:text-lg text-slate-900 group-hover:text-slate-950 transition tracking-tight">
-                        {cat.label}
-                      </h3>
-                      <div className="w-6 h-6 rounded-full bg-white/90 group-hover:bg-slate-900 group-hover:text-white flex items-center justify-center text-slate-400 shadow-2xs transition shrink-0">
-                        <ChevronRight className="w-3.5 h-3.5" />
+            {/* 4つの大ジャンルカード (2x2グリッド) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4.5 pt-1">
+              {genres.map((genre) => {
+                const Icon = genre.icon;
+                const count = getGenreCount(genre.categoryIds);
+
+                return (
+                  <button
+                    key={genre.id}
+                    onClick={() => setSelectedGenre(genre.id)}
+                    className={`group relative ${genre.cardBg} border-2 ${genre.borderColor} rounded-3xl p-5 sm:p-6 text-left shadow-xs hover:shadow-lg transition-all duration-200 active:scale-[0.98] flex flex-col justify-between min-h-[160px] sm:min-h-[180px] overflow-hidden cursor-pointer`}
+                  >
+                    <div className="absolute inset-0 bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+
+                    {/* 上部: アイコン & 在籍人数バッジ */}
+                    <div className="flex items-center justify-between gap-2 relative z-10">
+                      <div
+                        className={`w-13 h-13 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center transition-all group-hover:scale-105 shadow-2xs ${genre.iconBg}`}
+                      >
+                        <Icon className="w-7 h-7 sm:w-8 sm:h-8" />
+                      </div>
+                      <div className="flex flex-col items-end gap-1">
+                        <span className={`text-xs font-black px-2.5 py-1 rounded-full shadow-2xs ${genre.badgeBg}`}>
+                          計{count}名
+                        </span>
+                        <span className="text-[10px] font-bold text-slate-500">
+                          {genre.badge}
+                        </span>
                       </div>
                     </div>
-                    <p className="text-xs sm:text-[13px] font-medium text-slate-600 line-clamp-1 mt-0.5 group-hover:text-slate-800 transition">
-                      {cat.subtitle}
+
+                    {/* 下部: ジャンル名 & サブタイトル & 含まれる専門職ピル */}
+                    <div className="mt-4 relative z-10">
+                      <div className="flex items-center justify-between gap-1">
+                        <h3 className="font-black text-lg sm:text-xl text-slate-900 group-hover:text-slate-950 transition tracking-tight">
+                          {genre.name}
+                        </h3>
+                        <div className="w-7 h-7 rounded-full bg-white/90 group-hover:bg-slate-900 group-hover:text-white flex items-center justify-center text-slate-400 shadow-2xs transition shrink-0">
+                          <ChevronRight className="w-4 h-4" />
+                        </div>
+                      </div>
+                      <p className="text-xs font-bold text-slate-600 mt-1 line-clamp-1">
+                        {genre.subtitle}
+                      </p>
+                      <div className="mt-2.5 pt-2 border-t border-slate-200/60 flex items-center gap-1.5 flex-wrap">
+                        <span className="text-[10px] font-bold text-slate-400">対象:</span>
+                        <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-white/80 text-slate-700 border border-slate-200/60">
+                          {genre.highlight}
+                        </span>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          /* --------------------------------------------------------
+             Step 2: 詳細カテゴリー (各職種) 選択画面
+             -------------------------------------------------------- */
+          <div className="space-y-4 pt-1 animate-fadeIn">
+            {/* 上部ナビゲーション: ジャンル一覧に戻るボタン */}
+            <div className="flex items-center justify-between gap-3 pb-2 border-b border-slate-100">
+              <button
+                onClick={() => setSelectedGenre(null)}
+                className="px-3.5 py-2 rounded-2xl bg-white border border-slate-200 hover:border-slate-300 text-slate-700 hover:text-slate-900 text-xs font-bold shadow-2xs hover:shadow-xs transition flex items-center gap-1.5 active:scale-95 group cursor-pointer shrink-0"
+              >
+                <ArrowLeft className="w-4 h-4 text-slate-500 group-hover:-translate-x-0.5 transition-transform" />
+                <span>ジャンル一覧に戻る</span>
+              </button>
+
+              {currentGenreInfo && (
+                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
+                  <span>ジャンル:</span>
+                  <span className="text-slate-900 font-black">{currentGenreInfo.name}</span>
+                </div>
+              )}
+            </div>
+
+            {/* 選択中ジャンルのバナー案内 */}
+            {currentGenreInfo && (
+              <div className={`p-4 sm:p-5 rounded-3xl ${currentGenreInfo.cardBg} border-2 ${currentGenreInfo.borderColor} flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs`}>
+                <div className="flex items-center gap-3.5">
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-2xs ${currentGenreInfo.iconBg}`}>
+                    {React.createElement(currentGenreInfo.icon, { className: 'w-6 h-6' })}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-black text-base sm:text-lg text-slate-900">
+                        {currentGenreInfo.name}
+                      </h3>
+                      <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${currentGenreInfo.badgeBg}`}>
+                        計{getGenreCount(currentGenreInfo.categoryIds)}名在籍
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-600 mt-0.5">
+                      {currentGenreInfo.description}
                     </p>
                   </div>
+                </div>
+
+                {/* このジャンル全員をまとめて見るボタン */}
+                <button
+                  onClick={() => setSelectedCategory(`genre_${currentGenreInfo.id}`)}
+                  className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs shrink-0 cursor-pointer self-start sm:self-auto"
+                >
+                  <span>このジャンル全員を見る</span>
+                  <ChevronRight className="w-3.5 h-3.5 text-amber-300" />
                 </button>
-              );
-            })}
+              </div>
+            )}
+
+            <div>
+              <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+                詳しいカテゴリー（専門職）をお選びください
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                目的の専門職・施術内容をタップすると、対応可能なセラピスト一覧が表示されます
+              </p>
+            </div>
+
+            {/* ジャンルに属する詳細カテゴリーボタン一覧 */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5 sm:gap-4.5">
+              {categories
+                .filter((cat) => currentGenreInfo?.categoryIds.includes(cat.id))
+                .map((cat) => {
+                  const Icon = cat.icon;
+                  const count = getCategoryCount(cat.id);
+
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() => setSelectedCategory(cat.id)}
+                      className={`group relative ${cat.cardBg} border-2 ${cat.borderColor} rounded-3xl p-4 sm:p-5 text-left shadow-xs hover:shadow-lg transition-all duration-200 active:scale-[0.98] flex flex-col justify-between min-h-[145px] sm:min-h-[160px] overflow-hidden cursor-pointer`}
+                    >
+                      <div className="absolute inset-0 bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+
+                      {/* 上部: アイコン & 在籍人数バッジ */}
+                      <div className="flex items-center justify-between gap-2 relative z-10">
+                        <div
+                          className={`w-12 h-12 sm:w-13 sm:h-13 rounded-2xl flex items-center justify-center transition-all group-hover:scale-105 shadow-2xs ${cat.bgColor} ${cat.iconColor}`}
+                        >
+                          <Icon className="w-6 h-6 sm:w-6.5 sm:h-6.5" />
+                        </div>
+                        <span className={`text-xs font-black px-2.5 py-1 rounded-full shadow-2xs ${cat.badgeBg}`}>
+                          {count}名
+                        </span>
+                      </div>
+
+                      {/* 下部: メニュー名 & サブタイトル & 矢印 */}
+                      <div className="mt-3.5 relative z-10">
+                        <div className="flex items-center justify-between gap-1">
+                          <h3 className="font-black text-base sm:text-lg text-slate-900 group-hover:text-slate-950 transition tracking-tight">
+                            {cat.label}
+                          </h3>
+                          <div className="w-6 h-6 rounded-full bg-white/90 group-hover:bg-slate-900 group-hover:text-white flex items-center justify-center text-slate-400 shadow-2xs transition shrink-0">
+                            <ChevronRight className="w-3.5 h-3.5" />
+                          </div>
+                        </div>
+                        <p className="text-xs sm:text-[13px] font-medium text-slate-600 line-clamp-1 mt-0.5 group-hover:text-slate-800 transition">
+                          {cat.subtitle}
+                        </p>
+                        <p className="text-[11px] text-slate-500 line-clamp-1 mt-1">
+                          {cat.description}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
+            </div>
           </div>
-        </div>
+        )
       ) : (
         /* ========================================================
            セラピスト表示画面: 戻るボタン・絞り込み・ソート・ビュー切替・一覧
            ======================================================== */
         <div className="space-y-4 animate-fadeIn">
-          {/* 上部ナビゲーション: メニュー一覧に戻るボタン ＆ 選択中のジャンル表示 */}
-          <div className="flex items-center justify-between gap-3 pb-3 border-b border-slate-100">
-            <button
-              onClick={() => {
-                setSelectedCategory(null);
-                setSearchQuery('');
-              }}
-              className="px-3.5 py-2 rounded-2xl bg-white border border-slate-200 hover:border-slate-300 text-slate-700 hover:text-slate-900 text-xs font-bold shadow-2xs hover:shadow-xs transition flex items-center gap-1.5 active:scale-95 group shrink-0"
-            >
-              <ArrowLeft className="w-4 h-4 text-slate-500 group-hover:-translate-x-0.5 transition-transform" />
-              <span>メニュー一覧に戻る</span>
-            </button>
+          {/* 上部ナビゲーション: 戻るボタン ＆ 選択中のジャンル/カテゴリー表示 */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  setSelectedCategory(null);
+                  setSearchQuery('');
+                }}
+                className="px-3.5 py-2 rounded-2xl bg-white border border-slate-200 hover:border-slate-300 text-slate-700 hover:text-slate-900 text-xs font-bold shadow-2xs hover:shadow-xs transition flex items-center gap-1.5 active:scale-95 group shrink-0 cursor-pointer"
+              >
+                <ArrowLeft className="w-4 h-4 text-slate-500 group-hover:-translate-x-0.5 transition-transform" />
+                <span>{selectedGenre ? 'カテゴリー選択に戻る' : 'メニュー一覧に戻る'}</span>
+              </button>
+
+              {selectedGenre && (
+                <button
+                  onClick={() => {
+                    setSelectedCategory(null);
+                    setSelectedGenre(null);
+                    setSearchQuery('');
+                  }}
+                  className="text-[11px] font-bold text-slate-400 hover:text-slate-700 hover:underline px-2 py-1 transition cursor-pointer"
+                >
+                  ジャンル一覧へ
+                </button>
+              )}
+            </div>
 
             {currentCategoryInfo && (
               <div className="flex items-center gap-2">
