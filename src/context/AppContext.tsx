@@ -10,7 +10,14 @@ import {
   UserRole,
   BookingStatus,
   ChatMessage,
+  AppBrandId,
+  AppBrandConfig,
 } from '@/types';
+import {
+  APP_BRANDS,
+  DEFAULT_BRAND_ID,
+  updateDocumentBranding,
+} from '@/lib/branding';
 import {
   initialProfiles,
   initialTherapistProfiles,
@@ -69,6 +76,9 @@ interface AppContextType {
   addTherapistUser: (user: Profile, therapistData?: Partial<TherapistProfile>) => Promise<void>;
   updateUserProfile: (userId: string, data: Partial<Profile>) => Promise<void>;
   updateTherapistInfo: (userId: string, profileData: Partial<Profile>, therapistData: Partial<TherapistProfile>) => Promise<void>;
+  appBrand: AppBrandId;
+  currentBrand: AppBrandConfig;
+  setAppBrand: (brandId: AppBrandId) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -108,6 +118,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [reviews, setReviews] = useState<Review[]>(initialReviews);
   const [messages, setMessages] = useState<ChatMessage[]>(initialChatMessages);
   const [platformFeeRate, setPlatformFeeRateState] = useState<number>(20);
+  const [appBrand, setAppBrandState] = useState<AppBrandId>(DEFAULT_BRAND_ID);
+  const currentBrand = APP_BRANDS[appBrand] || APP_BRANDS[DEFAULT_BRAND_ID];
+
+  // ブランド変更時にブラウザタイトルとファビコンを即時更新
+  useEffect(() => {
+    updateDocumentBranding(currentBrand);
+  }, [currentBrand]);
   const [userLocation, setUserLocation] = useState<UserLocation>(() => {
     if (initialCustomer.lat && initialCustomer.lng) {
       return {
@@ -219,6 +236,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setPlatformFeeRateState(Number(dbSettings.value.percentage));
       }
 
+      // 6-2. platform_settings: app_brand (ブランド切り替え設定)
+      const { data: dbBrand, error: brandErr } = await supabase
+        .from('platform_settings')
+        .select('*')
+        .eq('key', 'app_brand')
+        .maybeSingle();
+
+      if (!brandErr && dbBrand?.value?.brand_id && APP_BRANDS[dbBrand.value.brand_id as AppBrandId]) {
+        setAppBrandState(dbBrand.value.brand_id as AppBrandId);
+      }
+
       // 7. chat_messages (独立テーブルからチャット履歴を取得)
       const { data: dbMessages, error: mErr } = await supabase
         .from('chat_messages')
@@ -248,6 +276,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (parsed.reviews) setReviews(parsed.reviews);
         if (parsed.messages) setMessages(parsed.messages);
         if (parsed.platformFeeRate) setPlatformFeeRateState(parsed.platformFeeRate);
+        if (parsed.appBrand && APP_BRANDS[parsed.appBrand as AppBrandId]) {
+          setAppBrandState(parsed.appBrand as AppBrandId);
+        }
         if (typeof parsed.isLoggedIn === 'boolean') setIsLoggedIn(parsed.isLoggedIn);
         if (parsed.currentUserId) {
           const user = (parsed.allUsers || initialProfiles).find((u: Profile) => u.id === parsed.currentUserId);
@@ -289,6 +320,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           reviews,
           messages,
           platformFeeRate,
+          appBrand,
           isLoggedIn,
           currentUserId: currentUser.id,
         })
@@ -296,7 +328,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (e) {
       console.error('Failed to save state to localStorage', e);
     }
-  }, [allUsers, therapistProfiles, services, bookings, reviews, messages, platformFeeRate, currentUser, isLoggedIn, isLoaded]);
+  }, [allUsers, therapistProfiles, services, bookings, reviews, messages, platformFeeRate, appBrand, currentUser, isLoggedIn, isLoaded]);
 
   const login = (user: Profile) => {
     setCurrentUser(user);
@@ -778,6 +810,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const setAppBrand = async (brandId: AppBrandId) => {
+    setAppBrandState(brandId);
+    const brand = APP_BRANDS[brandId];
+    if (brand) {
+      updateDocumentBranding(brand);
+    }
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase
+          .from('platform_settings')
+          .upsert({ key: 'app_brand', value: { brand_id: brandId } }, { onConflict: 'key' });
+      } catch (e) {
+        console.warn('Failed to sync app_brand to Supabase', e);
+      }
+    }
+  };
+
   const resetToMock = () => {
     localStorage.removeItem(STORAGE_KEY);
     setAllUsers(initialProfiles);
@@ -825,6 +875,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addTherapistUser,
         updateUserProfile,
         updateTherapistInfo,
+        appBrand,
+        currentBrand,
+        setAppBrand,
       }}
     >
       {children}

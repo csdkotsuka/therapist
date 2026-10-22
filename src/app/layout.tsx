@@ -4,8 +4,12 @@ import './globals.css';
 import { AppProvider } from '@/context/AppContext';
 
 export const metadata: Metadata = {
-  title: 'CareHub - 出張・店舗対応ヘルスケア＆ボディケアプラットフォーム',
+  title: 'Carea Go - ON-DEMAND WELLNESS | 出張・店舗ヘルスケア＆ボディケア',
   description: '理学療法士、エステ、整体、カイロなどのプロによる出張＆店舗訪問オンデマンド予約・決済プラットフォーム',
+  icons: {
+    icon: '/branding/favicon-carea-go.png',
+    apple: '/branding/favicon-carea-go.png',
+  },
 };
 
 export default function RootLayout({

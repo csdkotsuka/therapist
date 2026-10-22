@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { formatPrice, formatDate } from '@/lib/geo';
+import { APP_BRANDS } from '@/lib/branding';
+import { AppBrandId, BookingStatus } from '@/types';
 import {
   ShieldAlert,
   Users,
@@ -25,8 +27,9 @@ import {
   Search,
   Filter,
   RotateCcw,
+  Palette,
+  Sparkles,
 } from 'lucide-react';
-import { BookingStatus } from '@/types';
 
 export const AdminView: React.FC = () => {
   const router = useRouter();
@@ -43,11 +46,24 @@ export const AdminView: React.FC = () => {
     refreshFromSupabase,
     isLoadingDb,
     switchUser,
+    appBrand,
+    currentBrand,
+    setAppBrand,
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'kpi' | 'bookings' | 'users' | 'customers' | 'reviews' | 'settings'>('kpi');
+  const [activeTab, setActiveTab] = useState<'kpi' | 'bookings' | 'users' | 'customers' | 'reviews' | 'branding' | 'settings'>('kpi');
   const [feeInput, setFeeInput] = useState<number>(platformFeeRate);
   const [feeSaveMessage, setFeeSaveMessage] = useState(false);
+  const [brandSaveMessage, setBrandSaveMessage] = useState<string | null>(null);
+
+  const handleSwitchBrand = async (brandId: AppBrandId) => {
+    await setAppBrand(brandId);
+    const target = APP_BRANDS[brandId];
+    setBrandSaveMessage(`アプリ名を「${target.name}」に変更しました。ロゴ・ファビコン・タイトルを更新しました。`);
+    setTimeout(() => {
+      setBrandSaveMessage(null);
+    }, 4500);
+  };
 
   // セラピスト審査・管理の絞り込み状態
   const [thSearch, setThSearch] = useState('');
@@ -159,9 +175,9 @@ export const AdminView: React.FC = () => {
               Admin Console
             </span>
           </div>
-          <h2 className="text-xl font-bold mt-1">CareHub プラットフォーム管理本部</h2>
+          <h2 className="text-xl font-bold mt-1">{currentBrand.name} プラットフォーム管理本部</h2>
           <p className="text-xs text-slate-400 mt-0.5">
-            全予約の監視・セラピスト承認・売上分配・手数料率設定
+            全予約の監視・セラピスト承認・売上分配・手数料率・ブランドロゴ設定
           </p>
         </div>
 
@@ -249,6 +265,18 @@ export const AdminView: React.FC = () => {
         >
           <Star className="w-4 h-4" />
           <span>レビュー管理 ({reviews.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('branding')}
+          className={`px-4 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap ${
+            activeTab === 'branding'
+              ? 'bg-slate-900 text-white shadow-md'
+              : 'text-slate-600 hover:bg-slate-100'
+          }`}
+        >
+          <Palette className="w-4 h-4 text-emerald-500" />
+          <span>🎨 アプリ名・ロゴ・ブランド設定</span>
         </button>
 
         <button
@@ -784,6 +812,157 @@ export const AdminView: React.FC = () => {
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* タブ: アプリ名・ロゴ・ブランド設定 (Carea Go / Care Go / Thera Go) */}
+      {activeTab === 'branding' && (
+        <div className="space-y-6">
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 space-y-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h4 className="font-black text-slate-900 text-lg flex items-center gap-2">
+                  <Palette className="w-5 h-5 text-emerald-600" />
+                  <span>アプリ名・ロゴ・ファビコン切り替え設定</span>
+                </h4>
+                <p className="text-xs text-slate-500 mt-1">
+                  管理本部からワンタップでプラットフォームのブランド名、ヘッダーロゴ画像、ファビコン（ブラウザタブアイコン）、タイトルを一括切り替えできます。
+                </p>
+              </div>
+
+              {/* 現在適用中ステータス */}
+              <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3.5 py-2 rounded-2xl shrink-0">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                <div className="text-xs">
+                  <span className="text-slate-500 text-[10px] block">現在の適用ブランド</span>
+                  <strong className="text-emerald-800 font-black">{currentBrand.name}</strong>
+                </div>
+              </div>
+            </div>
+
+            {/* 切り替え完了トースト通知 */}
+            {brandSaveMessage && (
+              <div className="mt-4 p-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-bold flex items-center gap-2.5 shadow-md animate-fadeIn">
+                <CheckCircle className="w-5 h-5 shrink-0" />
+                <span>{brandSaveMessage}</span>
+              </div>
+            )}
+          </div>
+
+          {/* 3つのブランド選択カード */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {(Object.keys(APP_BRANDS) as AppBrandId[]).map((brandKey) => {
+              const brand = APP_BRANDS[brandKey];
+              const isSelected = appBrand === brandKey;
+
+              return (
+                <div
+                  key={brandKey}
+                  className={`bg-white rounded-3xl border-2 transition-all duration-200 overflow-hidden flex flex-col justify-between shadow-xs ${
+                    isSelected
+                      ? 'border-emerald-500 ring-2 ring-emerald-500/20 shadow-lg -translate-y-0.5'
+                      : 'border-slate-200 hover:border-slate-300 hover:shadow-md'
+                  }`}
+                >
+                  <div>
+                    {/* 上部: ロゴ元デザインプレビュー画像 */}
+                    <div className="relative aspect-[16/9] bg-slate-50 border-b border-slate-100 overflow-hidden flex items-center justify-center p-3">
+                      <img
+                        src={brand.fullImageUrl}
+                        alt={brand.name}
+                        className="w-full h-full object-contain"
+                      />
+                      {isSelected && (
+                        <div className="absolute top-3 right-3">
+                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-600 text-white text-[11px] font-black shadow-md">
+                            <Check className="w-3.5 h-3.5" />
+                            <span>適用中</span>
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* ブランド情報 */}
+                    <div className="p-5 space-y-4">
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-black text-xl text-slate-900 tracking-tight">
+                            {brand.name}
+                          </h3>
+                          <span
+                            className="text-[10px] font-black px-2 py-0.5 rounded-md"
+                            style={{ backgroundColor: `${brand.themeColor}15`, color: brand.themeColor }}
+                          >
+                            {brand.tagline}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                          {brand.description}
+                        </p>
+                      </div>
+
+                      {/* プレビュー表示エリア */}
+                      <div className="space-y-2 pt-2 border-t border-slate-100">
+                        <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">
+                          表示プレビュー
+                        </span>
+
+                        {/* ヘッダーロゴプレビュー */}
+                        <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
+                          <span className="text-[11px] font-bold text-slate-500">ヘッダーロゴ:</span>
+                          <div className="h-8 flex items-center px-2 py-1 bg-white rounded-lg border border-slate-200/80 shadow-2xs">
+                            <img
+                              src={brand.logoUrl}
+                              alt={brand.name}
+                              className="h-6 w-auto object-contain"
+                            />
+                          </div>
+                        </div>
+
+                        {/* ファビコン & タブプレビュー */}
+                        <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
+                          <span className="text-[11px] font-bold text-slate-500">ブラウザタブ:</span>
+                          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white rounded-lg border border-slate-200/80 shadow-2xs text-[11px] font-bold text-slate-700 max-w-[160px] truncate">
+                            <img
+                              src={brand.faviconUrl}
+                              alt="favicon"
+                              className="w-4 h-4 rounded-xs shrink-0"
+                            />
+                            <span className="truncate">{brand.name}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 下部: 適用切り替えボタン */}
+                  <div className="p-5 pt-0">
+                    <button
+                      onClick={() => handleSwitchBrand(brandKey)}
+                      disabled={isSelected}
+                      className={`w-full py-3 rounded-2xl font-bold text-xs transition flex items-center justify-center gap-2 ${
+                        isSelected
+                          ? 'bg-emerald-50 text-emerald-800 border-2 border-emerald-500/50 cursor-default font-black'
+                          : 'bg-slate-900 hover:bg-slate-800 text-white shadow-xs hover:shadow-md active:scale-98'
+                      }`}
+                    >
+                      {isSelected ? (
+                        <>
+                          <Check className="w-4 h-4 text-emerald-600" />
+                          <span>現在このブランドを適用中</span>
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-4 h-4 text-amber-300" />
+                          <span>「{brand.name}」に切り替える</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
               );
             })}

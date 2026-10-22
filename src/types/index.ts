@@ -120,3 +120,18 @@ export interface ChatMessage {
   created_at: string;
   is_read: boolean;
 }
+
+// アプリのブランド切り替え (Carea Go / Care Go / Thera Go)
+export type AppBrandId = 'carea_go' | 'care_go' | 'thera_go';
+
+export interface AppBrandConfig {
+  id: AppBrandId;
+  name: string;
+  tagline: string;
+  description: string;
+  logoUrl: string;
+  fullImageUrl: string;
+  faviconUrl: string;
+  themeColor: string;
+  accentColor: string;
+}

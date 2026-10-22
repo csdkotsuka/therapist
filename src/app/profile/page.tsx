@@ -18,7 +18,7 @@ import {
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { currentUser, isLoggedIn, logout } = useApp();
+  const { currentUser, isLoggedIn, logout, currentBrand } = useApp();
 
   const handleLogout = () => {
     if (confirm('ログアウトしますか？')) {
@@ -86,10 +86,12 @@ export default function ProfilePage() {
       <footer className="border-t border-slate-200 bg-white py-6 mt-12 text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-teal-600 flex items-center justify-center text-white">
-              <HeartPulse className="w-3.5 h-3.5" />
-            </div>
-            <span className="font-bold text-slate-800">CareHub</span>
+            <img
+              src={currentBrand.faviconUrl}
+              alt={currentBrand.name}
+              className="w-5 h-5 rounded-md object-contain"
+            />
+            <span className="font-bold text-slate-800">{currentBrand.name}</span>
             <span className="text-[11px] text-slate-400">
               - アカウント設定画面
             </span>
