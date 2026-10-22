@@ -7,6 +7,13 @@
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE EXTENSION IF NOT EXISTS postgis;
 
+-- 必要な拡張カラムの自動追加 (既存テーブルのカラム不足を完全防止)
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS address text;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS postal_code text;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS lat float;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS lng float;
+ALTER TABLE public.therapist_profiles ADD COLUMN IF NOT EXISTS campaign jsonb;
+
 CREATE TEMP TABLE tmp_seed_users (
   id uuid,
   role text,
