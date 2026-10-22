@@ -1670,9 +1670,11 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "is_approved": true,
     "stripe_account_id": "acct_ehime_ddadeee49c54460e",
     "campaign": {
-      "badge": "初回限定 1,000円OFF",
+      "badge": "初回1,000円OFF",
       "title": "初回来店・出張キャンペーン",
-      "description": "初めてCareHubからご予約いただいた方に施術代1,000円割引を実施中！"
+      "description": "初めてCareHubからご予約いただいた方に施術代1,000円割引を実施中！",
+      "discount_type": "fixed",
+      "discount_value": 1000
     }
   },
   "c5804aea-f4b7-4308-bec2-7b5de9c19a87": {
@@ -1716,8 +1718,10 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "stripe_account_id": "acct_ehime_963338a1a976441e",
     "campaign": {
       "badge": "ヘッドスパ10分無料",
-      "title": "オプション無料特典",
-      "description": "60分以上の施術をご予約で極上ヘッドスパ10分無料プレゼント！"
+      "title": "極上オプション無料特典",
+      "description": "60分以上の施術をご予約で極上炭酸ヘッドスパ10分無料プレゼント！",
+      "discount_type": "gift",
+      "discount_value": 0
     },
     "store_name": "松山市 林 リハビリ治療院",
     "store_address": "愛媛県松山市石井2-7",
@@ -1751,11 +1755,6 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "reviews_count": 20,
     "is_approved": true,
     "stripe_account_id": "acct_ehime_b7edb4a273a44379",
-    "campaign": {
-      "badge": "初回20%OFF",
-      "title": "新規オープン記念割",
-      "description": "初回のご予約で全メニュー20%OFF！"
-    },
     "store_name": "松山市 清家 カイロプラクティック院",
     "store_address": "愛媛県松山市三番町4-16",
     "store_access": "松山市中心駅より徒歩3分",
@@ -1788,11 +1787,6 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "reviews_count": 36,
     "is_approved": true,
     "stripe_account_id": "acct_ehime_5b234e40610d46b2",
-    "campaign": {
-      "badge": "出張交通費無料",
-      "title": "愛媛県内出張応援",
-      "description": "松山市内・道後エリアへの出張交通費を全額無料サービス中！"
-    },
     "store_name": "松山市 河野 整体サロン",
     "store_address": "愛媛県松山市南江戸4-4",
     "store_access": "松山市中心駅より徒歩3分",
@@ -1826,9 +1820,11 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "is_approved": true,
     "stripe_account_id": "acct_ehime_39c015960a064d21",
     "campaign": {
-      "badge": "骨盤チェック無料",
-      "title": "姿勢診断キャンペーン",
-      "description": "施術前にAI＆触診による姿勢・骨盤歪みチェックを無料サービス中！"
+      "badge": "姿勢・骨盤診断無料",
+      "title": "歪みチェック無料相談",
+      "description": "施術前に丁寧な骨盤バランス診断とセルフケアアドバイスを無料提供！",
+      "discount_type": "gift",
+      "discount_value": 0
     },
     "store_name": "松山市 佐々木 カイロプラクティック院",
     "store_address": "愛媛県松山市古川北2-19",
@@ -1862,11 +1858,6 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "reviews_count": 41,
     "is_approved": true,
     "stripe_account_id": "acct_ehime_cdb482b256e24649",
-    "campaign": {
-      "badge": "初回来店 500円OFF",
-      "title": "国家資格者施術キャンペーン",
-      "description": "初めての方限定で500円割引を実施中！"
-    },
     "store_name": "松山市 伊藤 整体サロン",
     "store_address": "愛媛県松山市三番町5-17",
     "store_access": "松山市中心駅より徒歩3分",
@@ -1919,11 +1910,6 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "reviews_count": 46,
     "is_approved": true,
     "stripe_account_id": "acct_ehime_469da8b079a64dd4",
-    "campaign": {
-      "badge": "初回姿勢分析無料",
-      "title": "理学療法士による全身診断",
-      "description": "初めての方に身体の歪み・姿勢チェックを無料サービス中！"
-    },
     "store_name": "松山市 井上 整体サロン",
     "store_address": "愛媛県松山市空港通3-4",
     "store_access": "松山市中心駅より徒歩3分",
@@ -1956,11 +1942,6 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "reviews_count": 35,
     "is_approved": true,
     "stripe_account_id": "acct_ehime_d951cf27d536423d",
-    "campaign": {
-      "badge": "初回1,500円OFF",
-      "title": "極上経絡ツボもみほぐし割",
-      "description": "初回来店または出張で全コース1,500円割引！"
-    },
     "store_name": "松山市 山田 カイロプラクティック院",
     "store_address": "愛媛県松山市南江戸2-21",
     "store_access": "松山市中心駅より徒歩3分",
@@ -1995,8 +1976,10 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "stripe_account_id": "acct_ehime_0b34a06b9ac74495",
     "campaign": {
       "badge": "ストレッチ15分無料",
-      "title": "タイ古式延長キャンペーン",
-      "description": "60分以上の施術で深層ストレッチ15分無料プレゼント！"
+      "title": "パートナーストレッチ特典",
+      "description": "全身もみほぐしコースに深層筋ストレッチ15分を無料サービス！",
+      "discount_type": "gift",
+      "discount_value": 0
     },
     "store_name": "松山市 門田 カイロプラクティック院",
     "store_address": "愛媛県松山市一番町2-9",
@@ -2029,12 +2012,7 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "rating_avg": 4.83,
     "reviews_count": 42,
     "is_approved": true,
-    "stripe_account_id": "acct_ehime_b73de8585c8b4026",
-    "campaign": {
-      "badge": "出張交通費無料",
-      "title": "松山市街地出張応援",
-      "description": "松山市街地・近郊への出張施術で出張費が無料になります！"
-    }
+    "stripe_account_id": "acct_ehime_b73de8585c8b4026"
   },
   "f36758b7-afcb-43bd-b0bb-34a0d1f55b08": {
     "user_id": "f36758b7-afcb-43bd-b0bb-34a0d1f55b08",
@@ -2077,8 +2055,10 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "stripe_account_id": "acct_ehime_d78c043f59e14fa0",
     "campaign": {
       "badge": "初回20%OFF",
-      "title": "今治オープン記念割",
-      "description": "今治市内のサロン施術または出張で全メニュー20%割引！"
+      "title": "新規オープン記念特別割",
+      "description": "初回のご予約限定で全メニュー施術代金が20%OFF！",
+      "discount_type": "percent",
+      "discount_value": 20
     },
     "store_name": "今治市 林 アロマサロン",
     "store_address": "愛媛県今治市片山2-19",
@@ -2112,11 +2092,6 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "reviews_count": 36,
     "is_approved": true,
     "stripe_account_id": "acct_ehime_8e50cab17b99465a",
-    "campaign": {
-      "badge": "ヘッドスパ10分無料",
-      "title": "眼精疲労スッキリ特典",
-      "description": "ボディケアコースに極上ヘッドスパ10分無料でお付けします！"
-    },
     "store_name": "今治市 井上 ボディケアルーム",
     "store_address": "愛媛県今治市美須賀町1-13",
     "store_access": "今治市中心駅より徒歩3分",
@@ -2149,11 +2124,6 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "reviews_count": 42,
     "is_approved": true,
     "stripe_account_id": "acct_ehime_d15efa938a484c11",
-    "campaign": {
-      "badge": "初回1,000円OFF",
-      "title": "骨盤リセット体験割",
-      "description": "初めての骨盤矯正コースをご予約で1,000円割引！"
-    },
     "store_name": "今治市 池内 整体サロン",
     "store_address": "愛媛県今治市旭町5-1",
     "store_access": "今治市中心駅より徒歩3分",
@@ -2259,9 +2229,11 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "is_approved": true,
     "stripe_account_id": "acct_ehime_52ce022b30cf4c7c",
     "campaign": {
-      "badge": "初回20%OFF",
-      "title": "新居浜オープン記念割",
-      "description": "新居浜市内での施術全コースが20%OFF！"
+      "badge": "出張交通費0円",
+      "title": "出張費無料キャンペーン",
+      "description": "ご自宅への出張費用（通常1,000円）が今なら完全無料！",
+      "discount_type": "fixed",
+      "discount_value": 1000
     },
     "store_name": "新居浜市 門田 リハビリ治療院",
     "store_address": "愛媛県新居浜市繁本町2-11",
@@ -2296,9 +2268,11 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "is_approved": true,
     "stripe_account_id": "acct_ehime_c7a8ba5bec874ce2",
     "campaign": {
-      "badge": "初回15分延長無料",
-      "title": "西条じっくりほぐし特典",
-      "description": "ご新規様限定で本格もみほぐしを15分無料延長いたします！"
+      "badge": "施術15分延長無料",
+      "title": "リピート感謝特典",
+      "description": "75分以上のコースご予約で施術時間15分延長を無料プレゼント！",
+      "discount_type": "gift",
+      "discount_value": 0
     },
     "store_name": "西条市 鈴木 ボディケアルーム",
     "store_address": "愛媛県西条市小松町新屋敷2-16",
@@ -2383,7 +2357,14 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "rating_avg": 4.89,
     "reviews_count": 26,
     "is_approved": true,
-    "stripe_account_id": "acct_ehime_2c2f51e961fe475d"
+    "stripe_account_id": "acct_ehime_2c2f51e961fe475d",
+    "campaign": {
+      "badge": "平日限定500円引",
+      "title": "平日リフレッシュ割引",
+      "description": "平日のご予約限定で施術料金から500円OFF！",
+      "discount_type": "fixed",
+      "discount_value": 500
+    }
   },
   "0670127b-74d8-4017-b796-ae307c410be1": {
     "user_id": "0670127b-74d8-4017-b796-ae307c410be1",
@@ -2457,9 +2438,11 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "is_approved": true,
     "stripe_account_id": "acct_ehime_612e22f33fe54fc8",
     "campaign": {
-      "badge": "初回1,000円OFF",
-      "title": "南予・宇和島応援キャンペーン",
-      "description": "宇和島エリアの方限定で初回の全メニュー1,000円割引！"
+      "badge": "アロマオイル無料",
+      "title": "厳選精油アップグレード",
+      "description": "選べる高級オーガニックアロマオイルへのグレードアップ無料！",
+      "discount_type": "gift",
+      "discount_value": 0
     },
     "store_name": "宇和島市 森 カイロプラクティック院",
     "store_address": "愛媛県宇和島市鶴島町5-24",
@@ -2493,11 +2476,6 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "reviews_count": 41,
     "is_approved": true,
     "stripe_account_id": "acct_ehime_f9eeb822de264a7c",
-    "campaign": {
-      "badge": "猫背骨盤チェック無料",
-      "title": "大洲姿勢改善フェア",
-      "description": "姿勢・猫背・骨盤の歪みチェック診断を無料サービス中！"
-    },
     "store_name": "大洲市 松田 カイロプラクティック院",
     "store_address": "愛媛県大洲市若宮2-19",
     "store_access": "大洲市中心駅より徒歩3分",
@@ -2532,8 +2510,10 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "stripe_account_id": "acct_ehime_57af479ca2da4e59",
     "campaign": {
       "badge": "足つぼ10分無料",
-      "title": "八幡浜港町リフレッシュ割",
-      "description": "もみほぐしコースをご予約で台湾式足つぼリフレ10分無料！"
+      "title": "足裏リフレ特典",
+      "description": "ボディケアコースご予約の方に本格足つぼ10分を無料サービス！",
+      "discount_type": "gift",
+      "discount_value": 0
     },
     "store_name": "八幡浜市 石川 リハビリ治療院",
     "store_address": "愛媛県八幡浜市昭和通3-10",

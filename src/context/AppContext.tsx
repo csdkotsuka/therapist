@@ -75,6 +75,29 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'therapist_platform_state_ehime_v2';
 
+// セラピスト全体の約2〜3割に特典・キャンペーンが確実に設定されている状態を保証するヘルパー関数
+const ensureCampaigns = (profiles: Record<string, TherapistProfile>): Record<string, TherapistProfile> => {
+  const keys = Object.keys(profiles);
+  if (keys.length === 0) return profiles;
+
+  const currentWithCamp = keys.filter((k) => Boolean(profiles[k]?.campaign));
+  // キャンペーン設定者が全体の15%未満（極端に少ない、または0人）の場合、
+  // initialTherapistProfiles からキャンペーンを復元・適用する
+  if (currentWithCamp.length < Math.max(1, Math.floor(keys.length * 0.15))) {
+    const updated = { ...profiles };
+    keys.forEach((id) => {
+      if (initialTherapistProfiles[id]?.campaign && !updated[id]?.campaign) {
+        updated[id] = {
+          ...updated[id],
+          campaign: initialTherapistProfiles[id].campaign,
+        };
+      }
+    });
+    return updated;
+  }
+  return profiles;
+};
+
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const initialCustomer = initialProfiles.find((p) => p.role === 'customer') || initialProfiles[0];
   const [currentUser, setCurrentUser] = useState<Profile>(initialCustomer);
@@ -119,10 +142,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         dbTherapists.forEach((t: any) => {
           const firstTherapistKey = Object.keys(initialTherapistProfiles)[0];
           const fallback = initialTherapistProfiles[t.user_id] || (firstTherapistKey ? initialTherapistProfiles[firstTherapistKey] : { lat: 33.8392, lng: 132.7656 });
+          const campaign = (t.campaign !== undefined && t.campaign !== null) ? t.campaign : fallback?.campaign;
           mapped[t.user_id] = {
+            ...fallback,
             ...t,
             lat: t.lat || fallback.lat,
             lng: t.lng || fallback.lng,
+            ...(campaign ? { campaign } : {}),
           };
         });
       }
@@ -133,6 +159,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           .filter((p: any) => p.role === 'therapist')
           .forEach((tpUser: any) => {
             if (!mapped[tpUser.id]) {
+              const fallback = initialTherapistProfiles[tpUser.id];
               mapped[tpUser.id] = {
                 user_id: tpUser.id,
                 bio: '新規登録セラピストです。管理本部による審査待ちです。',
@@ -146,11 +173,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 rating_avg: 5.0,
                 reviews_count: 0,
                 is_approved: false, // デフォルト審査中
+                ...(fallback?.campaign ? { campaign: fallback.campaign } : {}),
               };
             }
           });
       }
-      setTherapistProfiles((prev) => ({ ...prev, ...mapped }));
+      setTherapistProfiles((prev) => {
+        const merged: Record<string, TherapistProfile> = { ...prev };
+        Object.entries(mapped).forEach(([id, tp]) => {
+          merged[id] = {
+            ...prev[id],
+            ...tp,
+            campaign: prev[id]?.campaign ?? tp.campaign ?? initialTherapistProfiles[id]?.campaign,
+          };
+        });
+        return ensureCampaigns(merged);
+      });
 
       // 3. services
       const { data: dbServices, error: sErr } = await supabase.from('services').select('*');
@@ -204,7 +242,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed.allUsers) setAllUsers(parsed.allUsers);
-        if (parsed.therapistProfiles) setTherapistProfiles(parsed.therapistProfiles);
+        if (parsed.therapistProfiles) setTherapistProfiles(ensureCampaigns(parsed.therapistProfiles));
         if (parsed.services) setServices(parsed.services);
         if (parsed.bookings) setBookings(parsed.bookings);
         if (parsed.reviews) setReviews(parsed.reviews);

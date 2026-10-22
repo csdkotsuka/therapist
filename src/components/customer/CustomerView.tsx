@@ -171,7 +171,7 @@ export const CustomerView: React.FC = () => {
     },
     {
       id: 'physical_therapy',
-      label: '理学療法・整体',
+      label: '整体・理学',
       icon: PhysicalTherapyCategoryIcon,
       iconColor: 'text-blue-600',
       bgColor: 'bg-blue-50',
@@ -199,7 +199,7 @@ export const CustomerView: React.FC = () => {
     },
     {
       id: 'beauty',
-      label: '小顔・ヘッド',
+      label: 'ヘッドスパ',
       icon: HeadSpaCategoryIcon,
       iconColor: 'text-pink-600',
       bgColor: 'bg-pink-50',
@@ -384,8 +384,8 @@ export const CustomerView: React.FC = () => {
           />
         </div>
 
-        {/* カテゴリー選択 (横スクロールを排し、全メニューがパッと見渡せる改行・一覧表示) */}
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3 pb-2 pt-1">
+        {/* カテゴリー選択 (レスポンシブグリッド配置でウィンドウ幅に応じて横幅が自然に広がり、文字切れを防止) */}
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3 pb-2 pt-1">
           {categories.map((cat) => {
             const Icon = cat.icon;
             const isSelected = selectedCategory === cat.id;
@@ -394,8 +394,10 @@ export const CustomerView: React.FC = () => {
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`flex flex-col items-center justify-center min-w-[62px] sm:min-w-[72px] max-w-[78px] py-1 px-1 rounded-2xl transition group ${
-                  isSelected ? 'text-slate-950 font-black' : 'text-slate-600 hover:text-slate-900 font-bold'
+                className={`flex flex-col items-center justify-center py-2 px-2 sm:px-3 rounded-2xl transition group w-full ${
+                  isSelected
+                    ? 'text-slate-950 font-black bg-slate-100/90 shadow-2xs ring-1 ring-slate-200'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-bold'
                 }`}
               >
                 <div
@@ -408,7 +410,7 @@ export const CustomerView: React.FC = () => {
                   <Icon className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
                 </div>
                 <span
-                  className={`text-[10px] sm:text-[11px] mt-1 text-center leading-tight truncate w-full tracking-tight ${
+                  className={`text-xs sm:text-[13px] mt-1.5 text-center leading-tight whitespace-nowrap tracking-tight ${
                     isSelected ? 'text-slate-900 font-black' : 'text-slate-600'
                   }`}
                 >
