@@ -2023,10 +2023,10 @@ export const initialProfiles: Profile[] = [
 ,
   {
     "id": "8cdfe1ca-2f83-46a7-a846-72e92fa9d03a",
-    "name": "神崎 麗華 (Reika Kanzaki)",
-    "email": "reika.kanzaki@example.com",
+    "name": "菅原 結衣 (Yui Sugawara)",
+    "email": "yui.sugawara@carehub.ehime.jp",
     "role": "therapist",
-    "avatar_url": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&auto=format&fit=crop&q=80",
+    "avatar_url": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
     "phone": "089-948-2231",
     "postal_code": "790-0004",
     "address": "愛媛県松山市大街道2丁目5-1",

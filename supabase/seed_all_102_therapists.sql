@@ -1,14 +1,11 @@
 -- ========================================================
 -- 愛媛県ヘルスケア・ボディケアプラットフォーム
--- 全102名セラピスト・全17職種・全サービス完全シードデータ (冪等性・重複エラー完全回避版)
+-- 全102名セラピスト・全17職種・全サービス完全シードデータ (重複エラー完全回避・冪等性保証版)
 -- Supabase SQL Editor に貼り付けてそのまま [RUN] してください
 -- ========================================================
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE EXTENSION IF NOT EXISTS postgis;
-
--- 既存のメールアドレスやIDとの重複エラー（users_email_partial_key等）を完全に防ぐため、
--- トランザクション＋一時テーブル＋差分INSERT方式を採用しています。
 
 CREATE TEMP TABLE tmp_seed_users (
   id uuid,
@@ -193,7 +190,7 @@ VALUES
   ('5ace5689-59d7-4bb2-ac99-7d36db6db574', 'therapist', 'saki.morimoto@example.com', '森本 早紀 (Saki Morimoto)', '089-943-3320', 'https://images.unsplash.com/photo-1548142813-c348350df52b?w=400&auto=format&fit=crop&q=80', '愛媛県松山市平和通2丁目4-3', '790-0807', 33.8472, 132.7725),
   ('b075c2ea-fa9d-441c-acb9-324f6c3a9e11', 'therapist', 'chiharu.aihara@example.com', '相原 千春 (Chiharu Aihara)', '089-982-1150', 'https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?w=400&auto=format&fit=crop&q=80', '愛媛県伊予郡松前町筒井850', '791-3120', 33.7915, 132.7128),
   ('33c046ca-5f69-4355-a35d-0b0612c47523', 'therapist', 'emi.yoshino@example.com', '吉野 恵美 (Emi Yoshino)', '089-924-7715', 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=400&auto=format&fit=crop&q=80', '愛媛県松山市平和通6丁目3-2', '790-0821', 33.8502, 132.7548),
-  ('8cdfe1ca-2f83-46a7-a846-72e92fa9d03a', 'therapist', 'reika.kanzaki@example.com', '神崎 麗華 (Reika Kanzaki)', '089-948-2231', 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&auto=format&fit=crop&q=80', '愛媛県松山市大街道2丁目5-1', '790-0004', 33.8405, 132.7712),
+  ('8cdfe1ca-2f83-46a7-a846-72e92fa9d03a', 'therapist', 'yui.sugawara@carehub.ehime.jp', '菅原 結衣 (Yui Sugawara)', '089-948-2231', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80', '愛媛県松山市大街道2丁目5-1', '790-0004', 33.8405, 132.7712),
   ('8a0c54d7-eca6-4960-afdd-b9e9d4e0cb7b', 'therapist', 'yui.nakagawa@example.com', '中川 結衣 (Yui Nakagawa)', '0898-32-5541', 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&auto=format&fit=crop&q=80', '愛媛県今治市常盤町4丁目2-8', '794-0015', 34.0662, 132.9978),
   ('2141f9b9-1fd5-4f31-aada-ba9caee74074', 'therapist', 'yosuke.sakamoto@example.com', '坂本 陽介 (Yosuke Sakamoto)', '0897-33-8812', 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&auto=format&fit=crop&q=80', '愛媛県新居浜市一宮町1丁目6-15', '792-0025', 33.9592, 133.2831),
   ('64f74ef0-2862-41a0-adbc-a494ca7708c4', 'therapist', 'sayuri.fujimoto@example.com', '藤本 さゆり (Sayuri Fujimoto)', '0897-56-1190', 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&auto=format&fit=crop&q=80', '愛媛県西条市大町1705-1', '793-0030', 33.9184, 133.1834),
@@ -235,7 +232,7 @@ SET id = u.id
 FROM auth.users u
 WHERE lower(u.email) = lower(t.email);
 
--- 1. auth.users に未登録のユーザーのみを安全にINSERT (emailまたはID重複を自動スキップ)
+-- 1. auth.users に未登録のユーザーのみを安全にINSERT (DISTINCT ON で一時テーブル内の重複も排除し、既存も完全スキップ)
 INSERT INTO auth.users (
   instance_id,
   id,
@@ -261,7 +258,10 @@ SELECT
   jsonb_build_object('name', t.name, 'role', t.role),
   now(),
   now()
-FROM tmp_seed_users t
+FROM (
+  SELECT DISTINCT ON (lower(email)) *
+  FROM tmp_seed_users
+) t
 WHERE NOT EXISTS (
   SELECT 1 FROM auth.users u WHERE lower(u.email) = lower(t.email) OR u.id = t.id
 );
@@ -294,7 +294,10 @@ SELECT
   t.lng,
   now(),
   now()
-FROM tmp_seed_users t
+FROM (
+  SELECT DISTINCT ON (id) *
+  FROM tmp_seed_users
+) t
 JOIN auth.users u ON u.id = t.id
 ON CONFLICT (id) DO UPDATE SET
   role = EXCLUDED.role,
