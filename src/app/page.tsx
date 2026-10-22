@@ -39,19 +39,13 @@ export default function HomePage() {
             />
             <span className="font-bold text-slate-800">{currentBrand.name}</span>
             <span className="text-[11px] text-slate-400">
-              - {currentBrand.tagline} | 愛媛県発・出張＆店舗オンデマンドヘルスケアプラットフォーム
+              - {currentBrand.tagline} | 出張＆店舗オンデマンドヘルスケアプラットフォーム
             </span>
           </div>
 
           <div className="flex items-center gap-4 text-slate-500">
             <Link href="/guide/customer" className="hover:text-emerald-600 transition">
               ご利用ガイド
-            </Link>
-            <Link href="/therapist" className="hover:text-emerald-600 transition">
-              セラピスト画面へ
-            </Link>
-            <Link href="/admin" className="hover:text-emerald-600 transition">
-              管理本部へ
             </Link>
           </div>
         </div>

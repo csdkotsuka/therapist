@@ -163,16 +163,19 @@ export const CustomerView: React.FC = () => {
     };
   }, [setUserLocation]);
 
-  // カテゴリ一覧 (アイコン、わかりやすいサブタイトル・説明付き)
+  // カテゴリ一覧 (アイコン、わかりやすいサブタイトル・説明・淡いカラー設定付き)
   const categories = [
     {
       id: 'all',
       label: 'すべて',
       subtitle: '全ジャンルから探す',
-      description: '愛媛県内の登録セラピスト全員を一覧表示',
+      description: 'すべての登録セラピストを一覧表示',
       icon: Sparkles,
-      iconColor: 'text-emerald-600',
-      bgColor: 'bg-emerald-50',
+      iconColor: 'text-emerald-700',
+      bgColor: 'bg-emerald-500/15',
+      cardBg: 'bg-gradient-to-br from-emerald-50/90 via-emerald-50/50 to-teal-50/60',
+      borderColor: 'border-emerald-200/90 hover:border-emerald-500',
+      badgeBg: 'bg-white/95 text-emerald-800 border border-emerald-200/80',
     },
     {
       id: 'physical_therapy',
@@ -180,8 +183,11 @@ export const CustomerView: React.FC = () => {
       subtitle: '肩こり・腰痛・関節の根本改善',
       description: '国家資格保持者による本格リハビリ・整体',
       icon: PhysicalTherapyCategoryIcon,
-      iconColor: 'text-blue-600',
-      bgColor: 'bg-blue-50',
+      iconColor: 'text-blue-700',
+      bgColor: 'bg-blue-500/15',
+      cardBg: 'bg-gradient-to-br from-blue-50/90 via-blue-50/50 to-sky-50/60',
+      borderColor: 'border-blue-200/90 hover:border-blue-500',
+      badgeBg: 'bg-white/95 text-blue-800 border border-blue-200/80',
     },
     {
       id: 'massage',
@@ -189,8 +195,11 @@ export const CustomerView: React.FC = () => {
       subtitle: '全身疲労・筋肉のコリ解消',
       description: '手技で深層筋肉をじんわりほぐすボディケア',
       icon: MassageCategoryIcon,
-      iconColor: 'text-amber-600',
-      bgColor: 'bg-amber-50',
+      iconColor: 'text-amber-700',
+      bgColor: 'bg-amber-500/15',
+      cardBg: 'bg-gradient-to-br from-amber-50/90 via-amber-50/50 to-orange-50/60',
+      borderColor: 'border-amber-200/90 hover:border-amber-500',
+      badgeBg: 'bg-white/95 text-amber-800 border border-amber-200/80',
     },
     {
       id: 'aroma',
@@ -198,8 +207,11 @@ export const CustomerView: React.FC = () => {
       subtitle: '極上の癒やし・むくみ解消',
       description: '選べる上質精油で巡りを整えるオイルトリートメント',
       icon: AromaCategoryIcon,
-      iconColor: 'text-rose-600',
-      bgColor: 'bg-rose-50',
+      iconColor: 'text-rose-700',
+      bgColor: 'bg-rose-500/15',
+      cardBg: 'bg-gradient-to-br from-rose-50/90 via-rose-50/50 to-pink-50/60',
+      borderColor: 'border-rose-200/90 hover:border-rose-500',
+      badgeBg: 'bg-white/95 text-rose-800 border border-rose-200/80',
     },
     {
       id: 'chiropractic',
@@ -207,8 +219,11 @@ export const CustomerView: React.FC = () => {
       subtitle: '骨盤矯正・姿勢の歪みケア',
       description: '背骨や骨盤のアライメントを整え美姿勢へ',
       icon: ChiropracticCategoryIcon,
-      iconColor: 'text-indigo-600',
-      bgColor: 'bg-indigo-50',
+      iconColor: 'text-indigo-700',
+      bgColor: 'bg-indigo-500/15',
+      cardBg: 'bg-gradient-to-br from-indigo-50/90 via-indigo-50/50 to-purple-50/60',
+      borderColor: 'border-indigo-200/90 hover:border-indigo-500',
+      badgeBg: 'bg-white/95 text-indigo-800 border border-indigo-200/80',
     },
     {
       id: 'beauty',
@@ -216,8 +231,11 @@ export const CustomerView: React.FC = () => {
       subtitle: '眼精疲労・頭痛・睡眠改善',
       description: '頭皮をもみほぐし脳疲労と首肩の重さをリフレッシュ',
       icon: HeadSpaCategoryIcon,
-      iconColor: 'text-pink-600',
-      bgColor: 'bg-pink-50',
+      iconColor: 'text-pink-700',
+      bgColor: 'bg-pink-500/15',
+      cardBg: 'bg-gradient-to-br from-pink-50/90 via-pink-50/50 to-fuchsia-50/60',
+      borderColor: 'border-pink-200/90 hover:border-pink-500',
+      badgeBg: 'bg-white/95 text-pink-800 border border-pink-200/80',
     },
   ];
 
@@ -396,8 +414,8 @@ export const CustomerView: React.FC = () => {
             </p>
           </div>
 
-          {/* 6つの押しやすく分かりやすいメニューボタン */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3.5 sm:gap-4">
+          {/* 6つの押しやすく分かりやすいメニューボタン (淡いカラー背景 & 一回り大きな視認性の高い文字) */}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3.5 sm:gap-4.5">
             {categories.map((cat) => {
               const Icon = cat.icon;
               const count = getCategoryCount(cat.id);
@@ -406,34 +424,34 @@ export const CustomerView: React.FC = () => {
                 <button
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id)}
-                  className="group relative bg-white border-2 border-slate-200/90 hover:border-emerald-500 active:border-emerald-600 rounded-3xl p-4 sm:p-5 text-left shadow-xs hover:shadow-lg transition-all duration-200 active:scale-[0.98] flex flex-col justify-between min-h-[140px] sm:min-h-[150px] overflow-hidden cursor-pointer"
+                  className={`group relative ${cat.cardBg} border-2 ${cat.borderColor} rounded-3xl p-4 sm:p-5 text-left shadow-xs hover:shadow-lg transition-all duration-200 active:scale-[0.98] flex flex-col justify-between min-h-[145px] sm:min-h-[160px] overflow-hidden cursor-pointer`}
                 >
-                  {/* 背景ホバーエフェクト */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-transparent to-slate-50/50 group-hover:to-emerald-50/40 transition-colors pointer-events-none" />
+                  {/* ホバー時の微細なハイライト効果 */}
+                  <div className="absolute inset-0 bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
                   {/* 上部: アイコン & 在籍人数バッジ */}
                   <div className="flex items-center justify-between gap-2 relative z-10">
                     <div
-                      className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all group-hover:scale-105 shadow-2xs ${cat.bgColor} ${cat.iconColor}`}
+                      className={`w-12 h-12 sm:w-13 sm:h-13 rounded-2xl flex items-center justify-center transition-all group-hover:scale-105 shadow-2xs ${cat.bgColor} ${cat.iconColor}`}
                     >
-                      <Icon className="w-6 h-6" />
+                      <Icon className="w-6 h-6 sm:w-6.5 sm:h-6.5" />
                     </div>
-                    <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 group-hover:bg-emerald-100 group-hover:text-emerald-800 transition">
+                    <span className={`text-xs font-black px-2.5 py-1 rounded-full shadow-2xs ${cat.badgeBg}`}>
                       {count}名
                     </span>
                   </div>
 
                   {/* 下部: メニュー名 & サブタイトル & 矢印 */}
-                  <div className="mt-3 relative z-10">
+                  <div className="mt-3.5 relative z-10">
                     <div className="flex items-center justify-between gap-1">
-                      <h3 className="font-black text-sm sm:text-base text-slate-900 group-hover:text-emerald-700 transition">
+                      <h3 className="font-black text-base sm:text-lg text-slate-900 group-hover:text-slate-950 transition tracking-tight">
                         {cat.label}
                       </h3>
-                      <div className="w-6 h-6 rounded-full bg-slate-100 group-hover:bg-emerald-600 group-hover:text-white flex items-center justify-center text-slate-400 transition shrink-0">
+                      <div className="w-6 h-6 rounded-full bg-white/90 group-hover:bg-slate-900 group-hover:text-white flex items-center justify-center text-slate-400 shadow-2xs transition shrink-0">
                         <ChevronRight className="w-3.5 h-3.5" />
                       </div>
                     </div>
-                    <p className="text-[11px] sm:text-xs text-slate-500 line-clamp-1 mt-0.5 group-hover:text-slate-700 transition">
+                    <p className="text-xs sm:text-[13px] font-medium text-slate-600 line-clamp-1 mt-0.5 group-hover:text-slate-800 transition">
                       {cat.subtitle}
                     </p>
                   </div>
