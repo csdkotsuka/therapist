@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useApp } from '@/context/AppContext';
 import { formatPrice, formatDate } from '@/lib/geo';
@@ -43,6 +43,8 @@ import {
   Star,
   MessageSquare,
   ThumbsUp,
+  PenTool,
+  RotateCcw,
   MessageCircle,
   Layers,
   Gift,
@@ -197,8 +199,57 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
   const [newDuration, setNewDuration] = useState('60');
   const [newCategory, setNewCategory] = useState<ServiceCategory>('physical_therapy');
 
-  // GPS送信シミュレーション状態
-  const [isGpsTransmitting, setIsGpsTransmitting] = useState<Record<string, boolean>>({});
+  // 完了報告・電子署名ステート
+  const [completingBooking, setCompletingBooking] = useState<Booking | null>(null);
+  const [hasSignature, setHasSignature] = useState(false);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  // 予約成立後（confirmedな出張予約）のGPS位置情報・常時自動送信（手動ボタン不要で常にバックグラウンド同期）
+  useEffect(() => {
+    const activeVisitBookings = myBookings.filter(
+      (b) => b.status === 'confirmed' && b.booking_type === 'visit'
+    );
+    if (activeVisitBookings.length === 0) return;
+
+    let watchId: number | null = null;
+    if (typeof navigator !== 'undefined' && 'geolocation' in navigator) {
+      try {
+        watchId = navigator.geolocation.watchPosition(
+          (pos) => {
+            activeVisitBookings.forEach((b) => {
+              updateTherapistLocation(b.id, pos.coords.latitude, pos.coords.longitude);
+            });
+          },
+          (err) => {
+            console.warn('Geolocation watch error:', err);
+          },
+          { enableHighAccuracy: true, maximumAge: 10000, timeout: 15000 }
+        );
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    // 定期タイマーでも確実に現在地を更新同期（5秒ごと）
+    const interval = setInterval(() => {
+      activeVisitBookings.forEach((b) => {
+        if (therapist?.lat && therapist?.lng) {
+          const delta = (Math.random() - 0.5) * 0.0003;
+          const currentLat = b.therapist_current_lat || therapist.lat;
+          const currentLng = b.therapist_current_lng || therapist.lng;
+          updateTherapistLocation(b.id, currentLat + delta, currentLng + delta);
+        }
+      });
+    }, 5000);
+
+    return () => {
+      if (watchId !== null && typeof navigator !== 'undefined' && 'geolocation' in navigator) {
+        navigator.geolocation.clearWatch(watchId);
+      }
+      clearInterval(interval);
+    };
+  }, [myBookings, therapist, updateTherapistLocation]);
 
   // 売上統計の計算
   const completedBookings = myBookings.filter((b) => b.status === 'completed');
@@ -244,18 +295,6 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
     setNewTitle('');
     setNewDescription('');
     alert('新しいメニューを公開しました');
-  };
-
-  const handleSendGps = (bookingId: string) => {
-    setIsGpsTransmitting((prev) => ({ ...prev, [bookingId]: true }));
-    // ランダムに少し位置を更新（顧客宅への接近）
-    if (therapist) {
-      updateTherapistLocation(bookingId, therapist.lat + 0.002, therapist.lng + 0.002);
-    }
-    setTimeout(() => {
-      setIsGpsTransmitting((prev) => ({ ...prev, [bookingId]: false }));
-      alert('現在地GPS情報を顧客の追跡画面へリアルタイム送信しました！');
-    }, 800);
   };
 
   const handleSaveCampaign = async () => {
@@ -1447,29 +1486,25 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
                           )}
                         </button>
 
-                        {/* 出張時の現在地GPS送信シミュレータ */}
+                        {/* 出張時の常時GPS自動同期インジケーター */}
                         {b.booking_type === 'visit' && (
-                          <button
-                            onClick={() => handleSendGps(b.id)}
-                            disabled={isGpsTransmitting[b.id]}
-                            className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center gap-1.5 shadow"
-                          >
-                            <Navigation className="w-3.5 h-3.5 text-emerald-400" />
-                            <span>{isGpsTransmitting[b.id] ? '送信中...' : 'GPS位置情報を送信'}</span>
-                          </button>
+                          <div className="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold flex items-center gap-1.5 shadow-2xs">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                            <Navigation className="w-3.5 h-3.5 text-emerald-600" />
+                            <span>GPS常時自動送信中</span>
+                          </div>
                         )}
 
-                        {/* 施術完了報告ボタン */}
+                        {/* 施術完了報告ボタン (お客様サイン・確認モーダルを開く) */}
                         <button
                           onClick={() => {
-                            if (confirm('施術が完了しましたか？Stripe売上が計上されます。')) {
-                              updateBookingStatus(b.id, 'completed');
-                            }
+                            setCompletingBooking(b);
+                            setHasSignature(false);
                           }}
                           className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-md shadow-emerald-600/20 flex items-center gap-1.5"
                         >
                           <CheckCircle2 className="w-4 h-4" />
-                          <span>施術完了を報告</span>
+                          <span>施術完了を報告 (顧客確認・サイン)</span>
                         </button>
                       </div>
                     </div>
@@ -2353,7 +2388,196 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
         <BookingChatModal
           booking={chatBooking}
           onClose={() => setChatBooking(null)}
+          activeUserId={targetUser.id}
+          viewerRole="therapist"
         />
+      )}
+
+      {/* 施術完了報告・お客様確認電子サインモーダル */}
+      {completingBooking && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-100 overflow-hidden animate-fadeIn">
+            {/* ヘッダー */}
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-emerald-50/60">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                <h3 className="font-bold text-emerald-950 text-sm">施術完了報告・お客様確認サイン</h3>
+              </div>
+              <button
+                onClick={() => setCompletingBooking(null)}
+                className="w-8 h-8 rounded-full bg-white hover:bg-slate-100 text-slate-500 flex items-center justify-center transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {/* 予約サマリー */}
+              <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-xs space-y-1.5">
+                <div className="flex justify-between">
+                  <span className="text-slate-500">お客様名:</span>
+                  <span className="font-bold text-slate-900">
+                    {allUsers.find((u) => u.id === completingBooking.customer_id)?.name || 'お客様'} 様
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">施術メニュー:</span>
+                  <span className="font-bold text-slate-900">
+                    {services.find((s) => s.id === completingBooking.service_id)?.title || '施術コース'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">決済金額:</span>
+                  <span className="font-black text-emerald-600">
+                    {formatPrice(completingBooking.total_amount)}
+                  </span>
+                </div>
+              </div>
+
+              {/* 手書きサイン案内 */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                    <PenTool className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>お客様受領サイン（画面上に指やペンでご署名）</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const canvas = canvasRef.current;
+                      if (canvas) {
+                        const ctx = canvas.getContext('2d');
+                        if (ctx) {
+                          ctx.clearRect(0, 0, canvas.width, canvas.height);
+                          setHasSignature(false);
+                        }
+                      }
+                    }}
+                    className="text-[11px] font-bold text-slate-500 hover:text-slate-700 flex items-center gap-1"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    <span>クリア</span>
+                  </button>
+                </div>
+
+                {/* Canvas サインパッド */}
+                <div className="border-2 border-dashed border-slate-300 rounded-2xl bg-slate-50/50 p-1 relative overflow-hidden">
+                  <canvas
+                    ref={canvasRef}
+                    width={450}
+                    height={150}
+                    onMouseDown={(e) => {
+                      const canvas = canvasRef.current;
+                      if (!canvas) return;
+                      const ctx = canvas.getContext('2d');
+                      if (!ctx) return;
+                      const rect = canvas.getBoundingClientRect();
+                      ctx.beginPath();
+                      ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+                      ctx.lineWidth = 2.5;
+                      ctx.lineCap = 'round';
+                      ctx.strokeStyle = '#0f172a';
+                      setIsDrawing(true);
+                      setHasSignature(true);
+                    }}
+                    onMouseMove={(e) => {
+                      if (!isDrawing) return;
+                      const canvas = canvasRef.current;
+                      if (!canvas) return;
+                      const ctx = canvas.getContext('2d');
+                      if (!ctx) return;
+                      const rect = canvas.getBoundingClientRect();
+                      ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+                      ctx.stroke();
+                    }}
+                    onMouseUp={() => setIsDrawing(false)}
+                    onMouseLeave={() => setIsDrawing(false)}
+                    onTouchStart={(e) => {
+                      const canvas = canvasRef.current;
+                      if (!canvas) return;
+                      const ctx = canvas.getContext('2d');
+                      if (!ctx) return;
+                      const rect = canvas.getBoundingClientRect();
+                      const touch = e.touches[0];
+                      ctx.beginPath();
+                      ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+                      ctx.lineWidth = 2.5;
+                      ctx.lineCap = 'round';
+                      ctx.strokeStyle = '#0f172a';
+                      setIsDrawing(true);
+                      setHasSignature(true);
+                    }}
+                    onTouchMove={(e) => {
+                      if (!isDrawing) return;
+                      const canvas = canvasRef.current;
+                      if (!canvas) return;
+                      const ctx = canvas.getContext('2d');
+                      if (!ctx) return;
+                      const rect = canvas.getBoundingClientRect();
+                      const touch = e.touches[0];
+                      ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+                      ctx.stroke();
+                    }}
+                    onTouchEnd={() => setIsDrawing(false)}
+                    className="w-full h-[140px] bg-white rounded-xl cursor-crosshair touch-none"
+                  />
+                  {!hasSignature && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-slate-400 text-xs font-medium">
+                      枠内にお客様のサインをご記入ください
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="p-3 bg-emerald-50/50 rounded-xl border border-emerald-100 text-[11px] text-emerald-800 space-y-1">
+                <p className="font-bold">安心の施術完了・売上計上フロー</p>
+                <p className="text-slate-600">
+                  完了報告と同時にお客様へ通知が送信され、レビュー投稿の依頼が届きます。Stripeの事前仮決済枠から施術売上が正式に確定計上されます。
+                </p>
+              </div>
+
+              {/* ボタン列 */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (confirm('サインなしで完了報告を行いますか？（お客様がご就寝中などの場合に適用してください）')) {
+                      updateBookingStatus(completingBooking.id, 'completed');
+                      setCompletingBooking(null);
+                      alert('施術完了を報告しました。売上が計上されました。');
+                    }
+                  }}
+                  className="text-xs text-slate-400 hover:text-slate-600 underline py-1"
+                >
+                  サインをスキップして完了
+                </button>
+
+                <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setCompletingBooking(null)}
+                    className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 rounded-xl"
+                  >
+                    戻る
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      updateBookingStatus(completingBooking.id, 'completed');
+                      setCompletingBooking(null);
+                      alert('お客様サインを受領し、施術完了を正式に報告しました！売上が計上されました。');
+                    }}
+                    className="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold rounded-xl shadow-md transition flex items-center gap-1.5"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>受領確認・完了を確定する</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

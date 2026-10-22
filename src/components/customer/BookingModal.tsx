@@ -18,13 +18,14 @@ import {
   Info,
   Car,
   Compass,
+  MessageCircle,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 interface BookingModalProps {
   therapistId: string;
   onClose: () => void;
-  onSuccess: (bookingId: string) => void;
+  onSuccess: (bookingId: string, openChatImmediately?: boolean) => void;
 }
 
 export const BookingModal: React.FC<BookingModalProps> = ({
@@ -45,6 +46,16 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   const user = allUsers.find((u) => u.id === therapistId);
   const therapistServices = services.filter((s) => s.therapist_id === therapistId && s.is_active);
 
+  // 今日のYYYY-MM-DD文字列
+  const getTodayString = (addDays = 0) => {
+    const d = new Date();
+    d.setDate(d.getDate() + addDays);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
+
   // ステップ管理: 1: メニュー・日時選択, 2: 決済・確認, 3: 完了
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
@@ -55,10 +66,15 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   const [bookingType, setBookingType] = useState<'visit' | 'store'>(
     therapist?.is_visit_based ? 'visit' : 'store'
   );
-  const [selectedDate, setSelectedDate] = useState<string>('tomorrow');
+
+  // 日付指定: 'today' | 'tomorrow' | 'dayAfter' | 'custom'
+  const [dateType, setDateType] = useState<'today' | 'tomorrow' | 'dayAfter' | 'custom'>('tomorrow');
+  const [customDate, setCustomDate] = useState<string>(getTodayString(1));
+
+  // 時間指定: 30分刻みスロット または 直接指定
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>('14:00');
   const [visitAddress, setVisitAddress] = useState<string>(
-    '東京都渋谷区神宮前5-1-1 表参道レジデンス402号室'
+    currentUser.address || '東京都渋谷区神宮前5-1-1 表参道レジデンス402号室'
   );
   const [notes, setNotes] = useState<string>('');
 
@@ -75,19 +91,70 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   const distance = calculateDistanceKm(userLocation.lat, userLocation.lng, therapist.lat, therapist.lng);
   const travelTime = estimateTravelTimeMinutes(distance);
 
-  const timeSlots = ['10:00', '12:00', '14:00', '16:00', '18:00', '20:00'];
+  // 09:00 〜 22:30 までの30分刻みタイムスロット一覧
+  const timeSlots = [
+    '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
+    '12:00', '12:30', '13:00', '13:30', '14:00', '14:30',
+    '15:00', '15:30', '16:00', '16:30', '17:00', '17:30',
+    '18:00', '18:30', '19:00', '19:30', '20:00', '20:30',
+    '21:00', '21:30', '22:00', '22:30'
+  ];
+
+  // 終了予定時刻の計算
+  const calculateEndTime = (startTime: string, durationMinutes = 60) => {
+    try {
+      const [h, m] = startTime.split(':').map(Number);
+      const totalMinutes = h * 60 + m + durationMinutes;
+      const endH = Math.floor(totalMinutes / 60) % 24;
+      const endM = totalMinutes % 60;
+      return `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
+    } catch {
+      return '';
+    }
+  };
+
+  // 決定された日付オブジェクト
+  const getCalculatedDate = () => {
+    const targetDate = new Date();
+    if (dateType === 'today') {
+      // today
+    } else if (dateType === 'tomorrow') {
+      targetDate.setDate(targetDate.getDate() + 1);
+    } else if (dateType === 'dayAfter') {
+      targetDate.setDate(targetDate.getDate() + 2);
+    } else if (dateType === 'custom' && customDate) {
+      const [y, m, d] = customDate.split('-').map(Number);
+      targetDate.setFullYear(y, m - 1, d);
+    }
+    const [hours, minutes] = selectedTimeSlot.split(':').map(Number);
+    targetDate.setHours(hours || 14, minutes || 0, 0, 0);
+    return targetDate;
+  };
+
+  // 表示用の日付文字列
+  const getFormattedSelectedDateString = () => {
+    const dt = getCalculatedDate();
+    const days = ['日', '月', '火', '水', '木', '金', '土'];
+    return `${dt.getFullYear()}年${dt.getMonth() + 1}月${dt.getDate()}日 (${days[dt.getDay()]})`;
+  };
+
+  // 今すぐ（最短30分後）をセット
+  const handleSetQuickSoon = () => {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 30);
+    const roundMinutes = Math.ceil(now.getMinutes() / 15) * 15;
+    now.setMinutes(roundMinutes);
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes() % 60).padStart(2, '0');
+    setDateType('today');
+    setSelectedTimeSlot(`${h}:${m}`);
+  };
 
   const handleSubmitBooking = async () => {
     setIsSubmitting(true);
 
     try {
-      // 予約日時を計算
-      const targetDate = new Date();
-      if (selectedDate === 'tomorrow') targetDate.setDate(targetDate.getDate() + 1);
-      if (selectedDate === 'dayAfter') targetDate.setDate(targetDate.getDate() + 2);
-      
-      const [hours, minutes] = selectedTimeSlot.split(':').map(Number);
-      targetDate.setHours(hours, minutes, 0, 0);
+      const targetDate = getCalculatedDate();
 
       // 出張先住所のジオコーディング (緯度経度特定)
       let bookingLat = userLocation.lat;
@@ -337,46 +404,116 @@ export const BookingModal: React.FC<BookingModalProps> = ({
               </div>
 
               {/* 日時選択 */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                  3. 希望日時の指定
-                </label>
-                <div className="grid grid-cols-3 gap-2 mb-3">
-                  {[
-                    { id: 'today', label: '本日 (最短)' },
-                    { id: 'tomorrow', label: '明日' },
-                    { id: 'dayAfter', label: '明後日' },
-                  ].map((d) => (
-                    <button
-                      key={d.id}
-                      type="button"
-                      onClick={() => setSelectedDate(d.id)}
-                      className={`py-2 rounded-xl text-xs font-bold border transition ${
-                        selectedDate === d.id
-                          ? 'bg-emerald-600 border-emerald-600 text-white shadow-xs'
-                          : 'border-slate-200 text-slate-700 hover:bg-slate-50'
-                      }`}
-                    >
-                      {d.label}
-                    </button>
-                  ))}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                    3. 希望日時の詳細指定
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleSetQuickSoon}
+                    className="text-[11px] font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg border border-emerald-200 transition flex items-center gap-1"
+                  >
+                    <Sparkles className="w-3 h-3 text-emerald-600" />
+                    <span>今すぐ最短で依頼（約30分後〜）</span>
+                  </button>
                 </div>
 
-                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                  {timeSlots.map((slot) => (
-                    <button
-                      key={slot}
-                      type="button"
-                      onClick={() => setSelectedTimeSlot(slot)}
-                      className={`py-2 rounded-xl text-xs font-medium border transition ${
-                        selectedTimeSlot === slot
-                          ? 'border-emerald-500 bg-emerald-50 text-emerald-700 font-bold'
-                          : 'border-slate-200 text-slate-600 hover:bg-slate-50'
-                      }`}
-                    >
-                      {slot}
-                    </button>
-                  ))}
+                {/* 日付の選択肢 */}
+                <div className="space-y-2">
+                  <div className="grid grid-cols-4 gap-2">
+                    {[
+                      { id: 'today', label: '本日' },
+                      { id: 'tomorrow', label: '明日' },
+                      { id: 'dayAfter', label: '明後日' },
+                      { id: 'custom', label: 'カレンダー指定' },
+                    ].map((d) => (
+                      <button
+                        key={d.id}
+                        type="button"
+                        onClick={() => setDateType(d.id as any)}
+                        className={`py-2 px-1 text-center rounded-xl text-xs font-bold border transition ${
+                          dateType === d.id
+                            ? 'bg-emerald-600 border-emerald-600 text-white shadow-xs'
+                            : 'border-slate-200 text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        {d.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* カレンダー直接指定の場合の入力欄 */}
+                  {dateType === 'custom' && (
+                    <div className="p-3 bg-emerald-50/50 rounded-xl border border-emerald-200 flex items-center gap-3">
+                      <Calendar className="w-4 h-4 text-emerald-700 shrink-0" />
+                      <div className="flex-1">
+                        <label className="block text-[10px] font-bold text-emerald-900 mb-0.5">予約希望日</label>
+                        <input
+                          type="date"
+                          min={getTodayString()}
+                          value={customDate}
+                          onChange={(e) => setCustomDate(e.target.value)}
+                          className="w-full bg-white border border-emerald-300 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-800 focus:outline-emerald-500"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 選択中の日付バナー */}
+                  <div className="text-xs text-slate-600 font-bold bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 flex items-center justify-between">
+                    <span>選択日: <strong className="text-emerald-700">{getFormattedSelectedDateString()}</strong></span>
+                    <span className="text-[11px] text-slate-400 font-medium">コース: {currentService?.duration_minutes}分</span>
+                  </div>
+                </div>
+
+                {/* 時間帯スロット選択 */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-slate-500">希望開始時間（30分刻み）:</span>
+                    <div className="flex items-center gap-1.5 text-xs">
+                      <span className="text-slate-400 text-[10px]">直接指定:</span>
+                      <input
+                        type="time"
+                        value={selectedTimeSlot}
+                        onChange={(e) => setSelectedTimeSlot(e.target.value)}
+                        className="px-2 py-0.5 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-800 focus:outline-emerald-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-4 sm:grid-cols-7 gap-1.5 max-h-36 overflow-y-auto p-1 bg-slate-50/50 rounded-2xl border border-slate-200">
+                    {timeSlots.map((slot) => {
+                      const isSelected = selectedTimeSlot === slot;
+                      return (
+                        <button
+                          key={slot}
+                          type="button"
+                          onClick={() => setSelectedTimeSlot(slot)}
+                          className={`py-1.5 rounded-lg text-xs font-mono transition ${
+                            isSelected
+                              ? 'bg-emerald-600 text-white font-bold shadow-xs'
+                              : 'bg-white border border-slate-200 text-slate-700 hover:border-emerald-300'
+                          }`}
+                        >
+                          {slot}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* 施術終了予定プレビュー */}
+                  <div className="p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-200 text-xs text-emerald-950 flex items-center justify-between font-medium">
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      <span>
+                        予定時間: <strong>{selectedTimeSlot}</strong> 〜 <strong>{calculateEndTime(selectedTimeSlot, currentService?.duration_minutes)}</strong>
+                      </span>
+                    </div>
+                    <span className="text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-bold">
+                      {currentService?.duration_minutes}分間
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -426,8 +563,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 <div className="flex justify-between text-xs">
                   <span className="text-slate-500">希望日時</span>
                   <span className="font-bold text-slate-900">
-                    {selectedDate === 'today' ? '本日' : selectedDate === 'tomorrow' ? '明日' : '明後日'}{' '}
-                    {selectedTimeSlot}〜 ({currentService?.duration_minutes}分)
+                    {getFormattedSelectedDateString()} {selectedTimeSlot}〜{calculateEndTime(selectedTimeSlot, currentService?.duration_minutes)} ({currentService?.duration_minutes}分)
                   </span>
                 </div>
                 <div className="pt-2 border-t border-slate-200 flex justify-between items-center text-sm">
@@ -506,7 +642,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
               <div>
                 <h3 className="text-lg font-bold text-slate-900">予約リクエストを送信しました！</h3>
                 <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-                  セラピストが内容を確認後、承認通知が届きます。マイページで進行状況や施術者の移動状況を追跡できます。
+                  セラピストが内容を確認後、承認通知が届きます。事前にメッセージで相談や駐車場の案内なども行えます。
                 </p>
               </div>
 
@@ -514,6 +650,12 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 <div className="flex justify-between">
                   <span className="text-slate-500">予約番号:</span>
                   <span className="font-mono font-bold text-slate-700">{createdBookingId}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">予約日時:</span>
+                  <span className="font-bold text-slate-800">
+                    {getFormattedSelectedDateString()} {selectedTimeSlot}〜
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">ステータス:</span>
@@ -525,13 +667,27 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 </div>
               </div>
 
-              <div className="pt-4 flex justify-center gap-3">
+              {/* アクションボタン: メッセージを開く & 予約履歴へ */}
+              <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
                 <button
+                  type="button"
                   onClick={() => {
-                    onSuccess(createdBookingId);
+                    onSuccess(createdBookingId, true);
                     onClose();
                   }}
-                  className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-md transition"
+                  className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold rounded-xl shadow-md transition flex items-center justify-center gap-2"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>セラピストにメッセージを送る</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    onSuccess(createdBookingId, false);
+                    onClose();
+                  }}
+                  className="w-full sm:w-auto px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-xs transition"
                 >
                   予約履歴・追跡画面へ
                 </button>

@@ -12,6 +12,8 @@ import {
   reverseGeocode,
 } from '@/lib/geo';
 import { BookingModal } from './BookingModal';
+import { BookingChatModal } from '@/components/chat/BookingChatModal';
+import { Booking } from '@/types';
 import {
   Search,
   MapPin,
@@ -32,6 +34,7 @@ import {
   Filter,
   BadgePercent,
   Calendar,
+  MessageCircle,
   Bone,
   Hand,
   Flower2,
@@ -46,7 +49,6 @@ import {
   Baby,
   Eye,
 } from 'lucide-react';
-import { Booking } from '@/types';
 
 const RealLeafletMap = dynamic(
   () => import('./RealLeafletMap').then((m) => m.RealLeafletMap),
@@ -295,6 +297,7 @@ export const CustomerView: React.FC = () => {
     therapistProfiles,
     allUsers,
     services,
+    bookings,
     userLocation,
     setUserLocation,
   } = useApp();
@@ -313,6 +316,7 @@ export const CustomerView: React.FC = () => {
   // モーダル管理
   const [bookingTherapistId, setBookingTherapistId] = useState<string | null>(null);
   const [bookedSuccessInfo, setBookedSuccessInfo] = useState<{ id: string; name: string } | null>(null);
+  const [chatBooking, setChatBooking] = useState<Booking | null>(null);
 
   // GPS現在地の自動取得（デフォルトでオン、裏で静かに現在地を更新）
   useEffect(() => {
@@ -348,8 +352,9 @@ export const CustomerView: React.FC = () => {
       id: 'bodycare',
       name: 'ボディケア & リフレッシュ',
       badge: '癒やし・美容',
-      subtitle: 'もみほぐし・アロマ・ヘッドスパ・エステ・カイロ骨盤',
+      subtitle: 'もみほぐし・アロマ・ヘッドスパ・エステ・骨盤矯正',
       description: '筋肉疲労の深層もみほぐし、極上精油アロマ、快眠スパ、美肌フェイシャルエステ、姿勢骨盤矯正',
+      tags: ['もみほぐし', 'アロマ', 'ヘッドスパ', 'エステ', 'カイロ骨盤'],
       icon: BodyCareGroupIcon,
       themeColor: 'text-amber-700',
       iconBg: 'bg-amber-500/15 text-amber-700',
@@ -357,14 +362,14 @@ export const CustomerView: React.FC = () => {
       borderColor: 'border-amber-200 hover:border-amber-500',
       badgeBg: 'bg-white/95 text-amber-800 border border-amber-200/80',
       categoryIds: ['massage', 'aroma', 'beauty', 'esthetic', 'chiropractic'],
-      highlight: 'もみほぐし・アロマ・スパ・エステ・骨盤',
     },
     {
       id: 'conditioning',
       name: '専門コンディショニング & 姿勢',
       badge: '痛みの予防・運動',
-      subtitle: '整体理学療法・作業療法・鍼灸・パーソナルトレーニング',
+      subtitle: '理学療法・作業療法・鍼灸・パーソナルトレーニング',
       description: '国家資格保持者やプロトレーナーによる本格リハビリ・運動指導・姿勢改善・ツボ温熱治療',
+      tags: ['理学療法', '作業療法', '鍼灸', '姿勢改善', '筋トレ'],
       icon: StethoscopeCategoryIcon,
       themeColor: 'text-blue-700',
       iconBg: 'bg-blue-500/15 text-blue-700',
@@ -372,7 +377,6 @@ export const CustomerView: React.FC = () => {
       borderColor: 'border-blue-200 hover:border-blue-500',
       badgeBg: 'bg-white/95 text-blue-800 border border-blue-200/80',
       categoryIds: ['physical_therapy', 'occupational_therapy', 'acupuncture', 'personal_training'],
-      highlight: '理学療法・作業療法・鍼灸・筋トレ',
     },
     {
       id: 'oral_health',
@@ -380,6 +384,7 @@ export const CustomerView: React.FC = () => {
       badge: '健康・生活機能',
       subtitle: '言語聴覚・歯科衛生・視能訓練・フットケア巻き爪',
       description: '誤嚥防止・訪問口腔ケア・ことばの訓練・目の健康・足爪のトラブル解消をトータル支援',
+      tags: ['言語聴覚', '歯科衛生', '視能訓練', 'フットケア'],
       icon: OrientalDentalGroupIcon,
       themeColor: 'text-teal-700',
       iconBg: 'bg-teal-500/15 text-teal-700',
@@ -387,7 +392,6 @@ export const CustomerView: React.FC = () => {
       borderColor: 'border-teal-200 hover:border-teal-500',
       badgeBg: 'bg-white/95 text-teal-800 border border-teal-200/80',
       categoryIds: ['speech_therapy', 'dental_hygiene', 'orthoptist', 'footcare'],
-      highlight: '言語・歯科衛生・目の訓練・足爪ケア',
     },
     {
       id: 'mama_lifestyle',
@@ -395,6 +399,7 @@ export const CustomerView: React.FC = () => {
       badge: 'ライフステージ',
       subtitle: '助産師・管理栄養士・離乳食育児・心理カウンセリング',
       description: '産前産後ケア・母乳マッサージ・持病の食事制限相談・離乳食アドバイス・心のメンタルケア',
+      tags: ['助産師ケア', '管理栄養士', '離乳食相談', 'カウンセリング'],
       icon: FamilyLifestyleGroupIcon,
       themeColor: 'text-rose-700',
       iconBg: 'bg-rose-500/15 text-rose-700',
@@ -402,7 +407,6 @@ export const CustomerView: React.FC = () => {
       borderColor: 'border-rose-200 hover:border-rose-500',
       badgeBg: 'bg-white/95 text-rose-800 border border-rose-200/80',
       categoryIds: ['midwife', 'dietitian', 'parenting', 'counseling'],
-      highlight: '助産師・栄養指導・離乳食・メンタル',
     },
   ];
 
@@ -784,7 +788,7 @@ export const CustomerView: React.FC = () => {
     <div className="space-y-6">
       {/* 予約完了トースト案内 */}
       {bookedSuccessInfo && (
-        <div className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-4 rounded-3xl shadow-lg flex items-center justify-between gap-4 animate-fadeIn">
+        <div className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-4 rounded-3xl shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fadeIn">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center shrink-0">
               <Calendar className="w-5 h-5 text-white" />
@@ -792,16 +796,26 @@ export const CustomerView: React.FC = () => {
             <div>
               <h4 className="font-bold text-sm">予約リクエストを送信しました！</h4>
               <p className="text-xs text-white/90">
-                {bookedSuccessInfo.name} さんの承認待ちです。マイ予約・履歴ページからステータスを確認できます。
+                {bookedSuccessInfo.name} さんの承認待ちです。事前にメッセージで相談や連絡を行えます。
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                const b = bookings.find((x) => x.id === bookedSuccessInfo.id);
+                if (b) setChatBooking(b);
+              }}
+              className="px-3.5 py-2 bg-white text-emerald-800 text-xs font-bold rounded-xl shadow-xs hover:bg-emerald-50 transition flex items-center gap-1.5"
+            >
+              <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
+              <span>メッセージを送る</span>
+            </button>
             <Link
               href="/bookings"
-              className="px-4 py-2 bg-white text-emerald-800 text-xs font-bold rounded-xl shadow-xs hover:bg-emerald-50 transition"
+              className="px-3.5 py-2 bg-emerald-800/60 hover:bg-emerald-800 text-white text-xs font-bold rounded-xl shadow-xs transition"
             >
-              予約一覧を見る
+              予約一覧
             </Link>
             <button
               onClick={() => setBookedSuccessInfo(null)}
@@ -813,18 +827,39 @@ export const CustomerView: React.FC = () => {
         </div>
       )}
 
-      {/* トップヘッダーエリア (現在地・検索) */}
+      {/* トップヘッダーエリア (顧客名挨拶 & 現在地・検索) */}
       <div className="space-y-3">
-        {/* 上部: 現在地表示 */}
-        <div className="flex items-center gap-2 text-slate-600 pb-0.5">
-          <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
-            <MapPin className="w-4 h-4" />
+        {/* 顧客名表示バナー & 現在地 */}
+        <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <img
+              src={currentUser.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'}
+              alt={currentUser.name}
+              className="w-11 h-11 rounded-2xl object-cover ring-2 ring-emerald-500/20 shrink-0"
+            />
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-slate-500 font-medium">ようこそ</span>
+                <h2 className="text-base font-black text-slate-900">
+                  {currentUser.name} <span className="text-xs font-normal text-slate-500">様</span>
+                </h2>
+              </div>
+              <p className="text-xs text-slate-500 mt-0.5">
+                本日も安心の出張・店舗施術をお届けします
+              </p>
+            </div>
           </div>
-          <div className="flex items-baseline gap-1.5 min-w-0">
-            <span className="text-[11px] font-bold text-slate-400 shrink-0">施術場所:</span>
-            <span className="text-xs font-bold text-slate-800 truncate max-w-xs sm:max-w-md">
-              {userLocation.name}
-            </span>
+
+          <div className="flex items-center gap-2 text-slate-600 bg-slate-50 px-3.5 py-2 rounded-2xl border border-slate-200/80 w-full sm:w-auto">
+            <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
+              <MapPin className="w-3.5 h-3.5" />
+            </div>
+            <div className="min-w-0">
+              <div className="text-[10px] font-bold text-slate-400">施術場所</div>
+              <div className="text-xs font-bold text-slate-800 truncate max-w-[200px] sm:max-w-[260px]">
+                {userLocation.name}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -858,35 +893,28 @@ export const CustomerView: React.FC = () => {
              Step 1: 大ジャンル (グループ) 選択画面
              -------------------------------------------------------- */
           <div className="space-y-4 pt-1 animate-fadeIn">
-            <div>
+            <div className="flex items-baseline justify-between">
               <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
-                施術ジャンルをお選びください
+                施術ジャンルから探す
               </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                気になるジャンルをタップすると、さらに詳しい専門カテゴリー・職種が表示されます
-              </p>
+              <span className="text-xs text-slate-400">タップして詳細カテゴリーを選択</span>
             </div>
 
             {/* クイックアクセス: すべての施術者から探す */}
             <button
               onClick={() => setSelectedCategory('all')}
-              className="w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-600 hover:to-teal-700 text-white p-4 sm:p-4.5 rounded-3xl shadow-sm hover:shadow-md transition-all duration-200 active:scale-[0.99] flex items-center justify-between text-left cursor-pointer group"
+              className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white p-3.5 sm:p-4 rounded-3xl shadow-xs hover:shadow-md transition-all duration-200 active:scale-[0.99] flex items-center justify-between text-left cursor-pointer group"
             >
-              <div className="flex items-center gap-3.5">
-                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-white/20 flex items-center justify-center text-white shrink-0 shadow-2xs group-hover:scale-105 transition">
-                  <Sparkles className="w-6 h-6 text-amber-300" />
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center text-white shrink-0 shadow-2xs group-hover:scale-105 transition">
+                  <Sparkles className="w-5 h-5 text-amber-300" />
                 </div>
                 <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-black text-base sm:text-lg tracking-tight">
-                      すべての登録施術者から探す
-                    </span>
-                    <span className="text-[10px] sm:text-xs font-black bg-white/20 px-2 py-0.5 rounded-full">
-                      全{getCategoryCount('all')}名
-                    </span>
-                  </div>
-                  <p className="text-xs text-white/90 mt-0.5 hidden sm:block">
-                    全ジャンルの施術者を、現在地からの距離順やオススメ順で一覧表示します
+                  <span className="font-black text-sm sm:text-base tracking-tight">
+                    すべての登録施術者から探す（全{getCategoryCount('all')}名）
+                  </span>
+                  <p className="text-[11px] text-white/80 mt-0.5 hidden sm:block">
+                    現在地からの距離順やオススメ順で一覧表示します
                   </p>
                 </div>
               </div>
@@ -905,7 +933,7 @@ export const CustomerView: React.FC = () => {
                   <button
                     key={genre.id}
                     onClick={() => setSelectedGenre(genre.id)}
-                    className={`group relative ${genre.cardBg} border-2 ${genre.borderColor} rounded-3xl p-5 sm:p-6 text-left shadow-xs hover:shadow-lg transition-all duration-200 active:scale-[0.98] flex flex-col justify-between min-h-[160px] sm:min-h-[180px] overflow-hidden cursor-pointer`}
+                    className={`group relative ${genre.cardBg} border-2 ${genre.borderColor} rounded-3xl p-5 sm:p-6 text-left shadow-xs hover:shadow-lg transition-all duration-200 active:scale-[0.98] flex flex-col justify-between min-h-[160px] sm:min-h-[175px] overflow-hidden cursor-pointer`}
                   >
                     <div className="absolute inset-0 bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
@@ -926,7 +954,7 @@ export const CustomerView: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* 下部: ジャンル名 & サブタイトル & 含まれる専門職ピル */}
+                    {/* 下部: ジャンル名 & 主なメニューピル */}
                     <div className="mt-4 relative z-10">
                       <div className="flex items-center justify-between gap-1">
                         <h3 className="font-black text-lg sm:text-xl text-slate-900 group-hover:text-slate-950 transition tracking-tight">
@@ -936,14 +964,17 @@ export const CustomerView: React.FC = () => {
                           <ChevronRight className="w-4 h-4" />
                         </div>
                       </div>
-                      <p className="text-xs font-bold text-slate-600 mt-1 line-clamp-1">
-                        {genre.subtitle}
-                      </p>
-                      <div className="mt-2.5 pt-2 border-t border-slate-200/60 flex items-center gap-1.5 flex-wrap">
-                        <span className="text-[10px] font-bold text-slate-400">対象:</span>
-                        <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-white/80 text-slate-700 border border-slate-200/60">
-                          {genre.highlight}
-                        </span>
+
+                      {/* 専門種目ピルタグ (重複文言を解消) */}
+                      <div className="mt-3 flex items-center gap-1.5 flex-wrap">
+                        {genre.tags.map((tag) => (
+                          <span
+                            key={tag}
+                            className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-white/85 text-slate-700 border border-slate-200/60 shadow-2xs"
+                          >
+                            {tag}
+                          </span>
+                        ))}
                       </div>
                     </div>
                   </button>
@@ -1579,15 +1610,35 @@ export const CustomerView: React.FC = () => {
         <BookingModal
           therapistId={bookingTherapistId}
           onClose={() => setBookingTherapistId(null)}
-          onSuccess={(id) => {
-            const bookedTp = therapistProfiles[bookingTherapistId];
+          onSuccess={(id, openChatImmediately) => {
             const bookedUser = allUsers.find((u) => u.id === bookingTherapistId);
             setBookingTherapistId(null);
             setBookedSuccessInfo({
               id,
               name: bookedUser?.name || 'セラピスト',
             });
+            if (openChatImmediately) {
+              const b = bookings.find((x) => x.id === id);
+              if (b) {
+                setChatBooking(b);
+              } else {
+                setTimeout(() => {
+                  const targetBooking = bookings.find((x) => x.id === id);
+                  if (targetBooking) setChatBooking(targetBooking);
+                }, 150);
+              }
+            }
           }}
+        />
+      )}
+
+      {/* チャットモーダル */}
+      {chatBooking && (
+        <BookingChatModal
+          booking={chatBooking}
+          onClose={() => setChatBooking(null)}
+          activeUserId={currentUser.id}
+          viewerRole="customer"
         />
       )}
     </div>

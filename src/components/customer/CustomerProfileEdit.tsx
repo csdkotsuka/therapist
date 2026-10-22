@@ -82,6 +82,7 @@ export const CustomerProfileEdit: React.FC = () => {
         const item = data.results[0];
         setPrefecture(item.address1);
         setCity(`${item.address2}${item.address3}`);
+        setBuilding(''); // 郵便番号変更時は前回のマンション名・部屋番号を消去
 
         const full = `${item.address1}${item.address2}${item.address3}`;
         const geo = await geocodeAddress(full);

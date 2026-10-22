@@ -150,13 +150,13 @@ export const Header: React.FC = () => {
                     alt={currentUser.name}
                     className="w-7 h-7 rounded-full object-cover ring-2 ring-emerald-500/20"
                   />
-                  <div className="text-left hidden md:block">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-bold text-slate-800 hover:text-emerald-700 transition">
-                        {currentUser.name}
-                      </span>
+                  <div className="text-left flex items-center gap-1.5">
+                    <span className="text-xs font-bold text-slate-800 hover:text-emerald-700 transition max-w-[90px] sm:max-w-[140px] truncate">
+                      {currentUser.name}
+                    </span>
+                    <span className="hidden sm:inline-block">
                       {getRoleBadge(currentUser.role)}
-                    </div>
+                    </span>
                   </div>
                 </Link>
               </>

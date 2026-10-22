@@ -20,12 +20,25 @@ import {
 interface BookingChatModalProps {
   booking: Booking;
   onClose: () => void;
+  activeUserId?: string;
+  viewerRole?: 'customer' | 'therapist';
 }
 
-export const BookingChatModal: React.FC<BookingChatModalProps> = ({ booking, onClose }) => {
+export const BookingChatModal: React.FC<BookingChatModalProps> = ({
+  booking,
+  onClose,
+  activeUserId,
+  viewerRole,
+}) => {
   const { currentUser, allUsers, services, messages, sendChatMessage, markMessagesAsRead } = useApp();
 
-  const isTherapist = currentUser.id === booking.therapist_id;
+  // 表示しているユーザーがセラピスト視点か顧客視点かを特定
+  const isTherapist =
+    viewerRole === 'therapist' ||
+    (activeUserId ? activeUserId === booking.therapist_id : currentUser.id === booking.therapist_id);
+
+  // 自分のIDとお相手のID
+  const myUserId = isTherapist ? booking.therapist_id : booking.customer_id;
   const partnerId = isTherapist ? booking.customer_id : booking.therapist_id;
   const partnerUser = allUsers.find((u) => u.id === partnerId);
   const service = services.find((s) => s.id === booking.service_id);
@@ -39,8 +52,8 @@ export const BookingChatModal: React.FC<BookingChatModalProps> = ({ booking, onC
 
   // 開いた時に既読処理
   useEffect(() => {
-    markMessagesAsRead(booking.id);
-  }, [booking.id, bookingMessages.length, markMessagesAsRead]);
+    markMessagesAsRead(booking.id, myUserId);
+  }, [booking.id, bookingMessages.length, markMessagesAsRead, myUserId]);
 
   // 新着メッセージで最下部へスクロール
   useEffect(() => {
@@ -64,7 +77,7 @@ export const BookingChatModal: React.FC<BookingChatModalProps> = ({ booking, onC
 
     setIsSending(true);
     try {
-      await sendChatMessage(booking.id, partnerId, text);
+      await sendChatMessage(booking.id, partnerId, text, myUserId);
       setInputText('');
     } catch (err) {
       console.error('Failed to send message:', err);
@@ -158,7 +171,7 @@ export const BookingChatModal: React.FC<BookingChatModalProps> = ({ booking, onC
             </div>
           ) : (
             bookingMessages.map((msg) => {
-              const isMine = msg.sender_id === currentUser.id;
+              const isMine = msg.sender_id === myUserId;
 
               return (
                 <div

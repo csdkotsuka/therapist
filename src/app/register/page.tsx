@@ -77,6 +77,7 @@ export default function CustomerRegisterPage() {
         const item = data.results[0];
         setPrefecture(item.address1);
         setCity(`${item.address2}${item.address3}`);
+        setBuilding(''); // 郵便番号変更時は前回のマンション名をクリア
 
         const full = `${item.address1}${item.address2}${item.address3}`;
         const geo = await geocodeAddress(full);

@@ -80,8 +80,8 @@ interface AppContextType {
   logout: () => void;
   setUserLocation: (loc: UserLocation) => void;
   switchUser: (userId: string) => void;
-  sendChatMessage: (bookingId: string, receiverId: string, content: string) => Promise<ChatMessage>;
-  markMessagesAsRead: (bookingId: string) => void;
+  sendChatMessage: (bookingId: string, receiverId: string, content: string, senderId?: string) => Promise<ChatMessage>;
+  markMessagesAsRead: (bookingId: string, readerId?: string) => void;
   createBooking: (booking: Omit<Booking, 'id' | 'created_at' | 'platform_fee' | 'therapist_earnings' | 'status'>) => Promise<Booking>;
   updateBookingStatus: (bookingId: string, status: BookingStatus) => Promise<void>;
   updateTherapistLocation: (bookingId: string, lat: number, lng: number) => Promise<void>;
@@ -469,11 +469,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  const sendChatMessage = async (bookingId: string, receiverId: string, content: string): Promise<ChatMessage> => {
+  const sendChatMessage = async (
+    bookingId: string,
+    receiverId: string,
+    content: string,
+    senderId?: string
+  ): Promise<ChatMessage> => {
+    const actualSenderId = senderId || currentUser.id;
     const newMessage: ChatMessage = {
       id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `msg-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`,
       booking_id: bookingId,
-      sender_id: currentUser.id,
+      sender_id: actualSenderId,
       receiver_id: receiverId,
       content,
       created_at: new Date().toISOString(),
@@ -500,10 +506,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return newMessage;
   };
 
-  const markMessagesAsRead = async (bookingId: string) => {
+  const markMessagesAsRead = async (bookingId: string, readerId?: string) => {
+    const actualReaderId = readerId || currentUser.id;
     setMessages((prev) =>
       prev.map((m) =>
-        m.booking_id === bookingId && m.receiver_id === currentUser.id
+        m.booking_id === bookingId && m.receiver_id === actualReaderId
           ? { ...m, is_read: true }
           : m
       )
@@ -515,7 +522,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           .from('chat_messages')
           .update({ is_read: true })
           .eq('booking_id', bookingId)
-          .eq('receiver_id', currentUser.id);
+          .eq('receiver_id', actualReaderId);
       } catch (err) {
         console.warn('Supabase chat message mark as read warning:', err);
       }

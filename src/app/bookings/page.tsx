@@ -21,6 +21,12 @@ import {
   Clock,
   HeartPulse,
   MessageCircle,
+  AlertTriangle,
+  XCircle,
+  Info,
+  Shield,
+  X,
+  Award,
 } from 'lucide-react';
 
 export default function BookingsPage() {
@@ -33,11 +39,15 @@ export default function BookingsPage() {
     reviews,
     messages,
     currentBrand,
+    updateBookingStatus,
   } = useApp();
 
   const [trackingBooking, setTrackingBooking] = useState<Booking | null>(null);
   const [reviewBooking, setReviewBooking] = useState<Booking | null>(null);
   const [chatBooking, setChatBooking] = useState<Booking | null>(null);
+  const [cancellingBooking, setCancellingBooking] = useState<Booking | null>(null);
+  const [showPolicyModal, setShowPolicyModal] = useState<boolean>(false);
+  const [isCancelling, setIsCancelling] = useState<boolean>(false);
 
   // ログインユーザーの予約一覧
   const myBookings = bookings.filter((b) => b.customer_id === currentUser.id);
@@ -101,13 +111,23 @@ export default function BookingsPage() {
             </div>
           </div>
 
-          <Link
-            href="/"
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-xs"
-          >
-            <Search className="w-4 h-4 text-emerald-400" />
-            <span>新しい施術を探す</span>
-          </Link>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowPolicyModal(true)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition"
+            >
+              <Info className="w-4 h-4 text-slate-500" />
+              <span>キャンセル規定</span>
+            </button>
+
+            <Link
+              href="/"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-xs"
+            >
+              <Search className="w-4 h-4 text-emerald-400" />
+              <span>新しい施術を探す</span>
+            </Link>
+          </div>
         </div>
 
         {/* 予約リスト */}
@@ -129,7 +149,7 @@ export default function BookingsPage() {
             </Link>
           </div>
         ) : (
-          <div className="space-y-3.5">
+          <div className="space-y-4">
             {myBookings.map((b) => {
               const therapist = therapistProfiles[b.therapist_id];
               const therapistUser = allUsers.find((u) => u.id === b.therapist_id);
@@ -142,97 +162,160 @@ export default function BookingsPage() {
               return (
                 <div
                   key={b.id}
-                  className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-2xs hover:shadow-xs transition flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                  className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-2xs hover:shadow-xs transition space-y-4"
                 >
-                  <div className="flex items-start gap-4 flex-1 min-w-0">
-                    <img
-                      src={therapistUser?.avatar_url || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150'}
-                      alt={therapistUser?.name || 'セラピスト'}
-                      className="w-14 h-14 rounded-2xl object-cover ring-2 ring-emerald-500/20 shrink-0"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-bold text-slate-900 text-sm">{therapistUser?.name}</span>
-                        {getStatusBadge(b.status)}
-                        {b.serial_number && (
-                          <span className="text-[10px] text-slate-400 font-mono">
-                            {b.serial_number}
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="flex items-start gap-4 flex-1 min-w-0">
+                      <img
+                        src={therapistUser?.avatar_url || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150'}
+                        alt={therapistUser?.name || 'セラピスト'}
+                        className="w-16 h-16 rounded-2xl object-cover ring-2 ring-emerald-500/20 shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        {/* 施術者名・資格・ステータス */}
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-bold text-slate-900 text-base">{therapistUser?.name}</span>
+                          {therapist?.specialities && therapist.specialities.length > 0 && (
+                            <span className="text-[11px] bg-emerald-50 text-emerald-800 font-bold px-2 py-0.5 rounded-md border border-emerald-200/60">
+                              {therapist.specialities[0]}
+                            </span>
+                          )}
+                          {getStatusBadge(b.status)}
+                          {b.serial_number && (
+                            <span className="text-[10px] text-slate-400 font-mono">
+                              {b.serial_number}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* 店舗名・評価スコア */}
+                        <div className="flex flex-wrap items-center gap-2 mt-1 text-xs">
+                          {therapist?.store_name && (
+                            <span className="font-semibold text-slate-700 flex items-center gap-1">
+                              <Building className="w-3.5 h-3.5 text-teal-600" />
+                              {therapist.store_name}
+                            </span>
+                          )}
+                          <div className="flex items-center gap-1 text-amber-500 font-bold">
+                            <Star className="w-3.5 h-3.5 fill-amber-400" />
+                            <span>{therapist?.rating_avg || 5.0}</span>
+                            <span className="text-slate-400 font-normal">({therapist?.reviews_count || 0}件)</span>
+                          </div>
+                        </div>
+
+                        {/* 施術メニュー */}
+                        <h4 className="text-xs font-bold text-slate-800 mt-1.5 flex items-center gap-1.5">
+                          <span className="text-emerald-700">コース:</span>
+                          <span>{service?.title || '施術コース'}</span>
+                        </h4>
+
+                        {/* 予約日時・スタイル・料金 */}
+                        <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-slate-600">
+                          <span className="inline-flex items-center gap-1 font-bold text-slate-800 bg-slate-50 px-2 py-1 rounded-lg border border-slate-200">
+                            <Calendar className="w-3.5 h-3.5 text-emerald-600" />
+                            {formatDate(b.scheduled_at)}
                           </span>
+                          <span className="inline-flex items-center gap-1 bg-slate-50 px-2 py-1 rounded-lg border border-slate-200">
+                            {b.booking_type === 'visit' ? (
+                              <Home className="w-3.5 h-3.5 text-emerald-600" />
+                            ) : (
+                              <Building className="w-3.5 h-3.5 text-teal-600" />
+                            )}
+                            {b.booking_type === 'visit' ? '出張施術 (訪問)' : '店舗来店'}
+                          </span>
+                          <span className="font-black text-sm text-slate-900">
+                            {formatPrice(b.total_amount)}
+                          </span>
+                        </div>
+
+                        {/* 出張先住所 */}
+                        {b.booking_type === 'visit' && b.visit_address && (
+                          <p className="text-[11px] text-slate-500 mt-2 bg-amber-50/60 p-2 rounded-xl border border-amber-200/60 flex items-start gap-1">
+                            <span className="font-bold text-amber-900 shrink-0">訪問先:</span>
+                            <span className="text-slate-800">{b.visit_address}</span>
+                          </p>
+                        )}
+
+                        {/* セラピスト自己紹介・メッセージ（少し詳しく） */}
+                        {therapist?.bio && (
+                          <p className="text-[11px] text-slate-500 mt-1.5 line-clamp-2 bg-slate-50 p-2 rounded-xl">
+                            <strong className="text-slate-700">施術者プロフィール: </strong>
+                            {therapist.bio}
+                          </p>
                         )}
                       </div>
-
-                      <h4 className="text-xs font-semibold text-slate-700 mt-1 line-clamp-1">
-                        {service?.title || '施術コース'}
-                      </h4>
-
-                      <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-slate-500">
-                        <span className="inline-flex items-center gap-1 font-medium text-slate-700">
-                          <Calendar className="w-3.5 h-3.5 text-emerald-600" />
-                          {formatDate(b.scheduled_at)}
-                        </span>
-                        <span className="inline-flex items-center gap-1">
-                          {b.booking_type === 'visit' ? (
-                            <Home className="w-3.5 h-3.5 text-emerald-600" />
-                          ) : (
-                            <Building className="w-3.5 h-3.5 text-teal-600" />
-                          )}
-                          {b.booking_type === 'visit' ? '出張施術' : '店舗訪問'}
-                        </span>
-                        <span className="font-bold text-slate-900">
-                          {formatPrice(b.total_amount)}
-                        </span>
-                      </div>
-
-                      {b.booking_type === 'visit' && b.visit_address && (
-                        <p className="text-[11px] text-slate-400 mt-1.5 line-clamp-1">
-                          訪問先: {b.visit_address}
-                        </p>
-                      )}
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap sm:flex-col items-end gap-2 w-full sm:w-auto shrink-0 border-t sm:border-t-0 pt-3 sm:pt-0">
-                    {/* メッセージチャットボタン */}
-                    <button
-                      onClick={() => setChatBooking(b)}
-                      className="px-3.5 py-1.5 bg-white hover:bg-emerald-50 text-slate-800 border border-slate-300 hover:border-emerald-400 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs relative"
-                      title="セラピストとメッセージで連絡"
-                    >
-                      <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>メッセージ</span>
-                      {unreadCount > 0 && (
-                        <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                  {/* アクションボタンバー */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-100">
+                    <div className="flex items-center gap-2">
+                      {/* キャンセルポリシー確認ボタン */}
+                      <button
+                        type="button"
+                        onClick={() => setShowPolicyModal(true)}
+                        className="text-[11px] text-slate-400 hover:text-slate-600 underline flex items-center gap-1"
+                      >
+                        <Info className="w-3 h-3" />
+                        <span>キャンセル規定を確認</span>
+                      </button>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                      {/* キャンセルボタン（pending または confirmed時） */}
+                      {(b.status === 'pending' || b.status === 'confirmed') && (
+                        <button
+                          type="button"
+                          onClick={() => setCancellingBooking(b)}
+                          className="px-3 py-1.5 rounded-xl border border-rose-200 hover:bg-rose-50 text-rose-600 text-xs font-bold transition flex items-center gap-1 shadow-2xs"
+                        >
+                          <XCircle className="w-3.5 h-3.5" />
+                          <span>予約をキャンセル</span>
+                        </button>
                       )}
-                    </button>
 
-                    {/* 出張施術かつ確定済みならリアルタイム追跡ボタン */}
-                    {b.booking_type === 'visit' && (b.status === 'confirmed' || b.status === 'pending') && (
+                      {/* メッセージチャットボタン */}
                       <button
-                        onClick={() => setTrackingBooking(b)}
-                        className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs"
+                        onClick={() => setChatBooking(b)}
+                        className="px-3.5 py-1.5 bg-white hover:bg-emerald-50 text-slate-800 border border-slate-300 hover:border-emerald-400 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs relative"
+                        title="セラピストとメッセージで連絡"
                       >
-                        <Car className="w-3.5 h-3.5 text-emerald-400" />
-                        <span>セラピスト現在地を追跡</span>
+                        <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>メッセージ</span>
+                        {unreadCount > 0 && (
+                          <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                        )}
                       </button>
-                    )}
 
-                    {/* 完了時にレビュー投稿 */}
-                    {b.status === 'completed' && !hasReviewed && (
-                      <button
-                        onClick={() => setReviewBooking(b)}
-                        className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs"
-                      >
-                        <Star className="w-3.5 h-3.5 fill-white" />
-                        <span>評価・レビューを投稿</span>
-                      </button>
-                    )}
+                      {/* 出張施術かつ確定済みならリアルタイム追跡ボタン */}
+                      {b.booking_type === 'visit' && (b.status === 'confirmed' || b.status === 'pending') && (
+                        <button
+                          onClick={() => setTrackingBooking(b)}
+                          className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs"
+                        >
+                          <Car className="w-3.5 h-3.5 text-emerald-400" />
+                          <span>現在地を追跡</span>
+                        </button>
+                      )}
 
-                    {hasReviewed && (
-                      <span className="text-[11px] text-emerald-600 font-bold flex items-center gap-1">
-                        <CheckCircle className="w-3.5 h-3.5" />
-                        レビュー投稿済み
-                      </span>
-                    )}
+                      {/* 完了時にレビュー投稿 */}
+                      {b.status === 'completed' && !hasReviewed && (
+                        <button
+                          onClick={() => setReviewBooking(b)}
+                          className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs"
+                        >
+                          <Star className="w-3.5 h-3.5 fill-white" />
+                          <span>評価・レビューを投稿</span>
+                        </button>
+                      )}
+
+                      {hasReviewed && (
+                        <span className="text-[11px] text-emerald-600 font-bold flex items-center gap-1">
+                          <CheckCircle className="w-3.5 h-3.5" />
+                          レビュー投稿済み
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
@@ -287,7 +370,159 @@ export default function BookingsPage() {
         <BookingChatModal
           booking={chatBooking}
           onClose={() => setChatBooking(null)}
+          activeUserId={currentUser.id}
+          viewerRole="customer"
         />
+      )}
+
+      {/* キャンセルポリシー確認・実行モーダル */}
+      {cancellingBooking && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-100 overflow-hidden animate-fadeIn">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-rose-50/60">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-rose-600" />
+                <h3 className="font-bold text-rose-950 text-sm">予約のキャンセル確認</h3>
+              </div>
+              <button
+                onClick={() => setCancellingBooking(null)}
+                className="w-8 h-8 rounded-full bg-white hover:bg-slate-100 text-slate-500 flex items-center justify-center transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-xs space-y-1.5">
+                <div className="flex justify-between">
+                  <span className="text-slate-500">予約日時:</span>
+                  <span className="font-bold text-slate-900">{formatDate(cancellingBooking.scheduled_at)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">ステータス:</span>
+                  <span className="font-bold text-slate-800">
+                    {cancellingBooking.status === 'pending' ? '承認待ち（キャンセル料無料）' : '予約確定済み'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">返金予定額:</span>
+                  <span className="font-bold text-emerald-600">
+                    {cancellingBooking.status === 'pending' ? `${formatPrice(cancellingBooking.total_amount)} (全額無料)` : `${formatPrice(cancellingBooking.total_amount)} (規定に基づき返金)`}
+                  </span>
+                </div>
+              </div>
+
+              {/* キャンセル規定の案内 */}
+              <div className="p-3.5 bg-amber-50/70 border border-amber-200/80 rounded-2xl text-xs space-y-2 text-amber-950">
+                <div className="font-bold flex items-center gap-1.5 text-amber-900">
+                  <Shield className="w-4 h-4 text-amber-600" />
+                  <span>キャンセルポリシーについて</span>
+                </div>
+                <ul className="list-disc list-inside text-[11px] text-amber-900/90 space-y-1 pl-1">
+                  <li><strong>承認待ちリクエスト:</strong> セラピスト承認前はいつでも【キャンセル料無料】です。</li>
+                  <li><strong>前日23:59まで:</strong> キャンセル手数料なし（全額返金・カード枠解除）となります。</li>
+                  <li><strong>当日キャンセル:</strong> 施術開始時刻前は50%、開始後の無断キャンセルは100%が発生します。</li>
+                </ul>
+              </div>
+
+              <p className="text-xs text-slate-600">
+                本当にこの予約をキャンセルしますか？キャンセルされた予約は元に戻せません。
+              </p>
+
+              <div className="flex items-center justify-end gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setCancellingBooking(null)}
+                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 rounded-xl"
+                >
+                  戻る
+                </button>
+                <button
+                  type="button"
+                  disabled={isCancelling}
+                  onClick={async () => {
+                    setIsCancelling(true);
+                    try {
+                      await updateBookingStatus(cancellingBooking.id, 'cancelled');
+                      setCancellingBooking(null);
+                      alert('予約をキャンセルしました。仮決済枠は自動的に解除・返金されます。');
+                    } catch (e) {
+                      alert('キャンセル処理中にエラーが発生しました');
+                    } finally {
+                      setIsCancelling(false);
+                    }
+                  }}
+                  className="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow-xs transition disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  <XCircle className="w-3.5 h-3.5" />
+                  <span>{isCancelling ? 'キャンセル処理中...' : '予約をキャンセルする'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* キャンセルポリシー閲覧モーダル */}
+      {showPolicyModal && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-100 overflow-hidden animate-fadeIn">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+              <div className="flex items-center gap-2">
+                <Shield className="w-5 h-5 text-emerald-600" />
+                <h3 className="font-bold text-slate-900 text-sm">安心キャンセルポリシー</h3>
+              </div>
+              <button
+                onClick={() => setShowPolicyModal(false)}
+                className="w-8 h-8 rounded-full bg-white hover:bg-slate-100 text-slate-500 flex items-center justify-center transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4 text-xs text-slate-700">
+              <div className="space-y-3">
+                <div className="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-200">
+                  <h4 className="font-bold text-emerald-900 text-xs mb-1">1. 承認待ち（Pending）時</h4>
+                  <p className="text-[11px] text-emerald-800">
+                    セラピストが予約リクエストを承認する前であれば、いつでもキャンセル料無料（0円）でキャンセル可能です。クレジットカードの事前与信枠も即時解除されます。
+                  </p>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+                  <h4 className="font-bold text-slate-900 text-xs mb-1">2. 予約確定後〜施術前日 23:59 まで</h4>
+                  <p className="text-[11px] text-slate-600">
+                    急な予定変更や体調不良でも、前日23:59までならキャンセル料は一切かかりません。マイ予約画面からワンタップでキャンセルできます。
+                  </p>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-amber-50/60 border border-amber-200">
+                  <h4 className="font-bold text-amber-900 text-xs mb-1">3. 施術当日（開始予定時刻前）</h4>
+                  <p className="text-[11px] text-amber-800">
+                    セラピストの移動手配や枠確保のため、施術料金の50%のキャンセル料を頂戴いたします（残額50%は返金されます）。
+                  </p>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-rose-50/60 border border-rose-200">
+                  <h4 className="font-bold text-rose-900 text-xs mb-1">4. 施術開始時刻以降 または 無断キャンセル</h4>
+                  <p className="text-[11px] text-rose-800">
+                    施術開始時刻を過ぎてのキャンセル、または訪問時にご不在の場合は、施術料金の100%を頂戴いたします。
+                  </p>
+                </div>
+              </div>
+
+              <div className="pt-2 text-center">
+                <button
+                  type="button"
+                  onClick={() => setShowPolicyModal(false)}
+                  className="px-6 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-xs transition"
+                >
+                  閉じる
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
