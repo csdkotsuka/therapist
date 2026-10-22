@@ -447,56 +447,34 @@ export const CustomerView: React.FC = () => {
            セラピスト表示画面: 戻るボタン・絞り込み・ソート・ビュー切替・一覧
            ======================================================== */
         <div className="space-y-4 animate-fadeIn">
-          {/* 上部ナビゲーション: 戻るボタン ＆ カテゴリ切替ピル */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => {
-                  setSelectedCategory(null);
-                  setSearchQuery('');
-                }}
-                className="px-3.5 py-2 rounded-2xl bg-white border border-slate-200 hover:border-slate-300 text-slate-700 hover:text-slate-900 text-xs font-bold shadow-2xs hover:shadow-xs transition flex items-center gap-1.5 active:scale-95 group shrink-0"
-              >
-                <ArrowLeft className="w-4 h-4 text-slate-500 group-hover:-translate-x-0.5 transition-transform" />
-                <span>メニュー一覧に戻る</span>
-              </button>
+          {/* 上部ナビゲーション: メニュー一覧に戻るボタン ＆ 選択中のジャンル表示 */}
+          <div className="flex items-center justify-between gap-3 pb-3 border-b border-slate-100">
+            <button
+              onClick={() => {
+                setSelectedCategory(null);
+                setSearchQuery('');
+              }}
+              className="px-3.5 py-2 rounded-2xl bg-white border border-slate-200 hover:border-slate-300 text-slate-700 hover:text-slate-900 text-xs font-bold shadow-2xs hover:shadow-xs transition flex items-center gap-1.5 active:scale-95 group shrink-0"
+            >
+              <ArrowLeft className="w-4 h-4 text-slate-500 group-hover:-translate-x-0.5 transition-transform" />
+              <span>メニュー一覧に戻る</span>
+            </button>
 
-              {currentCategoryInfo && (
-                <div className="flex items-center gap-2">
-                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${currentCategoryInfo.bgColor} ${currentCategoryInfo.iconColor}`}>
-                    {React.createElement(currentCategoryInfo.icon, { className: 'w-4 h-4' })}
-                  </div>
-                  <div>
-                    <h3 className="font-black text-sm sm:text-base text-slate-900 leading-none">
-                      {currentCategoryInfo.label}
-                    </h3>
-                    <p className="text-[11px] text-slate-500 mt-0.5 hidden sm:block">
-                      {currentCategoryInfo.subtitle}
-                    </p>
-                  </div>
+            {currentCategoryInfo && (
+              <div className="flex items-center gap-2">
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${currentCategoryInfo.bgColor} ${currentCategoryInfo.iconColor}`}>
+                  {React.createElement(currentCategoryInfo.icon, { className: 'w-4 h-4' })}
                 </div>
-              )}
-            </div>
-
-            {/* 他のカテゴリにもすぐ切り替えられるコンパクトなピルタブ */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
-              {categories.map((cat) => {
-                const isSelected = selectedCategory === cat.id;
-                return (
-                  <button
-                    key={cat.id}
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition ${
-                      isSelected
-                        ? 'bg-slate-900 text-white shadow-2xs'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                    }`}
-                  >
-                    {cat.label}
-                  </button>
-                );
-              })}
-            </div>
+                <div>
+                  <h3 className="font-black text-sm sm:text-base text-slate-900 leading-none">
+                    {currentCategoryInfo.label}
+                  </h3>
+                  <p className="text-[11px] text-slate-500 mt-0.5 hidden sm:block">
+                    {currentCategoryInfo.subtitle}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* 絞り込み＆ソート ボタングループ */}
