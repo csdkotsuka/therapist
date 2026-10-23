@@ -304,7 +304,7 @@ export const Header: React.FC = () => {
                   }`}
                 >
                   <span className="block text-base">⚙️</span>
-                  <span>管理本部</span>
+                  <span>管理ポータル</span>
                 </button>
               </div>
             </div>
@@ -359,7 +359,7 @@ export const Header: React.FC = () => {
               <div className="space-y-2">
                 <span className="text-xs font-bold text-purple-800 flex items-center gap-1.5 uppercase tracking-wider">
                   <span>⚙️</span>
-                  <span>プラットフォーム管理メニュー</span>
+                  <span>管理ポータルメニュー</span>
                 </span>
                 <div className="space-y-1">
                   {adminMenuItems.map((item) => {

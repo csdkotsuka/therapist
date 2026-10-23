@@ -136,6 +136,7 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
     onboarding?.claimed_qualification_type || QUALIFICATION_TYPES[0]
   );
   const [stepFeedback, setStepFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [termsInlineFeedback, setTermsInlineFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isStepBusy, setIsStepBusy] = useState<boolean>(false);
 
   // 管理者審査・承認用ステート（isAdminViewer時）
@@ -925,27 +926,61 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
                       disabled={(!allTermsChecked && !termsDone) || isStepBusy}
                       onClick={async () => {
                         setIsStepBusy(true);
+                        setTermsInlineFeedback(null);
                         try {
                           const res = await submitTermsAgreement(targetUser.id, signatureName, claimedQualification);
                           setStepFeedback({ type: res.ok ? 'success' : 'error', text: res.message });
+                          setTermsInlineFeedback({
+                            type: res.ok ? 'success' : 'error',
+                            text: res.ok ? `✓ 電子署名を正常に記録・更新しました（${signatureName} 名義）` : res.message,
+                          });
                         } finally {
                           setIsStepBusy(false);
                         }
                       }}
-                      className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-300 text-white text-xs font-bold transition cursor-pointer"
+                      className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-300 text-white text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 shadow-sm active:scale-98"
                     >
-                      {termsDone ? '電子署名を更新する' : '誓約事項に同意して電子署名する'}
+                      {isStepBusy ? (
+                        <span>処理中...</span>
+                      ) : termsDone ? (
+                        <span>電子署名を更新する</span>
+                      ) : (
+                        <span>誓約事項に同意して電子署名する</span>
+                      )}
                     </button>
                   </div>
                 </div>
+
+                {/* 署名ステータス・更新フィードバック */}
+                {termsInlineFeedback && (
+                  <div
+                    className={`p-3 rounded-xl border text-xs font-bold flex items-center gap-2 animate-fadeIn ${
+                      termsInlineFeedback.type === 'success'
+                        ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
+                        : 'bg-rose-50 border-rose-300 text-rose-800'
+                    }`}
+                  >
+                    <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+                    <span>{termsInlineFeedback.text}</span>
+                  </div>
+                )}
+
+                {onboarding?.terms_agreed_at && !termsInlineFeedback && (
+                  <div className="p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-200 text-[11px] text-emerald-800 flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+                    <span>
+                      <strong>署名完了済:</strong> {onboarding.terms_signature_name} 名義（同意日時: {new Date(onboarding.terms_agreed_at).toLocaleString('ja-JP')}）
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* 3-B: 資格証 & 保険証票アップロード */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* 保有資格証 */}
+                {/* 保有資格証・認定証 */}
                 <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-black text-slate-900">③ 保有資格証（国家資格免状 PDF/画像）</span>
+                    <span className="text-xs font-black text-slate-900">③ 資格証・認定証・修了証（画像/PDF）</span>
                     {qualDone ? (
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
                         {isCertified ? '確認＆自動削除済' : '提出済'}
@@ -961,7 +996,7 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
                       ? '運営承認完了に伴い、一時保管バケットから完全削除されました。'
                       : onboarding?.qualification_file_name
                       ? `提出ファイル: ${onboarding.qualification_file_name}`
-                      : 'PT/OT/ST/助産師等の免状画像またはPDF（10MB以下）を選択してください。'}
+                      : '国家資格免状、民間認定証、各種ディプロマ、スクール修了証などの画像またはPDF（10MB以下）を選択してください。※リラクゼーション・ネイル等で資格不問の場合は、実績や経験が分かる資料・修了証でも可。'}
                   </p>
                   {!isCertified && (
                     <div className="flex flex-wrap items-center gap-2">
@@ -980,7 +1015,7 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
                         onClick={() => handleSampleDocUpload('qualification')}
                         className="px-3 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-bold transition cursor-pointer"
                       >
-                        サンプル免状画像を提出
+                        サンプル資格・認定証を提出
                       </button>
                     </div>
                   )}
@@ -1041,7 +1076,9 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
                   </span>
                   <div>
                     <h4 className="font-black text-slate-900 text-sm">
-                      【Step 4】運営管理画面での簡易チェック ＆ 自動データ削除付き本登録承認
+                      {isAdminViewer
+                        ? '【Step 4】運営管理画面での簡易チェック ＆ 自動データ削除付き本登録承認'
+                        : '【Step 4】運営本部による審査・本登録承認（原本書類は自動削除）'}
                     </h4>
                     <p className="text-xs text-slate-500">
                       運営本部にて Stripe 認証氏名と資格証氏名を照合後、本登録承認と同時に提出ファイルは Storage から完全自動削除されます。
@@ -1640,7 +1677,7 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
                           <div className="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold flex items-center gap-1.5 shadow-2xs">
                             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
                             <Navigation className="w-3.5 h-3.5 text-emerald-600" />
-                            <span>GPS常時自動送信中</span>
+                            <span>GPS</span>
                           </div>
                         )}
 
@@ -1653,7 +1690,7 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
                           className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-md shadow-emerald-600/20 flex items-center gap-1.5"
                         >
                           <CheckCircle2 className="w-4 h-4" />
-                          <span>施術完了を報告 (顧客確認・サイン)</span>
+                          <span>施術完了報告</span>
                         </button>
                       </div>
                     </div>

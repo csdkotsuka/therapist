@@ -301,7 +301,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
               Admin Console
             </span>
           </div>
-          <h2 className="text-xl font-bold mt-1">{currentBrand.japaneseName} ({currentBrand.name}) 管理本部</h2>
+          <h2 className="text-xl font-bold mt-1">{currentBrand.japaneseName} ({currentBrand.name}) 管理ポータル</h2>
         </div>
 
         <div className="flex items-center gap-2 bg-slate-800/80 px-4 py-2 rounded-2xl border border-slate-700">
@@ -1149,7 +1149,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                       <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between space-y-3">
                         <div>
                           <div className="flex items-center justify-between">
-                            <span className="text-xs font-black text-slate-900">③ 保有資格証（免状画像/PDF）</span>
+                            <span className="text-xs font-black text-slate-900">③ 資格証・認定証・修了証（画像/PDF）</span>
                             <span className="text-[10px] font-mono text-slate-500">{STORAGE_BUCKET}/</span>
                           </div>
                           <p className="text-[11px] text-slate-500 mt-0.5">

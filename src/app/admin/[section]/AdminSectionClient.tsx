@@ -37,12 +37,12 @@ export function AdminSectionClient({ rawSection }: { rawSection: string }) {
     <div className="min-h-screen flex flex-col bg-slate-50/50">
       <Header />
 
-      {/* 管理本部トップインジケータ */}
+      {/* 管理ポータルトップインジケータ */}
       <div className="bg-purple-950 text-white text-xs px-4 py-2 border-b border-purple-800">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="font-bold bg-purple-700 px-2 py-0.5 rounded text-[11px]">
-              ⚙️ 管理本部
+              ⚙️ 管理ポータル
             </span>
           </div>
         </div>
@@ -62,7 +62,7 @@ export function AdminSectionClient({ rawSection }: { rawSection: string }) {
               dangerouslySetInnerHTML={{ __html: currentBrand.iconSvg }}
             />
             <span className="font-bold text-slate-800">{currentBrand.japaneseName} ({currentBrand.name})</span>
-            <span className="text-[11px] text-slate-400">- プラットフォーム統括管理コンソール</span>
+            <span className="text-[11px] text-slate-400">- 管理ポータル</span>
           </div>
 
           <div className="flex items-center gap-4 text-slate-500">

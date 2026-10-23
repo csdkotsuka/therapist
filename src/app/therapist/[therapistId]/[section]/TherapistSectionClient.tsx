@@ -113,7 +113,7 @@ export function TherapistSectionClient({
             </Link>
             {isAdminViewer && (
               <Link href="/admin/therapists" className="hover:text-purple-600 font-bold transition">
-                管理本部へ戻る
+                管理ポータルへ戻る
               </Link>
             )}
           </div>
