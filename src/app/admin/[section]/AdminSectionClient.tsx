@@ -42,7 +42,7 @@ export function AdminSectionClient({ rawSection }: { rawSection: string }) {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="font-bold bg-purple-700 px-2 py-0.5 rounded text-[11px]">
-              ⚙️ プラットフォーム管理本部
+              ⚙️ 管理本部
             </span>
           </div>
         </div>

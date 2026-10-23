@@ -301,10 +301,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
               Admin Console
             </span>
           </div>
-          <h2 className="text-xl font-bold mt-1">{currentBrand.japaneseName} ({currentBrand.name}) プラットフォーム管理本部</h2>
-          <p className="text-xs text-slate-400 mt-0.5">
-            全予約の監視・セラピスト承認・売上分配・手数料率・ブランドロゴ設定
-          </p>
+          <h2 className="text-xl font-bold mt-1">{currentBrand.japaneseName} ({currentBrand.name}) 管理本部</h2>
         </div>
 
         <div className="flex items-center gap-2 bg-slate-800/80 px-4 py-2 rounded-2xl border border-slate-700">
@@ -876,10 +873,11 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
 
                           <Link
                             href={`/therapist/${th.id}/requests`}
-                            className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition"
-                            title="セラピスト画面を開く"
+                            className="px-2.5 py-1 rounded-lg text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition flex items-center gap-1 whitespace-nowrap shadow-2xs"
+                            title="セラピスト画面（詳細）を開く"
                           >
-                            <Eye className="w-3.5 h-3.5" />
+                            <Eye className="w-3.5 h-3.5 text-slate-500" />
+                            <span>詳細</span>
                           </Link>
                         </div>
                       </div>

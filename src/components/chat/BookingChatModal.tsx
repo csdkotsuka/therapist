@@ -45,6 +45,7 @@ export const BookingChatModal: React.FC<BookingChatModalProps> = ({
 
   const [inputText, setInputText] = useState('');
   const [isSending, setIsSending] = useState(false);
+  const [isComposing, setIsComposing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // 対象予約のメッセージ一覧
@@ -75,10 +76,11 @@ export const BookingChatModal: React.FC<BookingChatModalProps> = ({
     const text = inputText.trim();
     if (!text || isSending) return;
 
+    // 送信開始時に入力テキストをクリア
+    setInputText('');
     setIsSending(true);
     try {
       await sendChatMessage(booking.id, partnerId, text, myUserId);
-      setInputText('');
     } catch (err) {
       console.error('Failed to send message:', err);
     } finally {
@@ -87,6 +89,10 @@ export const BookingChatModal: React.FC<BookingChatModalProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // IME入力中・変換確定Enterの場合は送信しない
+    if (e.nativeEvent.isComposing || isComposing || e.key === 'Process' || e.keyCode === 229) {
+      return;
+    }
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -221,6 +227,7 @@ export const BookingChatModal: React.FC<BookingChatModalProps> = ({
           <form
             onSubmit={(e) => {
               e.preventDefault();
+              if (isComposing) return;
               handleSend();
             }}
             className="flex items-center gap-2"
@@ -230,6 +237,8 @@ export const BookingChatModal: React.FC<BookingChatModalProps> = ({
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={handleKeyDown}
+              onCompositionStart={() => setIsComposing(true)}
+              onCompositionEnd={() => setIsComposing(false)}
               placeholder="メッセージを入力... (Enterで送信)"
               className="flex-1 px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-2xl text-xs text-slate-800 placeholder-slate-400 focus:outline-emerald-500 focus:bg-white transition"
             />
