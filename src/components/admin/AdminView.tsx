@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
@@ -138,6 +138,18 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
   // メッセージ監視の絞り込み状態
   const [msgSearch, setMsgSearch] = useState<string>('');
   const [msgFilter, setMsgFilter] = useState<'all' | 'suspicious' | 'customer' | 'therapist'>('all');
+
+  // 横スクロールタブで現在のアクティブタブを可視領域に自動スクロール
+  const activeTabNavRef = useRef<HTMLAnchorElement>(null);
+  useEffect(() => {
+    if (activeTabNavRef.current) {
+      activeTabNavRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center',
+      });
+    }
+  }, [activeTab]);
 
   // 全体メトリクス
   const totalGMV = bookings
@@ -351,19 +363,34 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
               </div>
             </div>
 
-            {/* クイックタブ（横スクロール可能） */}
-            <div className="flex items-center gap-1.5 overflow-x-auto py-1 shrink-0">
+            {/* クイックタブ（横スクロール可能・現在開いているタブに自動追従） */}
+            <div className="flex items-center gap-1.5 overflow-x-auto py-1 shrink-0 max-w-full sm:max-w-md lg:max-w-xl scrollbar-none">
               {adminSections.map((sec) => (
                 <Link
                   key={sec.id}
+                  ref={activeTab === sec.id ? activeTabNavRef : undefined}
                   href={`/admin/${sec.id}`}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap shrink-0 ${
                     activeTab === sec.id
-                      ? 'bg-purple-900 text-white shadow-xs'
+                      ? 'bg-purple-900 text-white shadow-xs ring-2 ring-purple-600/30'
                       : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
                   }`}
                 >
-                  {sec.id === 'kpi' ? 'KPI' : sec.id === 'bookings' ? '予約監視' : sec.id === 'therapists' ? '審査管理' : sec.id === 'customers' ? '顧客' : sec.id === 'reviews' ? 'レビュー' : sec.id === 'branding' ? 'ブランド' : '設定'}
+                  {sec.id === 'kpi'
+                    ? 'KPI'
+                    : sec.id === 'bookings'
+                    ? '予約監視'
+                    : sec.id === 'therapists'
+                    ? '審査管理'
+                    : sec.id === 'customers'
+                    ? '顧客'
+                    : sec.id === 'messages'
+                    ? 'メッセージ'
+                    : sec.id === 'reviews'
+                    ? 'レビュー'
+                    : sec.id === 'branding'
+                    ? 'ブランド'
+                    : '設定'}
                 </Link>
               ))}
             </div>

@@ -35,11 +35,13 @@ const TrackingLeafletMap = dynamic(
 interface LiveTrackingModalProps {
   booking: Booking;
   onClose: () => void;
+  onOpenChat?: () => void;
 }
 
 export const LiveTrackingModal: React.FC<LiveTrackingModalProps> = ({
   booking,
   onClose,
+  onOpenChat,
 }) => {
   const { allUsers, therapistProfiles, updateTherapistLocation } = useApp();
 
@@ -241,9 +243,14 @@ export const LiveTrackingModal: React.FC<LiveTrackingModalProps> = ({
                 <Phone className="w-4 h-4" />
               </a>
               <button
-                onClick={() => alert('セラピストへのメッセージ機能（チャット）を開きます')}
+                type="button"
+                onClick={() => {
+                  if (onOpenChat) {
+                    onOpenChat();
+                  }
+                }}
                 className="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-400 flex items-center justify-center border border-slate-700 transition"
-                title="チャットを開く"
+                title="メッセージを送る"
               >
                 <MessageSquare className="w-4 h-4" />
               </button>
@@ -265,18 +272,6 @@ export const LiveTrackingModal: React.FC<LiveTrackingModalProps> = ({
               </div>
             )}
           </div>
-
-          <div className="flex items-center justify-between text-xs text-slate-400 pt-2 border-t border-slate-800">
-            <span>安心・安全の身元確認済みセラピスト</span>
-            <span className="inline-flex items-center gap-1 text-emerald-400">
-              <ShieldCheck className="w-4 h-4" />
-              本人確認・資格確認済
-            </span>
-          </div>
-
-          <p className="text-[10px] text-slate-500 text-center">
-            ※ ESCキー または 背景をクリックするとモーダルを閉じることができます
-          </p>
         </div>
       </div>
     </div>

@@ -420,6 +420,11 @@ export default function BookingsPage() {
         <LiveTrackingModal
           booking={trackingBooking}
           onClose={() => setTrackingBooking(null)}
+          onOpenChat={() => {
+            const b = trackingBooking;
+            setTrackingBooking(null);
+            setChatBooking(b);
+          }}
         />
       )}
 

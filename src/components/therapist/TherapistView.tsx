@@ -117,7 +117,6 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
   const [activeTab, setActiveTab] = useState<TherapistSection>(
     activeSection || (isCertified ? 'requests' : 'verification')
   );
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     if (activeSection) {
@@ -503,7 +502,7 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
         return (
           <div className="space-y-4">
             <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex items-center justify-between gap-4">
-              {/* 現在の画面タイトル表示 (大きく分かりやすい) */}
+              {/* 現在の画面タイトル表示 */}
               <div className="flex items-center gap-3.5 min-w-0">
                 <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center shrink-0 shadow-2xs">
                   <CurrentIcon className="w-6 h-6" />
@@ -524,93 +523,7 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
                   </p>
                 </div>
               </div>
-
-              {/* ハンバーガーメニューボタン */}
-              <button
-                type="button"
-                onClick={() => setIsMenuOpen(true)}
-                className="px-4 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-bold transition flex items-center gap-2 shadow-md shrink-0"
-              >
-                <Menu className="w-5 h-5 text-emerald-400" />
-                <span>メニュー</span>
-                {pendingRequests.length > 0 && (
-                  <span className="w-5 h-5 bg-rose-500 text-white text-[10px] rounded-full flex items-center justify-center font-black animate-pulse">
-                    {pendingRequests.length}
-                  </span>
-                )}
-              </button>
             </div>
-
-            {/* ハンバーガーメニュードロワー / ポップオーバー */}
-            {isMenuOpen && (
-              <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-fadeIn">
-                <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[90vh]">
-                  {/* Header */}
-                  <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-                    <div className="flex items-center gap-2">
-                      <Menu className="w-5 h-5 text-emerald-600" />
-                      <h3 className="font-bold text-slate-900 text-base">セラピスト管理メニュー</h3>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setIsMenuOpen(false)}
-                      className="p-1.5 rounded-full hover:bg-slate-200/60 text-slate-400 hover:text-slate-600 transition"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
-
-                  {/* Menu Items List */}
-                  <div className="p-4 overflow-y-auto space-y-2">
-                    {menuItems.map((item) => {
-                      const Icon = item.icon;
-                      const isActive = activeTab === item.id;
-                      return (
-                        <Link
-                          key={item.id}
-                          href={`/therapist/${targetUser.id}/${item.id}`}
-                          onClick={() => {
-                            setActiveTab(item.id);
-                            setIsMenuOpen(false);
-                          }}
-                          className={`p-3.5 rounded-2xl border flex items-center justify-between gap-3 transition ${
-                            isActive
-                              ? 'bg-emerald-50 border-emerald-400 ring-2 ring-emerald-500/20 shadow-xs'
-                              : 'bg-white border-slate-200/80 hover:bg-slate-50'
-                          }`}
-                        >
-                          <div className="flex items-center gap-3 min-w-0">
-                            <div
-                              className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                                isActive ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600'
-                              }`}
-                            >
-                              <Icon className="w-5 h-5" />
-                            </div>
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-2">
-                                <span className={`text-sm font-bold ${isActive ? 'text-emerald-950 font-black' : 'text-slate-900'}`}>
-                                  {item.label}
-                                </span>
-                                {item.badge && (
-                                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${item.badgeColor}`}>
-                                    {item.badge}
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-[11px] text-slate-500 truncate mt-0.5">
-                                {item.desc}
-                              </p>
-                            </div>
-                          </div>
-                          <ChevronRight className={`w-4 h-4 shrink-0 ${isActive ? 'text-emerald-600 font-bold' : 'text-slate-400'}`} />
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         );
       })()}
