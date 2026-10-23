@@ -56,7 +56,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
     return `${y}-${m}-${day}`;
   };
 
-  // ステップ管理: 1: メニュー・日時選択, 2: 決済・確認, 3: 完了
+  // ステップ管理: 1: メニュー・日時選択, 2: 内容確認・リクエスト送信, 3: 完了
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
   // 予約フォーム状態
@@ -74,14 +74,9 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   // 時間指定: 30分刻みスロット または 直接指定
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>('14:00');
   const [visitAddress, setVisitAddress] = useState<string>(
-    currentUser.address || '東京都渋谷区神宮前5-1-1 表参道レジデンス402号室'
+    currentUser.address || '愛媛県松山市一番町1-1-1'
   );
   const [notes, setNotes] = useState<string>('');
-
-  // クレジットカードダミー情報
-  const [cardNumber, setCardNumber] = useState<string>('4242 •••• •••• 4242');
-  const [cardExpiry, setCardExpiry] = useState<string>('12/28');
-  const [cardCvc, setCardCvc] = useState<string>('123');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [createdBookingId, setCreatedBookingId] = useState<string>('');
 
@@ -178,7 +173,6 @@ export const BookingModal: React.FC<BookingModalProps> = ({
         booking_type: bookingType,
         scheduled_at: targetDate.toISOString(),
         total_amount: currentService.price,
-        stripe_payment_intent_id: `pi_mock_${Date.now()}`,
         lat: bookingLat,
         lng: bookingLng,
         visit_address: bookingType === 'visit' ? visitAddress : therapist.address,
@@ -535,10 +529,38 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
           {step === 2 && (
             <div className="space-y-6">
+              {/* ご予約の流れガイダンス */}
+              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4">
+                <h4 className="text-xs font-bold text-emerald-900 mb-2 flex items-center gap-1.5">
+                  <Sparkles className="w-4 h-4 text-emerald-600" />
+                  <span>ご予約・決済の流れ</span>
+                </h4>
+                <div className="grid grid-cols-3 gap-2 text-center text-[11px] pt-1">
+                  <div className="bg-white p-2.5 rounded-xl border border-emerald-300 shadow-2xs font-bold text-emerald-800">
+                    <span className="block text-[10px] text-emerald-500">STEP 1</span>
+                    ① リクエスト送信
+                    <span className="block text-[9px] text-emerald-600 font-normal mt-0.5">（現在）</span>
+                  </div>
+                  <div className="bg-white/80 p-2.5 rounded-xl border border-emerald-200 font-bold text-slate-700">
+                    <span className="block text-[10px] text-slate-400">STEP 2</span>
+                    ② セラピスト承諾
+                    <span className="block text-[9px] text-slate-400 font-normal mt-0.5">空き時間を承認</span>
+                  </div>
+                  <div className="bg-white/80 p-2.5 rounded-xl border border-emerald-200 font-bold text-slate-700">
+                    <span className="block text-[10px] text-slate-400">STEP 3</span>
+                    ③ 決済・予約確定
+                    <span className="block text-[9px] text-slate-400 font-normal mt-0.5">マイ予約から決済</span>
+                  </div>
+                </div>
+                <p className="text-[11px] text-emerald-800 mt-2.5 bg-emerald-100/60 p-2 rounded-lg leading-relaxed">
+                  💡 <strong>この段階ではカード決済は発生しません。</strong>セラピストが希望日時を確認し、承諾した後に決済手続きを行っていただく安心のシステムです。
+                </p>
+              </div>
+
               {/* 予約内容サマリー */}
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
                 <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  予約内容の確認
+                  予約リクエスト内容
                 </h4>
                 <div className="flex justify-between text-xs">
                   <span className="text-slate-500">セラピスト</span>
@@ -566,68 +588,16 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                     {getFormattedSelectedDateString()} {selectedTimeSlot}〜{calculateEndTime(selectedTimeSlot, currentService?.duration_minutes)} ({currentService?.duration_minutes}分)
                   </span>
                 </div>
+                {notes && (
+                  <div className="flex justify-between text-xs pt-1 border-t border-slate-200">
+                    <span className="text-slate-500 shrink-0">ご要望</span>
+                    <span className="font-medium text-slate-700 text-right max-w-[220px] truncate">{notes}</span>
+                  </div>
+                )}
                 <div className="pt-2 border-t border-slate-200 flex justify-between items-center text-sm">
-                  <span className="font-bold text-slate-800">お支払い合計</span>
+                  <span className="font-bold text-slate-800">承諾後の決済予定額</span>
                   <span className="text-lg font-black text-emerald-600">
                     {formatPrice(currentService?.price || 0)}
-                  </span>
-                </div>
-              </div>
-
-              {/* Stripe決済入力シミュレーター */}
-              <div className="border border-slate-200 rounded-2xl p-4 space-y-4 bg-white shadow-xs">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 bg-blue-50 text-blue-600 rounded-lg">
-                      <CreditCard className="w-4 h-4" />
-                    </div>
-                    <span className="text-xs font-bold text-slate-900">
-                      Stripe Connect 安全決済
-                    </span>
-                  </div>
-                  <span className="inline-flex items-center gap-1 text-[11px] text-slate-400">
-                    <Lock className="w-3 h-3 text-emerald-500" />
-                    SSL 256-bit 暗号化
-                  </span>
-                </div>
-
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-[11px] text-slate-500 mb-1 font-medium">カード番号</label>
-                    <input
-                      type="text"
-                      value={cardNumber}
-                      onChange={(e) => setCardNumber(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-mono text-slate-800 focus:outline-emerald-500"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-[11px] text-slate-500 mb-1 font-medium">有効期限</label>
-                      <input
-                        type="text"
-                        value={cardExpiry}
-                        onChange={(e) => setCardExpiry(e.target.value)}
-                        className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-mono text-slate-800 focus:outline-emerald-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[11px] text-slate-500 mb-1 font-medium">セキュリティコード (CVC)</label>
-                      <input
-                        type="password"
-                        value={cardCvc}
-                        onChange={(e) => setCardCvc(e.target.value)}
-                        className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-mono text-slate-800 focus:outline-emerald-500"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-3 bg-slate-50 rounded-xl text-[11px] text-slate-500 flex items-start gap-2">
-                  <Info className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
-                  <span>
-                    セラピストが予約リクエストを承認するまで、カードへの実請求は発生しません（事前与信枠の確保のみ行われます）。
                   </span>
                 </div>
               </div>
@@ -641,8 +611,9 @@ export const BookingModal: React.FC<BookingModalProps> = ({
               </div>
               <div>
                 <h3 className="text-lg font-bold text-slate-900">予約リクエストを送信しました！</h3>
-                <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-                  セラピストが内容を確認後、承認通知が届きます。事前にメッセージで相談や駐車場の案内なども行えます。
+                <p className="text-xs text-slate-600 mt-1 max-w-md mx-auto leading-relaxed">
+                  セラピストが希望日時と空き状況を確認します。<br />
+                  セラピストによる<strong>承諾後に「マイ予約一覧」から決済</strong>を行うことで予約確定となります。
                 </p>
               </div>
 
@@ -652,17 +623,17 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   <span className="font-mono font-bold text-slate-700">{createdBookingId}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">予約日時:</span>
+                  <span className="text-slate-500">希望日時:</span>
                   <span className="font-bold text-slate-800">
                     {getFormattedSelectedDateString()} {selectedTimeSlot}〜
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">ステータス:</span>
-                  <span className="font-bold text-amber-600">承認待ち (Pending)</span>
+                  <span className="font-bold text-amber-600">セラピスト確認・承諾待ち</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">仮決済金額:</span>
+                  <span className="text-slate-500">承諾後のお支払い額:</span>
                   <span className="font-bold text-slate-900">{formatPrice(currentService.price)}</span>
                 </div>
               </div>
@@ -689,7 +660,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   }}
                   className="w-full sm:w-auto px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-xs transition"
                 >
-                  予約履歴・追跡画面へ
+                  マイ予約一覧へ
                 </button>
               </div>
             </div>
@@ -724,7 +695,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 onClick={() => setStep(2)}
                 className="px-6 py-2.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-500/20 transition flex items-center gap-2"
               >
-                <span>お支払いへ進む</span>
+                <span>予約リクエストの確認へ</span>
                 <span className="font-black">({formatPrice(currentService?.price || 0)})</span>
               </button>
             ) : (
@@ -732,14 +703,14 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 type="button"
                 disabled={isSubmitting}
                 onClick={handleSubmitBooking}
-                className="px-6 py-2.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-500/20 transition flex items-center gap-2 disabled:opacity-50"
+                className="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-600/20 transition flex items-center gap-2 disabled:opacity-50"
               >
                 {isSubmitting ? (
                   <span>予約リクエスト送信中...</span>
                 ) : (
                   <>
-                    <Lock className="w-3.5 h-3.5" />
-                    <span>予約を確定する ({formatPrice(currentService?.price || 0)})</span>
+                    <Calendar className="w-3.5 h-3.5" />
+                    <span>予約リクエストを送信する</span>
                   </>
                 )}
               </button>

@@ -552,6 +552,8 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                           className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                             b.status === 'confirmed'
                               ? 'bg-emerald-100 text-emerald-800'
+                              : b.status === 'awaiting_payment'
+                              ? 'bg-teal-100 text-teal-800'
                               : b.status === 'pending'
                               ? 'bg-amber-100 text-amber-800'
                               : b.status === 'completed'
@@ -559,7 +561,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                               : 'bg-rose-100 text-rose-800'
                           }`}
                         >
-                          {b.status}
+                          {b.status === 'awaiting_payment' ? '承諾・決済待ち' : b.status === 'pending' ? '承認待ち' : b.status === 'confirmed' ? '予約確定' : b.status === 'completed' ? '完了' : 'キャンセル'}
                         </span>
                       </td>
                       <td className="px-6 py-3.5 text-right">

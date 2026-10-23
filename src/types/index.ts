@@ -6,7 +6,7 @@ export type UserRole = 'admin' | 'therapist' | 'customer';
 
 export type BookingType = 'visit' | 'store';
 
-export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
+export type BookingStatus = 'pending' | 'awaiting_payment' | 'confirmed' | 'completed' | 'cancelled';
 
 export interface Profile {
   id: string;
@@ -155,6 +155,8 @@ export interface Booking {
   platform_fee: number;
   therapist_earnings: number;
   stripe_payment_intent_id?: string;
+  is_paid?: boolean;
+  paid_at?: string;
   lat?: number;
   lng?: number;
   visit_address?: string;

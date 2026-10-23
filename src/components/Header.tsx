@@ -37,6 +37,11 @@ export const Header: React.FC = () => {
     (b) => b.customer_id === currentUser.id
   ).length;
 
+  // 顧客の決済待ち件数
+  const awaitingPaymentCount = bookings.filter(
+    (b) => b.customer_id === currentUser.id && b.status === 'awaiting_payment'
+  ).length;
+
   const getRoleBadge = (role: string) => {
     switch (role) {
       case 'admin':
@@ -128,11 +133,16 @@ export const Header: React.FC = () => {
                 >
                   <Calendar className="w-3.5 h-3.5 text-emerald-600" />
                   <span className="hidden sm:inline">マイ予約</span>
-                  {myBookingsCount > 0 && (
+                  {awaitingPaymentCount > 0 ? (
+                    <span className="px-1.5 py-0.2 bg-rose-500 text-white text-[10px] rounded-full font-bold animate-pulse flex items-center gap-0.5" title="決済待ちの予約があります">
+                      <span>💳</span>
+                      <span>{awaitingPaymentCount}</span>
+                    </span>
+                  ) : myBookingsCount > 0 ? (
                     <span className="px-1.5 py-0.2 bg-emerald-500 text-white text-[10px] rounded-full font-bold">
                       {myBookingsCount}
                     </span>
-                  )}
+                  ) : null}
                 </Link>
 
                 {/* 顧客名 & アバター: クリックで登録情報・住所変更ページ（/profile）へ遷移 */}

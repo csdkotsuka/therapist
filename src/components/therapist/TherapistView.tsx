@@ -56,6 +56,8 @@ import {
   Award,
   Trash2,
   ClipboardCheck,
+  Menu,
+  ChevronRight,
 } from 'lucide-react';
 
 export type TherapistSection =
@@ -115,6 +117,7 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
   const [activeTab, setActiveTab] = useState<TherapistSection>(
     activeSection || (isCertified ? 'requests' : 'verification')
   );
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     if (activeSection) {
@@ -257,6 +260,7 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
   const totalNetEarnings = completedBookings.reduce((sum, b) => sum + b.therapist_earnings, 0);
   const totalPlatformFees = completedBookings.reduce((sum, b) => sum + b.platform_fee, 0);
   const pendingRequests = myBookings.filter((b) => b.status === 'pending');
+  const awaitingPaymentBookings = myBookings.filter((b) => b.status === 'awaiting_payment');
   const activeBookings = myBookings.filter((b) => b.status === 'confirmed');
 
   const daysOfWeek = [
@@ -341,213 +345,283 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
         </div>
       )}
 
-      {/* セラピストステータスバナー */}
-      <div className="bg-gradient-to-r from-emerald-800 to-teal-900 text-white rounded-3xl p-6 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-        <div className="flex items-center gap-4">
+      {/* シンプル＆特大テキストのセラピストダッシュボード */}
+      <div className="bg-gradient-to-r from-emerald-800 via-teal-800 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col lg:flex-row lg:items-center justify-between gap-6 border border-emerald-700/50">
+        {/* セラピスト概要 (名前・認定ステータス・評価) */}
+        <div className="flex items-center gap-5">
           <img
             src={targetUser.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(targetUser.name)}`}
             alt={targetUser.name}
-            className="w-16 h-16 rounded-2xl object-cover ring-4 ring-emerald-400/30 shrink-0"
+            className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover ring-4 ring-emerald-400/30 shrink-0 shadow-lg"
           />
-          <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-lg font-bold">{targetUser.name} セラピスト</h2>
+          <div className="space-y-1.5">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+                {targetUser.name}
+              </h2>
               {isCertified ? (
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-400/20 text-emerald-200 border border-emerald-400/30 flex items-center gap-1">
-                  <Award className="w-3 h-3" />
-                  <span>本登録・専門認定済パートナー</span>
+                <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-400/20 text-emerald-200 border border-emerald-400/40 flex items-center gap-1.5 shadow-xs">
+                  <Award className="w-4 h-4 text-emerald-300" />
+                  <span>専門認定パートナー</span>
                 </span>
               ) : (
                 <Link
                   href={`/therapist/${targetUser.id}/verification`}
-                  className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-400 text-slate-950 flex items-center gap-1 shadow-xs"
+                  className="px-3 py-1 rounded-full text-xs font-bold bg-amber-400 text-slate-950 flex items-center gap-1.5 shadow-xs hover:bg-amber-300 transition"
                 >
-                  <ClipboardCheck className="w-3 h-3" />
-                  <span>本登録審査: {stageMeta.label}（手続きへ）</span>
+                  <ClipboardCheck className="w-4 h-4" />
+                  <span>本登録審査: {stageMeta.label}</span>
                 </Link>
               )}
-              {therapist?.is_store_based && (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-400/20 text-teal-200 border border-teal-400/30 flex items-center gap-1">
-                  <Building className="w-3 h-3" />
-                  <span>店舗あり</span>
-                </span>
-              )}
-              {therapist?.is_visit_based && (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-400/20 text-emerald-200 border border-emerald-400/30 flex items-center gap-1">
-                  <Home className="w-3 h-3" />
-                  <span>出張対応</span>
-                </span>
-              )}
-              {therapist?.campaign && (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-rose-500 to-amber-500 text-white flex items-center gap-1 shadow-xs">
-                  <Gift className="w-3 h-3" />
-                  <span>特典掲載中: {therapist.campaign.badge}</span>
-                </span>
+            </div>
+
+            {/* 評価 ＆ スタイル */}
+            <div className="flex flex-wrap items-center gap-3 text-base text-emerald-100 font-semibold">
+              <span className="flex items-center gap-1 text-amber-300 font-bold text-lg">
+                <Star className="w-5 h-5 fill-amber-300 text-amber-300" />
+                <span>{therapist?.rating_avg || '5.0'}</span>
+                <span className="text-emerald-200/80 text-sm font-normal">({therapist?.reviews_count || 0}件)</span>
+              </span>
+              <span className="text-emerald-300/60">•</span>
+              <span className="text-sm sm:text-base text-emerald-100">
+                {therapist?.is_visit_based && therapist?.is_store_based
+                  ? '出張 ＆ 店舗対応'
+                  : therapist?.is_visit_based
+                  ? '出張施術専門'
+                  : 'サロン店舗施術'}
+              </span>
+              {therapist?.store_name && (
+                <>
+                  <span className="text-emerald-300/60">•</span>
+                  <span className="text-sm sm:text-base text-teal-200 truncate max-w-xs">{therapist.store_name}</span>
+                </>
               )}
             </div>
-            <p className="text-xs text-emerald-200 mt-1 line-clamp-1 max-w-md">
-              {therapist?.store_name ? `【店舗】${therapist.store_name} • ` : ''}
-              {therapist?.bio || 'プロフィール設定中'}
-            </p>
-            <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-emerald-100">
-              <span>★ 評価 {therapist?.rating_avg || '5.0'} ({therapist?.reviews_count || 0}件)</span>
-              {therapist?.is_visit_based && (
-                <>
-                  <span>•</span>
-                  <span>出張対応半径: {visitRadius}km</span>
-                </>
-              )}
-              {therapist?.is_store_based && therapist?.store_address && (
-                <>
-                  <span>•</span>
-                  <span className="flex items-center gap-1 text-teal-200">
-                    <Building className="w-3.5 h-3.5" />
-                    <span>店舗住所: {therapist.store_address}</span>
-                  </span>
-                </>
-              )}
-              <span>•</span>
-              <Link
-                href={`/therapist/${targetUser.id}/campaign`}
-                className="text-[11px] underline underline-offset-2 text-amber-200 hover:text-white flex items-center gap-1 font-bold"
+          </div>
+        </div>
+
+        {/* 右側: 振込可能残高 ＆ 予約ステータスピル */}
+        <div className="flex flex-col sm:flex-row lg:flex-col items-start sm:items-center lg:items-end justify-between gap-4 border-t lg:border-t-0 border-emerald-700/50 pt-4 lg:pt-0">
+          <div className="text-left sm:text-right lg:text-right">
+            <span className="text-xs sm:text-sm font-bold text-emerald-200 uppercase tracking-wider block">
+              振込可能残高
+            </span>
+            <span className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">
+              {formatPrice(totalNetEarnings)}
+            </span>
+          </div>
+
+          {/* クイックカウンターピル */}
+          <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
+            <span
+              onClick={() => setActiveTab('requests')}
+              className={`px-3 py-1.5 rounded-xl cursor-pointer transition flex items-center gap-1.5 ${
+                pendingRequests.length > 0
+                  ? 'bg-rose-500 text-white shadow-md animate-pulse'
+                  : 'bg-emerald-950/60 text-emerald-200 border border-emerald-500/20'
+              }`}
+            >
+              <span>承認待ち:</span>
+              <strong className="text-sm font-black">{pendingRequests.length}件</strong>
+            </span>
+
+            {awaitingPaymentBookings.length > 0 && (
+              <span
+                onClick={() => setActiveTab('requests')}
+                className="px-3 py-1.5 rounded-xl bg-amber-500 text-slate-950 font-black cursor-pointer shadow-md flex items-center gap-1.5"
               >
-                <Gift className="w-3.5 h-3.5" />
-                <span>{therapist?.campaign ? '特典を変更する' : '特典・キャンペーンを追加する'}</span>
-              </Link>
+                <span>決済待ち:</span>
+                <strong className="text-sm">{awaitingPaymentBookings.length}件</strong>
+              </span>
+            )}
+
+            <span
+              onClick={() => setActiveTab('requests')}
+              className="px-3 py-1.5 rounded-xl bg-emerald-950/60 text-emerald-200 border border-emerald-500/20 cursor-pointer hover:bg-emerald-900 transition flex items-center gap-1.5"
+            >
+              <span>確定:</span>
+              <strong className="text-sm font-black">{activeBookings.length}件</strong>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* すっきりハンバーガーメニュー・バー */}
+      {(() => {
+        const menuItems = [
+          {
+            id: 'requests' as const,
+            label: '予約リクエスト・進行中',
+            icon: Calendar,
+            badge: pendingRequests.length > 0 ? `${pendingRequests.length}件 承諾待ち` : undefined,
+            badgeColor: 'bg-rose-500 text-white animate-pulse',
+            desc: '未対応リクエストの承諾や、お客様の決済待ち・確定予約の管理',
+          },
+          {
+            id: 'schedule' as const,
+            label: '営業時間・シフト・出張設定',
+            icon: Clock,
+            desc: '出張受付半径や稼働シフト・店舗営業情報の設定',
+          },
+          {
+            id: 'campaign' as const,
+            label: '特典・キャンペーン設定',
+            icon: Gift,
+            badge: therapist?.campaign ? '掲載中' : undefined,
+            badgeColor: 'bg-rose-500 text-white',
+            desc: '初回クーポンや特典バッジの設定',
+          },
+          {
+            id: 'services' as const,
+            label: `施術メニュー管理 (${myServices.length})`,
+            icon: Sliders,
+            desc: '提供メニューの料金や所要時間の登録・編集',
+          },
+          {
+            id: 'reviews' as const,
+            label: `お客様の評価・口コミ (${myReviews.length})`,
+            icon: Star,
+            desc: 'お客様からのレビューと星評価の確認',
+          },
+          {
+            id: 'earnings' as const,
+            label: '売上・振込明細',
+            icon: DollarSign,
+            desc: '振込可能残高や受取明細の確認',
+          },
+          {
+            id: 'profile' as const,
+            label: 'プロフィール & 店舗情報編集',
+            icon: Building,
+            desc: '基本情報、サロン住所、写真の編集',
+          },
+          {
+            id: 'verification' as const,
+            label: '4ステップ本登録・審査手続き',
+            icon: ShieldCheck,
+            badge: stageMeta.label,
+            badgeColor: stageMeta.badge,
+            desc: '国家資格証・損害保険の提出と認証ステータス',
+          },
+        ];
+
+        const currentMenuItem = menuItems.find((m) => m.id === activeTab) || menuItems[0];
+        const CurrentIcon = currentMenuItem.icon;
+
+        return (
+          <div className="space-y-4">
+            <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex items-center justify-between gap-4">
+              {/* 現在の画面タイトル表示 (大きく分かりやすい) */}
+              <div className="flex items-center gap-3.5 min-w-0">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center shrink-0 shadow-2xs">
+                  <CurrentIcon className="w-6 h-6" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h1 className="text-lg sm:text-xl font-black text-slate-900 truncate">
+                      {currentMenuItem.label}
+                    </h1>
+                    {currentMenuItem.badge && (
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${currentMenuItem.badgeColor}`}>
+                        {currentMenuItem.badge}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-slate-500 truncate hidden sm:block">
+                    {currentMenuItem.desc}
+                  </p>
+                </div>
+              </div>
+
+              {/* ハンバーガーメニューボタン */}
+              <button
+                type="button"
+                onClick={() => setIsMenuOpen(true)}
+                className="px-4 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-bold transition flex items-center gap-2 shadow-md shrink-0"
+              >
+                <Menu className="w-5 h-5 text-emerald-400" />
+                <span>メニュー</span>
+                {pendingRequests.length > 0 && (
+                  <span className="w-5 h-5 bg-rose-500 text-white text-[10px] rounded-full flex items-center justify-center font-black animate-pulse">
+                    {pendingRequests.length}
+                  </span>
+                )}
+              </button>
             </div>
+
+            {/* ハンバーガーメニュードロワー / ポップオーバー */}
+            {isMenuOpen && (
+              <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-fadeIn">
+                <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[90vh]">
+                  {/* Header */}
+                  <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                    <div className="flex items-center gap-2">
+                      <Menu className="w-5 h-5 text-emerald-600" />
+                      <h3 className="font-bold text-slate-900 text-base">セラピスト管理メニュー</h3>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="p-1.5 rounded-full hover:bg-slate-200/60 text-slate-400 hover:text-slate-600 transition"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  {/* Menu Items List */}
+                  <div className="p-4 overflow-y-auto space-y-2">
+                    {menuItems.map((item) => {
+                      const Icon = item.icon;
+                      const isActive = activeTab === item.id;
+                      return (
+                        <Link
+                          key={item.id}
+                          href={`/therapist/${targetUser.id}/${item.id}`}
+                          onClick={() => {
+                            setActiveTab(item.id);
+                            setIsMenuOpen(false);
+                          }}
+                          className={`p-3.5 rounded-2xl border flex items-center justify-between gap-3 transition ${
+                            isActive
+                              ? 'bg-emerald-50 border-emerald-400 ring-2 ring-emerald-500/20 shadow-xs'
+                              : 'bg-white border-slate-200/80 hover:bg-slate-50'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div
+                              className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                                isActive ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600'
+                              }`}
+                            >
+                              <Icon className="w-5 h-5" />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className={`text-sm font-bold ${isActive ? 'text-emerald-950 font-black' : 'text-slate-900'}`}>
+                                  {item.label}
+                                </span>
+                                {item.badge && (
+                                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${item.badgeColor}`}>
+                                    {item.badge}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-[11px] text-slate-500 truncate mt-0.5">
+                                {item.desc}
+                              </p>
+                            </div>
+                          </div>
+                          <ChevronRight className={`w-4 h-4 shrink-0 ${isActive ? 'text-emerald-600 font-bold' : 'text-slate-400'}`} />
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-
-        {/* Stripe Express 連携状態 */}
-        <div className="bg-emerald-950/40 backdrop-blur-md rounded-2xl p-4 border border-emerald-500/20 text-right w-full md:w-auto">
-          <div className="flex items-center gap-2 justify-end text-xs text-emerald-300">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-            <span>Stripe Connect Express 連携済</span>
-          </div>
-          <div className="mt-1">
-            <span className="text-[10px] text-emerald-200 block">振込可能残高</span>
-            <span className="text-2xl font-black text-white">{formatPrice(totalNetEarnings)}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* ナビゲーションタブ（各メニュー独立URL対応） */}
-      <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 border-b border-slate-200 pb-3">
-        <Link
-          href={`/therapist/${targetUser.id}/requests`}
-          className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap shadow-2xs ${
-            activeTab === 'requests'
-              ? 'bg-slate-900 text-white shadow-md'
-              : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
-          }`}
-        >
-          <Calendar className="w-4 h-4" />
-          <span>予約リクエスト・進行中</span>
-          {pendingRequests.length > 0 && (
-            <span className="w-5 h-5 bg-rose-500 text-white text-[10px] rounded-full flex items-center justify-center font-bold animate-pulse">
-              {pendingRequests.length}
-            </span>
-          )}
-        </Link>
-
-        <Link
-          href={`/therapist/${targetUser.id}/schedule`}
-          className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap shadow-2xs ${
-            activeTab === 'schedule'
-              ? 'bg-slate-900 text-white shadow-md'
-              : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
-          }`}
-        >
-          <Clock className="w-4 h-4" />
-          <span>営業時間・シフト・出張設定</span>
-        </Link>
-
-        <Link
-          href={`/therapist/${targetUser.id}/campaign`}
-          className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap shadow-2xs ${
-            activeTab === 'campaign'
-              ? 'bg-gradient-to-r from-rose-600 to-amber-600 text-white shadow-md'
-              : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
-          }`}
-        >
-          <Gift className={`w-4 h-4 ${activeTab === 'campaign' ? 'text-white' : 'text-rose-500'}`} />
-          <span>特典・キャンペーン設定</span>
-          {therapist?.campaign ? (
-            <span className="px-1.5 py-0.2 rounded-full text-[9px] font-black bg-rose-500 text-white">
-              掲載中
-            </span>
-          ) : (
-            <span className="w-2 h-2 rounded-full bg-slate-300"></span>
-          )}
-        </Link>
-
-        <Link
-          href={`/therapist/${targetUser.id}/services`}
-          className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap shadow-2xs ${
-            activeTab === 'services'
-              ? 'bg-slate-900 text-white shadow-md'
-              : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
-          }`}
-        >
-          <Sliders className="w-4 h-4" />
-          <span>施術メニュー管理 ({myServices.length})</span>
-        </Link>
-
-        <Link
-          href={`/therapist/${targetUser.id}/reviews`}
-          className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap shadow-2xs ${
-            activeTab === 'reviews'
-              ? 'bg-slate-900 text-white shadow-md'
-              : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
-          }`}
-        >
-          <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
-          <span>お客様の評価・口コミ ({myReviews.length})</span>
-        </Link>
-
-        <Link
-          href={`/therapist/${targetUser.id}/earnings`}
-          className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap shadow-2xs ${
-            activeTab === 'earnings'
-              ? 'bg-slate-900 text-white shadow-md'
-              : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
-          }`}
-        >
-          <DollarSign className="w-4 h-4" />
-          <span>売上・振込明細</span>
-        </Link>
-
-        <Link
-          href={`/therapist/${targetUser.id}/profile`}
-          className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap shadow-2xs ${
-            activeTab === 'profile'
-              ? 'bg-slate-900 text-white shadow-md'
-              : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
-          }`}
-        >
-          <Building className="w-4 h-4 text-teal-500" />
-          <span>👤 プロフィール & 店舗情報編集</span>
-        </Link>
-
-        <Link
-          href={`/therapist/${targetUser.id}/verification`}
-          className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap shadow-2xs ${
-            activeTab === 'verification'
-              ? 'bg-indigo-700 text-white shadow-md'
-              : !isCertified
-              ? 'bg-amber-50 text-amber-900 border-2 border-amber-400 hover:bg-amber-100'
-              : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
-          }`}
-        >
-          <ShieldCheck className="w-4 h-4 text-emerald-500" />
-          <span>📋 4ステップ本登録・資格証/保険証提出</span>
-          <span
-            className={`px-2 py-0.2 rounded-full text-[9px] font-black border ${stageMeta.badge}`}
-          >
-            {stageMeta.label}
-          </span>
-        </Link>
-      </div>
+        );
+      })()}
 
       {/* タブ 0: 4ステップ本登録・審査手続きウィザード */}
       {activeTab === 'verification' && (() => {
@@ -1406,11 +1480,14 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
                           <span>辞退</span>
                         </button>
                         <button
-                          onClick={() => updateBookingStatus(b.id, 'confirmed')}
+                          onClick={() => {
+                            updateBookingStatus(b.id, 'awaiting_payment');
+                            alert('予約リクエストを承諾しました！お客様に決済案内が送信され、決済完了後に予約確定となります。');
+                          }}
                           className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-md shadow-emerald-600/20 flex items-center gap-1.5"
                         >
                           <Check className="w-4 h-4" />
-                          <span>承認</span>
+                          <span>承諾する (決済待ちへ)</span>
                         </button>
                       </div>
                     </div>
@@ -1419,6 +1496,87 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
               </div>
             )}
           </div>
+
+          {/* 承諾済み・お客様の決済待ち (Awaiting Payment) */}
+          {awaitingPaymentBookings.length > 0 && (
+            <div className="space-y-3 pt-2">
+              <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+                <span>承諾済み・お客様の決済待ち ({awaitingPaymentBookings.length}件)</span>
+              </h3>
+              <p className="text-xs text-slate-500">
+                セラピストが空き時間を承諾した予約です。お客様がクレジットカード決済を完了すると「確定」になります。
+              </p>
+
+              <div className="space-y-3">
+                {awaitingPaymentBookings.map((b) => {
+                  const customer = allUsers.find((u) => u.id === b.customer_id);
+                  const service = services.find((s) => s.id === b.service_id);
+
+                  return (
+                    <div
+                      key={b.id}
+                      className="bg-white rounded-3xl p-5 border border-amber-300 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
+                    >
+                      <div className="flex items-start gap-4">
+                        <img
+                          src={customer?.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'}
+                          alt={customer?.name}
+                          className="w-12 h-12 rounded-2xl object-cover ring-2 ring-amber-400 shrink-0"
+                        />
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-bold text-slate-900 text-sm">{customer?.name} 様</h4>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 flex items-center gap-1">
+                              <span>💳</span>
+                              <span>お客様の決済待ち</span>
+                            </span>
+                            <span className="text-[10px] text-slate-500 font-medium">
+                              {b.booking_type === 'visit' ? '出張' : '店舗'}
+                            </span>
+                          </div>
+                          <p className="text-xs font-semibold text-slate-700 mt-0.5">{service?.title}</p>
+                          <div className="flex flex-wrap items-center gap-3 mt-1.5 text-xs text-slate-500">
+                            <span className="font-bold text-emerald-700">{formatDate(b.scheduled_at)}</span>
+                            <span>•</span>
+                            <span>手取り報酬: <strong className="text-slate-900">{formatPrice(b.therapist_earnings)}</strong></span>
+                          </div>
+                          {b.booking_type === 'visit' && (
+                            <p className="text-[11px] text-slate-500 mt-1 flex items-center gap-1">
+                              <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                              出張先: {b.visit_address}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* アクションボタン */}
+                      <div className="flex flex-wrap items-center gap-2 w-full md:w-auto shrink-0 justify-end border-t md:border-t-0 pt-3 md:pt-0">
+                        <button
+                          onClick={() => setChatBooking(b)}
+                          className="px-3.5 py-2 rounded-xl border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/50 text-slate-700 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs relative"
+                        >
+                          <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>メッセージ</span>
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            if (confirm('この承諾を取り消し（辞退）しますか？')) {
+                              updateBookingStatus(b.id, 'cancelled');
+                            }
+                          }}
+                          className="px-3.5 py-2 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-100 text-xs font-bold transition"
+                        >
+                          辞退・取消
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* 進行中・確定済みの予約 (Confirmed) */}
           <div className="space-y-3 pt-4">

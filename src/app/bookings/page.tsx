@@ -7,6 +7,7 @@ import { Header } from '@/components/Header';
 import { LiveTrackingModal } from '@/components/customer/LiveTrackingModal';
 import { ReviewModal } from '@/components/customer/ReviewModal';
 import { BookingChatModal } from '@/components/chat/BookingChatModal';
+import { PaymentModal } from '@/components/customer/PaymentModal';
 import { formatPrice, formatDate } from '@/lib/geo';
 import { Booking } from '@/types';
 import {
@@ -46,6 +47,7 @@ export default function BookingsPage() {
   const [reviewBooking, setReviewBooking] = useState<Booking | null>(null);
   const [chatBooking, setChatBooking] = useState<Booking | null>(null);
   const [cancellingBooking, setCancellingBooking] = useState<Booking | null>(null);
+  const [paymentBooking, setPaymentBooking] = useState<Booking | null>(null);
   const [showPolicyModal, setShowPolicyModal] = useState<boolean>(false);
   const [isCancelling, setIsCancelling] = useState<boolean>(false);
 
@@ -56,8 +58,15 @@ export default function BookingsPage() {
     switch (status) {
       case 'pending':
         return (
-          <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-2.5 py-1 rounded-full border border-amber-200">
-            セラピスト承認待ち
+          <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-2.5 py-1 rounded-full border border-amber-200 flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+            セラピスト確認・承諾待ち
+          </span>
+        );
+      case 'awaiting_payment':
+        return (
+          <span className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-xs flex items-center gap-1 animate-bounce">
+            💳 承諾済・お客様の決済待ち
           </span>
         );
       case 'confirmed':
@@ -236,6 +245,38 @@ export default function BookingsPage() {
                           </p>
                         )}
 
+                        {/* セラピスト承諾済み・決済促進バナー */}
+                        {b.status === 'awaiting_payment' && (
+                          <div className="mt-3 p-3.5 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border-2 border-emerald-500 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+                            <div className="flex items-center gap-2.5">
+                              <span className="text-2xl animate-bounce">🎉</span>
+                              <div>
+                                <h5 className="font-bold text-emerald-900 text-xs sm:text-sm">
+                                  セラピストが日時を承諾しました！
+                                </h5>
+                                <p className="text-[11px] text-emerald-700">
+                                  クレジットカード決済を行って予約を確定してください。
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setPaymentBooking(b)}
+                              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-black shadow-md shadow-emerald-600/30 transition flex items-center justify-center gap-1.5 shrink-0"
+                            >
+                              <span>💳 決済する ({formatPrice(b.total_amount)})</span>
+                            </button>
+                          </div>
+                        )}
+
+                        {/* セラピスト承認待ちバナー */}
+                        {b.status === 'pending' && (
+                          <div className="mt-2.5 p-2.5 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-900 flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                            <span>セラピストが希望日時と空き状況を確認中です。承諾されるとこちらに決済ボタンが表示されます。</span>
+                          </div>
+                        )}
+
                         {/* セラピスト自己紹介・メッセージ（少し詳しく） */}
                         {therapist?.bio && (
                           <p className="text-[11px] text-slate-500 mt-1.5 line-clamp-2 bg-slate-50 p-2 rounded-xl">
@@ -262,8 +303,8 @@ export default function BookingsPage() {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
-                      {/* キャンセルボタン（pending または confirmed時） */}
-                      {(b.status === 'pending' || b.status === 'confirmed') && (
+                      {/* キャンセルボタン（pending または confirmed、awaiting_payment時） */}
+                      {(b.status === 'pending' || b.status === 'awaiting_payment' || b.status === 'confirmed') && (
                         <button
                           type="button"
                           onClick={() => setCancellingBooking(b)}
@@ -271,6 +312,17 @@ export default function BookingsPage() {
                         >
                           <XCircle className="w-3.5 h-3.5" />
                           <span>予約をキャンセル</span>
+                        </button>
+                      )}
+
+                      {/* 決済待ち時の決済ボタン（バー側にも配置） */}
+                      {b.status === 'awaiting_payment' && (
+                        <button
+                          type="button"
+                          onClick={() => setPaymentBooking(b)}
+                          className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-emerald-600/20"
+                        >
+                          <span>💳 今すぐ決済</span>
                         </button>
                       )}
 
@@ -523,6 +575,15 @@ export default function BookingsPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* 決済モーダル */}
+      {paymentBooking && (
+        <PaymentModal
+          booking={paymentBooking}
+          onClose={() => setPaymentBooking(null)}
+          onSuccess={() => setPaymentBooking(null)}
+        />
       )}
     </div>
   );
