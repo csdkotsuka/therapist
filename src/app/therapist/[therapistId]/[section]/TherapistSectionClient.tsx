@@ -40,16 +40,13 @@ export function TherapistSectionClient({
     <div className="min-h-screen flex flex-col bg-slate-50/50">
       <Header />
 
-      {/* セラピスト専用ポータルバー */}
+      {/* セラピスト専用バー */}
       <div className="bg-emerald-900 text-white text-xs px-4 py-2 border-b border-emerald-800">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
-          {/* 左側: タイトル & 対象セラピスト表示 (改行を防ぐすっきりレイアウト) */}
+          {/* 左側: 対象セラピスト表示 */}
           <div className="flex items-center gap-2 min-w-0 flex-1">
-            <span className="font-bold bg-emerald-700 px-2 py-0.5 rounded text-[11px] shrink-0">
-              💆‍♀️ ポータル
-            </span>
             <div className="flex items-center gap-1.5 min-w-0 truncate text-emerald-100">
-              <span className="text-emerald-300 shrink-0">対象:</span>
+              <span className="text-emerald-300 shrink-0">対象セラピスト:</span>
               <strong className="text-white truncate font-bold">{targetUser?.name || '未選択'}</strong>
               {targetUser?.address && (
                 <span className="text-emerald-300/80 text-[11px] hidden sm:inline shrink-0">
@@ -66,7 +63,7 @@ export function TherapistSectionClient({
 
           {/* 右側: セラピスト切替セレクター (幅を制御して左側を圧迫しない) */}
           <div className="flex items-center gap-1.5 shrink-0">
-            <label htmlFor="therapist-switch-select" className="text-emerald-300 text-[11px] hidden md:inline shrink-0">
+            <label htmlFor="therapist-switch-select" className="text-emerald-300 text-[11px] hidden sm:inline shrink-0">
               切替:
             </label>
             <select
@@ -111,9 +108,6 @@ export function TherapistSectionClient({
           </div>
 
           <div className="flex items-center gap-4 text-slate-500">
-            <Link href="/" className="hover:text-emerald-600 transition">
-              ← 顧客向けトップへ戻る
-            </Link>
             <Link href="/guide/therapist" className="hover:text-emerald-600 transition">
               セラピスト操作マニュアル
             </Link>

@@ -129,6 +129,9 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
   const [custAreaFilter, setCustAreaFilter] = useState<string>('all');
   const [custBookingFilter, setCustBookingFilter] = useState<'all' | 'has_bookings' | 'no_bookings'>('all');
 
+  // レビュー一覧のソート状態
+  const [reviewSort, setReviewSort] = useState<'date_desc' | 'date_asc' | 'rating_desc' | 'rating_asc' | 'customer_asc' | 'therapist_asc'>('date_desc');
+
   // 全体メトリクス
   const totalGMV = bookings
     .filter((b) => b.status === 'completed' || b.status === 'confirmed')
@@ -313,107 +316,55 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
-        <Link
-          href="/admin/kpi"
-          className={`px-4 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap ${
-            activeTab === 'kpi'
-              ? 'bg-slate-900 text-white shadow-md'
-              : 'text-slate-600 hover:bg-slate-100'
-          }`}
-        >
-          <TrendingUp className="w-4 h-4" />
-          <span>KPI・ダッシュボード</span>
-        </Link>
+      {/* 管理セクション見出しバー (セラピスト画面と統一された構造) */}
+      {(() => {
+        const adminSections = [
+          { id: 'kpi' as const, label: 'KPI・ダッシュボード', icon: TrendingUp, desc: '流通総額・売上収益・予約推移のリアルタイム統計' },
+          { id: 'bookings' as const, label: `全予約ステータス監視 (${bookings.length})`, icon: Calendar, desc: '出張・店舗の全トランザクション監視と強制キャンセル' },
+          { id: 'therapists' as const, label: `セラピスト審査・管理 (${therapists.length})`, icon: ShieldCheck, desc: '4ステップ登録審査・書類確認・認定バッジ付与' },
+          { id: 'customers' as const, label: `顧客一覧 & 視点切替 (${customers.length})`, icon: Users, desc: '登録顧客リストの確認・代理ログイン視点切替' },
+          { id: 'reviews' as const, label: `口コミ・レビュー管理 (${reviews.length})`, icon: Star, desc: 'お客様評価・口コミのソートとモデレーション' },
+          { id: 'branding' as const, label: 'ブランド・ロゴ設定', icon: Palette, desc: 'サービス名（Carea Go等）やアプリアイコンの一括切替' },
+          { id: 'settings' as const, label: '手数料率・プラットフォーム設定', icon: Sliders, desc: '基本手数料率の設定と保存' },
+        ];
+        const currentSec = adminSections.find((s) => s.id === activeTab) || adminSections[0];
+        const SecIcon = currentSec.icon;
 
-        <Link
-          href="/admin/bookings"
-          className={`px-4 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap ${
-            activeTab === 'bookings'
-              ? 'bg-slate-900 text-white shadow-md'
-              : 'text-slate-600 hover:bg-slate-100'
-          }`}
-        >
-          <Calendar className="w-4 h-4" />
-          <span>全予約ステータス監視 ({bookings.length})</span>
-          {pendingBookingsCount > 0 && (
-            <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-          )}
-        </Link>
+        return (
+          <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-700 border border-purple-200 flex items-center justify-center shrink-0 shadow-2xs">
+                <SecIcon className="w-6 h-6" />
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-lg sm:text-xl font-black text-slate-900 truncate">
+                  {currentSec.label}
+                </h1>
+                <p className="text-xs text-slate-500 truncate hidden sm:block">
+                  {currentSec.desc}
+                </p>
+              </div>
+            </div>
 
-        <Link
-          href="/admin/therapists"
-          className={`px-4 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap ${
-            activeTab === 'therapists'
-              ? 'bg-slate-900 text-white shadow-md'
-              : 'text-slate-600 hover:bg-slate-100'
-          }`}
-        >
-          <ShieldCheck className="w-4 h-4" />
-          <span>
-            セラピスト審査・管理 (
-            {filteredTherapists.length !== therapists.length
-              ? `${filteredTherapists.length}/`
-              : ''}
-            {therapists.length})
-          </span>
-        </Link>
-
-        <Link
-          href="/admin/customers"
-          className={`px-4 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap ${
-            activeTab === 'customers'
-              ? 'bg-slate-900 text-white shadow-md'
-              : 'text-slate-600 hover:bg-slate-100'
-          }`}
-        >
-          <Users className="w-4 h-4" />
-          <span>
-            顧客一覧 & 視点切替 (
-            {filteredCustomers.length !== customers.length
-              ? `${filteredCustomers.length}/`
-              : ''}
-            {customers.length})
-          </span>
-        </Link>
-
-        <Link
-          href="/admin/reviews"
-          className={`px-4 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap ${
-            activeTab === 'reviews'
-              ? 'bg-slate-900 text-white shadow-md'
-              : 'text-slate-600 hover:bg-slate-100'
-          }`}
-        >
-          <Star className="w-4 h-4" />
-          <span>レビュー管理 ({reviews.length})</span>
-        </Link>
-
-        <Link
-          href="/admin/branding"
-          className={`px-4 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap ${
-            activeTab === 'branding'
-              ? 'bg-slate-900 text-white shadow-md'
-              : 'text-slate-600 hover:bg-slate-100'
-          }`}
-        >
-          <Palette className="w-4 h-4 text-emerald-500" />
-          <span>🎨 アプリ名・ロゴ・ブランド設定</span>
-        </Link>
-
-        <Link
-          href="/admin/settings"
-          className={`px-4 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap ${
-            activeTab === 'settings'
-              ? 'bg-slate-900 text-white shadow-md'
-              : 'text-slate-600 hover:bg-slate-100'
-          }`}
-        >
-          <Sliders className="w-4 h-4" />
-          <span>手数料率・プラットフォーム設定</span>
-        </Link>
-      </div>
+            {/* クイックタブ（横スクロール可能） */}
+            <div className="flex items-center gap-1.5 overflow-x-auto py-1 shrink-0">
+              {adminSections.map((sec) => (
+                <Link
+                  key={sec.id}
+                  href={`/admin/${sec.id}`}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
+                    activeTab === sec.id
+                      ? 'bg-purple-900 text-white shadow-xs'
+                      : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                  }`}
+                >
+                  {sec.id === 'kpi' ? 'KPI' : sec.id === 'bookings' ? '予約監視' : sec.id === 'therapists' ? '審査管理' : sec.id === 'customers' ? '顧客' : sec.id === 'reviews' ? 'レビュー' : sec.id === 'branding' ? 'ブランド' : '設定'}
+                </Link>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* タブ 1: KPI ダッシュボード */}
       {activeTab === 'kpi' && (
@@ -510,17 +461,17 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-xs whitespace-nowrap min-w-[760px]">
               <thead className="bg-slate-50 border-b border-slate-100 text-slate-400 font-semibold uppercase tracking-wider text-[10px]">
                 <tr>
-                  <th className="px-6 py-3">予約番号</th>
-                  <th className="px-6 py-3">顧客</th>
-                  <th className="px-6 py-3">セラピスト</th>
-                  <th className="px-6 py-3">形態</th>
-                  <th className="px-6 py-3">日時</th>
-                  <th className="px-6 py-3">金額 / 手数料</th>
-                  <th className="px-6 py-3">ステータス</th>
-                  <th className="px-6 py-3 text-right">管理者操作</th>
+                  <th className="px-5 py-3 whitespace-nowrap">予約番号</th>
+                  <th className="px-5 py-3 whitespace-nowrap">顧客名</th>
+                  <th className="px-5 py-3 whitespace-nowrap">セラピスト</th>
+                  <th className="px-5 py-3 whitespace-nowrap">形態</th>
+                  <th className="px-5 py-3 whitespace-nowrap">予約日時</th>
+                  <th className="px-5 py-3 whitespace-nowrap">金額 / 手数料</th>
+                  <th className="px-5 py-3 whitespace-nowrap">ステータス</th>
+                  <th className="px-5 py-3 text-right whitespace-nowrap">管理者操作</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -530,24 +481,24 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
 
                   return (
                     <tr key={b.id} className="hover:bg-slate-50/60 transition">
-                      <td className="px-6 py-3.5">
+                      <td className="px-5 py-3.5 whitespace-nowrap">
                         <span className="font-mono font-bold text-xs text-slate-800 bg-slate-100 px-2 py-1 rounded-md border border-slate-200">
                           {b.serial_number || `BK-${String(idx + 1).padStart(4, '0')}`}
                         </span>
                       </td>
-                      <td className="px-6 py-3.5 font-bold text-slate-800">{customer?.name}</td>
-                      <td className="px-6 py-3.5 text-slate-700">{therapist?.name}</td>
-                      <td className="px-6 py-3.5">
+                      <td className="px-5 py-3.5 font-bold text-slate-800 whitespace-nowrap">{customer?.name}</td>
+                      <td className="px-5 py-3.5 text-slate-700 whitespace-nowrap">{therapist?.name}</td>
+                      <td className="px-5 py-3.5 whitespace-nowrap">
                         <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700">
                           {b.booking_type === 'visit' ? '出張' : '店舗'}
                         </span>
                       </td>
-                      <td className="px-6 py-3.5 text-slate-600">{formatDate(b.scheduled_at)}</td>
-                      <td className="px-6 py-3.5">
+                      <td className="px-5 py-3.5 text-slate-600 whitespace-nowrap">{formatDate(b.scheduled_at)}</td>
+                      <td className="px-5 py-3.5 whitespace-nowrap">
                         <span className="font-bold text-slate-900">{formatPrice(b.total_amount)}</span>
                         <span className="text-[10px] text-purple-600 block">手数料: {formatPrice(b.platform_fee)}</span>
                       </td>
-                      <td className="px-6 py-3.5">
+                      <td className="px-5 py-3.5 whitespace-nowrap">
                         <span
                           className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                             b.status === 'confirmed'
@@ -564,7 +515,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                           {b.status === 'awaiting_payment' ? '承諾・決済待ち' : b.status === 'pending' ? '承認待ち' : b.status === 'confirmed' ? '予約確定' : b.status === 'completed' ? '完了' : 'キャンセル'}
                         </span>
                       </td>
-                      <td className="px-6 py-3.5 text-right">
+                      <td className="px-5 py-3.5 text-right whitespace-nowrap">
                         {b.status !== 'cancelled' && b.status !== 'completed' && (
                           <button
                             onClick={() => {
@@ -587,81 +538,56 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
         </div>
       )}
 
-      {/* タブ 3: セラピスト登録審査・4点書類提出確認 & 自動データ破棄承認 */}
+      {/* タブ 3: セラピスト登録審査・書類確認 */}
       {activeTab === 'therapists' && (
-        <div className="space-y-5">
-          {/* 基本方針 ＆ 4ステップ審査フロー概要パネル */}
-          <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-white rounded-3xl p-5 sm:p-6 shadow-lg border border-slate-700/80 space-y-4">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-              <div>
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-[10px] font-bold">
-                  <Lock className="w-3 h-3" />
-                  <span>セキュリティ・コスト最適化 ＆ 資格確認データ即時破棄アーキテクチャ</span>
-                </div>
-                <h3 className="text-base sm:text-lg font-black mt-1.5">
-                  セラピスト4ステップ登録審査 ＆ 提出書類4点ステータス管理
-                </h3>
-                <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-                  ①免許証等の身分証画像は自社DBに一切保存せず<strong>Stripe Connect 自動eKYC</strong>へ完全委託 / ②国家資格証・保険証票は承認完了と同時に<strong>Supabase Storage（<code className="text-emerald-300">{STORAGE_BUCKET}/</code>）から自動削除（Delete）</strong> / ③削除後も<strong>承認日時・管理者ID・資格名・登録番号のテキストログ</strong>のみをDBに安全保持します。
-                </p>
-              </div>
+        <div className="space-y-4">
+          {/* 4ステップ審査フロー概要 (シンプル化) */}
+          <div className="bg-slate-900 text-white rounded-3xl p-4 sm:p-5 shadow-md border border-slate-800 space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="text-sm sm:text-base font-black">
+                セラピスト登録審査
+              </h3>
 
-              <div className="flex flex-wrap items-center gap-2 shrink-0">
+              <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={() => setShowAuditLogsPanel((prev) => !prev)}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border ${
                     showAuditLogsPanel
                       ? 'bg-emerald-500 text-slate-950 border-emerald-400 shadow-md'
                       : 'bg-white/10 hover:bg-white/15 text-white border-white/20'
                   }`}
                 >
                   <History className="w-3.5 h-3.5" />
-                  <span>承認・削除ログ ({verificationLogs.length}件)</span>
+                  <span>承認ログ ({verificationLogs.length})</span>
                 </button>
                 <button
                   onClick={() => refreshFromSupabase()}
                   disabled={isLoadingDb}
-                  className="px-3.5 py-2 bg-white/10 hover:bg-white/15 text-white border border-white/20 text-xs font-bold rounded-xl transition flex items-center gap-1.5 disabled:opacity-50"
+                  className="px-3 py-1.5 bg-white/10 hover:bg-white/15 text-white border border-white/20 text-xs font-bold rounded-xl transition flex items-center gap-1.5 disabled:opacity-50"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
-                  <span>{isLoadingDb ? '同期中...' : '最新データを取得'}</span>
+                  <span>{isLoadingDb ? '同期中...' : '更新'}</span>
                 </button>
               </div>
             </div>
 
-            {/* 4ステップフロー視覚化バー */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-1">
-              <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
-                <div className="flex items-center justify-between text-[10px] font-bold text-amber-300">
-                  <span>【Step 1】仮登録＆審査手数料</span>
-                  <CreditCard className="w-3.5 h-3.5" />
-                </div>
-                <p className="text-xs font-bold text-white mt-1">覚悟料 {REVIEW_FEE_YEN.toLocaleString()}円 Stripe決済</p>
-                <p className="text-[10px] text-slate-400 mt-0.5">payment_status = completed で Step2 解放</p>
+            {/* 4ステップ (最小限のテキスト) */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-xs">
+              <div className="p-2.5 rounded-xl bg-white/5 border border-white/10">
+                <span className="text-[10px] font-bold text-amber-300 block">Step 1</span>
+                <span className="font-bold text-white text-xs">審査手数料</span>
               </div>
-              <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
-                <div className="flex items-center justify-between text-[10px] font-bold text-sky-300">
-                  <span>【Step 2】Stripe Connect eKYC</span>
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                </div>
-                <p className="text-xs font-bold text-white mt-1">口座登録 ＋ 身分証AI自動審査</p>
-                <p className="text-[10px] text-slate-400 mt-0.5">payouts_enabled: true 連携（免許証画像は非保持）</p>
+              <div className="p-2.5 rounded-xl bg-white/5 border border-white/10">
+                <span className="text-[10px] font-bold text-sky-300 block">Step 2</span>
+                <span className="font-bold text-white text-xs">eKYC身分確認</span>
               </div>
-              <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
-                <div className="flex items-center justify-between text-[10px] font-bold text-purple-300">
-                  <span>【Step 3】誓約書＋資格・保険証</span>
-                  <FileText className="w-3.5 h-3.5" />
-                </div>
-                <p className="text-xs font-bold text-white mt-1">電子署名 ＋ 一時バケット提出</p>
-                <p className="text-[10px] text-slate-400 mt-0.5">{STORAGE_BUCKET}/ へ一時アップロード</p>
+              <div className="p-2.5 rounded-xl bg-white/5 border border-white/10">
+                <span className="text-[10px] font-bold text-purple-300 block">Step 3</span>
+                <span className="font-bold text-white text-xs">誓約・書類提出</span>
               </div>
-              <div className="p-3 rounded-2xl bg-emerald-500/15 border border-emerald-400/30">
-                <div className="flex items-center justify-between text-[10px] font-bold text-emerald-300">
-                  <span>【Step 4】運営照合＆自動破棄承認</span>
-                  <Trash2 className="w-3.5 h-3.5" />
-                </div>
-                <p className="text-xs font-bold text-white mt-1">氏名照合 → 承認＆Storage即時Delete</p>
-                <p className="text-[10px] text-emerald-200/80 mt-0.5">is_certified=true 更新 ＋ テキスト証跡のみ保持</p>
+              <div className="p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-400/30">
+                <span className="text-[10px] font-bold text-emerald-300 block">Step 4</span>
+                <span className="font-bold text-emerald-200 text-xs">照合・承認</span>
               </div>
             </div>
           </div>
@@ -780,15 +706,10 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
 
           {/* メイン一覧テーブル＆カード */}
           <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div>
-                <h4 className="font-bold text-slate-900 text-sm">
-                  各セラピストの提出書類4点（電子誓約書・eKYC・資格証・賠償責任保険）＆ 審査進捗一覧
-                </h4>
-                <p className="text-[11px] text-slate-500">
-                  該当 {filteredTherapists.length} 名 / 全 {therapists.length} 名（審査待ち・未承認のセラピストが最上部に表示されます）
-                </p>
-              </div>
+            <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between gap-2">
+              <h4 className="font-bold text-slate-900 text-sm">
+                セラピスト審査・提出書類一覧 ({filteredTherapists.length}名)
+              </h4>
             </div>
 
             {/* 絞り込みフィルターバー */}
@@ -878,7 +799,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                   return (
                     <div
                       key={th.id}
-                      className={`px-4 py-2.5 sm:py-2 transition flex flex-col md:flex-row md:items-center justify-between gap-2.5 border-b border-slate-100 ${
+                      className={`px-3 sm:px-4 py-2.5 transition flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-100 min-h-[56px] ${
                         stage === 'ready'
                           ? 'bg-emerald-50/60 hover:bg-emerald-50/90'
                           : stage === 'rejected'
@@ -886,74 +807,62 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                           : 'hover:bg-slate-50/80'
                       }`}
                     >
-                      {/* 左側: 基本情報（アバター、名前、エリア、審査ステージバッジ） */}
-                      <div className="flex items-center gap-3 min-w-0">
+                      {/* 左側: 基本情報（アバター、名前、エリア、審査ステージバッジを1行で整列） */}
+                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
                         <img
                           src={th.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(th.name)}`}
                           alt={th.name}
-                          className="w-9 h-9 rounded-xl object-cover ring-1 ring-slate-200 shrink-0"
+                          className="w-8 h-8 rounded-lg object-cover ring-1 ring-slate-200 shrink-0"
                         />
-                        <div className="min-w-0">
-                          <div className="flex flex-wrap items-center gap-1.5">
-                            <span className="font-bold text-slate-900 text-xs sm:text-sm truncate">
-                              {th.name}
+                        <div className="min-w-0 flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                          <span className="font-bold text-slate-900 text-xs sm:text-sm truncate">
+                            {th.name}
+                          </span>
+                          <span className={`px-2 py-0.2 rounded-full text-[10px] font-bold border shrink-0 ${stageMeta.badge}`}>
+                            {stageMeta.label}
+                          </span>
+                          {certified && (
+                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[9px] font-bold bg-indigo-600 text-white shrink-0">
+                              <Award className="w-2.5 h-2.5" />
+                              <span>認定</span>
                             </span>
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${stageMeta.badge}`}>
-                              {stageMeta.label}
-                            </span>
-                            {certified && (
-                              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold bg-indigo-600 text-white">
-                                <Award className="w-2.5 h-2.5" />
-                                <span>認定済</span>
-                              </span>
-                            )}
-                            {ob?.claimed_qualification_type && (
-                              <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[10px] font-medium border border-slate-200">
-                                {ob.claimed_qualification_type}
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2 text-[10px] text-slate-500 mt-0.5">
-                            <span>{cityName}</span>
-                            {tp?.is_store_based && <span className="text-purple-600 font-semibold">🏢店舗あり</span>}
-                            <span className="text-slate-300">|</span>
-                            <span className="font-mono text-slate-400 truncate max-w-[150px]">{th.email}</span>
-                          </div>
+                          )}
+                          <span className="text-[10px] text-slate-400 shrink-0 hidden sm:inline">
+                            {cityName}
+                          </span>
                         </div>
                       </div>
 
-                      {/* 右側: 5つのステータス（済/未のみ）を右寄せで並べる ＋ アクションボタン */}
-                      <div className="flex items-center justify-between md:justify-end gap-2.5 shrink-0">
-                        {/* 5つの処理状況: 枠・詳細説明なし、済/未のみ */}
-                        <div className="flex items-center gap-1 sm:gap-1.5">
+                      {/* 右側: 5つのステータス（高さを統一したコンパクトなピル） ＋ ボタン */}
+                      <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0">
+                        {/* 5つの処理状況: 済/未を横並びで均等表示 */}
+                        <div className="flex items-center gap-1 shrink-0 overflow-x-auto py-0.5">
                           {checklist.map((item) => {
                             const isDone = item.ok;
                             return (
                               <span
                                 key={item.key}
-                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold ${
+                                className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0 ${
                                   isDone
                                     ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                                     : 'bg-slate-100 text-slate-400 border border-slate-200'
                                 }`}
                                 title={`${item.shortLabel}: ${isDone ? '済' : '未'}`}
                               >
-                                <span className="text-[10px] text-slate-500 font-normal">{item.shortLabel}:</span>
-                                {isDone ? (
-                                  <span className="text-emerald-700 font-black">済</span>
-                                ) : (
-                                  <span className="text-slate-400 font-bold">未</span>
-                                )}
+                                <span className="text-[9px] text-slate-500 font-normal">{item.shortLabel}:</span>
+                                <span className={isDone ? 'text-emerald-700 font-black' : 'text-slate-400'}>
+                                  {isDone ? '済' : '未'}
+                                </span>
                               </span>
                             );
                           })}
                         </div>
 
-                        {/* 審査・承認ボタン（セラピストページへ直接リンク） */}
-                        <div className="flex items-center gap-1">
+                        {/* 審査・承認ボタン */}
+                        <div className="flex items-center gap-1 shrink-0">
                           <Link
                             href={`/therapist/${th.id}/verification`}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1 whitespace-nowrap shadow-xs ${
+                            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap shadow-2xs ${
                               stage === 'ready'
                                 ? 'bg-emerald-600 hover:bg-emerald-500 text-white ring-2 ring-emerald-500/20'
                                 : certified
@@ -962,12 +871,12 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                             }`}
                           >
                             <ClipboardCheck className="w-3.5 h-3.5" />
-                            <span>{stage === 'ready' ? '審査・承認' : '審査状況'}</span>
+                            <span>{stage === 'ready' ? '審査・承認' : '審査'}</span>
                           </Link>
 
                           <Link
                             href={`/therapist/${th.id}/requests`}
-                            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition"
+                            className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition"
                             title="セラピスト画面を開く"
                           >
                             <Eye className="w-3.5 h-3.5" />
@@ -1640,44 +1549,99 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
       )}
 
       {/* タブ 4: レビュー管理 */}
-      {activeTab === 'reviews' && (
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 space-y-4">
-          <h4 className="font-bold text-slate-900 text-sm">レビューモデレーション</h4>
-          <p className="text-xs text-slate-500">不適切なレビューや規約違反コメントの監視・非表示化を行えます。</p>
+      {activeTab === 'reviews' && (() => {
+        const sortedReviews = [...reviews].sort((a, b) => {
+          if (reviewSort === 'date_desc') {
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+          }
+          if (reviewSort === 'date_asc') {
+            return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+          }
+          if (reviewSort === 'rating_desc') {
+            return b.rating - a.rating;
+          }
+          if (reviewSort === 'rating_asc') {
+            return a.rating - b.rating;
+          }
+          if (reviewSort === 'customer_asc') {
+            const custA = allUsers.find((u) => u.id === a.customer_id)?.name || '';
+            const custB = allUsers.find((u) => u.id === b.customer_id)?.name || '';
+            return custA.localeCompare(custB, 'ja');
+          }
+          if (reviewSort === 'therapist_asc') {
+            const thA = allUsers.find((u) => u.id === a.therapist_id)?.name || '';
+            const thB = allUsers.find((u) => u.id === b.therapist_id)?.name || '';
+            return thA.localeCompare(thB, 'ja');
+          }
+          return 0;
+        });
 
-          <div className="space-y-3">
-            {reviews.map((rev) => {
-              const customer = allUsers.find((u) => u.id === rev.customer_id);
-              const therapist = allUsers.find((u) => u.id === rev.therapist_id);
+        return (
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-5 sm:p-6 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+              <div>
+                <h4 className="font-bold text-slate-900 text-sm">口コミ・レビュー管理 ({reviews.length}件)</h4>
+                <p className="text-xs text-slate-500">不適切なレビューの監視やソート確認を行えます。</p>
+              </div>
 
-              return (
-                <div key={rev.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex justify-between items-start gap-4 text-xs">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-slate-900">{customer?.name} 様</span>
-                      <span className="text-slate-400">→</span>
-                      <span className="font-semibold text-slate-700">{therapist?.name} セラピストへ</span>
-                      <div className="flex text-amber-500 font-bold ml-2">
-                        ★ {rev.rating}
-                      </div>
-                    </div>
-                    <p className="text-slate-600 mt-1.5 leading-relaxed">{rev.comment}</p>
-                    <span className="text-[10px] text-slate-400 mt-1 block">{formatDate(rev.created_at)}</span>
-                  </div>
+              {/* ソートセレクター */}
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-xs font-bold text-slate-500 shrink-0">並び順:</span>
+                <select
+                  value={reviewSort}
+                  onChange={(e) => setReviewSort(e.target.value as any)}
+                  className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-emerald-500 cursor-pointer shadow-2xs"
+                >
+                  <option value="date_desc">📅 投稿日: 新しい順</option>
+                  <option value="date_asc">📅 投稿日: 古い順</option>
+                  <option value="rating_desc">⭐ 評価: 高い順</option>
+                  <option value="rating_asc">⭐ 評価: 低い順</option>
+                  <option value="customer_asc">👤 顧客名順 (五十音)</option>
+                  <option value="therapist_asc">💆‍♀️ セラピスト名順 (五十音)</option>
+                </select>
+              </div>
+            </div>
 
-                  <button
-                    onClick={() => alert('このレビューを非表示・モデレーション処理しました')}
-                    className="p-2 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-white transition"
-                    title="非表示・削除"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+            <div className="space-y-3">
+              {sortedReviews.length === 0 ? (
+                <div className="p-8 text-center text-slate-400 text-xs">
+                  レビューはまだ投稿されていません
                 </div>
-              );
-            })}
+              ) : (
+                sortedReviews.map((rev) => {
+                  const customer = allUsers.find((u) => u.id === rev.customer_id);
+                  const therapist = allUsers.find((u) => u.id === rev.therapist_id);
+
+                  return (
+                    <div key={rev.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex justify-between items-start gap-4 text-xs hover:bg-slate-100/60 transition">
+                      <div className="space-y-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-bold text-slate-900">{customer?.name} 様</span>
+                          <span className="text-slate-400">→</span>
+                          <span className="font-semibold text-slate-700">{therapist?.name} セラピストへ</span>
+                          <div className="flex text-amber-500 font-bold ml-1">
+                            ★ {rev.rating}
+                          </div>
+                        </div>
+                        <p className="text-slate-700 leading-relaxed pt-0.5">{rev.comment}</p>
+                        <span className="text-[10px] text-slate-400 block">{formatDate(rev.created_at)}</span>
+                      </div>
+
+                      <button
+                        onClick={() => alert('このレビューを非表示・モデレーション処理しました')}
+                        className="p-2 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-white transition shrink-0"
+                        title="非表示・削除"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  );
+                })
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* タブ: アプリ名・ロゴ・ブランド設定 (Carea Go / Care Go / Thera Go) */}
       {activeTab === 'branding' && (

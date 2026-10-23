@@ -44,17 +44,7 @@ export function AdminSectionClient({ rawSection }: { rawSection: string }) {
             <span className="font-bold bg-purple-700 px-2 py-0.5 rounded text-[11px]">
               ⚙️ プラットフォーム管理本部
             </span>
-            <span className="text-purple-200">
-              全県リアルタイム監視・愛媛県エリア統括コンソール
-            </span>
           </div>
-
-          <Link
-            href="/"
-            className="text-purple-300 hover:text-white underline text-xs transition"
-          >
-            ← 顧客画面に戻る
-          </Link>
         </div>
       </div>
 
@@ -76,12 +66,6 @@ export function AdminSectionClient({ rawSection }: { rawSection: string }) {
           </div>
 
           <div className="flex items-center gap-4 text-slate-500">
-            <Link href="/" className="hover:text-emerald-600 transition">
-              顧客画面
-            </Link>
-            <Link href="/therapist" className="hover:text-emerald-600 transition">
-              セラピスト画面
-            </Link>
             <Link href="/guide/admin" className="hover:text-emerald-600 transition">
               管理者マニュアル
             </Link>

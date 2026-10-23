@@ -324,21 +324,12 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
 
   return (
     <div className="space-y-6">
-      {/* 管理者閲覧モードバナー ＆ 管理ページに戻るボタン */}
+      {/* 管理ページに戻るリンク (枠を撤廃し最小限に) */}
       {isAdminViewer && (
-        <div className="bg-purple-950 text-white px-5 py-3.5 rounded-2xl shadow-lg border border-purple-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
-            <span className="font-bold bg-purple-700 px-2.5 py-0.5 rounded text-xs">
-              👑 管理者審査・閲覧モード
-            </span>
-            <span className="text-xs text-purple-200">
-              セラピスト <strong>{targetUser.name}</strong>（ID: <code className="text-purple-300 font-mono text-[11px]">{targetUser.id}</code>）の画面を代理表示・審査中
-            </span>
-          </div>
-
+        <div className="flex items-center">
           <Link
             href="/admin/therapists"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-purple-950 hover:bg-purple-100 text-xs font-black transition shadow-sm self-start sm:self-auto shrink-0"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-100 hover:bg-purple-200 text-purple-900 text-xs font-bold transition"
           >
             <span>← 管理ページ（セラピスト審査・管理）に戻る</span>
           </Link>
