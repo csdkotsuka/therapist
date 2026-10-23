@@ -682,7 +682,7 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
                     セラピスト登録・審査の4ステップフロー
                   </h3>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    運転免許証等の身分証明書画像は自社DBには一切保存せず Stripe Connect の自動eKYCに完全委託しています。また、提出された資格証・保険証票ファイルは運営の承認完了と同時に Supabase Storage（{STORAGE_BUCKET}/）から自動削除されます。
+                    4つのステップを完了すると、本登録審査へ進みます。
                   </p>
                 </div>
               </div>
@@ -747,16 +747,16 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
                   </span>
                   <div>
                     <h4 className="font-black text-slate-900 text-sm">
-                      【Step 1】アカウント開設 ＆ 審査手数料（覚悟料）の決済
+                      【Step 1】審査手数料の決済
                     </h4>
                     <p className="text-xs text-slate-500">
-                      審査手数料（{REVIEW_FEE_YEN.toLocaleString()}円 / 返金不可）を Stripe 決済すると Step 2 へ進めます。
+                      審査手数料（{REVIEW_FEE_YEN.toLocaleString()}円）を決済します。
                     </p>
                   </div>
                 </div>
                 {feePaid ? (
                   <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                    ✓ 決済完了 (payment_status: completed)
+                    ✓ 決済完了
                   </span>
                 ) : (
                   <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300">
@@ -784,7 +784,7 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
                   className="px-5 py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center gap-2 shadow-sm cursor-pointer"
                 >
                   <CreditCard className="w-4 h-4 text-emerald-400" />
-                  <span>Stripe で審査手数料（{REVIEW_FEE_YEN.toLocaleString()}円）を決済する</span>
+                  <span>Stripe で審査手数料（{REVIEW_FEE_YEN.toLocaleString()}円）を決済</span>
                 </button>
               )}
             </div>
@@ -798,16 +798,16 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
                   </span>
                   <div>
                     <h4 className="font-black text-slate-900 text-sm">
-                      【Step 2】Stripe Connect による口座登録 ＆ 自動eKYC（身元確認）
+                      【Step 2】口座登録 ＆ 本人確認（eKYC）
                     </h4>
                     <p className="text-xs text-slate-500">
-                      Stripe Express オンボーディング画面にて振込口座情報および運転免許証等＋顔撮影を行います（免許証画像は自社DBに一切保存されません）。
+                      報酬振込口座の登録と、本人確認を行います。
                     </p>
                   </div>
                 </div>
                 {ekycDone ? (
                   <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                    ✓ eKYC本人確認済（認証氏名: {therapist?.identity_verified_name || targetUser.name.replace(/\s*\(.*?\)\s*$/, '')}）
+                    ✓ 本人確認済（{therapist?.identity_verified_name || targetUser.name.replace(/\s*\(.*?\)\s*$/, '')}）
                   </span>
                 ) : (
                   <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300">
@@ -835,7 +835,7 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
                   className="px-5 py-3 rounded-2xl bg-sky-600 hover:bg-sky-500 disabled:bg-slate-300 text-white text-xs font-bold transition flex items-center gap-2 shadow-sm cursor-pointer"
                 >
                   <ShieldCheck className="w-4 h-4" />
-                  <span>Stripe Express で口座登録＆自動eKYC（本人確認）を行う</span>
+                  <span>口座登録 ＆ 本人確認を行う</span>
                 </button>
               )}
             </div>
@@ -849,10 +849,10 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
                   </span>
                   <div>
                     <h4 className="font-black text-slate-900 text-sm">
-                      【Step 3】電子誓約書同意 ＋ 保有資格証・損害賠償責任保険証票のアップロード
+                      【Step 3】誓約書同意 ＆ 書類提出
                     </h4>
                     <p className="text-xs text-slate-500">
-                      ファイルは一時保管バケット（<code className="font-mono text-indigo-700">{STORAGE_BUCKET}/</code>）へ暗号化アップロードされ、Step 4 の運営承認完了と同時に自動削除されます。
+                      誓約事項への同意と、書類（資格証・保険証）を提出します。
                     </p>
                   </div>
                 </div>
@@ -1077,11 +1077,11 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
                   <div>
                     <h4 className="font-black text-slate-900 text-sm">
                       {isAdminViewer
-                        ? '【Step 4】運営管理画面での簡易チェック ＆ 自動データ削除付き本登録承認'
-                        : '【Step 4】運営本部による審査・本登録承認（原本書類は自動削除）'}
+                        ? '【Step 4】審査・承認パネル'
+                        : '【Step 4】本登録の審査・承認'}
                     </h4>
                     <p className="text-xs text-slate-500">
-                      運営本部にて Stripe 認証氏名と資格証氏名を照合後、本登録承認と同時に提出ファイルは Storage から完全自動削除されます。
+                      Step 1〜3完了後、運営による審査が行われます。
                     </p>
                   </div>
                 </div>

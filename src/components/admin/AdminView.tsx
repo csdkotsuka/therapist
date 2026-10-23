@@ -50,9 +50,11 @@ import {
   ClipboardCheck,
   History,
   Upload,
+  MessageCircle,
+  ExternalLink,
 } from 'lucide-react';
 
-export type AdminSection = 'kpi' | 'bookings' | 'therapists' | 'customers' | 'reviews' | 'branding' | 'settings';
+export type AdminSection = 'kpi' | 'bookings' | 'therapists' | 'customers' | 'messages' | 'reviews' | 'branding' | 'settings';
 
 interface AdminViewProps {
   activeSection?: AdminSection;
@@ -66,6 +68,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
     services,
     bookings,
     reviews,
+    messages,
     platformFeeRate,
     setPlatformFeeRate,
     toggleTherapistApproval,
@@ -131,6 +134,10 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
 
   // レビュー一覧のソート状態
   const [reviewSort, setReviewSort] = useState<'date_desc' | 'date_asc' | 'rating_desc' | 'rating_asc' | 'customer_asc' | 'therapist_asc'>('date_desc');
+
+  // メッセージ監視の絞り込み状態
+  const [msgSearch, setMsgSearch] = useState<string>('');
+  const [msgFilter, setMsgFilter] = useState<'all' | 'suspicious' | 'customer' | 'therapist'>('all');
 
   // 全体メトリクス
   const totalGMV = bookings
@@ -320,6 +327,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
           { id: 'bookings' as const, label: `全予約ステータス監視 (${bookings.length})`, icon: Calendar, desc: '出張・店舗の全トランザクション監視と強制キャンセル' },
           { id: 'therapists' as const, label: `セラピスト審査・管理 (${therapists.length})`, icon: ShieldCheck, desc: '4ステップ登録審査・書類確認・認定バッジ付与' },
           { id: 'customers' as const, label: `顧客一覧 & 視点切替 (${customers.length})`, icon: Users, desc: '登録顧客リストの確認・代理ログイン視点切替' },
+          { id: 'messages' as const, label: `全メッセージ監視 (${messages.length})`, icon: MessageCircle, desc: 'トラブル防止・直契約監視・連絡履歴の確認' },
           { id: 'reviews' as const, label: `口コミ・レビュー管理 (${reviews.length})`, icon: Star, desc: 'お客様評価・口コミのソートとモデレーション' },
           { id: 'branding' as const, label: 'ブランド・ロゴ設定', icon: Palette, desc: 'サービス名（Carea Go等）やアプリアイコンの一括切替' },
           { id: 'settings' as const, label: '手数料率・プラットフォーム設定', icon: Sliders, desc: '基本手数料率の設定と保存' },
@@ -1545,6 +1553,223 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
           </div>
         </div>
       )}
+
+      {/* タブ: 全メッセージ監視 */}
+      {activeTab === 'messages' && (() => {
+        const suspiciousPattern = /(?:0\d{1,4}[-(]?\d{1,4}[-)]?\d{3,4}|line|ライン|直契約|直接取引|口座番号|個人間|メアド|メールアドレス|paypay|振込)/i;
+
+        const filteredMessages = [...messages]
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+          .filter((m) => {
+            const sender = allUsers.find((u) => u.id === m.sender_id);
+            const receiver = allUsers.find((u) => u.id === m.receiver_id);
+            const isSuspicious = suspiciousPattern.test(m.content);
+
+            if (msgFilter === 'suspicious' && !isSuspicious) return false;
+            if (msgFilter === 'customer' && sender?.role !== 'customer') return false;
+            if (msgFilter === 'therapist' && sender?.role !== 'therapist') return false;
+
+            if (!msgSearch.trim()) return true;
+            const q = msgSearch.toLowerCase();
+            return (
+              m.content.toLowerCase().includes(q) ||
+              (sender?.name && sender.name.toLowerCase().includes(q)) ||
+              (receiver?.name && receiver.name.toLowerCase().includes(q)) ||
+              m.booking_id.toLowerCase().includes(q)
+            );
+          });
+
+        return (
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden space-y-0">
+            {/* ヘッダー */}
+            <div className="px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                  <MessageCircle className="w-4 h-4 text-purple-600" />
+                  <span>全メッセージ監視（チャット履歴・直契約監視）</span>
+                </h4>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  全 {messages.length} 件中 {filteredMessages.length} 件を表示中。ユーザー名をクリックすると管理者としてその画面へジャンプします。
+                </p>
+              </div>
+              <button
+                onClick={() => refreshFromSupabase()}
+                disabled={isLoadingDb}
+                className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-1.5 disabled:opacity-50 self-start sm:self-auto"
+              >
+                <span>{isLoadingDb ? '同期中...' : '最新メッセージを取得'}</span>
+              </button>
+            </div>
+
+            {/* フィルターバー */}
+            <div className="p-4 bg-slate-50 border-b border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+              <div className="relative flex-1 max-w-md">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={msgSearch}
+                  onChange={(e) => setMsgSearch(e.target.value)}
+                  placeholder="送信者・受信者名、本文テキスト、予約IDで検索..."
+                  className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-emerald-500 shadow-2xs"
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Filter className="w-3.5 h-3.5 text-slate-400" />
+                <select
+                  value={msgFilter}
+                  onChange={(e) => setMsgFilter(e.target.value as any)}
+                  className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-emerald-500 shadow-2xs"
+                >
+                  <option value="all">すべてのメッセージ</option>
+                  <option value="suspicious">⚠️ 連絡先検知の可能性あり</option>
+                  <option value="customer">顧客からの送信のみ</option>
+                  <option value="therapist">セラピストからの送信のみ</option>
+                </select>
+              </div>
+            </div>
+
+            {/* メッセージ一覧リスト */}
+            <div className="divide-y divide-slate-100">
+              {filteredMessages.length === 0 ? (
+                <div className="p-12 text-center text-slate-400 text-xs">
+                  該当するメッセージはありません。
+                </div>
+              ) : (
+                filteredMessages.map((msg) => {
+                  const sender = allUsers.find((u) => u.id === msg.sender_id);
+                  const receiver = allUsers.find((u) => u.id === msg.receiver_id);
+                  const booking = bookings.find((b) => b.id === msg.booking_id);
+                  const service = services.find((s) => s.id === booking?.service_id);
+                  const isSuspicious = suspiciousPattern.test(msg.content);
+
+                  const renderUserPill = (user: typeof sender, label: '送信者' | '宛先') => {
+                    if (!user) {
+                      return <span className="text-slate-400 text-xs">不明ユーザー</span>;
+                    }
+                    const isTherapist = user.role === 'therapist';
+                    const isCustomer = user.role === 'customer';
+
+                    if (isTherapist) {
+                      return (
+                        <Link
+                          href={`/therapist/${user.id}/requests`}
+                          className="inline-flex items-center gap-1.5 p-1 -m-1 rounded-lg hover:bg-purple-50 group transition"
+                          title="管理ポータル管理者としてセラピスト詳細画面を開く"
+                        >
+                          <img
+                            src={user.avatar_url || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150'}
+                            alt=""
+                            className="w-6 h-6 rounded-lg object-cover ring-1 ring-purple-200 shrink-0"
+                          />
+                          <span className="font-bold text-slate-900 group-hover:text-purple-700 text-xs">
+                            {user.name}
+                          </span>
+                          <span className="text-[10px] bg-purple-100 text-purple-800 px-1.5 py-0.2 rounded font-bold">
+                            セラピスト
+                          </span>
+                          <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-purple-600" />
+                        </Link>
+                      );
+                    }
+
+                    if (isCustomer) {
+                      return (
+                        <button
+                          onClick={() => {
+                            switchUser(user.id);
+                            router.push('/');
+                          }}
+                          className="inline-flex items-center gap-1.5 p-1 -m-1 rounded-lg hover:bg-emerald-50 group transition text-left cursor-pointer"
+                          title="この顧客として代理ログイン表示する"
+                        >
+                          <img
+                            src={user.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'}
+                            alt=""
+                            className="w-6 h-6 rounded-lg object-cover ring-1 ring-emerald-200 shrink-0"
+                          />
+                          <span className="font-bold text-slate-900 group-hover:text-emerald-700 text-xs">
+                            {user.name}
+                          </span>
+                          <span className="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded font-bold">
+                            顧客
+                          </span>
+                          <Users className="w-3 h-3 text-slate-400 group-hover:text-emerald-600" />
+                        </button>
+                      );
+                    }
+
+                    return (
+                      <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700">
+                        {user.name}（管理者）
+                      </span>
+                    );
+                  };
+
+                  return (
+                    <div
+                      key={msg.id}
+                      className={`p-4 sm:p-5 transition hover:bg-slate-50/70 ${
+                        isSuspicious ? 'bg-amber-50/40' : ''
+                      }`}
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2 text-xs">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-[11px] text-slate-400 font-mono">
+                            {new Date(msg.created_at).toLocaleString('ja-JP')}
+                          </span>
+                          {booking && (
+                            <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-mono">
+                              予約: {booking.id.slice(0, 8)} ({service?.title || '施術'})
+                            </span>
+                          )}
+                          {isSuspicious && (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300 px-2 py-0.5 rounded-full">
+                              <AlertTriangle className="w-3 h-3 text-amber-600" />
+                              連絡先検知の可能性
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="text-[11px] text-slate-400">
+                          {msg.is_read ? (
+                            <span className="text-emerald-600 font-bold">既読</span>
+                          ) : (
+                            <span className="text-slate-400">未読</span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-3 text-xs mb-2.5">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] text-slate-400 font-bold">FROM:</span>
+                          {renderUserPill(sender, '送信者')}
+                        </div>
+                        <span className="text-slate-300">➔</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] text-slate-400 font-bold">TO:</span>
+                          {renderUserPill(receiver, '宛先')}
+                        </div>
+                      </div>
+
+                      {/* 本文 */}
+                      <div
+                        className={`p-3 rounded-2xl text-xs text-slate-800 leading-relaxed border whitespace-pre-wrap ${
+                          isSuspicious
+                            ? 'bg-amber-50/80 border-amber-200 text-amber-950 font-medium'
+                            : 'bg-white border-slate-200'
+                        }`}
+                      >
+                        {msg.content}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* タブ 4: レビュー管理 */}
       {activeTab === 'reviews' && (() => {

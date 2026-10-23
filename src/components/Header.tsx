@@ -26,6 +26,7 @@ import {
   Settings,
   Home,
   CheckCircle2,
+  MessageCircle,
 } from 'lucide-react';
 
 export const Header: React.FC = () => {
@@ -35,6 +36,7 @@ export const Header: React.FC = () => {
     currentUser,
     allUsers,
     bookings,
+    messages,
     isLiveSupabase,
     isLoggedIn,
     currentBrand,
@@ -103,6 +105,7 @@ export const Header: React.FC = () => {
     { id: 'bookings', label: '全予約ステータス監視', icon: Calendar, badge: `${bookings.length}件` },
     { id: 'therapists', label: 'セラピスト審査・登録管理', icon: ShieldCheck },
     { id: 'customers', label: '顧客・利用者管理', icon: Users },
+    { id: 'messages', label: '全メッセージ監視', icon: MessageCircle, badge: `${messages.length}件` },
     { id: 'reviews', label: '口コミ・レビュー管理', icon: Star },
     { id: 'branding', label: 'ブランド・ロゴ設定', icon: Palette },
     { id: 'settings', label: '手数料・システム設定', icon: Settings },

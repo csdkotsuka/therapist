@@ -72,6 +72,9 @@ export const BookingChatModal: React.FC<BookingChatModalProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
+  // 連絡先・直接取引キーワード検知（嫌味のないソフトな案内用）
+  const hasContactPattern = /(?:0\d{1,4}[-(]?\d{1,4}[-)]?\d{3,4}|line|ライン|直契約|直接取引|口座番号|個人間|メアド|メールアドレス)/i.test(inputText);
+
   const handleSend = async () => {
     const text = inputText.trim();
     if (!text || isSending) return;
@@ -154,13 +157,12 @@ export const BookingChatModal: React.FC<BookingChatModalProps> = ({
           </button>
         </div>
 
-        {/* 囲い込み・直接取引防止バナー */}
+        {/* 安心・保険適用バナー */}
         <div className="bg-emerald-50 px-3.5 py-1.5 border-b border-emerald-100 flex items-center justify-between text-[11px] text-emerald-800 shrink-0">
           <div className="flex items-center gap-1.5 font-medium">
-            <Lock className="w-3 h-3 text-emerald-600 shrink-0" />
-            <span>安心メッセージ機能（アプリ内完結）</span>
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            <span>アプリ内予約は損害賠償保険・トラブル補償が自動適用されます</span>
           </div>
-          <span className="text-[10px] text-emerald-600">直接取引・個人LINE交換防止</span>
         </div>
 
         {/* メッセージ本文スクロールエリア */}
@@ -223,7 +225,13 @@ export const BookingChatModal: React.FC<BookingChatModalProps> = ({
         </div>
 
         {/* 入力フォーム */}
-        <div className="p-3 bg-white border-t border-slate-200 shrink-0">
+        <div className="p-3 bg-white border-t border-slate-200 shrink-0 space-y-2">
+          {hasContactPattern && (
+            <div className="px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-[11px] flex items-center gap-1.5 animate-fadeIn">
+              <ShieldCheck className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+              <span>※安全な保険適用やトラブル防止のため、アプリ内でのご連絡・決済をお願いしております。</span>
+            </div>
+          )}
           <form
             onSubmit={(e) => {
               e.preventDefault();

@@ -11,6 +11,7 @@ const VALID_SECTIONS: AdminSection[] = [
   'bookings',
   'therapists',
   'customers',
+  'messages',
   'reviews',
   'branding',
   'settings',
