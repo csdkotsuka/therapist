@@ -33,6 +33,7 @@ import {
   Award,
   Layers,
   ArrowUpRight,
+  Sliders,
   LineChart,
   Network,
   Compass,
@@ -253,7 +254,7 @@ export default function AdminGuidePage() {
             }`}
           >
             <Award className="w-4 h-4 text-amber-400" />
-            <span>【経営上申資料】専門職パートナー拡大構想</span>
+            <span>専門職パートナー拡大構想</span>
           </button>
           <button
             onClick={() => setActiveView('operations')}
@@ -271,10 +272,10 @@ export default function AdminGuidePage() {
         <button
           onClick={handlePrint}
           className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold rounded-2xl border border-emerald-200 shadow-2xs transition"
-          title="経営会議・上長報告用にA4形式で印刷またはPDF保存できます"
+          title="A4形式で印刷またはPDF保存できます"
         >
           <Printer className="w-4 h-4 text-emerald-600" />
-          <span>上申資料を印刷 / PDF保存</span>
+          <span>資料を印刷 / PDF保存</span>
         </button>
       </div>
 
@@ -304,7 +305,7 @@ export default function AdminGuidePage() {
               </h1>
 
               <p className="text-sm sm:text-base text-slate-300 max-w-3xl leading-relaxed pt-1">
-                単なる出張リラクゼーションの枠組みを超え、理学療法士・作業療法士・言語聴覚士・歯科衛生士・助産師・管理栄養士・鍼灸師などの医療・ヘルスケア国家資格者を包括。制度保険の隙間を埋める自費ヘルスケア市場を制覇し、世帯単位でのクロスセルと圧倒的なLTV向上を実現する事業戦略上申書です。
+                単なる出張リラクゼーションの枠組みを超え、理学療法士・作業療法士・言語聴覚士・歯科衛生士・助産師・管理栄養士・鍼灸師などの医療・ヘルスケア国家資格者を包括。制度保険の隙間を埋める自費ヘルスケア市場を制覇し、世帯単位でのクロスセルと圧倒的なLTV向上を実現する事業戦略構想書です。
               </p>
 
               {/* 3大コアバリュー指標 */}
@@ -559,7 +560,124 @@ export default function AdminGuidePage() {
             </div>
           </div>
 
-          {/* セクション 4: 経営陣への上申・決裁要請まとめ */}
+          {/* セクション 4: 規模拡大に合わせたシステム改築・事業ロードマップ（重要検討メモ） */}
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+            <div className="border-b border-slate-100 pb-4">
+              <span className="text-xs font-bold text-indigo-600 uppercase tracking-wider block">
+                Scale-up & System Roadmap Memo
+              </span>
+              <h3 className="text-xl sm:text-2xl font-black text-slate-900 mt-1">
+                規模拡大に合わせたシステム改築・事業ロードマップ（重要検討メモ）
+              </h3>
+              <p className="text-xs text-slate-500 mt-1">
+                プラットフォームの成長フェーズに合わせて順次実装・整備すべきシステム機能と、事業者として抑えておくべき法的・運営的リスク管理の備忘録です。
+              </p>
+            </div>
+
+            {/* 1. ポイント制度 & 2. 運営包括保険 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* ポイント制度 */}
+              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+                <div className="flex items-center gap-2 text-indigo-700 font-bold text-sm">
+                  <Sparkles className="w-4 h-4 text-indigo-600" />
+                  <span>① プラットフォーム共通ポイント制度（フェーズ2〜）</span>
+                </div>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  <strong>仕組み:</strong> 予約・施術完了時に決済額の1%を付与（1pt=1円）し、次回予約決済時に割引充当。原資は手数料（20%）からプラットフォーム販促費として負担。
+                </p>
+                <div className="p-3 bg-indigo-50/70 rounded-xl text-[11px] text-indigo-900 space-y-1">
+                  <p className="font-bold">導入タイミングの判断基準:</p>
+                  <p className="text-slate-600">
+                    立ち上げ初期は「初回限定クーポン（2,000円引）」や「お友達紹介」の方が圧倒的にフックとして強く、資金決済法（有効期限・供託金要件）の運用負荷を避けるため、月間予約200件超のスケール期に会員ランク制度（ブロンズ・シルバー・ゴールド）と併せて導入するのが最適。
+                  </p>
+                </div>
+              </div>
+
+              {/* 運営会社包括保険 */}
+              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+                <div className="flex items-center gap-2 text-emerald-800 font-bold text-sm">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  <span>② 管理会社としての包括損害賠償責任保険（フェーズ2〜）</span>
+                </div>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  <strong>必要性:</strong> セラピスト個人の保険加入確認（現在実装済）に加え、顧客からの使用者責任追及や、個人保険の失効・手技対象外・故意重過失免責リスクをカバーするセカンドライン。
+                </p>
+                <div className="p-3 bg-emerald-50/70 rounded-xl text-[11px] text-emerald-950 space-y-1">
+                  <p className="font-bold">中抜き防止の最強の武器:</p>
+                  <p className="text-slate-700">
+                    「アプリ内予約は最高1億円の賠償保険が自動付帯（直契約では全額自己責任）」と打ち出すことで、顧客・セラピスト双方にアプリを通す必然性を提供。損保各社の「シェアエコ包括保険（1予約数十円連動型）」を検討。
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* 3. プラットフォーム事業者として将来的に考えておくべき重要事項 */}
+            <div className="space-y-3 pt-2">
+              <h4 className="font-black text-slate-900 text-sm flex items-center gap-2">
+                <Sliders className="w-4 h-4 text-purple-600" />
+                <span>プラットフォーム事業者として将来的に考えておくべき5大テーマ</span>
+              </h4>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                {/* 1. 法令遵守 */}
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-1.5">
+                  <div className="font-bold text-slate-900 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-purple-500"></span>
+                    <span>1. 法令遵守・広告コンプライアンス</span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 leading-relaxed">
+                    医師法・あはき法・薬機法に基づき、「治療」「完治」「診断」等の医療類似行為と誤認させる表記の自動NGワード検知。また、景表法・ステマ規制に抵触しないサクラレビュー排除と透明なモデレーション体制の構築。
+                  </p>
+                </div>
+
+                {/* 2. 防犯・安全管理 */}
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-1.5">
+                  <div className="font-bold text-slate-900 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-rose-500"></span>
+                    <span>2. 防犯・安全管理（セラピスト保護）</span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 leading-relaxed">
+                    女性セラピストの夜間・密室出張における防犯対策。施術中の「ワンタップSOS緊急連絡」「現在地リアルタイム共有」、および悪質クレーマー・セクハラ顧客の即時ブラックリスト化・自動予約ブロック機能。
+                  </p>
+                </div>
+
+                {/* 3. 税務・インボイス */}
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-1.5">
+                  <div className="font-bold text-slate-900 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                    <span>3. 税務・インボイス・支払調書対応</span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 leading-relaxed">
+                    特定デジタルプラットフォーム情報開示義務への準拠。個人事業主セラピスト向けの確定申告用「年間売上・手数料控除明細書（PDF）」の自動発行機能を提供し、確定申告の手間を省くことで定着率を向上。
+                  </p>
+                </div>
+
+                {/* 4. 収益多角化 */}
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-1.5">
+                  <div className="font-bold text-slate-900 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span>4. 収益多角化（B2B・物販・スペース）</span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 leading-relaxed">
+                    手数料20%以外の第2・第3の収益源。企業向け福利厚生出張ケア（B2B契約）、施術で使用したオイル・快眠枕・サポーター等のEC物販連携（レベニューシェア）、店舗を持たない施術者向けの「提携シェアサロン」時間貸し予約。
+                  </p>
+                </div>
+
+                {/* 5. システムスケーラビリティ */}
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-1.5">
+                  <div className="font-bold text-slate-900 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-sky-500"></span>
+                    <span>5. システムスケーラビリティ</span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 leading-relaxed">
+                    チャットでの画像・写真送信（カウンセリング患部写真確認）、LINE公式アカウント連携（予約リマインド配信による無断キャンセル防止）、土日祝・深夜早朝の動的価格設定（サージプライシング機能）。
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* セクション 5: 経営陣への上申・決裁要請まとめ */}
           <div className="bg-emerald-900 text-white rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl">
             <div className="flex items-center gap-2 text-emerald-300 text-xs font-black uppercase tracking-wider">
               <CheckCircle2 className="w-4 h-4" />
