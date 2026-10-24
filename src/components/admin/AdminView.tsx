@@ -115,9 +115,19 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
   const [showAuditLogsPanel, setShowAuditLogsPanel] = useState<boolean>(false);
 
   const handleSwitchBrand = async (brandId: AppBrandId) => {
-    await setAppBrand(brandId);
     const target = APP_BRANDS[brandId];
-    setBrandSaveMessage(`アプリ名を「${target.name}」に変更しました。ロゴ・ファビコン・タイトルを更新しました。`);
+    if (target) {
+      await updateCustomBranding({
+        appName: target.name,
+        appJapaneseName: target.japaneseName,
+        appCatchphrase: target.catchphrase,
+        appTagline: target.tagline,
+        selectedIcon: target.iconUrl,
+        selectedLogo: target.logoUrl,
+      });
+    }
+    await setAppBrand(brandId);
+    setBrandSaveMessage(`「${target.japaneseName}」のプリセット設定を一括適用しました。ここから個別に変更可能です。`);
     setTimeout(() => {
       setBrandSaveMessage(null);
     }, 4500);
@@ -848,20 +858,20 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
               </div>
             </div>
 
-            {/* セラピスト審査一覧 (横スクロール対応 & 見出し表示で済/未のみの省スペース化) */}
+            {/* セラピスト審査一覧 (横スクロール対応 & 幅下限設定で損害保険との被りを完全防止) */}
             <div className="overflow-x-auto">
-              <div className="min-w-[780px]">
+              <div className="min-w-[880px]">
                 {/* テーブル見出し行 */}
-                <div className="px-4 py-2 bg-slate-100 border-b border-slate-200 text-slate-600 text-xs font-bold flex items-center justify-between">
+                <div className="px-4 py-2.5 bg-slate-100 border-b border-slate-200 text-slate-600 text-xs font-bold flex items-center justify-between">
                   <div className="w-[240px] shrink-0">セラピスト・専門職情報</div>
-                  <div className="flex-1 grid grid-cols-5 text-center text-[11px] font-bold text-slate-600">
+                  <div className="w-[380px] shrink-0 grid grid-cols-5 text-center text-[11px] font-bold text-slate-600">
                     <div>審査手数料</div>
                     <div>電子誓約書</div>
                     <div>本人確認</div>
                     <div>国家資格証</div>
                     <div>損害保険</div>
                   </div>
-                  <div className="w-[140px] shrink-0 text-right pr-2">操作・判定</div>
+                  <div className="w-[190px] shrink-0 text-right pr-2">操作・判定</div>
                 </div>
 
                 <div className="divide-y divide-slate-100">
@@ -916,14 +926,14 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                             </div>
                           </div>
 
-                          {/* 中央: 5つのステータス (済/未 のみ表示) */}
-                          <div className="flex-1 grid grid-cols-5 text-center items-center gap-1">
+                          {/* 中央: 5つのステータス (済/未 のみ表示・幅380px固定で損害保険との被り防止) */}
+                          <div className="w-[380px] shrink-0 grid grid-cols-5 text-center items-center gap-1">
                             {checklist.map((item) => {
                               const isDone = item.ok;
                               return (
                                 <div key={item.key} className="flex justify-center">
                                   <span
-                                    className={`px-2 py-0.5 rounded-md text-xs font-black inline-flex items-center justify-center min-w-[32px] ${
+                                    className={`px-2 py-0.5 rounded-md text-xs font-black inline-flex items-center justify-center min-w-[34px] ${
                                       isDone
                                         ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                                         : 'bg-slate-100 text-slate-400 border border-slate-200'
@@ -937,8 +947,8 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                             })}
                           </div>
 
-                          {/* 右側: 審査・承認ボタン */}
-                          <div className="w-[140px] shrink-0 flex items-center justify-end gap-1.5">
+                          {/* 右側: 審査・承認ボタン (幅190px固定で絶対に左と被らない) */}
+                          <div className="w-[190px] shrink-0 flex items-center justify-end gap-1.5">
                             <Link
                               href={`/therapist/${th.id}/verification`}
                               className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap shadow-2xs ${
@@ -1361,28 +1371,42 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                         </div>
 
                         <div className="space-y-2 pt-1">
-                          <label className="flex items-center gap-2.5 text-xs font-bold text-slate-800 cursor-pointer">
+                          <label className={`flex items-center gap-2.5 text-xs font-bold text-slate-800 ${selCertified ? 'cursor-not-allowed opacity-80' : 'cursor-pointer'}`}>
                             <input
                               type="checkbox"
-                              checked={nameMatchConfirmed}
-                              onChange={(e) => setNameMatchConfirmed(e.target.checked)}
-                              className="w-4 h-4 accent-emerald-600 rounded"
+                              checked={selCertified ? true : nameMatchConfirmed}
+                              disabled={selCertified || isProcessingDecision}
+                              onChange={(e) => !selCertified && setNameMatchConfirmed(e.target.checked)}
+                              className={`w-4 h-4 accent-emerald-600 rounded ${selCertified ? 'cursor-not-allowed' : ''}`}
                             />
                             <span>
                               Stripeから連携された「認証氏名（{selTp?.identity_verified_name || selUser.name.replace(/\s*\(.*?\)\s*$/, '')}）」と「資格証画像の氏名」を照合し、一致を確認しました
                             </span>
+                            {selCertified && (
+                              <span className="text-[10px] text-emerald-800 bg-emerald-100 px-1.5 py-0.2 rounded font-bold ml-1 inline-flex items-center gap-0.5">
+                                <Lock className="w-2.5 h-2.5" />
+                                <span>確定ロック済</span>
+                              </span>
+                            )}
                           </label>
 
-                          <label className="flex items-center gap-2.5 text-xs font-bold text-slate-800 cursor-pointer">
+                          <label className={`flex items-center gap-2.5 text-xs font-bold text-slate-800 ${selCertified ? 'cursor-not-allowed opacity-80' : 'cursor-pointer'}`}>
                             <input
                               type="checkbox"
-                              checked={insuranceConfirmed}
-                              onChange={(e) => setInsuranceConfirmed(e.target.checked)}
-                              className="w-4 h-4 accent-emerald-600 rounded"
+                              checked={selCertified ? true : insuranceConfirmed}
+                              disabled={selCertified || isProcessingDecision}
+                              onChange={(e) => !selCertified && setInsuranceConfirmed(e.target.checked)}
+                              className={`w-4 h-4 accent-emerald-600 rounded ${selCertified ? 'cursor-not-allowed' : ''}`}
                             />
                             <span>
                               損害賠償責任保険の加入証明を確認しました（承認と同時に資格証・保険証票の原本ファイルを自動削除します）
                             </span>
+                            {selCertified && (
+                              <span className="text-[10px] text-emerald-800 bg-emerald-100 px-1.5 py-0.2 rounded font-bold ml-1 inline-flex items-center gap-0.5">
+                                <Lock className="w-2.5 h-2.5" />
+                                <span>確定ロック済</span>
+                              </span>
+                            )}
                           </label>
                         </div>
 
@@ -1973,28 +1997,38 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
       {/* タブ: アプリ名・ロゴ・ブランド設定 (独立設定対応) */}
       {activeTab === 'branding' && (
         <div className="space-y-8">
-          {/* 上部ステータスカード */}
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 space-y-3">
+          {/* 上部ステータスカード: 採用中の組み合わせプレビュー */}
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h4 className="font-black text-slate-900 text-lg flex items-center gap-2">
                   <Palette className="w-5 h-5 text-emerald-600" />
-                  <span>アプリ名・ロゴ・アイコン 独立設定</span>
+                  <span>ブランド・ロゴ・アイコン 独立設定</span>
                 </h4>
                 <p className="text-xs text-slate-500 mt-1 max-w-2xl leading-relaxed">
-                  管理本部から「アプリ名」「ヘッダーロゴ」「アプリアイコン/ファビコン」をそれぞれ独立して設定・切り替えできます。提供画像（赤枠）からトリミングした高品質シンボルマークを即時反映可能です。
+                  「アプリアイコン（＝ファビコン）」「ブランドロゴ」「アプリ名（テキスト）」をそれぞれ選ぶだけで、選んだ組み合わせが即座にアプリ全体（ヘッダー、ブラウザタブ、トップ画面）へ採用されます。
                 </p>
               </div>
 
-              {/* 現在適用中プレビュー */}
-              <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 px-4 py-2.5 rounded-2xl shrink-0">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                <div className="w-9 h-9 rounded-xl overflow-hidden shrink-0 shadow-2xs bg-white border border-slate-100 flex items-center justify-center">
+              {/* 切り替え完了トースト通知 */}
+              {brandSaveMessage && (
+                <div className="p-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-bold flex items-center gap-2 shadow-md animate-fadeIn shrink-0">
+                  <CheckCircle className="w-4 h-4 shrink-0" />
+                  <span>{brandSaveMessage}</span>
+                </div>
+              )}
+            </div>
+
+            {/* 現在採用されている組み合わせプレビュー（3要素を横並び表示） */}
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {/* 1. 採用中アイコン（＝ファビコン） */}
+              <div className="bg-white p-3 rounded-xl border border-slate-200 flex items-center gap-3 shadow-2xs">
+                <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0 bg-slate-50 border border-slate-200 flex items-center justify-center p-1">
                   {currentBrand.iconUrl ? (
                     <img
                       src={currentBrand.iconUrl}
                       alt={currentBrand.japaneseName}
-                      className="w-full h-full object-contain p-0.5"
+                      className="w-full h-full object-contain"
                     />
                   ) : (
                     <div
@@ -2003,36 +2037,83 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                     />
                   )}
                 </div>
-                <div className="text-xs">
-                  <span className="text-slate-500 text-[10px] block font-bold">現在の適用ブランド</span>
-                  <strong className="text-emerald-900 font-black text-sm block">
-                    {currentBrand.japaneseName} ({currentBrand.name})
-                  </strong>
-                  <span className="text-[10px] text-emerald-700 truncate max-w-[200px] block">
-                    {currentBrand.catchphrase}
+                <div className="min-w-0">
+                  <span className="text-[10px] text-slate-400 font-bold block">採用中のアイコン (＝ファビコン)</span>
+                  <span className="text-xs font-black text-slate-900 truncate block">
+                    {AVAILABLE_ICONS.find((i) => i.url === currentBrand.iconUrl)?.label || 'カスタムアイコン'}
                   </span>
                 </div>
               </div>
-            </div>
 
-            {/* 切り替え完了トースト通知 */}
-            {brandSaveMessage && (
-              <div className="mt-2 p-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-bold flex items-center gap-2.5 shadow-md animate-fadeIn">
-                <CheckCircle className="w-4 h-4 shrink-0" />
-                <span>{brandSaveMessage}</span>
+              {/* 2. 採用中ブランドロゴ */}
+              <div className="bg-white p-3 rounded-xl border border-slate-200 flex items-center gap-3 shadow-2xs">
+                <div className="h-10 px-2 rounded-xl overflow-hidden shrink-0 bg-slate-50 border border-slate-200 flex items-center justify-center max-w-[120px]">
+                  {currentBrand.logoUrl ? (
+                    <img
+                      src={currentBrand.logoUrl}
+                      alt="採用中ロゴ"
+                      className="max-h-full max-w-full object-contain"
+                    />
+                  ) : (
+                    <span className="text-[10px] text-slate-400 font-bold">テキスト表示</span>
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <span className="text-[10px] text-slate-400 font-bold block">採用中のロゴ</span>
+                  <span className="text-xs font-black text-slate-900 truncate block">
+                    {AVAILABLE_LOGOS.find((l) => l.url === currentBrand.logoUrl)?.label || 'デフォルトロゴ'}
+                  </span>
+                </div>
               </div>
-            )}
+
+              {/* 3. 採用中アプリ名 */}
+              <div className="bg-white p-3 rounded-xl border border-slate-200 flex items-center gap-3 shadow-2xs">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center justify-center shrink-0 font-black text-sm">
+                  Aa
+                </div>
+                <div className="min-w-0">
+                  <span className="text-[10px] text-slate-400 font-bold block">採用中のアプリ名</span>
+                  <strong className="text-xs font-black text-slate-900 truncate block">
+                    {currentBrand.japaneseName} ({currentBrand.name})
+                  </strong>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* 独立設定 1: アプリ名・キャッチコピー設定 */}
+          {/* 独立設定 1: アプリ名設定 */}
           <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 space-y-4">
-            <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+            <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <h5 className="font-bold text-slate-900 text-sm flex items-center gap-2">
                   <span className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center text-xs font-black">1</span>
-                  <span>アプリ名称・キャッチコピー設定 (独立変更)</span>
+                  <span>アプリ名称・キャッチコピー設定 (テキスト入力 / 候補選択)</span>
                 </h5>
                 <p className="text-xs text-slate-500 mt-0.5">ヘッダーやブラウザタイトルに表示されるサービス名を直接編集できます。</p>
+              </div>
+
+              {/* クイック選択候補 */}
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-[10px] font-bold text-slate-400">候補から選ぶ:</span>
+                {[
+                  { jp: 'ケアリアゴー', en: 'Carearia Go', cp: 'あなたの「したい」叶える場所。' },
+                  { jp: 'セラリンク', en: 'Theralink', cp: '内側から輝く、本当の美しさを。' },
+                  { jp: 'ケアゴー', en: 'Care Go', cp: 'その一歩が、もっとキレイな未来をつくる。' },
+                  { jp: 'ケアリアゴー', en: 'Careia Go', cp: 'あなたのキレイと健康をプロの手で。' },
+                ].map((preset, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => {
+                      setAppJpNameInput(preset.jp);
+                      setAppNameInput(preset.en);
+                      setAppCatchphraseInput(preset.cp);
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 text-[11px] font-bold text-slate-600 transition border border-slate-200/80 cursor-pointer"
+                  >
+                    {preset.jp} ({preset.en})
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -2118,7 +2199,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                       ) : (
                         <div
                           className="w-full h-full"
-                          dangerouslySetInnerHTML={{ __html: iconItem.svg || '' }}
+                          dangerouslySetInnerHTML={{ __html: (iconItem as any).svg || '' }}
                         />
                       )}
                     </div>

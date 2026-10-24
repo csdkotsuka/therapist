@@ -1142,23 +1142,37 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
                     </div>
 
                     <div className="pt-2 space-y-1.5 border-t border-indigo-200/60">
-                      <label className="flex items-center gap-2 cursor-pointer font-bold text-slate-800">
+                      <label className={`flex items-center gap-2 font-bold text-slate-800 ${isCertified ? 'cursor-not-allowed opacity-80' : 'cursor-pointer'}`}>
                         <input
                           type="checkbox"
-                          checked={adminNameConfirmed}
-                          onChange={(e) => setAdminNameConfirmed(e.target.checked)}
-                          className="w-4 h-4 accent-indigo-600 rounded"
+                          checked={isCertified ? true : adminNameConfirmed}
+                          disabled={isCertified || isAdminDeciding}
+                          onChange={(e) => !isCertified && setAdminNameConfirmed(e.target.checked)}
+                          className={`w-4 h-4 accent-indigo-600 rounded ${isCertified ? 'cursor-not-allowed' : ''}`}
                         />
                         <span>【照合確認①】Stripe本人確認氏名と資格証原本の氏名が完全に一致していることを確認しました</span>
+                        {isCertified && (
+                          <span className="text-[10px] text-indigo-700 bg-indigo-100 px-1.5 py-0.2 rounded font-bold ml-1 flex items-center gap-0.5">
+                            <Lock className="w-2.5 h-2.5" />
+                            <span>承認ロック済</span>
+                          </span>
+                        )}
                       </label>
-                      <label className="flex items-center gap-2 cursor-pointer font-bold text-slate-800">
+                      <label className={`flex items-center gap-2 font-bold text-slate-800 ${isCertified ? 'cursor-not-allowed opacity-80' : 'cursor-pointer'}`}>
                         <input
                           type="checkbox"
-                          checked={adminInsConfirmed}
-                          onChange={(e) => setAdminInsConfirmed(e.target.checked)}
-                          className="w-4 h-4 accent-indigo-600 rounded"
+                          checked={isCertified ? true : adminInsConfirmed}
+                          disabled={isCertified || isAdminDeciding}
+                          onChange={(e) => !isCertified && setAdminInsConfirmed(e.target.checked)}
+                          className={`w-4 h-4 accent-indigo-600 rounded ${isCertified ? 'cursor-not-allowed' : ''}`}
                         />
                         <span>【照合確認②】損害賠償責任保険が有効期限内かつ本人名義であることを確認しました</span>
+                        {isCertified && (
+                          <span className="text-[10px] text-indigo-700 bg-indigo-100 px-1.5 py-0.2 rounded font-bold ml-1 flex items-center gap-0.5">
+                            <Lock className="w-2.5 h-2.5" />
+                            <span>承認ロック済</span>
+                          </span>
+                        )}
                       </label>
                     </div>
                   </div>
@@ -1198,68 +1212,33 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
 
                   {/* アクションボタン群 */}
                   <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-                    <button
-                      disabled={isAdminDeciding || !adminNameConfirmed || !adminInsConfirmed}
-                      onClick={async () => {
-                        if (!confirm(`セラピスト「${targetUser.name}」の本登録を承認しますか？\n（承認と同時に一時保管ファイルは完全自動削除されます）`)) {
-                          return;
-                        }
-                        setIsAdminDeciding(true);
-                        setAdminDecisionMsg(null);
-                        try {
-                          const res = await approveTherapistVerification({
-                            therapistId: targetUser.id,
-                            qualificationType: adminQualType,
-                            registrationNumber: adminRegNumber,
-                            nameMatchConfirmed: adminNameConfirmed,
-                            insuranceConfirmed: adminInsConfirmed,
-                          });
-                          setAdminDecisionMsg({
-                            type: res.ok ? 'success' : 'error',
-                            text: res.message,
-                          });
-                          if (res.ok) {
-                            setQualPreviewUrl(null);
-                            setInsPreviewUrl(null);
-                          }
-                        } finally {
-                          setIsAdminDeciding(false);
-                        }
-                      }}
-                      className="px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-300 text-white text-xs font-black transition flex items-center gap-2 shadow-sm cursor-pointer"
-                    >
-                      <Trash2 className="w-4 h-4 text-emerald-200" />
-                      <span>{isCertified ? '資格情報を更新承認する' : '本登録を承認する（ファイル完全自動削除）'}</span>
-                    </button>
-
-                    {/* 差戻し操作 */}
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="text"
-                        value={adminRejectReason}
-                        onChange={(e) => setAdminRejectReason(e.target.value)}
-                        placeholder="差戻し理由（例: 保険証が不鮮明）..."
-                        className="px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 placeholder-slate-400 w-56"
-                      />
+                    {isCertified ? (
+                      <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-bold shadow-2xs">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                        <span>本登録承認完了済み（照合チェックおよび登録内容は確定ロックされています）</span>
+                      </div>
+                    ) : (
                       <button
-                        disabled={isAdminDeciding || !adminRejectReason.trim()}
+                        disabled={isAdminDeciding || !adminNameConfirmed || !adminInsConfirmed}
                         onClick={async () => {
-                          if (!confirm(`差戻しを実行しますか？\n（不備のある提出ファイルはStorageから自動削除され、再提出要請されます）`)) {
+                          if (!confirm(`セラピスト「${targetUser.name}」の本登録を承認しますか？\n（承認と同時に一時保管ファイルは完全自動削除されます）`)) {
                             return;
                           }
                           setIsAdminDeciding(true);
                           setAdminDecisionMsg(null);
                           try {
-                            const res = await rejectTherapistVerification({
+                            const res = await approveTherapistVerification({
                               therapistId: targetUser.id,
-                              reason: adminRejectReason,
+                              qualificationType: adminQualType,
+                              registrationNumber: adminRegNumber,
+                              nameMatchConfirmed: adminNameConfirmed,
+                              insuranceConfirmed: adminInsConfirmed,
                             });
                             setAdminDecisionMsg({
                               type: res.ok ? 'success' : 'error',
                               text: res.message,
                             });
                             if (res.ok) {
-                              setAdminRejectReason('');
                               setQualPreviewUrl(null);
                               setInsPreviewUrl(null);
                             }
@@ -1267,11 +1246,55 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
                             setIsAdminDeciding(false);
                           }
                         }}
-                        className="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 disabled:bg-slate-300 text-white text-xs font-bold transition shadow-xs cursor-pointer"
+                        className="px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-300 text-white text-xs font-black transition flex items-center gap-2 shadow-sm cursor-pointer"
                       >
-                        差戻し実行
+                        <Trash2 className="w-4 h-4 text-emerald-200" />
+                        <span>本登録を承認する（ファイル完全自動削除）</span>
                       </button>
-                    </div>
+                    )}
+
+                    {/* 差戻し操作 */}
+                    {!isCertified && (
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={adminRejectReason}
+                          onChange={(e) => setAdminRejectReason(e.target.value)}
+                          placeholder="差戻し理由（例: 保険証が不鮮明）..."
+                          className="px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 placeholder-slate-400 w-56"
+                        />
+                        <button
+                          disabled={isAdminDeciding || !adminRejectReason.trim()}
+                          onClick={async () => {
+                            if (!confirm(`差戻しを実行しますか？\n（不備のある提出ファイルはStorageから自動削除され、再提出要請されます）`)) {
+                              return;
+                            }
+                            setIsAdminDeciding(true);
+                            setAdminDecisionMsg(null);
+                            try {
+                              const res = await rejectTherapistVerification({
+                                therapistId: targetUser.id,
+                                reason: adminRejectReason,
+                              });
+                              setAdminDecisionMsg({
+                                type: res.ok ? 'success' : 'error',
+                                text: res.message,
+                              });
+                              if (res.ok) {
+                                setAdminRejectReason('');
+                                setQualPreviewUrl(null);
+                                setInsPreviewUrl(null);
+                              }
+                            } finally {
+                              setIsAdminDeciding(false);
+                            }
+                          }}
+                          className="px-4 py-2 bg-rose-600 hover:bg-rose-500 disabled:bg-slate-200 text-white rounded-xl text-xs font-bold transition cursor-pointer"
+                        >
+                          差戻し
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               ) : (

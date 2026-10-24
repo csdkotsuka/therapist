@@ -144,6 +144,8 @@ export const APP_BRANDS: Record<AppBrandId, AppBrandConfig> = {
     description: '青い「C」と人型、そして新緑の若葉が躍動する、前向きなヘルスケア＆ビューティーシンボル',
     themeColor: '#0284c7',
     accentColor: '#16a34a',
+    iconUrl: '/branding/icon_care_go_symbol.png',
+    logoUrl: '/branding/logo-care-go.png',
     iconSvg: ICON_CARE_GO_BLUE,
   },
 
@@ -172,6 +174,7 @@ export const APP_BRANDS: Record<AppBrandId, AppBrandConfig> = {
     description: '優美なオープンハートのリボンと右下に輝くゴールドリーフが織りなす上質なプロフェッショナルシンボル',
     themeColor: '#e11d48',
     accentColor: '#f59e0b',
+    iconUrl: '/branding/icon_careia_pink_symbol.png',
     iconSvg: ICON_CAREIA_GO_PINK,
   },
 
@@ -232,34 +235,34 @@ export const APP_BRANDS: Record<AppBrandId, AppBrandConfig> = {
 
 export const DEFAULT_BRAND_ID: AppBrandId = 'carearia_go_green';
 
-// 独立選択用: アプリアイコン一覧
+// 独立選択用: アプリアイコン（＝ファビコン）一覧
 export const AVAILABLE_ICONS = [
   {
     id: 'icon_carearia_symbol',
-    label: '赤枠ロゴ 13: ケアリアゴー 若葉シンボル (トリミング画像)',
+    label: '赤枠ロゴ 13: ケアリアゴー 若葉シンボル',
     url: '/branding/icon_carearia_symbol.png',
-    badge: '提供画像トリミング',
+    badge: '赤枠ロゴ (提供画像)',
     themeColor: '#059669',
   },
   {
     id: 'icon_theralink_symbol',
-    label: '赤枠ロゴ 12: セラリンク リースシンボル (トリミング画像)',
+    label: '赤枠ロゴ 12: セラリンク リースシンボル',
     url: '/branding/icon_theralink_symbol.png',
-    badge: '提供画像トリミング',
+    badge: '赤枠ロゴ (提供画像)',
     themeColor: '#059669',
   },
   {
     id: 'icon_care_go_blue',
     label: 'ロゴ 2: ケアゴー ブルーC × 若葉',
-    svg: ICON_CARE_GO_BLUE,
-    badge: 'ベクター',
+    url: '/branding/icon_care_go_symbol.png',
+    badge: '提供画像トリミング',
     themeColor: '#0284c7',
   },
   {
     id: 'icon_careia_pink',
     label: 'ロゴ 10: ケアリアゴー ピンクハート × ゴールド',
-    svg: ICON_CAREIA_GO_PINK,
-    badge: 'ベクター',
+    url: '/branding/icon_careia_pink_symbol.png',
+    badge: '提供画像トリミング',
     themeColor: '#e11d48',
   },
 ];
@@ -275,6 +278,11 @@ export const AVAILABLE_LOGOS = [
     id: 'logo_theralink_full',
     label: 'セラリンク フルロゴ (シンボル＋テキスト)',
     url: '/branding/logo_theralink_text.png',
+  },
+  {
+    id: 'logo_care_go_full',
+    label: 'ケアゴー フルロゴ (シンボル＋テキスト)',
+    url: '/branding/logo-care-go.png',
   },
   {
     id: 'logo_carearia_symbol_only',
