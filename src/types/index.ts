@@ -211,7 +211,18 @@ export interface AppBrandConfig {
   logoUrl?: string;
   fullImageUrl?: string;
   faviconUrl?: string;
+  iconUrl?: string; // 提供画像からトリミングした実画像アイコンのパス
   themeColor: string;
   accentColor: string;
-  iconSvg: string; // アイコン部分だけのSVG（ファビコン及びアイコン表示用）
+  iconSvg: string; // アイコン部分のSVG定義
+}
+
+// 独立設定可能なカスタムブランド設定
+export interface CustomBrandingSettings {
+  appName?: string;
+  appJapaneseName?: string;
+  appCatchphrase?: string;
+  appTagline?: string;
+  selectedLogo?: string; // ロゴ画像パス or プリセット識別子
+  selectedIcon?: string; // アイコン画像パス or プリセット識別子
 }

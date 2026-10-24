@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { formatPrice, formatDate } from '@/lib/geo';
-import { APP_BRANDS } from '@/lib/branding';
+import { APP_BRANDS, AVAILABLE_ICONS, AVAILABLE_LOGOS } from '@/lib/branding';
 import { AppBrandId, BookingStatus } from '@/types';
 import {
   getChecklist,
@@ -78,7 +78,9 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
     switchUser,
     appBrand,
     currentBrand,
+    customBranding,
     setAppBrand,
+    updateCustomBranding,
     onboardings,
     verificationLogs,
     completeReviewFeePayment,
@@ -119,6 +121,40 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
     setTimeout(() => {
       setBrandSaveMessage(null);
     }, 4500);
+  };
+
+  // 独立設定フォーム用のローカルstate
+  const [appNameInput, setAppNameInput] = useState(currentBrand.name);
+  const [appJpNameInput, setAppJpNameInput] = useState(currentBrand.japaneseName);
+  const [appCatchphraseInput, setAppCatchphraseInput] = useState(currentBrand.catchphrase);
+
+  useEffect(() => {
+    setAppNameInput(currentBrand.name);
+    setAppJpNameInput(currentBrand.japaneseName);
+    setAppCatchphraseInput(currentBrand.catchphrase);
+  }, [currentBrand.name, currentBrand.japaneseName, currentBrand.catchphrase]);
+
+  const handleSaveAppName = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await updateCustomBranding({
+      appName: appNameInput,
+      appJapaneseName: appJpNameInput,
+      appCatchphrase: appCatchphraseInput,
+    });
+    setBrandSaveMessage(`アプリ名を「${appJpNameInput} (${appNameInput})」に更新しました。`);
+    setTimeout(() => setBrandSaveMessage(null), 4000);
+  };
+
+  const handleSelectIcon = async (iconUrl?: string) => {
+    await updateCustomBranding({ selectedIcon: iconUrl });
+    setBrandSaveMessage('アプリアイコン・ファビコンを更新しました。');
+    setTimeout(() => setBrandSaveMessage(null), 4000);
+  };
+
+  const handleSelectLogo = async (logoUrl?: string) => {
+    await updateCustomBranding({ selectedLogo: logoUrl });
+    setBrandSaveMessage('ヘッダー用ブランドロゴを更新しました。');
+    setTimeout(() => setBrandSaveMessage(null), 4000);
   };
 
   // セラピスト審査・管理の絞り込み状態
@@ -657,76 +693,75 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
           {/* 承認・自動データ削除ログ（テキスト監査証跡）パネル */}
           {showAuditLogsPanel && (
             <div className="bg-white rounded-3xl border-2 border-indigo-200 shadow-md overflow-hidden">
-              <div className="px-6 py-4 bg-indigo-950 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="px-6 py-3.5 bg-indigo-950 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
                   <div className="flex items-center gap-2">
                     <History className="w-4 h-4 text-emerald-400" />
-                    <h4 className="font-bold text-sm">審査証跡ログ（therapist_verification_logs）— 原本画像削除後も保持されるテキスト記録</h4>
+                    <h4 className="font-bold text-sm">審査証跡ログ</h4>
                   </div>
-                  <p className="text-[11px] text-indigo-200 mt-0.5">
-                    Supabase Storage（{STORAGE_BUCKET}/）から資格証・保険証ファイルを完全削除した後も、承認日時・管理者ID・資格名・登録番号の証跡を永続保持します。
+                  <p className="text-xs text-indigo-200 mt-0.5">
+                    原本ファイル削除後も、承認日時・管理者・資格名・登録番号の証跡を保持します。
                   </p>
                 </div>
                 <button
                   onClick={() => setShowAuditLogsPanel(false)}
-                  className="px-3 py-1 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold self-start sm:self-auto"
+                  className="px-3 py-1 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold self-start sm:self-auto cursor-pointer"
                 >
                   閉じる
                 </button>
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold text-[10px] uppercase">
+                <table className="w-full text-left text-xs whitespace-nowrap">
+                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold text-[11px]">
                     <tr>
-                      <th className="px-4 py-3">承認/判定日時 (verified_at)</th>
-                      <th className="px-4 py-3">対象セラピスト</th>
-                      <th className="px-4 py-3">判定</th>
-                      <th className="px-4 py-3">確認資格名 (qualification_type)</th>
-                      <th className="px-4 py-3">登録番号 (registration_number)</th>
-                      <th className="px-4 py-3">照合氏名 (Stripe eKYC)</th>
-                      <th className="px-4 py-3">管理者ID (verified_by)</th>
-                      <th className="px-4 py-3">Storage自動削除</th>
+                      <th className="px-4 py-3 whitespace-nowrap">承認/判定日時</th>
+                      <th className="px-4 py-3 whitespace-nowrap">対象セラピスト</th>
+                      <th className="px-4 py-3 whitespace-nowrap">判定</th>
+                      <th className="px-4 py-3 whitespace-nowrap">確認資格名</th>
+                      <th className="px-4 py-3 whitespace-nowrap">登録番号</th>
+                      <th className="px-4 py-3 whitespace-nowrap">照合氏名</th>
+                      <th className="px-4 py-3 whitespace-nowrap">管理者</th>
+                      <th className="px-4 py-3 whitespace-nowrap min-w-[140px]">Storage自動削除</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {verificationLogs.map((log) => (
                       <tr key={log.id} className="hover:bg-slate-50/80">
-                        <td className="px-4 py-3 font-mono text-[11px] text-slate-600">
+                        <td className="px-4 py-3 font-mono text-xs text-slate-600 whitespace-nowrap">
                           {formatDate(log.verified_at)}
                         </td>
-                        <td className="px-4 py-3 font-bold text-slate-900">{log.therapist_name || log.therapist_id}</td>
-                        <td className="px-4 py-3">
+                        <td className="px-4 py-3 font-bold text-slate-900 whitespace-nowrap">
+                          {log.therapist_name || log.therapist_id}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
                           {log.decision === 'approved' ? (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                            <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
                               承認・認定付与
                             </span>
                           ) : (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300">
+                            <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-300">
                               差戻し
                             </span>
                           )}
                         </td>
-                        <td className="px-4 py-3 font-bold text-indigo-900">
+                        <td className="px-4 py-3 font-bold text-indigo-900 whitespace-nowrap">
                           {log.qualification_type || <span className="text-slate-400 font-normal">-</span>}
                         </td>
-                        <td className="px-4 py-3 font-mono text-slate-700">
+                        <td className="px-4 py-3 font-mono text-slate-700 whitespace-nowrap">
                           {log.registration_number || <span className="text-slate-400">-</span>}
                         </td>
-                        <td className="px-4 py-3 text-slate-700">
+                        <td className="px-4 py-3 text-slate-700 whitespace-nowrap">
                           {log.confirmed_name || <span className="text-slate-400">-</span>}
                         </td>
-                        <td className="px-4 py-3 font-mono text-[10px] text-slate-500">
+                        <td className="px-4 py-3 font-mono text-xs text-slate-500 whitespace-nowrap">
                           {log.verified_by ? `${log.verified_by.slice(0, 8)}...` : 'admin'}
                         </td>
-                        <td className="px-4 py-3">
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-bold border border-slate-200">
-                            <Trash2 className="w-3 h-3 text-rose-500" />
-                            <span>{log.files_deleted_count ?? 0}件 Delete済</span>
+                        <td className="px-4 py-3 whitespace-nowrap min-w-[140px]">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200">
+                            <Trash2 className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                            <span>{log.files_deleted_count ?? 0}件 削除済</span>
                           </span>
-                          {log.reason && (
-                            <span className="block text-[10px] text-rose-600 mt-0.5">理由: {log.reason}</span>
-                          )}
                         </td>
                       </tr>
                     ))}
@@ -813,113 +848,126 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
               </div>
             </div>
 
-            <div className="divide-y divide-slate-100">
-              {filteredTherapists.length === 0 ? (
-                <div className="p-8 text-center text-slate-400 text-xs">
-                  条件に一致するセラピストが見つかりませんでした
+            {/* セラピスト審査一覧 (横スクロール対応 & 見出し表示で済/未のみの省スペース化) */}
+            <div className="overflow-x-auto">
+              <div className="min-w-[780px]">
+                {/* テーブル見出し行 */}
+                <div className="px-4 py-2 bg-slate-100 border-b border-slate-200 text-slate-600 text-xs font-bold flex items-center justify-between">
+                  <div className="w-[240px] shrink-0">セラピスト・専門職情報</div>
+                  <div className="flex-1 grid grid-cols-5 text-center text-[11px] font-bold text-slate-600">
+                    <div>審査手数料</div>
+                    <div>電子誓約書</div>
+                    <div>本人確認</div>
+                    <div>国家資格証</div>
+                    <div>損害保険</div>
+                  </div>
+                  <div className="w-[140px] shrink-0 text-right pr-2">操作・判定</div>
                 </div>
-              ) : (
-                filteredTherapists.map((th) => {
-                  const tp = therapistProfiles[th.id];
-                  const ob = onboardings[th.id];
-                  const stage = getVerificationStage(tp, ob);
-                  const stageMeta = STAGE_META[stage];
-                  const checklist = getChecklist(tp, ob);
-                  const certified = isTherapistCertified(tp);
-                  const cityName = th.address ? th.address.replace('愛媛県', '').split('市')[0] + '市' : '愛媛';
 
-                  return (
-                    <div
-                      key={th.id}
-                      className={`px-3 sm:px-4 py-2.5 transition flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-100 min-h-[56px] ${
-                        stage === 'ready'
-                          ? 'bg-emerald-50/60 hover:bg-emerald-50/90'
-                          : stage === 'rejected'
-                          ? 'bg-rose-50/40 hover:bg-rose-50/60'
-                          : 'hover:bg-slate-50/80'
-                      }`}
-                    >
-                      {/* 左側: 基本情報（アバター、名前、エリア、審査ステージバッジを1行で整列） */}
-                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                        <img
-                          src={th.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(th.name)}`}
-                          alt={th.name}
-                          className="w-8 h-8 rounded-lg object-cover ring-1 ring-slate-200 shrink-0"
-                        />
-                        <div className="min-w-0 flex items-center gap-2 flex-wrap sm:flex-nowrap">
-                          <span className="font-bold text-slate-900 text-xs sm:text-sm truncate">
-                            {th.name}
-                          </span>
-                          <span className={`px-2 py-0.2 rounded-full text-[10px] font-bold border shrink-0 ${stageMeta.badge}`}>
-                            {stageMeta.label}
-                          </span>
-                          {certified && (
-                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[9px] font-bold bg-indigo-600 text-white shrink-0">
-                              <Award className="w-2.5 h-2.5" />
-                              <span>認定</span>
-                            </span>
-                          )}
-                          <span className="text-[10px] text-slate-400 shrink-0 hidden sm:inline">
-                            {cityName}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* 右側: 5つのステータス（高さを統一したコンパクトなピル） ＋ ボタン */}
-                      <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0">
-                        {/* 5つの処理状況: 済/未を横並びで均等表示 */}
-                        <div className="flex items-center gap-1 shrink-0 overflow-x-auto py-0.5">
-                          {checklist.map((item) => {
-                            const isDone = item.ok;
-                            return (
-                              <span
-                                key={item.key}
-                                className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0 ${
-                                  isDone
-                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                    : 'bg-slate-100 text-slate-400 border border-slate-200'
-                                }`}
-                                title={`${item.shortLabel}: ${isDone ? '済' : '未'}`}
-                              >
-                                <span className="text-[9px] text-slate-500 font-normal">{item.shortLabel}:</span>
-                                <span className={isDone ? 'text-emerald-700 font-black' : 'text-slate-400'}>
-                                  {isDone ? '済' : '未'}
-                                </span>
-                              </span>
-                            );
-                          })}
-                        </div>
-
-                        {/* 審査・承認ボタン */}
-                        <div className="flex items-center gap-1 shrink-0">
-                          <Link
-                            href={`/therapist/${th.id}/verification`}
-                            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap shadow-2xs ${
-                              stage === 'ready'
-                                ? 'bg-emerald-600 hover:bg-emerald-500 text-white ring-2 ring-emerald-500/20'
-                                : certified
-                                ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
-                                : 'bg-slate-900 hover:bg-slate-800 text-white'
-                            }`}
-                          >
-                            <ClipboardCheck className="w-3.5 h-3.5" />
-                            <span>{stage === 'ready' ? '審査・承認' : '審査'}</span>
-                          </Link>
-
-                          <Link
-                            href={`/therapist/${th.id}/requests`}
-                            className="px-2.5 py-1 rounded-lg text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition flex items-center gap-1 whitespace-nowrap shadow-2xs"
-                            title="セラピスト画面（詳細）を開く"
-                          >
-                            <Eye className="w-3.5 h-3.5 text-slate-500" />
-                            <span>詳細</span>
-                          </Link>
-                        </div>
-                      </div>
+                <div className="divide-y divide-slate-100">
+                  {filteredTherapists.length === 0 ? (
+                    <div className="p-8 text-center text-slate-400 text-xs">
+                      条件に一致するセラピストが見つかりませんでした
                     </div>
-                  );
-                })
-              )}
+                  ) : (
+                    filteredTherapists.map((th) => {
+                      const tp = therapistProfiles[th.id];
+                      const ob = onboardings[th.id];
+                      const stage = getVerificationStage(tp, ob);
+                      const stageMeta = STAGE_META[stage];
+                      const checklist = getChecklist(tp, ob);
+                      const certified = isTherapistCertified(tp);
+                      const cityName = th.address ? th.address.replace('愛媛県', '').split('市')[0] + '市' : '愛媛';
+
+                      return (
+                        <div
+                          key={th.id}
+                          className={`px-4 py-2.5 transition flex items-center justify-between border-b border-slate-100 min-h-[54px] ${
+                            stage === 'ready'
+                              ? 'bg-emerald-50/60 hover:bg-emerald-50/90'
+                              : stage === 'rejected'
+                              ? 'bg-rose-50/40 hover:bg-rose-50/60'
+                              : 'hover:bg-slate-50/80'
+                          }`}
+                        >
+                          {/* 左側: 基本情報 */}
+                          <div className="w-[240px] shrink-0 flex items-center gap-2.5 min-w-0 pr-2">
+                            <img
+                              src={th.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(th.name)}`}
+                              alt={th.name}
+                              className="w-8 h-8 rounded-lg object-cover ring-1 ring-slate-200 shrink-0"
+                            />
+                            <div className="min-w-0 flex items-center gap-1.5 flex-wrap">
+                              <span className="font-bold text-slate-900 text-xs sm:text-sm truncate">
+                                {th.name}
+                              </span>
+                              <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold border shrink-0 ${stageMeta.badge}`}>
+                                {stageMeta.label}
+                              </span>
+                              {certified && (
+                                <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded text-[9px] font-bold bg-indigo-600 text-white shrink-0">
+                                  <Award className="w-2.5 h-2.5" />
+                                  <span>認定</span>
+                                </span>
+                              )}
+                              <span className="text-[10px] text-slate-400 shrink-0">
+                                {cityName}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* 中央: 5つのステータス (済/未 のみ表示) */}
+                          <div className="flex-1 grid grid-cols-5 text-center items-center gap-1">
+                            {checklist.map((item) => {
+                              const isDone = item.ok;
+                              return (
+                                <div key={item.key} className="flex justify-center">
+                                  <span
+                                    className={`px-2 py-0.5 rounded-md text-xs font-black inline-flex items-center justify-center min-w-[32px] ${
+                                      isDone
+                                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                                        : 'bg-slate-100 text-slate-400 border border-slate-200'
+                                    }`}
+                                    title={`${item.shortLabel}: ${isDone ? '済' : '未'}`}
+                                  >
+                                    {isDone ? '済' : '未'}
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+
+                          {/* 右側: 審査・承認ボタン */}
+                          <div className="w-[140px] shrink-0 flex items-center justify-end gap-1.5">
+                            <Link
+                              href={`/therapist/${th.id}/verification`}
+                              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap shadow-2xs ${
+                                stage === 'ready'
+                                  ? 'bg-emerald-600 hover:bg-emerald-500 text-white ring-2 ring-emerald-500/20'
+                                  : certified
+                                  ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
+                                  : 'bg-slate-900 hover:bg-slate-800 text-white'
+                              }`}
+                            >
+                              <ClipboardCheck className="w-3.5 h-3.5" />
+                              <span>{stage === 'ready' ? '審査・承認' : '審査'}</span>
+                            </Link>
+
+                            <Link
+                              href={`/therapist/${th.id}/requests`}
+                              className="px-2.5 py-1 rounded-lg text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition flex items-center gap-1 whitespace-nowrap shadow-2xs"
+                              title="セラピスト画面（詳細）を開く"
+                            >
+                              <Eye className="w-3.5 h-3.5 text-slate-500" />
+                              <span>詳細</span>
+                            </Link>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1529,29 +1577,29 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                 const customerBookings = bookings.filter((b) => b.customer_id === c.id);
 
                 return (
-                  <div key={c.id} className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-slate-50/50 transition">
-                    <div className="flex items-center gap-3.5">
+                  <div key={c.id} className="px-4 py-2.5 flex items-center justify-between gap-3 hover:bg-slate-50/50 transition">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
                       <img
                         src={c.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(c.name)}`}
                         alt={c.name}
-                        className="w-12 h-12 rounded-2xl object-cover ring-2 ring-blue-500/20 shrink-0"
+                        className="w-8 h-8 rounded-xl object-cover ring-1 ring-blue-500/20 shrink-0"
                       />
-                      <div>
+                      <div className="min-w-0 flex-1 flex flex-wrap items-center gap-x-3 gap-y-0.5">
                         <div className="flex items-center gap-2">
-                          <h4 className="font-bold text-slate-900 text-sm">{c.name}</h4>
-                          <span className="text-[11px] text-slate-400 font-mono">{c.email}</span>
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                            予約 {customerBookings.length} 件
+                          <h4 className="font-bold text-slate-900 text-xs sm:text-sm truncate">{c.name}</h4>
+                          <span className="text-[10px] sm:text-xs text-slate-400 font-mono truncate hidden sm:inline">{c.email}</span>
+                          <span className="px-2 py-0.2 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 shrink-0">
+                            予約 {customerBookings.length}件
                           </span>
                         </div>
-                        <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-slate-500">
+                        <div className="flex items-center gap-2 text-xs text-slate-500">
                           {c.phone && (
-                            <span className="inline-flex items-center gap-1 font-mono">
+                            <span className="inline-flex items-center gap-1 font-mono text-[11px]">
                               📞 {c.phone}
                             </span>
                           )}
                           {c.address && (
-                            <span className="inline-flex items-center gap-1 text-slate-600">
+                            <span className="inline-flex items-center gap-1 text-slate-600 text-[11px] truncate max-w-[200px] hidden md:inline">
                               📍 {c.address}
                             </span>
                           )}
@@ -1559,14 +1607,14 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                       </div>
                     </div>
 
-                    {/* この顧客として表示（視点切り替え）ボタン */}
-                    <div className="flex items-center gap-2 w-full sm:w-auto shrink-0 border-t sm:border-t-0 pt-2 sm:pt-0">
+                    {/* この顧客として表示（右端ボタン） */}
+                    <div className="shrink-0">
                       <button
                         onClick={() => {
                           switchUser(c.id);
                           router.push('/');
                         }}
-                        className="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm"
+                        className="px-3 py-1.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs whitespace-nowrap cursor-pointer"
                         title="この顧客の視点に切り替えて操作する"
                       >
                         <Users className="w-3.5 h-3.5" />
@@ -1736,20 +1784,29 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                   return (
                     <div
                       key={msg.id}
-                      className={`p-4 sm:p-5 transition hover:bg-slate-50/70 ${
+                      className={`p-4 transition hover:bg-slate-50/70 ${
                         isSuspicious ? 'bg-amber-50/40' : ''
                       }`}
                     >
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2 text-xs">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="text-[11px] text-slate-400 font-mono">
-                            {new Date(msg.created_at).toLocaleString('ja-JP')}
-                          </span>
+                      {/* 口コミ・レビューと同様に横一列に並べたヘッダー行 */}
+                      <div className="flex flex-wrap items-center justify-between gap-2.5 mb-2 text-xs">
+                        <div className="flex flex-wrap items-center gap-2.5">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[10px] text-slate-400 font-bold">FROM:</span>
+                            {renderUserPill(sender, '送信者')}
+                          </div>
+                          <span className="text-slate-400 font-bold">➔</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[10px] text-slate-400 font-bold">TO:</span>
+                            {renderUserPill(receiver, '宛先')}
+                          </div>
+
                           {booking && (
                             <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-mono">
                               予約: {booking.id.slice(0, 8)} ({service?.title || '施術'})
                             </span>
                           )}
+
                           {isSuspicious && (
                             <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300 px-2 py-0.5 rounded-full">
                               <AlertTriangle className="w-3 h-3 text-amber-600" />
@@ -1758,24 +1815,15 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                           )}
                         </div>
 
-                        <div className="text-[11px] text-slate-400">
+                        <div className="flex items-center gap-2 text-[11px] text-slate-400">
+                          <span className="font-mono">
+                            {new Date(msg.created_at).toLocaleString('ja-JP')}
+                          </span>
                           {msg.is_read ? (
                             <span className="text-emerald-600 font-bold">既読</span>
                           ) : (
                             <span className="text-slate-400">未読</span>
                           )}
-                        </div>
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-3 text-xs mb-2.5">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[10px] text-slate-400 font-bold">FROM:</span>
-                          {renderUserPill(sender, '送信者')}
-                        </div>
-                        <span className="text-slate-300">➔</span>
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[10px] text-slate-400 font-bold">TO:</span>
-                          {renderUserPill(receiver, '宛先')}
                         </div>
                       </div>
 
@@ -1866,11 +1914,40 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                     <div key={rev.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex justify-between items-start gap-4 text-xs hover:bg-slate-100/60 transition">
                       <div className="space-y-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="font-bold text-slate-900">{customer?.name} 様</span>
-                          <span className="text-slate-400">→</span>
-                          <span className="font-semibold text-slate-700">{therapist?.name} セラピストへ</span>
-                          <div className="flex text-amber-500 font-bold ml-1">
-                            ★ {rev.rating}
+                          {customer ? (
+                            <button
+                              onClick={() => {
+                                switchUser(customer.id);
+                                router.push('/');
+                              }}
+                              className="inline-flex items-center gap-1 font-bold text-slate-900 hover:text-emerald-700 hover:underline cursor-pointer bg-white px-2 py-0.5 rounded-lg border border-slate-200 shadow-2xs"
+                              title="この顧客としてアプリを表示（視点切替）"
+                            >
+                              <Users className="w-3 h-3 text-emerald-600" />
+                              <span>{customer.name} 様</span>
+                            </button>
+                          ) : (
+                            <span className="font-bold text-slate-900">匿名顧客 様</span>
+                          )}
+
+                          <span className="text-slate-400 font-bold">➔</span>
+
+                          {therapist ? (
+                            <Link
+                              href={`/therapist/${therapist.id}/requests`}
+                              className="inline-flex items-center gap-1 font-semibold text-slate-700 hover:text-purple-700 hover:underline bg-white px-2 py-0.5 rounded-lg border border-slate-200 shadow-2xs"
+                              title="このセラピスト画面（詳細）を開く"
+                            >
+                              <Award className="w-3 h-3 text-purple-600" />
+                              <span>{therapist.name} セラピストへ</span>
+                            </Link>
+                          ) : (
+                            <span className="font-semibold text-slate-700">セラピストへ</span>
+                          )}
+
+                          <div className="flex items-center gap-1 text-amber-500 font-bold ml-1 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 text-xs">
+                            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                            <span>{rev.rating}</span>
                           </div>
                         </div>
                         <p className="text-slate-700 leading-relaxed pt-0.5">{rev.comment}</p>
@@ -1893,165 +1970,349 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
         );
       })()}
 
-      {/* タブ: アプリ名・ロゴ・ブランド設定 (Carea Go / Care Go / Thera Go) */}
+      {/* タブ: アプリ名・ロゴ・ブランド設定 (独立設定対応) */}
       {activeTab === 'branding' && (
-        <div className="space-y-6">
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 space-y-2">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="space-y-8">
+          {/* 上部ステータスカード */}
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h4 className="font-black text-slate-900 text-lg flex items-center gap-2">
                   <Palette className="w-5 h-5 text-emerald-600" />
-                  <span>アプリ名・ロゴ・ファビコン切り替え設定</span>
+                  <span>アプリ名・ロゴ・アイコン 独立設定</span>
                 </h4>
-                <p className="text-xs text-slate-500 mt-1">
-                  管理本部からワンタップでプラットフォームのブランド名、ヘッダーロゴ画像、ファビコン（ブラウザタブアイコン）、タイトルを一括切り替えできます。
+                <p className="text-xs text-slate-500 mt-1 max-w-2xl leading-relaxed">
+                  管理本部から「アプリ名」「ヘッダーロゴ」「アプリアイコン/ファビコン」をそれぞれ独立して設定・切り替えできます。提供画像（赤枠）からトリミングした高品質シンボルマークを即時反映可能です。
                 </p>
               </div>
 
-              {/* 現在適用中ステータス */}
-              <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3.5 py-2 rounded-2xl shrink-0">
+              {/* 現在適用中プレビュー */}
+              <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 px-4 py-2.5 rounded-2xl shrink-0">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                <div
-                  className="w-7 h-7 rounded-lg overflow-hidden shrink-0 shadow-2xs"
-                  dangerouslySetInnerHTML={{ __html: currentBrand.iconSvg }}
-                />
+                <div className="w-9 h-9 rounded-xl overflow-hidden shrink-0 shadow-2xs bg-white border border-slate-100 flex items-center justify-center">
+                  {currentBrand.iconUrl ? (
+                    <img
+                      src={currentBrand.iconUrl}
+                      alt={currentBrand.japaneseName}
+                      className="w-full h-full object-contain p-0.5"
+                    />
+                  ) : (
+                    <div
+                      className="w-full h-full"
+                      dangerouslySetInnerHTML={{ __html: currentBrand.iconSvg }}
+                    />
+                  )}
+                </div>
                 <div className="text-xs">
-                  <span className="text-slate-500 text-[10px] block">現在の適用ブランド</span>
-                  <strong className="text-emerald-800 font-black">{currentBrand.japaneseName} ({currentBrand.name})</strong>
+                  <span className="text-slate-500 text-[10px] block font-bold">現在の適用ブランド</span>
+                  <strong className="text-emerald-900 font-black text-sm block">
+                    {currentBrand.japaneseName} ({currentBrand.name})
+                  </strong>
+                  <span className="text-[10px] text-emerald-700 truncate max-w-[200px] block">
+                    {currentBrand.catchphrase}
+                  </span>
                 </div>
               </div>
             </div>
 
             {/* 切り替え完了トースト通知 */}
             {brandSaveMessage && (
-              <div className="mt-4 p-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-bold flex items-center gap-2.5 shadow-md animate-fadeIn">
-                <CheckCircle className="w-5 h-5 shrink-0" />
+              <div className="mt-2 p-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-bold flex items-center gap-2.5 shadow-md animate-fadeIn">
+                <CheckCircle className="w-4 h-4 shrink-0" />
                 <span>{brandSaveMessage}</span>
               </div>
             )}
           </div>
 
-          {/* ブランド選択カード */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {(['care_go_blue', 'carearia_go_green', 'careia_go_pink', 'theralink', 'carea_go', 'thera_go'] as AppBrandId[]).map((brandKey) => {
-              const brand = APP_BRANDS[brandKey];
-              if (!brand) return null;
-              const isSelected = appBrand === brandKey || (brandKey === 'care_go_blue' && appBrand === 'care_go');
+          {/* 独立設定 1: アプリ名・キャッチコピー設定 */}
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 space-y-4">
+            <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+              <div>
+                <h5 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center text-xs font-black">1</span>
+                  <span>アプリ名称・キャッチコピー設定 (独立変更)</span>
+                </h5>
+                <p className="text-xs text-slate-500 mt-0.5">ヘッダーやブラウザタイトルに表示されるサービス名を直接編集できます。</p>
+              </div>
+            </div>
 
-              return (
-                <div
-                  key={brandKey}
-                  className={`bg-white rounded-3xl border-2 transition-all duration-200 overflow-hidden flex flex-col justify-between shadow-xs ${
-                    isSelected
-                      ? 'border-emerald-500 ring-2 ring-emerald-500/20 shadow-lg -translate-y-0.5'
-                      : 'border-slate-200 hover:border-slate-300 hover:shadow-md'
-                  }`}
+            <form onSubmit={handleSaveAppName} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">アプリ名 (日本語)</label>
+                <input
+                  type="text"
+                  value={appJpNameInput}
+                  onChange={(e) => setAppJpNameInput(e.target.value)}
+                  placeholder="例: ケアリアゴー"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-bold focus:outline-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">アプリ名 (英字 / 英語)</label>
+                <input
+                  type="text"
+                  value={appNameInput}
+                  onChange={(e) => setAppNameInput(e.target.value)}
+                  placeholder="例: Carearia Go"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-bold focus:outline-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">キャッチコピー</label>
+                <input
+                  type="text"
+                  value={appCatchphraseInput}
+                  onChange={(e) => setAppCatchphraseInput(e.target.value)}
+                  placeholder="例: あなたの「したい」叶える場所。"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-medium focus:outline-emerald-500"
+                />
+              </div>
+
+              <div className="md:col-span-3 flex justify-end">
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer"
                 >
-                  <div>
-                    {/* 上部: アイコン単体（シンボルマーク）プレビュー */}
-                    <div className="relative h-44 bg-gradient-to-b from-slate-50 to-slate-100/60 border-b border-slate-100 flex flex-col items-center justify-center p-4">
-                      <div
-                        className="w-20 h-20 rounded-2xl shadow-md overflow-hidden transform group-hover:scale-105 transition-transform"
-                        dangerouslySetInnerHTML={{ __html: brand.iconSvg }}
-                      />
-                      <span className="text-[11px] font-bold text-slate-400 mt-2">
-                        ファビコン＆アプリアイコン
-                      </span>
-                      {isSelected && (
-                        <div className="absolute top-3 right-3">
-                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-600 text-white text-[11px] font-black shadow-md">
-                            <Check className="w-3.5 h-3.5" />
-                            <span>適用中</span>
-                          </span>
-                        </div>
+                  <Check className="w-3.5 h-3.5" />
+                  <span>アプリ名称を保存・反映</span>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* 独立設定 2: アプリアイコン / ファビコン設定 */}
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 space-y-4">
+            <div className="border-b border-slate-100 pb-3">
+              <h5 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                <span className="w-6 h-6 rounded-lg bg-teal-100 text-teal-800 flex items-center justify-center text-xs font-black">2</span>
+                <span>アプリアイコン ＆ ファビコン設定 (独立選択)</span>
+              </h5>
+              <p className="text-xs text-slate-500 mt-0.5">
+                ブラウザのタブアイコンやヘッダーのシンボルマークとして使用するアイコンを選択します。提供画像の赤枠ロゴからテキストをトリミングした高品質シンボルマークを選択可能です。
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {AVAILABLE_ICONS.map((iconItem) => {
+                const isSelected = currentBrand.iconUrl === iconItem.url;
+
+                return (
+                  <div
+                    key={iconItem.id}
+                    onClick={() => handleSelectIcon(iconItem.url)}
+                    className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col items-center justify-between text-center ${
+                      isSelected
+                        ? 'border-emerald-500 bg-emerald-50/40 ring-2 ring-emerald-500/20 shadow-sm'
+                        : 'border-slate-200 hover:border-emerald-300 hover:bg-slate-50/50'
+                    }`}
+                  >
+                    <div className="w-20 h-20 rounded-2xl bg-white border border-slate-200 flex items-center justify-center p-2 shadow-xs overflow-hidden mb-3">
+                      {iconItem.url ? (
+                        <img
+                          src={iconItem.url}
+                          alt={iconItem.label}
+                          className="w-full h-full object-contain"
+                        />
+                      ) : (
+                        <div
+                          className="w-full h-full"
+                          dangerouslySetInnerHTML={{ __html: iconItem.svg || '' }}
+                        />
                       )}
                     </div>
 
-                    {/* ブランド情報 */}
-                    <div className="p-5 space-y-4">
-                      <div>
+                    <div className="space-y-1 mb-3">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 block">
+                        {iconItem.badge}
+                      </span>
+                      <h6 className="font-bold text-xs text-slate-900 leading-tight">
+                        {iconItem.label}
+                      </h6>
+                    </div>
+
+                    <button
+                      type="button"
+                      className={`w-full py-1.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 ${
+                        isSelected
+                          ? 'bg-emerald-600 text-white font-black'
+                          : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                      }`}
+                    >
+                      {isSelected ? (
+                        <>
+                          <Check className="w-3.5 h-3.5" />
+                          <span>適用中</span>
+                        </>
+                      ) : (
+                        <span>このアイコンを適用</span>
+                      )}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 独立設定 3: ブランドロゴ設定 */}
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 space-y-4">
+            <div className="border-b border-slate-100 pb-3">
+              <h5 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                <span className="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-800 flex items-center justify-center text-xs font-black">3</span>
+                <span>ヘッダー用ブランドロゴ設定 (独立選択)</span>
+              </h5>
+              <p className="text-xs text-slate-500 mt-0.5">ヘッダーや資料ページに掲載するロゴ画像のタイプを選択できます。</p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {AVAILABLE_LOGOS.map((logoItem) => {
+                const isSelected = currentBrand.logoUrl === logoItem.url;
+
+                return (
+                  <div
+                    key={logoItem.id}
+                    onClick={() => handleSelectLogo(logoItem.url)}
+                    className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col items-center justify-between text-center ${
+                      isSelected
+                        ? 'border-indigo-500 bg-indigo-50/40 ring-2 ring-indigo-500/20 shadow-sm'
+                        : 'border-slate-200 hover:border-indigo-300 hover:bg-slate-50/50'
+                    }`}
+                  >
+                    <div className="w-full h-24 rounded-2xl bg-white border border-slate-200 flex items-center justify-center p-2 shadow-xs overflow-hidden mb-3">
+                      <img
+                        src={logoItem.url}
+                        alt={logoItem.label}
+                        className="max-h-full max-w-full object-contain"
+                      />
+                    </div>
+
+                    <h6 className="font-bold text-xs text-slate-900 leading-tight mb-3">
+                      {logoItem.label}
+                    </h6>
+
+                    <button
+                      type="button"
+                      className={`w-full py-1.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 ${
+                        isSelected
+                          ? 'bg-indigo-600 text-white font-black'
+                          : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                      }`}
+                    >
+                      {isSelected ? (
+                        <>
+                          <Check className="w-3.5 h-3.5" />
+                          <span>適用中</span>
+                        </>
+                      ) : (
+                        <span>このロゴを適用</span>
+                      )}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* ブランドプリセット一括切り替えカード */}
+          <div className="space-y-4">
+            <div className="border-b border-slate-200 pb-2">
+              <h5 className="font-bold text-slate-900 text-sm">プリセットブランド一括切り替え</h5>
+              <p className="text-xs text-slate-500">名称・カラー・ロゴ・アイコンをパッケージとして一括適用できます。</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {(['carearia_go_green', 'theralink', 'care_go_blue', 'careia_go_pink', 'carea_go', 'thera_go'] as AppBrandId[]).map((brandKey) => {
+                const brand = APP_BRANDS[brandKey];
+                if (!brand) return null;
+                const isSelected = appBrand === brandKey;
+
+                return (
+                  <div
+                    key={brandKey}
+                    className={`bg-white rounded-3xl border-2 transition-all duration-200 overflow-hidden flex flex-col justify-between shadow-xs ${
+                      isSelected
+                        ? 'border-emerald-500 ring-2 ring-emerald-500/20 shadow-lg -translate-y-0.5'
+                        : 'border-slate-200 hover:border-slate-300 hover:shadow-md'
+                    }`}
+                  >
+                    <div>
+                      {/* 上部: アイコン単体プレビュー */}
+                      <div className="relative h-36 bg-gradient-to-b from-slate-50 to-slate-100/60 border-b border-slate-100 flex flex-col items-center justify-center p-3">
+                        <div className="w-16 h-16 rounded-2xl shadow-md overflow-hidden bg-white p-1 border border-slate-200 flex items-center justify-center">
+                          {brand.iconUrl ? (
+                            <img
+                              src={brand.iconUrl}
+                              alt={brand.japaneseName}
+                              className="w-full h-full object-contain"
+                            />
+                          ) : (
+                            <div
+                              className="w-full h-full"
+                              dangerouslySetInnerHTML={{ __html: brand.iconSvg }}
+                            />
+                          )}
+                        </div>
+                        {isSelected && (
+                          <div className="absolute top-2.5 right-2.5">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-black shadow-md">
+                              <Check className="w-3 h-3" />
+                              <span>適用中</span>
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* ブランド情報 */}
+                      <div className="p-4 space-y-2">
                         <div className="flex items-baseline justify-between gap-2">
-                          <h3 className="font-black text-xl text-slate-900 tracking-tight">
+                          <h3 className="font-black text-base text-slate-900 tracking-tight">
                             {brand.japaneseName}
                           </h3>
                           <span
-                            className="text-[11px] font-black px-2 py-0.5 rounded-md uppercase"
+                            className="text-[10px] font-black px-2 py-0.5 rounded-md uppercase"
                             style={{ backgroundColor: `${brand.themeColor}15`, color: brand.themeColor }}
                           >
                             {brand.tagline}
                           </span>
                         </div>
-                        <p className="text-xs font-bold text-emerald-700 mt-1">
+                        <p className="text-xs font-bold text-emerald-700">
                           「{brand.catchphrase}」
                         </p>
-                        <p className="text-[11px] text-slate-500 mt-1.5 leading-relaxed">
+                        <p className="text-[11px] text-slate-500 leading-relaxed">
                           {brand.description}
                         </p>
                       </div>
+                    </div>
 
-                      {/* プレビュー表示エリア */}
-                      <div className="space-y-2 pt-2 border-t border-slate-100">
-                        <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">
-                          表示プレビュー
-                        </span>
-
-                        {/* ヘッダーロゴプレビュー */}
-                        <div className="p-2.5 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
-                          <span className="text-[11px] font-bold text-slate-500">ヘッダー表示:</span>
-                          <div className="flex items-center gap-2 px-2.5 py-1 bg-white rounded-lg border border-slate-200/80 shadow-2xs">
-                            <div
-                              className="w-6 h-6 rounded-md overflow-hidden shrink-0"
-                              dangerouslySetInnerHTML={{ __html: brand.iconSvg }}
-                            />
-                            <div className="flex items-baseline gap-1">
-                              <span className="text-xs font-black text-slate-900">{brand.japaneseName}</span>
-                              <span className="text-[9px] font-bold text-slate-400 uppercase">{brand.tagline}</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* ファビコン & タブプレビュー */}
-                        <div className="p-2.5 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
-                          <span className="text-[11px] font-bold text-slate-500">ブラウザタブ:</span>
-                          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white rounded-lg border border-slate-200/80 shadow-2xs text-[11px] font-bold text-slate-700 max-w-[170px] truncate">
-                            <div
-                              className="w-4 h-4 rounded-xs overflow-hidden shrink-0"
-                              dangerouslySetInnerHTML={{ __html: brand.iconSvg }}
-                            />
-                            <span className="truncate">{brand.japaneseName} - {brand.catchphrase}</span>
-                          </div>
-                        </div>
-                      </div>
+                    {/* 下部: 適用切り替えボタン */}
+                    <div className="p-4 pt-0">
+                      <button
+                        onClick={() => handleSwitchBrand(brandKey)}
+                        disabled={isSelected}
+                        className={`w-full py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 ${
+                          isSelected
+                            ? 'bg-emerald-50 text-emerald-800 border border-emerald-500/50 cursor-default font-black'
+                            : 'bg-slate-900 hover:bg-slate-800 text-white shadow-xs hover:shadow-md active:scale-98 cursor-pointer'
+                        }`}
+                      >
+                        {isSelected ? (
+                          <>
+                            <Check className="w-3.5 h-3.5 text-emerald-600" />
+                            <span>適用中</span>
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                            <span>「{brand.japaneseName}」を一括適用</span>
+                          </>
+                        )}
+                      </button>
                     </div>
                   </div>
-
-                  {/* 下部: 適用切り替えボタン */}
-                  <div className="p-5 pt-0">
-                    <button
-                      onClick={() => handleSwitchBrand(brandKey)}
-                      disabled={isSelected}
-                      className={`w-full py-3 rounded-2xl font-bold text-xs transition flex items-center justify-center gap-2 ${
-                        isSelected
-                          ? 'bg-emerald-50 text-emerald-800 border-2 border-emerald-500/50 cursor-default font-black'
-                          : 'bg-slate-900 hover:bg-slate-800 text-white shadow-xs hover:shadow-md active:scale-98 cursor-pointer'
-                      }`}
-                    >
-                      {isSelected ? (
-                        <>
-                          <Check className="w-4 h-4 text-emerald-600" />
-                          <span>現在このブランドを適用中</span>
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="w-4 h-4 text-amber-300" />
-                          <span>「{brand.japaneseName}」に切り替える</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
       )}

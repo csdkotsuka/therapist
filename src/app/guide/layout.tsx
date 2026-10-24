@@ -1,24 +1,30 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
-import { HeartPulse, ArrowLeft } from 'lucide-react';
+import { useApp } from '@/context/AppContext';
+import { ArrowLeft } from 'lucide-react';
 
 export default function GuideLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { currentBrand } = useApp();
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col text-slate-800">
       {/* Guide Header */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200">
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 print:hidden">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-teal-500 to-emerald-400 flex items-center justify-center text-white shadow-md shadow-emerald-500/20">
-              <HeartPulse className="w-5 h-5" />
-            </div>
+            <div
+              className="w-9 h-9 rounded-xl overflow-hidden shrink-0 shadow-sm"
+              dangerouslySetInnerHTML={{ __html: currentBrand.iconSvg }}
+            />
             <div>
-              <span className="text-lg font-black bg-gradient-to-r from-teal-700 to-emerald-600 bg-clip-text text-transparent">
-                CareHub
+              <span className="text-lg font-black bg-gradient-to-r from-emerald-800 to-teal-700 bg-clip-text text-transparent">
+                {currentBrand.japaneseName}
               </span>
               <span className="text-xs text-slate-400 ml-2 font-medium">Docs & Manuals</span>
             </div>
@@ -40,8 +46,8 @@ export default function GuideLayout({
       </main>
 
       {/* Guide Footer */}
-      <footer className="border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-400">
-        <p>CareHub Platform Operations & Architecture Manuals</p>
+      <footer className="border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-400 print:hidden">
+        <p>{currentBrand.japaneseName} ({currentBrand.name}) Platform Operations & Architecture Manuals</p>
       </footer>
     </div>
   );

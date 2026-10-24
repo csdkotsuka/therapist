@@ -37,6 +37,12 @@ import {
   LineChart,
   Network,
   Compass,
+  History,
+  Trash2,
+  Lock,
+  CreditCard,
+  MapPin,
+  Navigation,
 } from 'lucide-react';
 
 export default function AdminGuidePage() {
@@ -98,104 +104,93 @@ export default function AdminGuidePage() {
     {
       category: '鍼灸師 (ハリ・お灸)',
       icon: Flame,
-      color: 'amber',
-      badge: '国家資格 / 東洋医学・自律神経',
-      targetPain: '病院で原因不明と言われる「不定愁訴」、頑固な自律神経失調、眼精疲労・偏頭痛、冷え性・更年期障害、不眠',
-      services: '経穴（ツボ）へのディスポ鍼治療、温灸、電気温鍼、パルス療法、東洋医学的体質診断とツボ指導',
-      whyEssential: '西洋医学では治療法が見つからない慢性不調に対する決定打。「西洋医学（リハビリ）× 東洋医学（鍼灸）」のハイブリッド提供でプラットフォームの唯一無二性を確立。',
+      color: 'rose',
+      badge: '国家資格 / 東洋医学・自律神経調律',
+      targetPain: '頑固な自律神経失調症、不眠、頭痛、眼精疲労、冷え性、生理痛・更年期障害、薬に頼りたくない不調',
+      services: '全身経絡経穴（ツボ）鍼治療、温灸温熱療法、美顔鍼（美容鍼灸）、自律神経バランス調整',
+      whyEssential: '現代人の「未病（検査では異常が出ないが不調）」に対する根本治療として富裕層・働き世代のリピート率が圧倒的。定期メンテナンス需要の中核となります。',
       priceRange: '¥7,500〜¥12,000 / 60分',
-      targetCustomer: '働く女性、更年期世代、慢性疲労のビジネスパーソン、アスリート',
+      targetCustomer: 'ストレスの多いデスクワーカー、経営者、妊活中・更年期の女性、慢性疲労層',
     },
     {
-      category: '管理栄養士',
+      category: '柔道整復師 (整骨・外傷)',
+      icon: Bone,
+      color: 'orange',
+      badge: '国家資格 / 骨格・関節アライメント',
+      targetPain: 'ぎっくり腰、寝違え、スポーツでの関節捻挫・打撲、産後骨盤の歪み、姿勢の崩れ（猫背・反り腰）',
+      services: '徒手整復・関節モビライゼーション、骨盤骨格矯正、トリガーポイント筋膜リリース、キネシオテーピング',
+      whyEssential: '「急な強い痛み（急性痛）」に対するファーストオピニオンとして即日訪問のニーズが最も高く、オンデマンド配車の即時性と抜群の親和性を持ちます。',
+      priceRange: '¥7,000〜¥11,000 / 60分',
+      targetCustomer: '子育て世代、デスクワーク層、スポーツ愛好家、シニア',
+    },
+    {
+      category: 'あん摩マッサージ指圧師',
+      icon: Hand,
+      color: 'emerald',
+      badge: '国家資格 / 伝統徒手手技・循環改善',
+      targetPain: '全身の極度の筋疲労・こり、血行不良による浮腫（むくみ）、手足のしびれ、リラクゼーション',
+      services: '国家規格の伝統あん摩術、ツボ指圧療法、リンパ血行促進徒手マッサージ',
+      whyEssential: '無資格マッサージ店と法的に差別化できる唯一の徒手手技資格。安心感を重視する高齢者や医療関係者世帯からの絶大な信頼を獲得します。',
+      priceRange: '¥6,500〜¥10,000 / 60分',
+      targetCustomer: '高齢者世帯、慢性疲労のビジネス層、安心・安全手技を求める層',
+    },
+    {
+      category: '助産師 (産前産後ケア)',
+      icon: Baby,
+      color: 'pink',
+      badge: '国家資格 / 母子ケアのスペシャリスト',
+      targetPain: '授乳の痛み・母乳不足・乳腺炎、産後うつ・極度の孤立育児不安、赤ちゃんの体重増加不良、産後骨盤の開き',
+      services: '乳房マッサージ手技、授乳・抱っこ指導、沐浴代行・赤ちゃん発育チェック、産後ママの休息レスパイト＆傾聴',
+      whyEssential: '産後直後のママは外出不能。自宅に来てくれる助産師は「命の恩人」級の感謝を生み、乳幼児期を通じて家族全体のヘルスケアプラットフォーム利用へと繋がります。',
+      priceRange: '¥8,000〜¥14,000 / 60分',
+      targetCustomer: '産後0ヶ月〜1年の母子、初産婦家庭、里帰りなしのワンオペ家庭',
+    },
+    {
+      category: '管理栄養士 / 栄養士',
       icon: Utensils,
       color: 'lime',
-      badge: '国家資格 / 食事指導・栄養管理',
-      targetPain: '糖尿病・高血圧・腎臓病などの食事制限のストレス、産後やブライダルのダイエット挫折、高齢者の低栄養（フレイル・痩せ）',
-      services: '冷蔵庫拝見＆パーソナル栄養カウンセリング、オーダーメイド1週間献立表作成、持病食・嚥下食の調理レクチャー、LINE食事写真添削',
-      whyEssential: '「外側からの施術（整体・リハビリ）」と「内側からの栄養（食事）」が合わさることで顧客の健康改善効果が劇的に加速。定期サブスクリプション指導に適しています。',
-      priceRange: '¥7,000〜¥11,000 / 60分',
-      targetCustomer: '生活習慣病予備軍、産後ママ、ボディメイク層、高齢親の食事に悩む子ども世代',
+      badge: '国家資格 / 医食同源・食事栄養指導',
+      targetPain: '糖尿病・脂質異常症・高血圧の食事改善困難、生活習慣病予備軍、アレルギー食の献立悩み、離乳食の進め方',
+      services: '自宅冷蔵庫・調味料チェック＆改善指導、パーソナル週間献立作成、持病別減塩・糖質コントロール実地アドバイス',
+      whyEssential: '治療だけでなく「予防」の観点で不可欠。身体施術（PT・整体）と食事指導をセットで受けるパッケージ化により、顧客単価と健康効果が劇的に向上します。',
+      priceRange: '¥6,000〜¥9,000 / 45分',
+      targetCustomer: '健診結果が気になる中高年、持病管理世帯、子育て世帯、アスリート',
     },
     {
-      category: '助産師',
-      icon: Baby,
-      color: 'rose',
-      badge: '国家資格 / 産前産後・母子ケア',
-      targetPain: '退院後の母乳トラブル（乳腺炎・出が悪い）、赤ちゃんが泣き止まない・体重が増えない不安、産後の骨盤の開き・尿もれ、産後うつ・ワンオペ孤立',
-      services: '出張乳房マッサージ（痛みの少ない乳頭ケア）、正しい抱き方・授乳姿勢指導、赤ちゃんの体重測定・沐浴指導、産後骨盤ケア＆メンタル傾聴',
-      whyEssential: '少子化の一方で「産後ケア」への公費助成や自己投資熱が空前。若年ファミリー層をアプリへ初期獲得する強力な「フック」となり、その後の世帯丸ごと顧客化へ直結します。',
-      priceRange: '¥8,500〜¥14,000 / 60分',
-      targetCustomer: '新生児〜乳幼児を育てる産後ママ、初産ファミリー、育休中のご家庭',
-    },
-    {
-      category: '視能訓練士 (CO)',
+      category: '視能訓練士 (ORT)',
       icon: Eye,
-      color: 'sky',
-      badge: '国家資格 / 視覚機能・アイケア',
-      targetPain: 'PC・スマホ・タブレットによる極度の眼精疲労、子どもの近視進行・斜視・弱視の不安、シニアの視野狭窄・見えづらさ',
-      services: 'ビジョントレーニング（動体視力・眼球運動・両眼視機能訓練）、眼精疲労緩和アイケア、弱視・斜視のセルフケア相談、照明・視環境アドバイス',
-      whyEssential: 'デジタル社会における新国民病「デジタル眼精疲労」および子どもの視力低下に対応。他社には存在しない独自性でメディア露出や学校・企業導入の突破口に。',
-      priceRange: '¥7,000〜¥10,000 / 50分',
-      targetCustomer: 'ITワーカー・デスクワーカー、学習期の児童・保護者、シニア、eスポーツ選手',
-    },
-    {
-      category: 'もみほぐし・整体',
-      icon: Sparkles,
-      color: 'emerald',
-      badge: 'ボディケア / 筋肉疲労回復',
-      targetPain: '日々の仕事・家事による首・肩・背中・腰の筋肉疲労、だるさ、手軽なリフレッシュ需要',
-      services: '全身もみほぐし、トリガーポイント指圧、ストレッチ整体、足つぼ・リフレクソロジー',
-      whyEssential: '最も裾野が広く認知度の高いマス市場。初回利用の敷居を下げ、他専門職へのクロスセルへ誘導するプラットフォームの基本導線です。',
-      priceRange: '¥5,000〜¥8,000 / 60分',
-      targetCustomer: '全世代、仕事帰りの会社員、主婦・主夫層',
-    },
-    {
-      category: 'アロマ・リンパ',
-      icon: Flower2,
-      color: 'pink',
-      badge: 'オイルケア / 極上リラクゼーション',
-      targetPain: '脚や顔のむくみ、冷え、日々の過度なストレス、自律神経の乱れ、肌の乾燥',
-      services: '天然精油を用いた全身アロマトリートメント、深層リンパドレナージュ、デトックスオイルケア',
-      whyEssential: '女性ユーザーの高リピート率と満足度を牽引。自宅が高級スパに変わる非日常体験で客単価が高く、口コミ拡散の原動力となります。',
-      priceRange: '¥7,500〜¥13,000 / 70分',
-      targetCustomer: '働く女性、美容意識の高い層、ご褒美ケア需要',
-    },
-    {
-      category: 'カイロ・骨盤矯正',
-      icon: Bone,
       color: 'indigo',
-      badge: 'アライメント調整 / 姿勢改善',
-      targetPain: '猫背、ストレートネック、産後骨盤の歪み、左右の足の長さの違い、姿勢悪化による外見悩み',
-      services: '骨盤矯正、脊椎アライメント調整、姿勢写真ビフォーアフター分析、日常生活の姿勢指導',
-      whyEssential: 'ビフォーアフターの変化が視覚的にわかりやすく、SNSや紹介による新規獲得が強い。産後骨盤ケアで助産師との強力な連携シナジーを発揮。',
-      priceRange: '¥6,500〜¥10,000 / 50分',
-      targetCustomer: '産後女性、姿勢が気になる若年層〜ビジネスパーソン',
+      badge: '国家資格 / 視覚機能・ロービジョン',
+      targetPain: '子どもの斜視・弱視の発見遅れ、在宅ワークによる激しいVDT眼精疲労、シニアの見えにくさ・転倒リスク',
+      services: '小児視覚スクリーニング相談、VDT作業環境（照明・ディスプレイ距離）診断、ロービジョン補助具選定アドバイス',
+      whyEssential: '完全なニッチでありながら専門性が極めて高く、特に就学前健診前後の子育て世帯やIT企業のリモートワーカーから指名が入る高付加価値領域です。',
+      priceRange: '¥7,000〜¥10,000 / 45分',
+      targetCustomer: '子育てファミリー、テレワーカー、視力低下に悩むシニア',
     },
     {
-      category: 'ドライヘッドスパ',
-      icon: HeartPulse,
-      color: 'purple',
-      badge: '脳疲労回復 / 睡眠改善',
-      targetPain: '睡眠の質低下（眠りが浅い・不眠）、デスクワークの脳疲労、眼精疲労、側頭筋・首すじの張り',
-      services: '水を使わない無水ヘッドマッサージ、側頭筋・後頭下筋群の深層リリース、首肩デコルテほぐし',
-      whyEssential: '「服を着たまま、省スペースでベッド不要」という出張の圧倒的相性の良さ。オフィス訪問やホテル出張、スキマ時間の利用に最適です。',
-      priceRange: '¥5,500〜¥8,500 / 45分',
-      targetCustomer: 'ビジネスパーソン、不眠に悩む全世代、経営者・エグゼクティブ',
-    },
-    {
-      category: 'エステティシャン / 美容セラピスト',
+      category: '訪問エステ・美容セラピスト',
       icon: Sparkles,
-      color: 'pink',
-      badge: '美肌・フェイシャル / ブライダル',
-      targetPain: '毛穴・くすみ・たるみ、ブライダル前の集中痩身、子育てや仕事でサロンに通えない美容ニーズ',
-      services: '美白フェイシャル、毛穴クレンジング、小顔リンパリフト、ブライダルデコルテ＆背中トリートメント',
-      whyEssential: '自費マッチングの中で最も客単価が高くリピート率も抜群。自宅が高級エステサロンに変わる感動体験で、女性ユーザーの定着を強力に牽引します。',
-      priceRange: '¥8,500〜¥15,000 / 70分',
-      targetCustomer: '美容意識の高い女性、ブライダル層、外出が難しい子育て中のママ',
+      color: 'rose',
+      badge: '認定プロ / 自宅極上フェイシャル＆ボディ',
+      targetPain: '育児や介護でエステサロンに通えない、すっぴんでリラックスして受けたい、年齢肌のくすみ・たるみ',
+      services: 'ポータブルスチーマー持参の本格フェイシャル、オーガニックアロマオイルボディトリートメント、ヘッドスパ',
+      whyEssential: '「贅沢・癒やし」の象徴であり、女性ユーザーのプラットフォーム定着（LTV）を高める最高峰のフック商材。出張施術の感動体験を最も演出できます。',
+      priceRange: '¥9,000〜¥16,000 / 75分',
+      targetCustomer: '子育てママ、働く女性、ブライダル前の花嫁、外出困難なシニア女性',
     },
     {
-      category: 'パーソナルトレーナー / 運動コーチ',
+      category: 'アロマセラピスト',
+      icon: Flower2,
+      color: 'purple',
+      badge: '認定資格 / メディカルアロマ・香気療法',
+      targetPain: 'メンタルの落ち込み、ホルモンバランスの乱れ、睡眠の質の悪化、日々の過度なプレッシャー',
+      services: '体調・感情に合わせた精油ブレンディング、アロマトリートメントマッサージ、ホームフレグランス処方',
+      whyEssential: 'メディカルな資格と組み合わせることで「癒やしの最高峰」を演出。香りの空間演出により、自宅が瞬時に高級リゾートサロンへと昇華します。',
+      priceRange: '¥8,000〜¥13,000 / 60分',
+      targetCustomer: '不眠に悩む全世代、女性ホルモンの変化に悩む層、ストレス過多のビジネス層',
+    },
+    {
+      category: 'パーソナルトレーナー',
       icon: Activity,
       color: 'emerald',
       badge: '運動指導 / ボディメイク・姿勢',
@@ -241,40 +236,40 @@ export default function AdminGuidePage() {
   ];
 
   return (
-    <div className="space-y-8 pb-16">
+    <div className="space-y-8 pb-16 text-slate-800 text-sm sm:text-base leading-relaxed">
       {/* 画面トップ: ビュー切り替えタブ & 上申用印刷ボタン */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-3xl border border-slate-200 shadow-xs print:hidden">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setActiveView('proposal')}
-            className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition flex items-center gap-2 ${
+            className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition flex items-center gap-2 ${
               activeView === 'proposal'
                 ? 'bg-slate-900 text-white shadow-md'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
             <Award className="w-4 h-4 text-amber-400" />
-            <span>専門職パートナー拡大構想</span>
+            <span>専門職パートナー拡大構想・事業計画</span>
           </button>
           <button
             onClick={() => setActiveView('operations')}
-            className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition flex items-center gap-2 ${
+            className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition flex items-center gap-2 ${
               activeView === 'operations'
                 ? 'bg-slate-900 text-white shadow-md'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
             <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>管理者向け 運用・操作マニュアル</span>
+            <span>統括実務運用マニュアル (改築最新版)</span>
           </button>
         </div>
 
         <button
           onClick={handlePrint}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold rounded-2xl border border-emerald-200 shadow-2xs transition"
+          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-bold rounded-2xl shadow transition cursor-pointer"
           title="A4形式で印刷またはPDF保存できます"
         >
-          <Printer className="w-4 h-4 text-emerald-600" />
+          <Printer className="w-4 h-4" />
           <span>資料を印刷 / PDF保存</span>
         </button>
       </div>
@@ -285,115 +280,110 @@ export default function AdminGuidePage() {
            ======================================================== */
         <div className="space-y-10">
           {/* 表紙・エグゼクティブサマリー */}
-          <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 text-white rounded-3xl p-6 sm:p-10 shadow-2xl border border-slate-800 relative overflow-hidden">
-            {/* 装飾背景 */}
+          <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 text-white rounded-3xl p-6 sm:p-10 shadow-2xl border border-slate-800 relative overflow-hidden print-avoid-break">
             <div className="absolute right-0 top-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
             <div className="relative z-10 space-y-4">
               <div className="flex flex-wrap items-center gap-2.5">
-                <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-black uppercase tracking-wider border border-emerald-500/30">
+                <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs sm:text-sm font-black uppercase tracking-wider border border-emerald-500/30">
                   Business Strategy Proposal
                 </span>
-                <span className="text-xs text-slate-400 font-bold">
+                <span className="text-xs sm:text-sm text-slate-400 font-bold">
                   対象: 経営陣・事業推進責任者・提携パートナー各位
                 </span>
               </div>
 
-              <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight leading-tight">
-                専門職パートナー網の拡充による<br />
-                『全世代・家庭密着型ウェルネスプラットフォーム』構築構想
+              <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight leading-snug">
+                {currentBrand.japaneseName} ({currentBrand.name})<br />
+                ヘルスケア＆ウェルネス専門職パートナー拡大構想
               </h1>
 
-              <p className="text-sm sm:text-base text-slate-300 max-w-3xl leading-relaxed pt-1">
-                単なる出張リラクゼーションの枠組みを超え、理学療法士・作業療法士・言語聴覚士・歯科衛生士・助産師・管理栄養士・鍼灸師などの医療・ヘルスケア国家資格者を包括。制度保険の隙間を埋める自費ヘルスケア市場を制覇し、世帯単位でのクロスセルと圧倒的なLTV向上を実現する事業戦略構想書です。
+              <p className="text-sm sm:text-lg text-emerald-100/90 max-w-3xl leading-relaxed font-normal">
+                従来の「出張リラクゼーション・もみほぐし」の枠組を超越し、医療国家資格保持者（理学療法士・作業療法士・助産師・歯科衛生士等）と認定美容・健康指導プロを束ねる、全国規模のオンデマンド・ヘルスケアインフラへの事業飛躍構想です。
               </p>
 
-              {/* 3大コアバリュー指標 */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-slate-800/80">
-                <div className="bg-white/5 backdrop-blur-md rounded-2xl p-4 border border-white/10">
-                  <div className="text-[11px] text-slate-400 font-bold">顧客単価 (ARPU)</div>
-                  <div className="text-xl sm:text-2xl font-black text-emerald-400 mt-1">1.8〜2.5倍</div>
-                  <p className="text-[11px] text-slate-400 mt-1">専門資格による付加価値で高客単価（¥8,000〜¥14,000）を確立</p>
+              <div className="pt-4 border-t border-slate-800 flex flex-wrap items-center gap-6 text-xs sm:text-sm text-slate-300 font-medium">
+                <div>
+                  <span className="text-slate-400 block text-xs">統括責任者</span>
+                  <strong className="text-white font-bold">プラットフォーム本部</strong>
                 </div>
-                <div className="bg-white/5 backdrop-blur-md rounded-2xl p-4 border border-white/10">
-                  <div className="text-[11px] text-slate-400 font-bold">継続利用率 (LTV向上)</div>
-                  <div className="text-xl sm:text-2xl font-black text-sky-400 mt-1">85〜92%</div>
-                  <p className="text-[11px] text-slate-400 mt-1">「気晴らし」から「生活維持・健康管理」の習慣化による定期契約化</p>
+                <div>
+                  <span className="text-slate-400 block text-xs">戦略展開ステータス</span>
+                  <strong className="text-emerald-400 font-bold">フェーズ1: 全国同時立ち上げ進行中</strong>
                 </div>
-                <div className="bg-white/5 backdrop-blur-md rounded-2xl p-4 border border-white/10">
-                  <div className="text-[11px] text-slate-400 font-bold">世帯クロスセル率</div>
-                  <div className="text-xl sm:text-2xl font-black text-amber-400 mt-1">3.2人/世帯</div>
-                  <p className="text-[11px] text-slate-400 mt-1">産後ママ・祖父母・ビジネスパーソン・子どもを1つのアプリで包括</p>
+                <div>
+                  <span className="text-slate-400 block text-xs">対象専門職種</span>
+                  <strong className="text-white font-bold">全17領域網羅</strong>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* セクション 1: なぜ専門職の拡充が「全体の顧客拡大」に直結するのか？ (4大レバレッジ) */}
-          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-6">
+          {/* セクション 1: なぜ今、専門職拡大なのか */}
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-6 print-avoid-break">
             <div className="border-b border-slate-100 pb-4">
-              <span className="text-xs font-black uppercase text-emerald-600 tracking-wider">Strategic Advantage</span>
+              <span className="text-xs sm:text-sm font-black uppercase text-emerald-600 tracking-wider">Strategic Imperative</span>
               <h2 className="text-xl sm:text-2xl font-black text-slate-900 mt-1">
-                1. なぜ専門職の追加がプラットフォーム全体の顧客基盤を爆発的に拡大させるのか？
+                1. なぜ今、専門職パートナーの全国同時拡大が不可欠なのか
               </h2>
-              <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                一般的なマッチングアプリが直面する「単身利用・低頻度・価格競争」の壁を打ち破る、4つの強力な成長エンジンです。
+              <p className="text-sm text-slate-600 mt-1">
+                単なるマッチングアプリから「社会保障の隙間を埋める生活インフラ」へ進化させる4つの成長エンジン。
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* エンジン 1: 世帯丸ごと顧客化 */}
-              <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-50/70 to-teal-50/40 border border-emerald-200/80 space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black shadow-xs">
-                  <Network className="w-5 h-5" />
+              {/* エンジン 1 */}
+              <div className="p-6 rounded-2xl bg-gradient-to-br from-blue-50/70 to-indigo-50/40 border border-blue-200/80 space-y-3 print-avoid-break">
+                <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-black shadow-xs">
+                  <TrendingUp className="w-6 h-6 print:stroke-[2.5]" />
                 </div>
-                <h3 className="font-bold text-base text-slate-900">① ファミリー・クロスセル（世帯単位でのアカウント獲得）</h3>
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  従来のリラクゼーションは個人完結型でした。しかし、<strong>助産師（産後ケア）</strong>や<strong>歯科衛生士（訪問口腔ケア）</strong>、<strong>理学療法士（歩行リハビリ）</strong>が加わることで、家族内での紹介が連鎖します。
+                <h3 className="font-bold text-base sm:text-lg text-slate-900">① 客単価の飛躍的向上（1.6倍〜2.2倍）</h3>
+                <p className="text-sm text-slate-700 leading-relaxed">
+                  通常のリラクゼーション（¥6,000/60分）に対し、国家資格者による自費リハビリや産後専門ケアは¥10,000〜¥15,000が市場相場。プラットフォームの手数料（20%）実額が成約1件あたり¥1,200から¥2,500超へと劇的に拡大します。
                 </p>
-                <div className="p-3 bg-white/80 rounded-xl border border-emerald-200/60 text-[11px] text-emerald-950 font-medium">
-                  <strong>💡 獲得シナリオ:</strong> 産後ケアで「助産師」を呼んだママが、足腰の弱った同居の親に「理学療法士・歯科衛生士」を手配し、夫は休日に「もみほぐし」、子どもは「弱視トレーニング」を利用。1アカウントの世帯課金額が最大化します。
+                <div className="p-3 bg-white/90 rounded-xl border border-blue-200/60 text-xs sm:text-sm text-blue-950 font-medium">
+                  <strong>💡 収益試算:</strong> 月間1,000件成約時、従来型モデル比で月間手数料売上が約+130万円純増します。
                 </div>
               </div>
 
-              {/* エンジン 2: 制度保険の「隙間」を埋める未開拓巨大市場 */}
-              <div className="p-5 rounded-2xl bg-gradient-to-br from-blue-50/70 to-indigo-50/40 border border-blue-200/80 space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black shadow-xs">
-                  <Layers className="w-5 h-5" />
+              {/* エンジン 2 */}
+              <div className="p-6 rounded-2xl bg-gradient-to-br from-emerald-50/70 to-teal-50/40 border border-emerald-200/80 space-y-3 print-avoid-break">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-black shadow-xs">
+                  <HeartPulse className="w-6 h-6 print:stroke-[2.5]" />
                 </div>
-                <h3 className="font-bold text-base text-slate-900">② 制度保険外「自費リハビリ・自費ヘルスケア」市場の制覇</h3>
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  医療保険のリハビリは発症から150〜180日で打ち切られ、介護保険の枠も限度額で埋まっています。「もっと専門的なリハビリやケアを受けたいが、受けられない」という<strong>自費ヘルスケア難民は全国で数百万人規模</strong>に達しています。
+                <h3 className="font-bold text-base sm:text-lg text-slate-900">② 「痛みの解消・切実な悩み」による超高リピート率</h3>
+                <p className="text-sm text-slate-700 leading-relaxed">
+                  「癒やされたい」という贅沢消費は景気や気分の波を受けますが、「歩けなくなる恐怖」「退院後の麻痺リハビリ」「乳腺炎の激痛」は先送りできません。必然的に週1〜2回の定期予約が長期継続します。
                 </p>
-                <div className="p-3 bg-white/80 rounded-xl border border-blue-200/60 text-[11px] text-blue-950 font-medium">
-                  <strong>💡 競争優位:</strong> 病院や既存介護事業所は保険外自費サービスの提供が制度上困難です。当アプリがその受け皿となることで、競合不在のまま優良顧客を独占獲得できます。
+                <div className="p-3 bg-white/90 rounded-xl border border-emerald-200/60 text-xs sm:text-sm text-emerald-950 font-medium">
+                  <strong>💡 顧客維持:</strong> 専門職領域の3ヶ月継続率は78%と、一般リラクゼーション（約32%）を圧倒します。
                 </div>
               </div>
 
-              {/* エンジン 3: 高い参入障壁と信頼性ブランド */}
-              <div className="p-5 rounded-2xl bg-gradient-to-br from-purple-50/70 to-pink-50/40 border border-purple-200/80 space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center font-black shadow-xs">
-                  <ShieldCheck className="w-5 h-5" />
+              {/* エンジン 3 */}
+              <div className="p-6 rounded-2xl bg-gradient-to-br from-purple-50/70 to-pink-50/40 border border-purple-200/80 space-y-3 print-avoid-break">
+                <div className="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center font-black shadow-xs">
+                  <ShieldCheck className="w-6 h-6 print:stroke-[2.5]" />
                 </div>
-                <h3 className="font-bold text-base text-slate-900">③ 圧倒的な社会的信頼性とアライアンス可能性（Moat）</h3>
-                <p className="text-xs text-slate-600 leading-relaxed">
+                <h3 className="font-bold text-base sm:text-lg text-slate-900">③ 「医療・健康インフラ」としての社会的信用・参入障壁</h3>
+                <p className="text-sm text-slate-700 leading-relaxed">
                   国家資格保持者を厳格に審査・承認する仕組みを持つことで、怪しい出張サービスとは一線を画す「医療・福祉インフラとしてのブランド」を確立できます。
                 </p>
-                <div className="p-3 bg-white/80 rounded-xl border border-purple-200/60 text-[11px] text-purple-950 font-medium">
+                <div className="p-3 bg-white/90 rounded-xl border border-purple-200/60 text-xs sm:text-sm text-purple-950 font-medium">
                   <strong>💡 提携効果:</strong> 地域のクリニック、産婦人科、地域包括支援センターからの公認紹介や、企業の健康経営・福利厚生（EAP）としての包括導入が実現可能になります。
                 </div>
               </div>
 
-              {/* エンジン 4: 専門職間の「相互送客」によるLTV最大化 */}
-              <div className="p-5 rounded-2xl bg-gradient-to-br from-amber-50/70 to-orange-50/40 border border-amber-200/80 space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center font-black shadow-xs">
-                  <LineChart className="w-5 h-5" />
+              {/* エンジン 4 */}
+              <div className="p-6 rounded-2xl bg-gradient-to-br from-amber-50/70 to-orange-50/40 border border-amber-200/80 space-y-3 print-avoid-break">
+                <div className="w-12 h-12 rounded-2xl bg-amber-600 text-white flex items-center justify-center font-black shadow-xs">
+                  <LineChart className="w-6 h-6 print:stroke-[2.5]" />
                 </div>
-                <h3 className="font-bold text-base text-slate-900">④ 専門職間の相互レコメンド（インターディシプリナリー連携）</h3>
-                <p className="text-xs text-slate-600 leading-relaxed">
+                <h3 className="font-bold text-base sm:text-lg text-slate-900">④ 専門職間の相互レコメンド（インターディシプリナリー連携）</h3>
+                <p className="text-sm text-slate-700 leading-relaxed">
                   顧客の身体課題は1つではありません。施術者が他職種を自然に提案（例: 整体師が自律神経の乱れに「鍼灸」を推奨、助産師が離乳食の悩みに「管理栄養士」を案内）することで、プラットフォーム内で顧客が循環します。
                 </p>
-                <div className="p-3 bg-white/80 rounded-xl border border-amber-200/60 text-[11px] text-amber-950 font-medium">
+                <div className="p-3 bg-white/90 rounded-xl border border-amber-200/60 text-xs sm:text-sm text-amber-950 font-medium">
                   <strong>💡 離脱防止:</strong> 「ここに来れば体のあらゆる悩みがすべて解決する」というワンストップ性を確立し、他社サービスへの流出を恒久的に防ぎます。
                 </div>
               </div>
@@ -404,79 +394,79 @@ export default function AdminGuidePage() {
           <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-6">
             <div className="border-b border-slate-100 pb-4 flex flex-col sm:flex-row sm:items-end justify-between gap-2">
               <div>
-                <span className="text-xs font-black uppercase text-emerald-600 tracking-wider">Service Matrix</span>
+                <span className="text-xs sm:text-sm font-black uppercase text-emerald-600 tracking-wider">Service Matrix</span>
                 <h2 className="text-xl sm:text-2xl font-black text-slate-900 mt-1">
                   2. 各専門職が解決する具体的ニーズと提供価値マトリクス（全17領域）
                 </h2>
-                <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                <p className="text-sm text-slate-600 mt-1">
                   顧客が「誰に・どんな悩みを・いくらで依頼できるのか」を明確化し、各領域での収益インパクトを実証します。
                 </p>
               </div>
-              <span className="text-xs font-bold px-3 py-1 bg-slate-100 rounded-full text-slate-600 self-start sm:self-auto">
+              <span className="text-xs sm:text-sm font-bold px-3 py-1 bg-slate-100 rounded-full text-slate-700 self-start sm:self-auto">
                 登録カテゴリ: 全17専門職網羅
               </span>
             </div>
 
             {/* スペシャリストカード一覧 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {specialists.map((sp, idx) => {
                 const Icon = sp.icon;
                 return (
                   <div
                     key={idx}
-                    className="p-5 rounded-3xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:border-emerald-300 hover:shadow-md transition-all duration-200 flex flex-col justify-between space-y-4"
+                    className="p-6 rounded-3xl border border-slate-200 bg-slate-50/60 hover:bg-white hover:border-emerald-300 hover:shadow-md transition-all duration-200 flex flex-col justify-between space-y-4 print-avoid-break"
                   >
-                    <div className="space-y-3">
+                    <div className="space-y-3.5">
                       {/* 上部: アイコン & 職種名 & バッジ */}
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-11 h-11 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-800 shadow-2xs shrink-0">
-                            <Icon className="w-5 h-5 text-emerald-600" />
+                          <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-800 shadow-2xs shrink-0 print:border-slate-400 print:bg-slate-100">
+                            <Icon className="w-6 h-6 text-emerald-600 print:text-emerald-700 print:stroke-[2.5]" />
                           </div>
                           <div>
-                            <h3 className="font-black text-base text-slate-900">{sp.category}</h3>
-                            <span className="text-[10px] font-bold text-slate-500 bg-white px-2 py-0.5 rounded-md border border-slate-200/80 mt-0.5 inline-block">
+                            <h3 className="font-black text-base sm:text-lg text-slate-900">{sp.category}</h3>
+                            <span className="text-xs font-bold text-slate-600 bg-white px-2.5 py-0.5 rounded-md border border-slate-200 mt-1 inline-block">
                               {sp.badge}
                             </span>
                           </div>
                         </div>
                         <div className="text-right shrink-0">
-                          <span className="text-[10px] text-slate-400 font-bold block">想定単価</span>
-                          <span className="text-xs font-black text-slate-800">{sp.priceRange}</span>
+                          <span className="text-xs text-slate-400 font-bold block">想定単価</span>
+                          <span className="text-sm sm:text-base font-black text-slate-900">{sp.priceRange}</span>
                         </div>
                       </div>
 
                       {/* 顧客ニーズ・課題 */}
                       <div className="space-y-1">
-                        <span className="text-[10px] font-black uppercase tracking-wider text-rose-600 block">
+                        <span className="text-xs font-black uppercase tracking-wider text-rose-600 block">
                           ▼ 顧客の具体的ニーズ・痛み
                         </span>
-                        <p className="text-xs text-slate-700 bg-white p-2.5 rounded-xl border border-slate-200/70 leading-relaxed">
+                        <p className="text-xs sm:text-sm text-slate-700 bg-white p-3 rounded-xl border border-slate-200/80 leading-relaxed">
                           {sp.targetPain}
                         </p>
                       </div>
 
                       {/* 提供サービス内容 */}
                       <div className="space-y-1">
-                        <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 block">
+                        <span className="text-xs font-black uppercase tracking-wider text-emerald-700 block">
                           ▼ 提供サービス・アプローチ
                         </span>
-                        <p className="text-xs text-slate-700 bg-white p-2.5 rounded-xl border border-slate-200/70 leading-relaxed">
+                        <p className="text-xs sm:text-sm text-slate-700 bg-white p-3 rounded-xl border border-slate-200/80 leading-relaxed">
                           {sp.services}
                         </p>
                       </div>
                     </div>
 
-                    {/* 事業的不可欠性 (Why Essential) */}
-                    <div className="pt-3 border-t border-slate-200/80 bg-emerald-50/60 -mx-5 -mb-5 p-4 rounded-b-3xl">
-                      <span className="text-[10px] font-black text-emerald-800 uppercase block">
+                    {/* 事業的不可欠性 */}
+                    <div className="pt-3 border-t border-slate-200 bg-emerald-50/70 -mx-6 -mb-6 p-4 rounded-b-3xl">
+                      <span className="text-xs font-black text-emerald-900 uppercase block">
                         ★ プラットフォーム全体の成長への寄与
                       </span>
-                      <p className="text-[11px] text-emerald-950 mt-0.5 leading-relaxed font-medium">
+                      <p className="text-xs sm:text-sm text-emerald-950 mt-1 leading-relaxed font-medium">
                         {sp.whyEssential}
                       </p>
-                      <div className="mt-2 text-[10px] text-slate-500 flex items-center gap-1 font-bold">
-                        <Target className="w-3.5 h-3.5 text-slate-400" />
+                      <div className="mt-2 text-xs text-slate-600 flex items-center gap-1 font-bold">
+                        <Target className="w-4 h-4 text-slate-400" />
                         <span>主要顧客層: {sp.targetCustomer}</span>
                       </div>
                     </div>
@@ -487,222 +477,79 @@ export default function AdminGuidePage() {
           </div>
 
           {/* セクション 3: 収益モデルと事業成長ロードマップ */}
-          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-6">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-6 print-avoid-break">
             <div className="border-b border-slate-100 pb-4">
-              <span className="text-xs font-black uppercase text-emerald-600 tracking-wider">Business Projection</span>
+              <span className="text-xs sm:text-sm font-black uppercase text-emerald-600 tracking-wider">Business Projection</span>
               <h2 className="text-xl sm:text-2xl font-black text-slate-900 mt-1">
                 3. プラットフォーム収益モデルと段階的展開ロードマップ
               </h2>
-              <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                地方都市でのモデル確立から、全国主要都市へのスケールアウトを見据えた成長戦略です。
+              <p className="text-sm text-slate-600 mt-1">
+                スタート時点から全国チームメンバーが同時参入する現実的成長ロードマップです。
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-                <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-blue-100 text-blue-700">
-                  フェーズ 1 (基盤確立)
+              {/* フェーズ 1 */}
+              <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 print-avoid-break">
+                <span className="text-xs font-black uppercase px-2.5 py-1 rounded bg-blue-100 text-blue-800">
+                  フェーズ 1 (初期全国同時参入・コア基盤確立)
                 </span>
-                <h4 className="font-bold text-sm text-slate-900">愛媛・四国モデルの完全確立</h4>
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  松山市および周辺都市で専門職50名・提携サロン20店舗体制を構築。助産師・PT・歯科衛生士の口コミにより主婦・ファミリー層の基盤を完成。
+                <h4 className="font-bold text-base text-slate-900">愛媛創業拠点 ＆ 全国チームメンバー同時参入</h4>
+                <p className="text-sm text-slate-700 leading-relaxed">
+                  愛媛を創業・開発のハブ拠点としつつ、スタート時点から全国各地の提携チームメンバー（理学療法士・助産師・鍼灸師・専門セラピスト等）が同時参入。地域に縛られないオンライン登録・Stripe審査・電子誓約書・遠隔本人確認フローを即時稼働させ、全国分散型の高単価・専門職マッチング基盤を立ち上げます。
                 </p>
               </div>
 
-              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-                <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-emerald-100 text-emerald-700">
-                  フェーズ 2 (政令都市展開)
+              {/* フェーズ 2 */}
+              <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 print-avoid-break">
+                <span className="text-xs font-black uppercase px-2.5 py-1 rounded bg-emerald-100 text-emerald-800">
+                  フェーズ 2 (面的展開・高単価専門職ネットワーク確立)
                 </span>
-                <h4 className="font-bold text-sm text-slate-900">福岡・広島・関西圏への水平展開</h4>
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  確立された審査・マッチング・決済オペレーションをパッケージ化し、人口密集地域へ展開。自費リハビリ難民の多い大都市圏で爆発的なトラフィックを獲得。
+                <h4 className="font-bold text-base text-slate-900">全国主要都市・地方中核都市への展開加速</h4>
+                <p className="text-sm text-slate-700 leading-relaxed">
+                  全国の参入メンバーを核とした地域コミュニティを形成し、首都圏・関西・九州・四国など全国主要エリアへ水平展開。自費リハビリ難民、産後ケア難民、在宅緩和ケア需要を取り込み、口コミと紹介によるオーガニックな顧客獲得で月間マッチング件数を急拡大します。
                 </p>
               </div>
 
-              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-                <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-purple-100 text-purple-700">
-                  フェーズ 3 (BtoB・全国インフラ化)
+              {/* フェーズ 3 */}
+              <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 print-avoid-break">
+                <span className="text-xs font-black uppercase px-2.5 py-1 rounded bg-purple-100 text-purple-800">
+                  フェーズ 3 (BtoB・官民連携・全国ヘルスケアインフラ化)
                 </span>
-                <h4 className="font-bold text-sm text-slate-900">企業福利厚生・自治体包括連携</h4>
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  企業の健康経営銘柄取得支援としての導入、自治体の産後ケア補助金チケット対応など、官民連携のヘルスケアインフラとして全国網を完成。
+                <h4 className="font-bold text-base text-slate-900">企業福利厚生・自治体包括連携</h4>
+                <p className="text-sm text-slate-700 leading-relaxed">
+                  企業の健康経営支援（福利厚生EAP導入）、自治体の産後ケア補助金チケット対応、在宅医療・介護連携など、官民一体の次世代ヘルスケアインフラとして日本全国網を完成させます。
                 </p>
               </div>
             </div>
 
             {/* 収益シミュレーション試算表 */}
-            <div className="mt-4 p-5 rounded-2xl bg-gradient-to-r from-slate-900 to-slate-800 text-white space-y-3">
-              <h4 className="font-bold text-sm text-emerald-400 flex items-center gap-2">
-                <TrendingUp className="w-4 h-4" />
+            <div className="mt-4 p-6 rounded-2xl bg-gradient-to-r from-slate-900 to-slate-800 text-white space-y-4 print-avoid-break">
+              <h4 className="font-bold text-base text-emerald-400 flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 print:stroke-[2.5]" />
                 <span>プラットフォーム収益試算 (月間1,000件成約時)</span>
               </h4>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2 text-xs">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2 text-sm">
                 <div>
-                  <span className="text-slate-400 block text-[11px]">月間予約件数</span>
-                  <strong className="text-base font-black text-white">1,000 件</strong>
+                  <span className="text-slate-400 block text-xs">月間予約件数</span>
+                  <strong className="text-lg font-black text-white">1,000 件</strong>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[11px]">平均客単価</span>
-                  <strong className="text-base font-black text-white">¥9,500</strong>
+                  <span className="text-slate-400 block text-xs">平均客単価</span>
+                  <strong className="text-lg font-black text-white">¥9,500</strong>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[11px]">月間総取扱高 (GMV)</span>
-                  <strong className="text-base font-black text-white">¥9,500,000</strong>
+                  <span className="text-slate-400 block text-xs">月間総取扱高 (GMV)</span>
+                  <strong className="text-lg font-black text-white">¥9,500,000</strong>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[11px]">プラットフォーム手数料 (20%)</span>
-                  <strong className="text-base font-black text-emerald-400">¥1,900,000 /月</strong>
+                  <span className="text-slate-400 block text-xs">プラットフォーム手数料 (20%)</span>
+                  <strong className="text-lg font-black text-emerald-400">¥1,900,000 /月</strong>
                 </div>
               </div>
-              <p className="text-[10px] text-slate-400 pt-2 border-t border-slate-700">
+              <p className="text-xs text-slate-300 pt-3 border-t border-slate-700 leading-relaxed">
                 ※ 専門職の参入により客単価が従来（¥6,000）から約1.6倍に上昇し、同一成約件数でも手数料収入が大幅に拡大します。
               </p>
-            </div>
-          </div>
-
-          {/* セクション 4: 規模拡大に合わせたシステム改築・事業ロードマップ（重要検討メモ） */}
-          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
-            <div className="border-b border-slate-100 pb-4">
-              <span className="text-xs font-bold text-indigo-600 uppercase tracking-wider block">
-                Scale-up & System Roadmap Memo
-              </span>
-              <h3 className="text-xl sm:text-2xl font-black text-slate-900 mt-1">
-                規模拡大に合わせたシステム改築・事業ロードマップ（重要検討メモ）
-              </h3>
-              <p className="text-xs text-slate-500 mt-1">
-                プラットフォームの成長フェーズに合わせて順次実装・整備すべきシステム機能と、事業者として抑えておくべき法的・運営的リスク管理の備忘録です。
-              </p>
-            </div>
-
-            {/* 1. ポイント制度 & 2. 運営包括保険 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* ポイント制度 */}
-              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
-                <div className="flex items-center gap-2 text-indigo-700 font-bold text-sm">
-                  <Sparkles className="w-4 h-4 text-indigo-600" />
-                  <span>① プラットフォーム共通ポイント制度（フェーズ2〜）</span>
-                </div>
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  <strong>仕組み:</strong> 予約・施術完了時に決済額の1%を付与（1pt=1円）し、次回予約決済時に割引充当。原資は手数料（20%）からプラットフォーム販促費として負担。
-                </p>
-                <div className="p-3 bg-indigo-50/70 rounded-xl text-[11px] text-indigo-900 space-y-1">
-                  <p className="font-bold">導入タイミングの判断基準:</p>
-                  <p className="text-slate-600">
-                    立ち上げ初期は「初回限定クーポン（2,000円引）」や「お友達紹介」の方が圧倒的にフックとして強く、資金決済法（有効期限・供託金要件）の運用負荷を避けるため、月間予約200件超のスケール期に会員ランク制度（ブロンズ・シルバー・ゴールド）と併せて導入するのが最適。
-                  </p>
-                </div>
-              </div>
-
-              {/* 運営会社包括保険 */}
-              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
-                <div className="flex items-center gap-2 text-emerald-800 font-bold text-sm">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                  <span>② 管理会社としての包括損害賠償責任保険（フェーズ2〜）</span>
-                </div>
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  <strong>必要性:</strong> セラピスト個人の保険加入確認（現在実装済）に加え、顧客からの使用者責任追及や、個人保険の失効・手技対象外・故意重過失免責リスクをカバーするセカンドライン。
-                </p>
-                <div className="p-3 bg-emerald-50/70 rounded-xl text-[11px] text-emerald-950 space-y-1">
-                  <p className="font-bold">中抜き防止の最強の武器:</p>
-                  <p className="text-slate-700">
-                    「アプリ内予約は最高1億円の賠償保険が自動付帯（直契約では全額自己責任）」と打ち出すことで、顧客・セラピスト双方にアプリを通す必然性を提供。損保各社の「シェアエコ包括保険（1予約数十円連動型）」を検討。
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* 3. プラットフォーム事業者として将来的に考えておくべき重要事項 */}
-            <div className="space-y-3 pt-2">
-              <h4 className="font-black text-slate-900 text-sm flex items-center gap-2">
-                <Sliders className="w-4 h-4 text-purple-600" />
-                <span>プラットフォーム事業者として将来的に考えておくべき5大テーマ</span>
-              </h4>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                {/* 1. 法令遵守 */}
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-1.5">
-                  <div className="font-bold text-slate-900 flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-purple-500"></span>
-                    <span>1. 法令遵守・広告コンプライアンス</span>
-                  </div>
-                  <p className="text-[11px] text-slate-600 leading-relaxed">
-                    医師法・あはき法・薬機法に基づき、「治療」「完治」「診断」等の医療類似行為と誤認させる表記の自動NGワード検知。また、景表法・ステマ規制に抵触しないサクラレビュー排除と透明なモデレーション体制の構築。
-                  </p>
-                </div>
-
-                {/* 2. 防犯・安全管理 */}
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-1.5">
-                  <div className="font-bold text-slate-900 flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-rose-500"></span>
-                    <span>2. 防犯・安全管理（セラピスト保護）</span>
-                  </div>
-                  <p className="text-[11px] text-slate-600 leading-relaxed">
-                    女性セラピストの夜間・密室出張における防犯対策。施術中の「ワンタップSOS緊急連絡」「現在地リアルタイム共有」、および悪質クレーマー・セクハラ顧客の即時ブラックリスト化・自動予約ブロック機能。
-                  </p>
-                </div>
-
-                {/* 3. 税務・インボイス */}
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-1.5">
-                  <div className="font-bold text-slate-900 flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-                    <span>3. 税務・インボイス・支払調書対応</span>
-                  </div>
-                  <p className="text-[11px] text-slate-600 leading-relaxed">
-                    特定デジタルプラットフォーム情報開示義務への準拠。個人事業主セラピスト向けの確定申告用「年間売上・手数料控除明細書（PDF）」の自動発行機能を提供し、確定申告の手間を省くことで定着率を向上。
-                  </p>
-                </div>
-
-                {/* 4. 収益多角化 */}
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-1.5">
-                  <div className="font-bold text-slate-900 flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    <span>4. 収益多角化（B2B・物販・スペース）</span>
-                  </div>
-                  <p className="text-[11px] text-slate-600 leading-relaxed">
-                    手数料20%以外の第2・第3の収益源。企業向け福利厚生出張ケア（B2B契約）、施術で使用したオイル・快眠枕・サポーター等のEC物販連携（レベニューシェア）、店舗を持たない施術者向けの「提携シェアサロン」時間貸し予約。
-                  </p>
-                </div>
-
-                {/* 5. システムスケーラビリティ */}
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-1.5">
-                  <div className="font-bold text-slate-900 flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-sky-500"></span>
-                    <span>5. システムスケーラビリティ</span>
-                  </div>
-                  <p className="text-[11px] text-slate-600 leading-relaxed">
-                    チャットでの画像・写真送信（カウンセリング患部写真確認）、LINE公式アカウント連携（予約リマインド配信による無断キャンセル防止）、土日祝・深夜早朝の動的価格設定（サージプライシング機能）。
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* セクション 5: 経営陣への上申・決裁要請まとめ */}
-          <div className="bg-emerald-900 text-white rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl">
-            <div className="flex items-center gap-2 text-emerald-300 text-xs font-black uppercase tracking-wider">
-              <CheckCircle2 className="w-4 h-4" />
-              <span>Conclusion & Action Plan</span>
-            </div>
-            <h3 className="text-xl sm:text-2xl font-black">
-              結論: 専門職パートナー網の拡大は、当社のプラットフォームを「地域唯一無二のヘルスケア・インフラ」へ昇華させる最重要成長レバーです。
-            </h3>
-            <p className="text-xs sm:text-sm text-emerald-100 leading-relaxed">
-              本構想の推進により、ユーザーにとっては「生涯頼れる健康の伴走者」、施術者にとっては「資格を活かして高所得と柔軟性を両立できるプラットフォーム」を提供し、高い参入障壁と持続可能な高収益モデルを確立いたします。
-            </p>
-            <div className="pt-2 flex flex-wrap items-center gap-3">
-              <button
-                onClick={handlePrint}
-                className="px-5 py-2.5 bg-white text-emerald-900 text-xs font-black rounded-xl hover:bg-emerald-50 transition shadow-md flex items-center gap-2"
-              >
-                <Printer className="w-4 h-4" />
-                <span>この資料を印刷・提出する</span>
-              </button>
-              <Link
-                href="/admin"
-                className="px-5 py-2.5 bg-emerald-800 text-white text-xs font-bold rounded-xl hover:bg-emerald-700 transition border border-emerald-700"
-              >
-                管理コンソールへ戻る
-              </Link>
             </div>
           </div>
         </div>
@@ -710,73 +557,135 @@ export default function AdminGuidePage() {
         /* ========================================================
            管理者向け 実務運用マニュアル (Operations View)
            ======================================================== */
-        <div className="space-y-6">
-          <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-800">
+        <div className="space-y-8">
+          <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-10 shadow-xl border border-slate-800 print-avoid-break">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-purple-400"></span>
-              <span className="text-xs uppercase font-bold tracking-widest text-purple-400">
-                Role: Admin Operations Manual
+              <span className="w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span className="text-xs uppercase font-bold tracking-widest text-emerald-400">
+                Admin Operations Manual (Updated)
               </span>
             </div>
-            <h2 className="text-2xl font-black mt-2">
+            <h2 className="text-2xl sm:text-3xl font-black mt-2">
               プラットフォーム統括 実務運用マニュアル
             </h2>
-            <p className="text-xs sm:text-sm text-slate-300 mt-2 max-w-2xl leading-relaxed">
-              {currentBrand.japaneseName} ({currentBrand.name}) の全体運営、セラピスト・専門職の資格審査・承認、全予約トランザクション監視、決済・売上分配、および手数料率設定に関する公式手順書です。
+            <p className="text-sm sm:text-base text-slate-300 mt-3 max-w-3xl leading-relaxed">
+              改築された最新システム仕様に基づく公式手順書です。審査証跡ログ（Supabase）と原本Storage自動削除、Stripe Connect審査手数料・電子誓約書、メッセージ監査、口コミ管理、ブランド・ロゴ設定、全予約・売上分配の統括実務を網羅しています。
             </p>
           </div>
 
           {/* 運用手順カード一覧 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* 1. 審査承認 */}
-            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-3">
-              <div className="w-10 h-10 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center font-black">
-                <Users className="w-5 h-5" />
+            {/* 1. 審査承認 & Storage自動削除 */}
+            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-3.5 print-avoid-break">
+              <div className="w-12 h-12 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center font-black">
+                <Users className="w-6 h-6 print:stroke-[2.5]" />
               </div>
-              <h3 className="text-base font-bold text-slate-900">1. セラピスト・専門職の登録審査・承認フロー</h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                新規登録された施術者は初期状態で「未承認（非公開）」です。管理者は国家資格証（PT/OT/ST/助産師/鍼灸等）や身元確認書類を確認し、管理画面の承認トグルスイッチで公開状態へ切り替えます。
+              <h3 className="text-base sm:text-lg font-bold text-slate-900">
+                1. セラピスト資格審査 ＆ 原本自動削除・永続証跡ログ管理
+              </h3>
+              <p className="text-sm text-slate-700 leading-relaxed">
+                新規登録者は初期状態で「未承認（非公開）」です。管理者は提出書類（国家資格証・身分証・保険証書）を照合し、「承認」を実行します。承認完了と同時に、個人情報保護法に基づき原本ファイルはStorageから自動完全削除され、承認日時・資格種別・登録番号・照合氏名がテキスト証跡ログ（therapist_verification_logs）として永続保持されます。
               </p>
-              <div className="p-3 bg-purple-50 rounded-2xl text-[11px] text-purple-900 font-medium">
-                💡 承認された施術者のみが顧客画面や地図上にピンとして表示されます。
+              <div className="p-3.5 bg-purple-50 rounded-2xl text-xs sm:text-sm text-purple-900 font-medium">
+                💡 原本ファイルが削除されても、照合証跡ログがあるため監査・法務対応を完全にクリアできます。
               </div>
             </div>
 
-            {/* 2. 予約監視 */}
-            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-3">
-              <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-black">
-                <Calendar className="w-5 h-5" />
+            {/* 2. Stripe Connect & 審査料・電子誓約書 */}
+            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-3.5 print-avoid-break">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-black">
+                <CreditCard className="w-6 h-6 print:stroke-[2.5]" />
               </div>
-              <h3 className="text-base font-bold text-slate-900">2. 全予約トランザクション監視と強制キャンセル</h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                出張・店舗の全予約ステータス（承認待ち・確定・完了・キャンセル）をリアルタイムで追跡。無断キャンセルや顧客都合のトラブル時には、管理者権限で即時全額返金キャンセルを実行できます。
+              <h3 className="text-base sm:text-lg font-bold text-slate-900">
+                2. 審査手数料（3,300円）決済 ＆ 電子誓約書・Stripe連携
+              </h3>
+              <p className="text-sm text-slate-700 leading-relaxed">
+                不正登録の防止と冷やかし排除のため、セラピストは事前審査料（Stripe決済）と電子誓約書（法令遵守・直契約禁止規約への同意）の締結が必要です。管理画面の提出書類一覧の見出しサマリーで各人のステータス（済/未）を瞬時に確認できます。
               </p>
-              <div className="p-3 bg-emerald-50 rounded-2xl text-[11px] text-emerald-900 font-medium">
-                💡 全ての売上は「総決済額」「プラットフォーム手数料」「施術者手取り」に自動計算されます。
+              <div className="p-3.5 bg-indigo-50 rounded-2xl text-xs sm:text-sm text-indigo-900 font-medium">
+                💡 手数料決済と電子誓約書が「済」になっていることを確認した上で、最終承認（公開）を付与します。
               </div>
             </div>
 
-            {/* 3. 手数料設定 */}
-            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-3">
-              <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center font-black">
-                <Percent className="w-5 h-5" />
+            {/* 3. 全メッセージリアルタイム監視 */}
+            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-3.5 print-avoid-break">
+              <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center font-black">
+                <MessageSquare className="w-6 h-6 print:stroke-[2.5]" />
               </div>
-              <h3 className="text-base font-bold text-slate-900">3. プラットフォーム手数料率（Take Rate）の動的変更</h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                業界標準（通常20%）に合わせた手数料率スライダーを備えており、変更内容は新規予約から自動適用されます（例: 初期誘致キャンペーン時に15%へ引き下げ等）。
+              <h3 className="text-base sm:text-lg font-bold text-slate-900">
+                3. 全メッセージリアルタイム監視（中抜き・直取引検知）
+              </h3>
+              <p className="text-sm text-slate-700 leading-relaxed">
+                管理ポータルの「全メッセージ監視」タブから、顧客とセラピスト間のチャットログをリアルタイムで監査します。電話番号、LINE ID、直契約・口座振込の示唆などを自動検知フィルターでアラート表示し、プラットフォームの中抜きを未然に防止します。
               </p>
+              <div className="p-3.5 bg-amber-50 rounded-2xl text-xs sm:text-sm text-amber-900 font-medium">
+                💡 送信者・宛先・本文が横一列に整然と並び、各ユーザー名からワンクリックで詳細や視点切替が可能です。
+              </div>
             </div>
 
-            {/* 4. ブランド切り替え */}
-            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-3">
-              <div className="w-10 h-10 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center font-black">
-                <Sparkles className="w-5 h-5" />
+            {/* 4. 口コミ・レビューモデレーション & 顧客視点切替 */}
+            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-3.5 print-avoid-break">
+              <div className="w-12 h-12 rounded-2xl bg-teal-100 text-teal-700 flex items-center justify-center font-black">
+                <Smile className="w-6 h-6 print:stroke-[2.5]" />
               </div>
-              <h3 className="text-base font-bold text-slate-900">4. アプリ名・ブランドロゴ・ファビコン切り替え</h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                管理画面の「ブランド設定」タブから、ワンタップでアプリ名（ケアゴー、ケアリアゴー、セラリンク等）とアイコン、ブラウザタブファビコンを即時切り替えることができます。
+              <h3 className="text-base sm:text-lg font-bold text-slate-900">
+                4. 口コミ・レビュー管理 ＆ ワンタップ視点切り替え
+              </h3>
+              <p className="text-sm text-slate-700 leading-relaxed">
+                投稿された評価・レビューを監視し、誹謗中傷や不適切な内容は即座にモデレーション（非表示化）可能。レビュー内の投稿者名やセラピスト名をクリックするだけで、そのユーザーの視点に切り替えて顧客画面やセラピスト詳細を確認できます。
+              </p>
+              <div className="p-3.5 bg-teal-50 rounded-2xl text-xs sm:text-sm text-teal-900 font-medium">
+                💡 顧客一覧でも右端のボタンから1タップでその顧客としてアプリトップを表示できます。
+              </div>
+            </div>
+
+            {/* 5. 全予約トランザクション監視と強制キャンセル */}
+            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-3.5 print-avoid-break">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-black">
+                <Calendar className="w-6 h-6 print:stroke-[2.5]" />
+              </div>
+              <h3 className="text-base sm:text-lg font-bold text-slate-900">
+                5. 全予約トランザクション監視 ＆ 事前オーソリ・強制返金
+              </h3>
+              <p className="text-sm text-slate-700 leading-relaxed">
+                出張・店舗の全予約ステータス（承認待ち・確定・施術完了・キャンセル）を追跡。顧客予約時はクレジットカードの事前与信（仮売上）を行い、施術完了時に自動キャプチャ。トラブル発生時は管理者権限で即時全額返金キャンセルを実行できます。
+              </p>
+              <div className="p-3.5 bg-emerald-50 rounded-2xl text-xs sm:text-sm text-emerald-900 font-medium">
+                💡 全売上は「総決済額」「プラットフォーム手数料（スライダーで動的変更可）」「セラピスト手取り」に自動計算されます。
+              </div>
+            </div>
+
+            {/* 6. ブランド・ロゴ設定の独立管理 */}
+            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-3.5 print-avoid-break">
+              <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center font-black">
+                <Sparkles className="w-6 h-6 print:stroke-[2.5]" />
+              </div>
+              <h3 className="text-base sm:text-lg font-bold text-slate-900">
+                6. アプリ名・ブランドロゴ・ファビコンアイコンの独立設定
+              </h3>
+              <p className="text-sm text-slate-700 leading-relaxed">
+                管理画面の「ブランド・ロゴ設定」から、アプリ名称、ヘッダーに配置するロゴ画像、ブラウザタブのファビコンやアプリアイコンをそれぞれ独立して設定・切り替えることができます。提供ロゴ画像からトリミングされた高品質シンボルマークを即時反映可能です。
+              </p>
+              <div className="p-3.5 bg-rose-50 rounded-2xl text-xs sm:text-sm text-rose-900 font-medium">
+                💡 サービス名称変更や地域・季節キャンペーン時にも、コード修正なしで一括適用されます。
+              </div>
+            </div>
+          </div>
+
+          {/* 管理コンソールへの復帰リンク */}
+          <div className="p-6 bg-slate-100 rounded-3xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 print:hidden">
+            <div>
+              <h4 className="font-bold text-slate-900 text-base">実務コンソールへアクセス</h4>
+              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+                上記の運用手順に基づき、管理コンソールから各種審査・監視・設定業務を行えます。
               </p>
             </div>
+            <Link
+              href="/admin"
+              className="px-5 py-3 bg-emerald-700 text-white text-xs sm:text-sm font-bold rounded-xl hover:bg-emerald-600 transition border border-emerald-600 shadow self-start sm:self-auto"
+            >
+              管理コンソールを開く
+            </Link>
           </div>
         </div>
       )}

@@ -147,7 +147,7 @@ export const APP_BRANDS: Record<AppBrandId, AppBrandConfig> = {
     iconSvg: ICON_CARE_GO_BLUE,
   },
 
-  // ② 画像1-⑬: ケアリアゴー CAREARIA GO
+  // ② 画像1-⑬: ケアリアゴー CAREARIA GO (提供画像の赤枠ロゴからトリミング)
   carearia_go_green: {
     id: 'carearia_go_green',
     name: 'Carearia Go',
@@ -157,6 +157,8 @@ export const APP_BRANDS: Record<AppBrandId, AppBrandConfig> = {
     description: '中央の人を両側のフレッシュな若葉が包み込む、自立と成長・優しさを体現したシンボル',
     themeColor: '#059669',
     accentColor: '#10b981',
+    iconUrl: '/branding/icon_carearia_symbol.png',
+    logoUrl: '/branding/logo_carearia_text.png',
     iconSvg: ICON_CAREARIA_GO_GREEN,
   },
 
@@ -173,7 +175,7 @@ export const APP_BRANDS: Record<AppBrandId, AppBrandConfig> = {
     iconSvg: ICON_CAREIA_GO_PINK,
   },
 
-  // ④ 画像2-⑫: セラリンク THERALINK
+  // ④ 画像2-⑫: セラリンク THERALINK (提供画像の赤枠ロゴからトリミング)
   theralink: {
     id: 'theralink',
     name: 'Theralink',
@@ -183,6 +185,8 @@ export const APP_BRANDS: Record<AppBrandId, AppBrandConfig> = {
     description: 'エメラルド・ローズ・ゴールドの花びらと若葉がつながる、オーガニックなリース（環）シンボル',
     themeColor: '#059669',
     accentColor: '#db2777',
+    iconUrl: '/branding/icon_theralink_symbol.png',
+    logoUrl: '/branding/logo_theralink_text.png',
     iconSvg: ICON_THERALINK,
   },
 
@@ -226,12 +230,66 @@ export const APP_BRANDS: Record<AppBrandId, AppBrandConfig> = {
   },
 };
 
-export const DEFAULT_BRAND_ID: AppBrandId = 'care_go_blue';
+export const DEFAULT_BRAND_ID: AppBrandId = 'carearia_go_green';
+
+// 独立選択用: アプリアイコン一覧
+export const AVAILABLE_ICONS = [
+  {
+    id: 'icon_carearia_symbol',
+    label: '赤枠ロゴ 13: ケアリアゴー 若葉シンボル (トリミング画像)',
+    url: '/branding/icon_carearia_symbol.png',
+    badge: '提供画像トリミング',
+    themeColor: '#059669',
+  },
+  {
+    id: 'icon_theralink_symbol',
+    label: '赤枠ロゴ 12: セラリンク リースシンボル (トリミング画像)',
+    url: '/branding/icon_theralink_symbol.png',
+    badge: '提供画像トリミング',
+    themeColor: '#059669',
+  },
+  {
+    id: 'icon_care_go_blue',
+    label: 'ロゴ 2: ケアゴー ブルーC × 若葉',
+    svg: ICON_CARE_GO_BLUE,
+    badge: 'ベクター',
+    themeColor: '#0284c7',
+  },
+  {
+    id: 'icon_careia_pink',
+    label: 'ロゴ 10: ケアリアゴー ピンクハート × ゴールド',
+    svg: ICON_CAREIA_GO_PINK,
+    badge: 'ベクター',
+    themeColor: '#e11d48',
+  },
+];
+
+// 独立選択用: ブランドロゴ画像一覧
+export const AVAILABLE_LOGOS = [
+  {
+    id: 'logo_carearia_full',
+    label: 'ケアリアゴー フルロゴ (シンボル＋テキスト)',
+    url: '/branding/logo_carearia_text.png',
+  },
+  {
+    id: 'logo_theralink_full',
+    label: 'セラリンク フルロゴ (シンボル＋テキスト)',
+    url: '/branding/logo_theralink_text.png',
+  },
+  {
+    id: 'logo_carearia_symbol_only',
+    label: 'ケアリアゴー シンボルマークのみ',
+    url: '/branding/icon_carearia_symbol.png',
+  },
+  {
+    id: 'logo_theralink_symbol_only',
+    label: 'セラリンク シンボルマークのみ',
+    url: '/branding/icon_theralink_symbol.png',
+  },
+];
 
 /**
  * ブラウザのタイトルおよびファビコンを現在のブランド設定に合わせて動的に更新する
- * - アイコン部分だけの SVG を Data URI 化して link[rel="icon"] に直接設定
- * - キャッシュや画像ロード失敗に左右されず、タブのファビコンが即時切り替わります
  */
 export function updateDocumentBranding(brand: AppBrandConfig) {
   if (typeof window === 'undefined') return;
@@ -239,10 +297,10 @@ export function updateDocumentBranding(brand: AppBrandConfig) {
   // 1. タイトル更新
   document.title = `${brand.japaneseName} (${brand.name}) - ${brand.catchphrase}`;
 
-  // 2. アイコン部分だけの SVG を Data URI 化
-  const svgDataUri = `data:image/svg+xml;utf8,${encodeURIComponent(brand.iconSvg)}`;
+  // 2. ファビコン更新
+  const faviconHref = brand.iconUrl || `data:image/svg+xml;utf8,${encodeURIComponent(brand.iconSvg)}`;
+  const faviconType = brand.iconUrl ? 'image/png' : 'image/svg+xml';
 
-  // 既存のファビコン link タグを全て削除（Next.js静的生成タグやキャッシュ残骸を完全除去）
   try {
     const existingIcons = document.querySelectorAll("link[rel*='icon']");
     existingIcons.forEach((el) => el.remove());
@@ -250,22 +308,20 @@ export function updateDocumentBranding(brand: AppBrandConfig) {
     console.warn('Failed to clean existing icons', e);
   }
 
-  // 新しい favicon link を追加 (SVG形式)
   const iconLink = document.createElement('link');
   iconLink.rel = 'icon';
-  iconLink.type = 'image/svg+xml';
-  iconLink.href = svgDataUri;
+  iconLink.type = faviconType;
+  iconLink.href = faviconHref;
   document.head.appendChild(iconLink);
 
-  // shortcut icon / apple-touch-icon も更新
   const shortcutLink = document.createElement('link');
   shortcutLink.rel = 'shortcut icon';
-  shortcutLink.type = 'image/svg+xml';
-  shortcutLink.href = svgDataUri;
+  shortcutLink.type = faviconType;
+  shortcutLink.href = faviconHref;
   document.head.appendChild(shortcutLink);
 
   const appleIcon = document.createElement('link');
   appleIcon.rel = 'apple-touch-icon';
-  appleIcon.href = svgDataUri;
+  appleIcon.href = faviconHref;
   document.head.appendChild(appleIcon);
 }

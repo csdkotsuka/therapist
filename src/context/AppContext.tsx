@@ -12,6 +12,7 @@ import {
   ChatMessage,
   AppBrandId,
   AppBrandConfig,
+  CustomBrandingSettings,
   TherapistOnboarding,
   VerificationLog,
   VerificationDocKind,
@@ -97,7 +98,9 @@ interface AppContextType {
   updateTherapistInfo: (userId: string, profileData: Partial<Profile>, therapistData: Partial<TherapistProfile>) => Promise<void>;
   appBrand: AppBrandId;
   currentBrand: AppBrandConfig;
+  customBranding: CustomBrandingSettings;
   setAppBrand: (brandId: AppBrandId) => Promise<void>;
+  updateCustomBranding: (settings: Partial<CustomBrandingSettings>) => Promise<void>;
   // 本登録審査（4ステップ）・提出書類確認・承認＆Storage自動削除
   onboardings: Record<string, TherapistOnboarding>;
   verificationLogs: VerificationLog[];
@@ -160,7 +163,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [localDocPreviews, setLocalDocPreviews] = useState<Record<string, string>>({});
   const [platformFeeRate, setPlatformFeeRateState] = useState<number>(20);
   const [appBrand, setAppBrandState] = useState<AppBrandId>(DEFAULT_BRAND_ID);
-  const currentBrand = APP_BRANDS[appBrand] || APP_BRANDS[DEFAULT_BRAND_ID];
+  const [customBranding, setCustomBrandingState] = useState<CustomBrandingSettings>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('carehub_custom_branding');
+        if (saved) return JSON.parse(saved);
+      } catch (e) {
+        console.warn('Failed to parse local custom branding', e);
+      }
+    }
+    return {
+      selectedIcon: '/branding/icon_carearia_symbol.png',
+      selectedLogo: '/branding/logo_carearia_text.png',
+    };
+  });
+
+  // ベースブランドと独立カスタム設定を合成したアクティブブランド
+  const baseBrand = APP_BRANDS[appBrand] || APP_BRANDS[DEFAULT_BRAND_ID];
+  const currentBrand: AppBrandConfig = {
+    ...baseBrand,
+    name: customBranding.appName || baseBrand.name,
+    japaneseName: customBranding.appJapaneseName || baseBrand.japaneseName,
+    catchphrase: customBranding.appCatchphrase || baseBrand.catchphrase,
+    tagline: customBranding.appTagline || baseBrand.tagline,
+    iconUrl: customBranding.selectedIcon !== undefined ? customBranding.selectedIcon : baseBrand.iconUrl,
+    logoUrl: customBranding.selectedLogo !== undefined ? customBranding.selectedLogo : baseBrand.logoUrl,
+  };
 
   // ブランド変更時にブラウザタイトルとファビコンを即時更新
   useEffect(() => {
@@ -299,6 +327,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       if (!brandErr && dbBrand?.value?.brand_id && APP_BRANDS[dbBrand.value.brand_id as AppBrandId]) {
         setAppBrandState(dbBrand.value.brand_id as AppBrandId);
+      }
+
+      // 6-3. platform_settings: custom_branding (アプリ名・ロゴ・アイコン独立設定)
+      const { data: dbCustomBrand, error: cbErr } = await supabase
+        .from('platform_settings')
+        .select('*')
+        .eq('key', 'custom_branding')
+        .maybeSingle();
+
+      if (!cbErr && dbCustomBrand?.value) {
+        setCustomBrandingState((prev) => ({ ...prev, ...dbCustomBrand.value }));
       }
 
       // 7. chat_messages (独立テーブルからチャット履歴を取得)
@@ -950,6 +989,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const updateCustomBranding = async (settings: Partial<CustomBrandingSettings>) => {
+    setCustomBrandingState((prev) => {
+      const next = { ...prev, ...settings };
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('carehub_custom_branding', JSON.stringify(next));
+        } catch (e) {
+          console.warn('Failed to save custom branding locally', e);
+        }
+      }
+      return next;
+    });
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase
+          .from('platform_settings')
+          .upsert({ key: 'custom_branding', value: settings }, { onConflict: 'key' });
+      } catch (e) {
+        console.warn('Failed to sync custom_branding to Supabase', e);
+      }
+    }
+  };
+
   // ========================================================
   // 本登録審査（4ステップ）・提出書類確認・自動削除承認ロジック
   // ========================================================
@@ -1587,7 +1650,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateTherapistInfo,
         appBrand,
         currentBrand,
+        customBranding,
         setAppBrand,
+        updateCustomBranding,
         onboardings,
         verificationLogs,
         completeReviewFeePayment,

@@ -55,3 +55,78 @@ body {
   background: transparent;
   border: none;
 }
+
+/* ========================================================
+   PDF出力 / 印刷用レイアウト最適化スタイル (Print Styles)
+   ======================================================== */
+@media print {
+  /* 1. 背景色と境界線を強制的にフルカラー印刷 */
+  *,
+  *::before,
+  *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* 2. 印刷時のページ余白設定 */
+  @page {
+    margin: 12mm 10mm;
+    size: auto;
+  }
+
+  body {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+
+  /* 3. ナビゲーションや印刷ボタンなどの画面専用要素を完全非表示 */
+  .print\:hidden,
+  header,
+  footer,
+  button,
+  .no-print {
+    display: none !important;
+  }
+
+  /* 4. カードやセクションがページの途中で分断（ページ跨ぎ）されるのを防止 */
+  .break-inside-avoid,
+  .print-avoid-break,
+  .rounded-3xl,
+  .rounded-2xl,
+  article,
+  section,
+  .grid > div {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* 5. アイコンSVGが印刷時に空欄（中身消失）になるのを防止 */
+  svg {
+    display: inline-block !important;
+    vertical-align: middle !important;
+    stroke: currentColor !important;
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  /* 6. グリッドの印刷表示調整 */
+  .grid {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 1rem !important;
+  }
+
+  .grid > * {
+    flex: 1 1 calc(50% - 1rem) !important;
+    min-width: 260px !important;
+  }
+
+  /* 単一カラムまたは3カラムの調整 */
+  .grid-cols-1 > * {
+    flex: 1 1 100% !important;
+  }
+}
+

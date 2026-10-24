@@ -123,10 +123,20 @@ export const Header: React.FC = () => {
                 className="flex items-center gap-2 group py-1 min-w-0"
                 title={`${currentBrand.japaneseName} (${currentBrand.name}) - ${currentBrand.catchphrase}`}
               >
-                <div
-                  className="w-8 h-8 sm:w-9 sm:h-9 shrink-0 rounded-xl overflow-hidden shadow-xs group-hover:scale-105 transition-transform"
-                  dangerouslySetInnerHTML={{ __html: currentBrand.iconSvg }}
-                />
+                <div className="w-8 h-8 sm:w-9 sm:h-9 shrink-0 rounded-xl overflow-hidden shadow-xs group-hover:scale-105 transition-transform flex items-center justify-center bg-white border border-slate-100">
+                  {currentBrand.iconUrl ? (
+                    <img
+                      src={currentBrand.iconUrl}
+                      alt={currentBrand.japaneseName}
+                      className="w-full h-full object-contain p-0.5"
+                    />
+                  ) : (
+                    <div
+                      className="w-full h-full"
+                      dangerouslySetInnerHTML={{ __html: currentBrand.iconSvg }}
+                    />
+                  )}
+                </div>
                 <div className="flex flex-col min-w-0">
                   <div className="flex items-baseline gap-1.5 whitespace-nowrap">
                     <span className="text-base sm:text-lg font-black tracking-tight text-slate-900 group-hover:text-emerald-700 transition truncate">
@@ -244,10 +254,20 @@ export const Header: React.FC = () => {
           {/* Drawer Header */}
           <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
             <div className="flex items-center gap-2">
-              <div
-                className="w-6 h-6 rounded-lg overflow-hidden shrink-0"
-                dangerouslySetInnerHTML={{ __html: currentBrand.iconSvg }}
-              />
+              <div className="w-6 h-6 rounded-lg overflow-hidden shrink-0 flex items-center justify-center bg-white border border-slate-100">
+                {currentBrand.iconUrl ? (
+                  <img
+                    src={currentBrand.iconUrl}
+                    alt={currentBrand.japaneseName}
+                    className="w-full h-full object-contain p-0.5"
+                  />
+                ) : (
+                  <div
+                    className="w-full h-full"
+                    dangerouslySetInnerHTML={{ __html: currentBrand.iconSvg }}
+                  />
+                )}
+              </div>
               <span className="font-black text-slate-900 text-sm">
                 {currentBrand.japaneseName} ナビゲーション
               </span>
