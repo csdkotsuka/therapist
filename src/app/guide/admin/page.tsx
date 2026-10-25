@@ -56,6 +56,9 @@ import {
   Smartphone,
   Send,
   HelpCircle,
+  Type,
+  Maximize2,
+  Info,
 } from 'lucide-react';
 
 export default function AdminGuidePage() {
@@ -92,39 +95,43 @@ export default function AdminGuidePage() {
     }
   };
 
-  // 5分プレゼン・スライド構成データ
+  // 5分プレゼン・スライド構成データ（大塚 和宏 / yaShine 様 Keynoteスタイル準拠）
   const presentationSlides = [
     {
       id: 1,
-      title: '専門技術が、もっと自由に届く場所へ。',
-      subTitle: `国家資格者＆ウェルネスプロのためのオンデマンド・ヘルスケア「${currentBrand.japaneseName}」`,
+      title: 'セラピストプラットフォームのご紹介',
+      subTitle: '大塚 和宏 / yaShine',
+      tagline: `専門技術が、もっと自由に届く場所へ。国家資格者＆ウェルネスプロのためのオンデマンド・ヘルスケア「${currentBrand.japaneseName}」`,
       timeRange: '00:00 〜 00:30',
       durationSec: '30秒',
-      layoutType: 'ヒーロー型（インパクト全面・センター配置）',
-      objective: '聴衆（400名の専門職候補者）の関心を引き込み、本日の5分間で何が得られるかを明快に提示する。',
-      audienceState: '「どんなアプリなんだろう？」「自分に関係があるのかな？」という興味・観察フェーズ',
+      layoutType: 'Keynote基本レイアウト（エレガント明朝 ＆ オーロラグラデーション）',
+      keynoteFontSizes: 'メインタイトル: 56〜64pt（太字明朝） / 登壇者: 28〜32pt / キャッチ: 22〜24pt / フッター: 16pt',
+      objective: '聴衆（400名の専門職候補者）の視線を釘付けにし、落ち着いた品格と信頼感を醸成する。',
+      audienceState: '「どんなアプリなんだろう？」「落ち着いた雰囲気で信頼できそう」という興味・注視フェーズ',
       slideBulletedPoints: [
-        '病院やサロンの「場所・組織の壁」を超える新しい働き方',
-        'スマホ1台で、あなたの得意な時間・エリアでダイレクトに施術',
-        '理学療法士・助産師・鍼灸・エステ等、全17分野の専門職パートナーを募集',
-        '初期費用・月額固定費完全 0 円でリスクなく始められる',
+        '【メインタイトル】セラピストプラットフォームのご紹介',
+        '【登壇者】大塚 和宏 / yaShine',
+        '【キャッチコピー】病院やサロンの枠を超え、あなたの得意なエリアで直接価値を届ける',
+        '【対象専門職】理学療法士・助産師・鍼灸・エステ等、全17分野のパートナー募集',
       ],
-      scriptText: `「みなさん、こんにちは。本日はお集まりいただきありがとうございます。
+      scriptText: `「みなさん、こんにちは。yaShineの大塚和宏です。本日は貴重なお時間をいただきありがとうございます。
 いま、この会場には理学療法士や助産師、鍼灸・マッサージ師、エステティシャンなど、人の心と身体を支える約400名ものプロフェッショナルの方々がいらっしゃいます。
 
 今日お話しするのは、皆さんが培ってきた確かな専門技術を、病院やサロンという『枠』を超えて、いま本当にケアを求めている地域の生活者へダイレクトに届ける新しい仕組み――『${currentBrand.japaneseName}』についてです。
 
 わずか5分間ですが、皆さんのこれからの働き方の選択肢が大きく広がるお話をさせていただきます。どうぞリラックスしてお聞きください。」`,
       tips: '第一声は明るく堂々と。400人の目を見渡しながら「みなさんのための仕組みです」というメッセージを届けます。',
-      visualBadge: 'SLIDE 01 / OPENING',
+      visualBadge: 'SLIDE 01 / TITLE',
     },
     {
       id: 2,
       title: 'なぜ今、このプロジェクトなのか？',
       subTitle: '「施設・店舗の制約」と「届かないケア難民」の深いギャップを埋める',
+      tagline: '意図とミッション：プロの技術を眠らせず、地域住民へ直結させる',
       timeRange: '00:30 〜 01:15',
       durationSec: '45秒',
-      layoutType: '左右2カラム対比型（現状の課題 ⇄ プロジェクトの意図）',
+      layoutType: '左右2分割・すりガラス対比カード（現状の課題 ⇄ プロジェクトの意図）',
+      keynoteFontSizes: 'スライドタイトル: 44〜48pt / カード見出し: 26〜28pt / 箇条書き: 20〜22pt',
       objective: '「なぜこのアプリが必要なのか？」という社会的意義（Why）を共有し、共感と誇りを生み出す。',
       audienceState: '「確かに現場でそういうジレンマを感じていた」「自分の技術をもっと役立てたい」と強く共鳴する',
       slideBulletedPoints: [
@@ -150,9 +157,11 @@ export default function AdminGuidePage() {
       id: 3,
       title: '登録者にとっての3大メリット',
       subTitle: '空き時間×得意エリアで、あなたのスキルを最大化する',
+      tagline: '自由度 × スマホ1台完結 × 高還元・ノーリスク',
       timeRange: '01:15 〜 02:15',
       durationSec: '60秒',
-      layoutType: '3カラム・カードグリッド（特徴 × 直感操作 × 高還元）',
+      layoutType: '3カラム・すりガラスカード（特徴 × 直感操作 × 高還元）',
+      keynoteFontSizes: 'スライドタイトル: 44〜48pt / カードタイトル: 24〜26pt / カード本文: 18〜20pt',
       objective: '「実際に登録したらどう働くのか？」の具体イメージを湧かせ、心理的ハードルを一気に下げる。',
       audienceState: '「これなら自分でもできる！」「今の仕事と両立できるかも」と前向きな意欲が湧く',
       slideBulletedPoints: [
@@ -174,9 +183,11 @@ export default function AdminGuidePage() {
       id: 4,
       title: 'プロを守る「4つの安心と配慮」',
       subTitle: '見知らぬ場所への出張や個人活動の不安を、仕組みで徹底ガード',
+      tagline: '資格審査・相互評価・事前決済・地域管理者サポート',
       timeRange: '02:15 〜 03:15',
       durationSec: '60秒',
-      layoutType: '4マトリクス・セーフティシールド配置（信頼・安全設計）',
+      layoutType: '4グリッド・セーフティシールド配置（信頼・安全設計）',
+      keynoteFontSizes: 'スライドタイトル: 44〜48pt / バッジ見出し: 22〜24pt / 説明文: 18〜20pt',
       objective: '「出張は安全なの？」「変なお客さんが来たら？」という最大の不安を先回りして払拭する。',
       audienceState: '「ここまで安全対策されているなら安心だ」「運営や管理者のサポート体制があるのは心強い」と確信に変わる',
       slideBulletedPoints: [
@@ -194,7 +205,7 @@ export default function AdminGuidePage() {
 
 さらに、料金は予約時にカードの事前与信枠を確保するため、『施術したのにお金がもらえない』ということは絶対に起きません。無断キャンセルでも規定通りの報酬が補償されます。
 
-そして本日お集まりの方の中には将来『管理・運営側』に回るリーダー候補の方もいらっしゃいますが、地域の管理スタッフがバックオフィスとして皆様の日常を強力に支えます。」`,
+そして本日お集まりの方の中には将来『管理・運営側』に回るリーダー候補の方もいらっしゃると思いますが、地域の管理スタッフがバックオフィスとして皆様の日常を強力に支えます。」`,
       tips: '400名の中の「不安そうな表情」をしている人に視線を合わせながら、ゆっくり落ち着いて安心感を伝えます。一部の管理者候補への目配せも自然に入れます。',
       visualBadge: 'SLIDE 04 / TRUST & SAFETY',
     },
@@ -202,9 +213,11 @@ export default function AdminGuidePage() {
       id: 5,
       title: 'このプロジェクトが拓く「未来のヘルスケア」',
       subTitle: '単なるマッチングを超え、多職種連携と地域包括ケアの基盤へ進化する',
+      tagline: 'Phase 1: 専門職集結 ➔ Phase 2: 多職種連携 ➔ Phase 3: 地域統括キャリア',
       timeRange: '03:15 〜 04:00',
       durationSec: '45秒',
-      layoutType: '3ステップ・ロードマップ（成長とキャリアの未来絵図）',
+      layoutType: '3ステップ・進行ロードマップ（成長とキャリアの未来絵図）',
+      keynoteFontSizes: 'スライドタイトル: 44〜48pt / ステップ見出し: 24〜26pt / 詳細テキスト: 18〜20pt',
       objective: 'アプリの将来性とスケール感を伝え、参加することへのワクワク感とキャリアの広がりを感じてもらう。',
       audienceState: '「単なる一過性のアプリじゃない」「将来的に色んな専門職と繋がれて面白そう」と期待が膨らむ',
       slideBulletedPoints: [
@@ -225,9 +238,11 @@ export default function AdminGuidePage() {
       id: 6,
       title: 'あなたの専門性が、誰かの希望になる。',
       subTitle: '登録・掲載は完全無料。リスクゼロで新しい一歩を踏み出しましょう',
+      tagline: '①WEB登録（3分） ➔ ②審査・承認 ➔ ③稼働開始（ノルマなし）',
       timeRange: '04:00 〜 04:45',
       durationSec: '45秒',
       layoutType: 'CTA・コンバージョン型（簡単3ステップ ＋ 行動喚起 ＋ 相談窓口）',
+      keynoteFontSizes: 'メインタイトル: 46〜52pt / ステップ数字: 28〜32pt / ステップテキスト: 22〜24pt / QR枠: 18pt',
       objective: '聴衆400名の背中を押し、今すぐ無料登録または相談へとアクションを起こさせる。',
       audienceState: '「リスクもないし、まずは登録してみよう」「後で質問に行ってみよう」と行動に移る',
       slideBulletedPoints: [
@@ -251,9 +266,11 @@ export default function AdminGuidePage() {
       id: 7,
       title: 'Q&A / よくあるご質問 ＆ 個別相談',
       subTitle: '疑問点や不安な点はお気軽にご相談ください',
+      tagline: '副業・損害補償・稼働ノルマ・管理側参画についてのQ&A',
       timeRange: '04:45 〜 05:00',
       durationSec: '15秒〜質疑',
-      layoutType: 'FAQ・対話型カードレイアウト（安心のQ&Aまとめ）',
+      layoutType: 'FAQ・対話型すりガラスカード（安心のQ&Aまとめ）',
+      keynoteFontSizes: 'スライドタイトル: 44〜48pt / Q質問文: 22〜24pt / A回答文: 18〜20pt',
       objective: '質疑応答中の投影用。副業規定、損害補償、稼働ノルマなしなどの疑問に即答できる状態を作る。',
       audienceState: '具体的な質問が出やすくなり、個別相談への導入がスムーズになる',
       slideBulletedPoints: [
@@ -274,7 +291,7 @@ export default function AdminGuidePage() {
     const text = presentationSlides
       .map(
         (s) =>
-          `========================================\n【スライド ${s.id}】${s.title}\n時間目安: ${s.timeRange} (${s.durationSec})\nレイアウト形式: ${s.layoutType}\nサブタイトル: ${s.subTitle}\n\n■ 投影箇条書き:\n${s.slideBulletedPoints.map((p) => `・${p}`).join('\n')}\n\n■ トークスクリプト（口頭原稿）:\n${s.scriptText}\n\n■ 発表のコツ:\n${s.tips}\n`
+          `========================================\n【スライド ${s.id}】${s.title}\n時間目安: ${s.timeRange} (${s.durationSec})\nKeynote推奨文字サイズ: ${s.keynoteFontSizes}\nレイアウト形式: ${s.layoutType}\nサブタイトル: ${s.subTitle}\n\n■ 投影箇条書き:\n${s.slideBulletedPoints.map((p) => `・${p}`).join('\n')}\n\n■ トークスクリプト（口頭原稿）:\n${s.scriptText}\n\n■ 発表のコツ:\n${s.tips}\n`
       )
       .join('\n\n');
 
@@ -287,7 +304,7 @@ export default function AdminGuidePage() {
 
   // 単一スライドの原稿コピー
   const handleCopySingle = (slide: typeof presentationSlides[0]) => {
-    const text = `【スライド ${slide.id}】${slide.title}\n時間目安: ${slide.timeRange} (${slide.durationSec})\nレイアウト: ${slide.layoutType}\nサブタイトル: ${slide.subTitle}\n\n■ 投影箇条書き:\n${slide.slideBulletedPoints.map((p) => `・${p}`).join('\n')}\n\n■ トークスクリプト:\n${slide.scriptText}\n\n■ コツ:\n${slide.tips}`;
+    const text = `【スライド ${slide.id}】${slide.title}\n時間目安: ${slide.timeRange} (${slide.durationSec})\nKeynote推奨文字サイズ: ${slide.keynoteFontSizes}\nレイアウト: ${slide.layoutType}\nサブタイトル: ${slide.subTitle}\n\n■ 投影箇条書き:\n${slide.slideBulletedPoints.map((p) => `・${p}`).join('\n')}\n\n■ トークスクリプト:\n${slide.scriptText}\n\n■ コツ:\n${slide.tips}`;
     if (navigator.clipboard) {
       navigator.clipboard.writeText(text);
       setCopiedSlide(slide.id);
@@ -485,14 +502,14 @@ export default function AdminGuidePage() {
             onClick={() => setActiveView('presentation')}
             className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-black transition flex items-center gap-2 cursor-pointer ${
               activeView === 'presentation'
-                ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
+                ? 'bg-slate-900 text-white shadow-md'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
-            <Presentation className="w-4 h-4 text-emerald-200" />
+            <Presentation className="w-4 h-4 text-emerald-400" />
             <span>🎤 5分ピッチ構成案 (400名対象)</span>
-            <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-white/20 font-bold">
-              新設
+            <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-emerald-500/30 text-emerald-300 font-bold">
+              Keynote準拠
             </span>
           </button>
 
@@ -541,34 +558,34 @@ export default function AdminGuidePage() {
       {activeView === 'presentation' && (
         <div className="space-y-10">
           {/* プレゼン・サマリーカード */}
-          <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 text-white rounded-3xl p-6 sm:p-10 shadow-2xl border border-slate-800 relative overflow-hidden print-avoid-break">
+          <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white rounded-3xl p-6 sm:p-10 shadow-2xl border border-slate-700 relative overflow-hidden print-avoid-break">
             <div className="absolute right-0 top-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
             <div className="relative z-10 space-y-5">
               <div className="flex flex-wrap items-center gap-2.5">
                 <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-black uppercase tracking-wider border border-emerald-500/30 flex items-center gap-1.5">
                   <Mic className="w-3.5 h-3.5 text-emerald-400" />
-                  5-Minute Presentation Kit
+                  Keynote Presentation Kit
                 </span>
-                <span className="text-xs sm:text-sm text-slate-400 font-bold">
-                  対象: 登録候補者 約400名（理学療法士・助産師・鍼灸・エステ等）＋ 管理者候補
+                <span className="text-xs sm:text-sm text-slate-300 font-bold font-serif">
+                  登壇者: 大塚 和宏 / yaShine ｜ 対象: 登録候補者 約400名 ＋ 管理者候補
                 </span>
               </div>
 
-              <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight leading-snug">
-                {currentBrand.japaneseName} 5分プレゼンテーション構成案<br />
-                <span className="text-emerald-400 text-xl sm:text-2xl font-bold">
-                  プロジェクトの意図・特徴・配慮・未来をシンプルに伝える全スライド設計
+              <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight leading-snug font-serif">
+                セラピストプラットフォームのご紹介<br />
+                <span className="text-emerald-400 text-xl sm:text-2xl font-bold font-sans">
+                  5分プレゼンテーション全スライド設計 ＆ Keynoteレイアウト調整ガイド
                 </span>
               </h1>
 
-              <p className="text-sm sm:text-base text-emerald-100/90 max-w-3xl leading-relaxed font-normal">
-                本ページは、実際のプレゼンテーションファイル（PowerPoint / Keynote / Googleスライド）を作成・発表するための完全な設計書です。
-                各スライドの<strong>「投影テキスト（箇条書き）」「推奨レイアウトのビジュアル概要」「そのまま話せるトークスクリプト（口頭原稿）」</strong>を完備しています。
+              <p className="text-sm sm:text-base text-slate-200 max-w-3xl leading-relaxed font-normal">
+                添付いただいたMacのKeynote基本テンプレート（セージグレー〜テラコッタピンクのグラデーション ＆ 端正な明朝体）を完全再現。
+                400名の大規模会場で後方席まで確実に視認できる<strong>「文字サイズ（pt）階層」「すりガラスカードによるコントラスト改善」「そのまま話せる5分間トークスクリプト」</strong>を完備しています。
               </p>
 
               {/* プレゼン仕様 KPI & タイマーツール */}
-              <div className="pt-4 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-4">
+              <div className="pt-4 border-t border-slate-700/80 flex flex-wrap items-center justify-between gap-4">
                 <div className="flex flex-wrap items-center gap-6 text-xs sm:text-sm text-slate-300 font-medium">
                   <div>
                     <span className="text-slate-400 block text-xs">発表持ち時間</span>
@@ -582,8 +599,8 @@ export default function AdminGuidePage() {
                     <strong className="text-emerald-400 font-bold text-sm sm:text-base">全6枚 + 予備1枚</strong>
                   </div>
                   <div>
-                    <span className="text-slate-400 block text-xs">主眼テーマ</span>
-                    <strong className="text-white font-bold">プロジェクトの意図 ＆ 特徴・配慮・未来</strong>
+                    <span className="text-slate-400 block text-xs">デザイン指針</span>
+                    <strong className="text-white font-bold font-serif">Keynoteセージオーロラ × 明朝体</strong>
                   </div>
                 </div>
 
@@ -625,11 +642,158 @@ export default function AdminGuidePage() {
             </div>
           </div>
 
+          {/* ========================================================
+              ★ 特設セクション: Keynoteスライド設定＆400名会場向け文字サイズ・レイアウト調整ガイド
+             ======================================================== */}
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6 print-avoid-break">
+            <div className="border-b border-slate-100 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2 text-xs font-bold text-emerald-700 uppercase tracking-wider">
+                  <Type className="w-4 h-4" />
+                  <span>Keynote Design & Typography Guidelines</span>
+                </div>
+                <h3 className="text-lg sm:text-2xl font-black text-slate-900 mt-0.5 font-serif">
+                  400名会場で「見やすく・伝わる」Keynote文字サイズ ＆ レイアウト調整指針
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                  添付いただいた基本テンプレート（セージオーロラ）の美しさを最大限に活かしつつ、400人規模の大会場で後方座席からでもくっきり読める文字設定・配置ルールです。
+                </p>
+              </div>
+
+              <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-xl text-xs font-mono font-bold self-start md:self-auto shrink-0">
+                Keynote設定: 1920×1080 (16:9)
+              </span>
+            </div>
+
+            {/* 添付スライドの比較プレビュー ＆ ポイント */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              {/* 左側: 添付スライド実物画像 */}
+              <div className="lg:col-span-5 space-y-2">
+                <span className="text-xs font-bold text-slate-600 block">
+                  【添付いただいたKeynoteの基本レイアウト（参照画像）】
+                </span>
+                <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-100">
+                  <img
+                    src="/presentation/keynote_template_ref.png"
+                    alt="Keynote基本テンプレート"
+                    className="w-full h-auto object-cover"
+                  />
+                </div>
+                <p className="text-[11px] text-slate-500 leading-relaxed">
+                  ▲ セージグレー〜テラコッタピンクの上品なグラデーション背景と明朝体の美しい組み合わせ。このトーンを崩さず視認性を高めます。
+                </p>
+              </div>
+
+              {/* 右側: 400名向け文字サイズ・レイアウト調整テーブル */}
+              <div className="lg:col-span-7 space-y-4">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="bg-slate-50 border-b border-slate-200 text-slate-600">
+                        <th className="p-2.5 font-bold">要素</th>
+                        <th className="p-2.5 font-bold">現状の目安</th>
+                        <th className="p-2.5 font-bold text-emerald-800 bg-emerald-50/80">
+                          400名会場 推奨サイズ (pt)
+                        </th>
+                        <th className="p-2.5 font-bold">ウェイト ＆ 調整のポイント</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-slate-700">
+                      <tr>
+                        <td className="p-2.5 font-bold">表紙 メインタイトル</td>
+                        <td className="p-2.5 text-slate-400 font-mono">約36〜40pt</td>
+                        <td className="p-2.5 font-bold font-mono text-emerald-700 bg-emerald-50/40">
+                          56 〜 64 pt
+                        </td>
+                        <td className="p-2.5 text-slate-600">
+                          <strong>太字（W6）</strong>にして1.5倍に拡大。暗色（#1e293b）でコントラスト確保
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-2.5 font-bold">登壇者名 / yaShine</td>
+                        <td className="p-2.5 text-slate-400 font-mono">約20〜24pt</td>
+                        <td className="p-2.5 font-bold font-mono text-emerald-700 bg-emerald-50/40">
+                          28 〜 32 pt
+                        </td>
+                        <td className="p-2.5 text-slate-600">
+                          明朝体（W3〜W6）。タイトルとの間隔は行間1.4倍程度
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-2.5 font-bold">コンテンツ スライド見出し</td>
+                        <td className="p-2.5 text-slate-400 font-mono">-</td>
+                        <td className="p-2.5 font-bold font-mono text-emerald-700 bg-emerald-50/40">
+                          44 〜 48 pt
+                        </td>
+                        <td className="p-2.5 text-slate-600">
+                          スライド上部中央または左上に固定配置。視線誘導を統一
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-2.5 font-bold">カード・枠内の見出し</td>
+                        <td className="p-2.5 text-slate-400 font-mono">-</td>
+                        <td className="p-2.5 font-bold font-mono text-emerald-700 bg-emerald-50/40">
+                          24 〜 28 pt
+                        </td>
+                        <td className="p-2.5 text-slate-600">
+                          太字（Bold）。すりガラスカード（白不透明度75%）上に配置
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-2.5 font-bold">本文・箇条書きテキスト</td>
+                        <td className="p-2.5 text-slate-400 font-mono">-</td>
+                        <td className="p-2.5 font-bold font-mono text-emerald-700 bg-emerald-50/40">
+                          20 〜 24 pt
+                        </td>
+                        <td className="p-2.5 text-slate-600">
+                          <span className="text-rose-600 font-bold">18pt以下は使用禁止</span>（後方から読めなくなるため）
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* 3大レイアウト調整テクニック */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-xs">
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                    <strong className="font-bold text-slate-900 block flex items-center gap-1">
+                      <span className="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px]">1</span>
+                      すりガラス座布団の活用
+                    </strong>
+                    <p className="text-slate-600 text-[11px] leading-relaxed">
+                      情報スライドでは、白の四角形（不透明度70〜80%・角丸20pt・背景ぼかし）を敷いて文字を乗せると、背景の美しさを保ちつつ視認性が劇的に向上します。
+                    </p>
+                  </div>
+
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                    <strong className="font-bold text-slate-900 block flex items-center gap-1">
+                      <span className="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px]">2</span>
+                      左右マージンは10%厳守
+                    </strong>
+                    <p className="text-slate-600 text-[11px] leading-relaxed">
+                      プロジェクターの枠切れを防ぐため、画面の端から160px（約10%）の内側に文字要素をすべて収めます。
+                    </p>
+                  </div>
+
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                    <strong className="font-bold text-slate-900 block flex items-center gap-1">
+                      <span className="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px]">3</span>
+                      明朝体の太さ（ウェイト）
+                    </strong>
+                    <p className="text-slate-600 text-[11px] leading-relaxed">
+                      Keynote標準の「Light」明朝は投影光で細い線が飛ぶため、「Medium」または「W6」を選択すると遠くまで力強く届きます。
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* 5分タイムライン進行バー（全体の流れを視覚化） */}
           <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
               <div>
-                <h3 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
+                <h3 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2 font-serif">
                   <Clock className="w-5 h-5 text-emerald-600" />
                   <span>5分間のストーリーライン（時間配分と構成）</span>
                 </h3>
@@ -658,7 +822,7 @@ export default function AdminGuidePage() {
                       <span className="text-emerald-700">スライド {s.id}</span>
                       <span className="text-slate-400 font-mono">{s.durationSec}</span>
                     </div>
-                    <div className="text-xs font-bold text-slate-800 line-clamp-1">{s.title}</div>
+                    <div className="text-xs font-bold text-slate-800 line-clamp-1 font-serif">{s.title}</div>
                   </div>
                   <div className="text-[10px] text-slate-500 font-mono mt-2 pt-1 border-t border-slate-200/60">
                     {s.timeRange}
@@ -672,12 +836,12 @@ export default function AdminGuidePage() {
           <div className="space-y-12">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2.5">
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2.5 font-serif">
                   <Layers className="w-6 h-6 text-emerald-600" />
-                  <span>各スライドのレイアウト画像・テキスト・発表原稿</span>
+                  <span>各スライドのKeynoteレイアウト画像・テキスト・発表原稿</span>
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                  実際のプレゼン作成時にそのまま投影できるレイアウト画面イメージと、壇上でそのまま読めるスクリプトを掲載しています。
+                  Keynote作成時にそのまま使える推奨レイアウト画面イメージ、400名会場向け文字サイズ設定、および口頭スクリプトです。
                 </p>
               </div>
             </div>
@@ -691,23 +855,27 @@ export default function AdminGuidePage() {
                 {/* スライドヘッダーバー */}
                 <div className="p-4 sm:px-6 bg-slate-900 text-white flex flex-wrap items-center justify-between gap-3 border-b border-slate-800">
                   <div className="flex items-center gap-3">
-                    <span className="px-3 py-1 rounded-xl bg-emerald-500 text-slate-950 font-black text-xs sm:text-sm tracking-wider">
+                    <span className="px-3 py-1 rounded-xl bg-emerald-500 text-slate-950 font-black text-xs sm:text-sm tracking-wider font-mono">
                       SLIDE {slide.id}
                     </span>
                     <div>
-                      <h3 className="font-black text-sm sm:text-base text-white">{slide.title}</h3>
+                      <h3 className="font-black text-sm sm:text-base text-white font-serif">{slide.title}</h3>
                       <div className="text-xs text-slate-400 flex items-center gap-3 mt-0.5">
                         <span className="text-emerald-400 font-mono flex items-center gap-1">
                           <Clock className="w-3.5 h-3.5" />
                           {slide.timeRange} ({slide.durationSec})
                         </span>
                         <span>•</span>
-                        <span className="text-slate-300">レイアウト: {slide.layoutType}</span>
+                        <span className="text-slate-300">形式: {slide.layoutType}</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2">
+                    <span className="hidden sm:inline-block text-[11px] font-mono text-emerald-300 bg-emerald-950/70 border border-emerald-800/80 px-2.5 py-1 rounded-lg">
+                      Keynote推奨: {slide.keynoteFontSizes.split('/')[0]}
+                    </span>
+
                     <button
                       onClick={() => handleCopySingle(slide)}
                       className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer border border-slate-700"
@@ -721,7 +889,7 @@ export default function AdminGuidePage() {
                       ) : (
                         <>
                           <Copy className="w-3.5 h-3.5 text-slate-400" />
-                          <span>原稿をコピー</span>
+                          <span>原稿コピー</span>
                         </>
                       )}
                     </button>
@@ -731,168 +899,192 @@ export default function AdminGuidePage() {
                 <div className="p-6 sm:p-8 space-y-8">
                   {/* ========================================================
                       1. 使用するレイアウトの画像・視覚的スライドモックアップ
+                         (添付いただいたKeynoteのセージ〜テラコッタオーロラ × 明朝体を完全再現)
                      ======================================================== */}
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between text-xs font-bold text-slate-500">
-                      <span className="flex items-center gap-1.5 uppercase tracking-wider text-slate-600">
+                    <div className="flex flex-wrap items-center justify-between text-xs font-bold text-slate-500 gap-2">
+                      <span className="flex items-center gap-1.5 uppercase tracking-wider text-slate-700 font-serif">
                         <Presentation className="w-4 h-4 text-emerald-600" />
-                        【投影スライド・レイアウト画像イメージ（16:9 プレビュー）】
+                        【Keynote 16:9 スライド画面プレビュー（推奨レイアウト ＆ 文字階層）】
                       </span>
-                      <span className="bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-md text-[11px]">
-                        {slide.layoutType}
+                      <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-md text-[11px] font-mono">
+                        {slide.keynoteFontSizes}
                       </span>
                     </div>
 
-                    {/* スライドモックアップ本体 (16:9比率のアスペクト枠) */}
-                    <div className="w-full aspect-[16/9] max-h-[460px] bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 rounded-2xl p-5 sm:p-8 text-white flex flex-col justify-between shadow-inner relative overflow-hidden border border-slate-800 select-none">
-                      <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+                    {/* スライドモックアップ本体: Keynoteスタイル完全再現
+                        背景: セージグレー 〜 テラコッタピンクの流麗グラデーション ＋ 光のブラー円
+                        フォント: font-serif (明朝体)
+                    */}
+                    <div
+                      className="w-full aspect-[16/9] max-h-[480px] rounded-2xl p-6 sm:p-10 flex flex-col justify-between shadow-md relative overflow-hidden select-none border border-slate-300 font-serif"
+                      style={{
+                        background: 'linear-gradient(135deg, #879798 0%, #9cb0af 28%, #c58d81 68%, #b27b72 82%, #798086 100%)',
+                      }}
+                    >
+                      {/* 背景の柔らかな光・山並みグラデーション */}
+                      <div className="absolute top-1/4 right-1/6 w-[450px] h-[300px] bg-[#c78b7e]/45 rounded-full blur-3xl pointer-events-none" />
+                      <div className="absolute -bottom-10 left-1/4 w-[400px] h-[250px] bg-[#a2b4b3]/40 rounded-full blur-3xl pointer-events-none" />
 
                       {/* スライド内ヘッダー */}
-                      <div className="relative z-10 flex items-center justify-between border-b border-slate-800/80 pb-3">
+                      <div className="relative z-10 flex items-center justify-between border-b border-slate-700/20 pb-2 text-slate-800">
                         <div className="flex items-center gap-2">
                           <div
-                            className="w-6 h-6 rounded-md overflow-hidden shrink-0 shadow-sm"
+                            className="w-6 h-6 rounded-md overflow-hidden shrink-0 shadow-xs"
                             dangerouslySetInnerHTML={{ __html: currentBrand.iconSvg }}
                           />
-                          <span className="text-xs sm:text-sm font-black tracking-wider text-emerald-300">
+                          <span className="text-xs sm:text-sm font-bold tracking-wider text-slate-800">
                             {currentBrand.japaneseName}
                           </span>
                         </div>
-                        <div className="text-[11px] text-slate-400 font-mono tracking-widest">
+                        <div className="text-[11px] text-slate-600 font-mono tracking-widest">
                           {slide.visualBadge}
                         </div>
                       </div>
 
                       {/* スライド内メインコンテンツ（各スライド固有のレイアウト） */}
                       <div className="relative z-10 my-auto py-2">
-                        {/* スライド 1: ヒーロー型（インパクト全面配置） */}
+                        {/* スライド 1: 添付Keynoteと同一の表紙レイアウト（文字サイズ・コントラスト調整済） */}
                         {slide.id === 1 && (
-                          <div className="text-center space-y-4 max-w-2xl mx-auto">
-                            <span className="inline-block px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] sm:text-xs font-bold border border-emerald-500/30">
-                              Healthcare & Wellness Professional Platform
-                            </span>
-                            <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-white leading-tight">
-                              あなたの専門技術が、<br />
-                              <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-300 bg-clip-text text-transparent">
-                                もっと自由に届く場所へ。
+                          <div className="space-y-4 max-w-2xl text-left py-4">
+                            <div className="space-y-2">
+                              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-wide leading-tight drop-shadow-xs">
+                                セラピストプラットフォームのご紹介
+                              </h2>
+                              <p className="text-base sm:text-xl text-slate-800 font-normal tracking-wide">
+                                大塚 和宏 / yaShine
+                              </p>
+                            </div>
+
+                            <div className="pt-2">
+                              <span className="inline-block px-3.5 py-1.5 rounded-xl bg-white/75 backdrop-blur-md text-slate-800 text-xs sm:text-sm font-sans font-medium border border-white/60 shadow-xs">
+                                専門技術が、もっと自由に届く場所へ。国家資格者＆プロのためのオンデマンド・ケア
                               </span>
-                            </h2>
-                            <p className="text-xs sm:text-sm text-slate-300 font-medium max-w-xl mx-auto leading-relaxed">
-                              理学療法士・助産師・鍼灸・マッサージ・エステ等、プロフェッショナルのための新しい働き方
-                            </p>
-                            <div className="flex flex-wrap items-center justify-center gap-2 pt-2 text-[10px] sm:text-xs text-emerald-300 font-bold">
-                              <span className="bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-700">#完全自由なシフト</span>
-                              <span className="bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-700">#店舗・固定費ゼロ</span>
-                              <span className="bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-700">#高還元・即時性</span>
-                              <span className="bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-700">#安心の安全設計</span>
                             </div>
                           </div>
                         )}
 
-                        {/* スライド 2: 左右2カラム対比型（現状の課題 ⇄ プロジェクトの意図） */}
+                        {/* スライド 2: 左右2分割・すりガラス対比カード（現状の課題 ⇄ プロジェクトの意図） */}
                         {slide.id === 2 && (
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6 items-stretch">
-                            <div className="bg-rose-950/40 border border-rose-500/30 rounded-xl p-3 sm:p-4 space-y-2">
-                              <div className="flex items-center gap-1.5 text-rose-400 text-xs sm:text-sm font-black">
-                                <AlertTriangle className="w-4 h-4 shrink-0" />
-                                <span>【現状の課題】届かないケア難民</span>
+                          <div className="space-y-3">
+                            <h3 className="text-lg sm:text-2xl font-black text-slate-900 tracking-wide text-center sm:text-left drop-shadow-xs">
+                              なぜ今、このプロジェクトなのか？
+                            </h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5 items-stretch">
+                              {/* 左: 課題（すりガラス白カード） */}
+                              <div className="bg-white/75 backdrop-blur-md border border-white/60 rounded-2xl p-4 space-y-2 shadow-xs">
+                                <div className="flex items-center gap-1.5 text-rose-800 text-xs sm:text-sm font-black">
+                                  <AlertTriangle className="w-4 h-4 shrink-0" />
+                                  <span>【現状の課題】届かないケア難民</span>
+                                </div>
+                                <ul className="text-[11px] sm:text-xs text-slate-700 space-y-1.5 leading-relaxed font-sans">
+                                  <li>• 医療保険の日数制限（150/180日）による退院後リハビリ難民</li>
+                                  <li>• 産後外出できず孤独に悩むワンオペ育児・母子のケア不足</li>
+                                  <li>• 専門職独立の高額なテナント料・内装費・集客リスク</li>
+                                </ul>
                               </div>
-                              <ul className="text-[10px] sm:text-xs text-rose-100/90 space-y-1.5 leading-relaxed">
-                                <li>• 保険日数制限（150/180日）による退院後リハビリ難民</li>
-                                <li>• 産後外出できず孤独に悩むワンオペ育児世帯</li>
-                                <li>• 店舗開業の高額なテナント・固定費・集客リスク</li>
-                              </ul>
-                            </div>
 
-                            <div className="bg-emerald-950/40 border border-emerald-500/30 rounded-xl p-3 sm:p-4 space-y-2">
-                              <div className="flex items-center gap-1.5 text-emerald-400 text-xs sm:text-sm font-black">
-                                <Sparkles className="w-4 h-4 shrink-0" />
-                                <span>【私たちが創る未来】意図とミッション</span>
+                              {/* 右: 意図（すりガラス白カード） */}
+                              <div className="bg-white/80 backdrop-blur-md border border-emerald-600/30 rounded-2xl p-4 space-y-2 shadow-xs">
+                                <div className="flex items-center gap-1.5 text-emerald-900 text-xs sm:text-sm font-black">
+                                  <Sparkles className="w-4 h-4 shrink-0 text-emerald-600" />
+                                  <span>【私たちが創る未来】意図とミッション</span>
+                                </div>
+                                <ul className="text-[11px] sm:text-xs text-slate-700 space-y-1.5 leading-relaxed font-sans">
+                                  <li>• スマホ1台で、あなたの空き時間に直接ケアを提供</li>
+                                  <li>• 店舗を持たず、高水準の還元率で正当な対価を獲得</li>
+                                  <li>• 地域の隅々までプロの技術を届ける新インフラ</li>
+                                </ul>
                               </div>
-                              <ul className="text-[10px] sm:text-xs text-emerald-100/90 space-y-1.5 leading-relaxed">
-                                <li>• スマホ1台で、あなたの空き時間に直接ケアを提供</li>
-                                <li>• 店舗を持たず、高い還元率で正当な対価を獲得</li>
-                                <li>• 地域の隅々までプロの技術を届ける新インフラ</li>
-                              </ul>
                             </div>
                           </div>
                         )}
 
-                        {/* スライド 3: 3カラム・カードグリッド（特徴 × 直感操作 × 高還元） */}
+                        {/* スライド 3: 3カラム・すりガラスカード（特徴 × 直感操作 × 高還元） */}
                         {slide.id === 3 && (
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4">
-                            <div className="bg-slate-800/80 border border-slate-700 rounded-xl p-3 space-y-1.5 text-center sm:text-left">
-                              <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-black mx-auto sm:mx-0">
-                                <Compass className="w-4 h-4" />
+                          <div className="space-y-3">
+                            <h3 className="text-lg sm:text-2xl font-black text-slate-900 tracking-wide text-center sm:text-left drop-shadow-xs">
+                              登録者にとっての3大メリット
+                            </h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3.5">
+                              <div className="bg-white/75 backdrop-blur-md border border-white/60 rounded-2xl p-3.5 space-y-1.5 text-center sm:text-left shadow-xs">
+                                <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-black mx-auto sm:mx-0">
+                                  <Compass className="w-4 h-4" />
+                                </div>
+                                <h4 className="text-xs sm:text-sm font-black text-slate-900">① 自由度MAX</h4>
+                                <p className="text-[11px] text-slate-700 leading-snug font-sans">
+                                  出張可能エリア（半径km指定）や稼働日時、メニュー料金を完全自由に決定。
+                                </p>
                               </div>
-                              <h4 className="text-xs sm:text-sm font-bold text-white">① 自由度MAX</h4>
-                              <p className="text-[10px] sm:text-[11px] text-slate-300 leading-snug">
-                                出張可能エリア（半径km指定）や稼働日時、料金メニューを完全自由に決定。
-                              </p>
-                            </div>
 
-                            <div className="bg-slate-800/80 border border-slate-700 rounded-xl p-3 space-y-1.5 text-center sm:text-left">
-                              <div className="w-8 h-8 rounded-lg bg-teal-500/20 text-teal-400 flex items-center justify-center font-black mx-auto sm:mx-0">
-                                <Smartphone className="w-4 h-4" />
+                              <div className="bg-white/75 backdrop-blur-md border border-white/60 rounded-2xl p-3.5 space-y-1.5 text-center sm:text-left shadow-xs">
+                                <div className="w-8 h-8 rounded-xl bg-teal-100 text-teal-800 flex items-center justify-center font-black mx-auto sm:mx-0">
+                                  <Smartphone className="w-4 h-4" />
+                                </div>
+                                <h4 className="text-xs sm:text-sm font-black text-slate-900">② スマホ1台完結</h4>
+                                <p className="text-[11px] text-slate-700 leading-snug font-sans">
+                                  予約受付・顧客チャット・GPS移動案内・完了報告までワンタップ操作。
+                                </p>
                               </div>
-                              <h4 className="text-xs sm:text-sm font-bold text-white">② スマホ1台完結</h4>
-                              <p className="text-[10px] sm:text-[11px] text-slate-300 leading-snug">
-                                予約受付・顧客チャット・リアルタイムGPS移動ナビ・完了報告まで迷わず操作。
-                              </p>
-                            </div>
 
-                            <div className="bg-slate-800/80 border border-slate-700 rounded-xl p-3 space-y-1.5 text-center sm:text-left">
-                              <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-black mx-auto sm:mx-0">
-                                <CreditCard className="w-4 h-4" />
+                              <div className="bg-white/75 backdrop-blur-md border border-white/60 rounded-2xl p-3.5 space-y-1.5 text-center sm:text-left shadow-xs">
+                                <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-black mx-auto sm:mx-0">
+                                  <CreditCard className="w-4 h-4" />
+                                </div>
+                                <h4 className="text-xs sm:text-sm font-black text-slate-900">③ 初期・月額 0 円</h4>
+                                <p className="text-[11px] text-slate-700 leading-snug font-sans">
+                                  事前カード決済で未回収・ドタキャンなし。高水準の報酬が自動振込。
+                                </p>
                               </div>
-                              <h4 className="text-xs sm:text-sm font-bold text-white">③ 初期・月額 0 円</h4>
-                              <p className="text-[10px] sm:text-[11px] text-slate-300 leading-snug">
-                                事前決済で未回収・ドタキャンリスクなし。高水準の手取り報酬が自動振込。
-                              </p>
                             </div>
                           </div>
                         )}
 
-                        {/* スライド 4: 4マトリクス・セーフティシールド配置 */}
+                        {/* スライド 4: 4グリッド・セーフティシールド配置 */}
                         {slide.id === 4 && (
-                          <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                            <div className="bg-slate-900/80 border border-emerald-500/30 rounded-xl p-2.5 sm:p-3 flex items-start gap-2">
-                              <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 shrink-0 mt-0.5" />
-                              <div>
-                                <h5 className="text-[11px] sm:text-xs font-bold text-white">100% 資格・身元審査</h5>
-                                <p className="text-[9px] sm:text-[10px] text-slate-300 mt-0.5 leading-snug">
-                                  国家資格・免許証を事前確認。質の高いプロ集団のブランドを死守。
-                                </p>
+                          <div className="space-y-3">
+                            <h3 className="text-lg sm:text-2xl font-black text-slate-900 tracking-wide text-center sm:text-left drop-shadow-xs">
+                              プロを守る「4つの安心と配慮」
+                            </h3>
+                            <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                              <div className="bg-white/75 backdrop-blur-md border border-white/60 rounded-xl p-2.5 sm:p-3 flex items-start gap-2 shadow-xs">
+                                <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-700 shrink-0 mt-0.5" />
+                                <div>
+                                  <h5 className="text-[11px] sm:text-xs font-black text-slate-900">100% 資格・身元審査</h5>
+                                  <p className="text-[9px] sm:text-[10px] text-slate-600 mt-0.5 leading-snug font-sans">
+                                    国家資格・免許証を事前確認。質の高いプロ集団のブランドを死守。
+                                  </p>
+                                </div>
                               </div>
-                            </div>
 
-                            <div className="bg-slate-900/80 border border-emerald-500/30 rounded-xl p-2.5 sm:p-3 flex items-start gap-2">
-                              <Users className="w-4 h-4 sm:w-5 sm:h-5 text-teal-400 shrink-0 mt-0.5" />
-                              <div>
-                                <h5 className="text-[11px] sm:text-xs font-bold text-white">相互評価 ＆ 住所保護</h5>
-                                <p className="text-[9px] sm:text-[10px] text-slate-300 mt-0.5 leading-snug">
-                                  悪質客は即時排除。出張先住所は予約確定後のみ開示で安全。
-                                </p>
+                              <div className="bg-white/75 backdrop-blur-md border border-white/60 rounded-xl p-2.5 sm:p-3 flex items-start gap-2 shadow-xs">
+                                <Users className="w-4 h-4 sm:w-5 sm:h-5 text-teal-700 shrink-0 mt-0.5" />
+                                <div>
+                                  <h5 className="text-[11px] sm:text-xs font-black text-slate-900">相互評価 ＆ 住所保護</h5>
+                                  <p className="text-[9px] sm:text-[10px] text-slate-600 mt-0.5 leading-snug font-sans">
+                                    悪質客は即時排除。出張先住所は予約確定後のみ開示で安全。
+                                  </p>
+                                </div>
                               </div>
-                            </div>
 
-                            <div className="bg-slate-900/80 border border-emerald-500/30 rounded-xl p-2.5 sm:p-3 flex items-start gap-2">
-                              <Lock className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 shrink-0 mt-0.5" />
-                              <div>
-                                <h5 className="text-[11px] sm:text-xs font-bold text-white">事前与信・自動補償</h5>
-                                <p className="text-[9px] sm:text-[10px] text-slate-300 mt-0.5 leading-snug">
-                                  未払いトラブル皆無。無断キャンセル時もキャンセル料を自動回収。
-                                </p>
+                              <div className="bg-white/75 backdrop-blur-md border border-white/60 rounded-xl p-2.5 sm:p-3 flex items-start gap-2 shadow-xs">
+                                <Lock className="w-4 h-4 sm:w-5 sm:h-5 text-amber-700 shrink-0 mt-0.5" />
+                                <div>
+                                  <h5 className="text-[11px] sm:text-xs font-black text-slate-900">事前与信・自動補償</h5>
+                                  <p className="text-[9px] sm:text-[10px] text-slate-600 mt-0.5 leading-snug font-sans">
+                                    未払いトラブル皆無。無断キャンセル時もキャンセル料を自動回収。
+                                  </p>
+                                </div>
                               </div>
-                            </div>
 
-                            <div className="bg-slate-900/80 border border-emerald-500/30 rounded-xl p-2.5 sm:p-3 flex items-start gap-2">
-                              <Building className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 shrink-0 mt-0.5" />
-                              <div>
-                                <h5 className="text-[11px] sm:text-xs font-bold text-white">地域管理者のサポート網</h5>
-                                <p className="text-[9px] sm:text-[10px] text-slate-300 mt-0.5 leading-snug">
-                                  地域の統括スタッフが日常をバックアップ。万が一の相談窓口を完備。
-                                </p>
+                              <div className="bg-white/75 backdrop-blur-md border border-white/60 rounded-xl p-2.5 sm:p-3 flex items-start gap-2 shadow-xs">
+                                <Building className="w-4 h-4 sm:w-5 sm:h-5 text-slate-800 shrink-0 mt-0.5" />
+                                <div>
+                                  <h5 className="text-[11px] sm:text-xs font-black text-slate-900">地域管理者のサポート網</h5>
+                                  <p className="text-[9px] sm:text-[10px] text-slate-600 mt-0.5 leading-snug font-sans">
+                                    地域の統括スタッフが日常をバックアップ。万が一の相談窓口を完備。
+                                  </p>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -901,27 +1093,30 @@ export default function AdminGuidePage() {
                         {/* スライド 5: 3ステップ・ロードマップ（将来展望） */}
                         {slide.id === 5 && (
                           <div className="space-y-3">
+                            <h3 className="text-lg sm:text-2xl font-black text-slate-900 tracking-wide text-center sm:text-left drop-shadow-xs">
+                              このプロジェクトが拓く「未来のヘルスケア」
+                            </h3>
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
-                              <div className="bg-slate-800/80 border-t-2 border-emerald-400 rounded-xl p-3 space-y-1">
-                                <span className="text-[10px] text-emerald-400 font-bold block">STEP 1 / 現在進行形</span>
-                                <h5 className="text-xs sm:text-sm font-bold text-white">17専門職の地域集結</h5>
-                                <p className="text-[10px] text-slate-300 leading-snug">
+                              <div className="bg-white/75 backdrop-blur-md border-t-4 border-emerald-600 rounded-xl p-3 space-y-1 shadow-xs">
+                                <span className="text-[10px] text-emerald-800 font-bold block font-sans">STEP 1 / 現在進行形</span>
+                                <h5 className="text-xs sm:text-sm font-black text-slate-900">17専門職の地域集結</h5>
+                                <p className="text-[10px] text-slate-600 leading-snug font-sans">
                                   PT・助産師・鍼灸・エステ等、顔の見える出張ケア網を全国構築。
                                 </p>
                               </div>
 
-                              <div className="bg-slate-800/80 border-t-2 border-teal-400 rounded-xl p-3 space-y-1">
-                                <span className="text-[10px] text-teal-400 font-bold block">STEP 2 / 展開フェーズ</span>
-                                <h5 className="text-xs sm:text-sm font-bold text-white">多職種連携 ＆ 法人導入</h5>
-                                <p className="text-[10px] text-slate-300 leading-snug">
+                              <div className="bg-white/75 backdrop-blur-md border-t-4 border-teal-600 rounded-xl p-3 space-y-1 shadow-xs">
+                                <span className="text-[10px] text-teal-800 font-bold block font-sans">STEP 2 / 展開フェーズ</span>
+                                <h5 className="text-xs sm:text-sm font-black text-slate-900">多職種連携 ＆ 法人導入</h5>
+                                <p className="text-[10px] text-slate-600 leading-snug font-sans">
                                   「リハビリ×栄養」「助産×産後骨盤」等の連携パッケージと福利厚生導入。
                                 </p>
                               </div>
 
-                              <div className="bg-slate-800/80 border-t-2 border-cyan-400 rounded-xl p-3 space-y-1">
-                                <span className="text-[10px] text-cyan-400 font-bold block">STEP 3 / キャリア進化</span>
-                                <h5 className="text-xs sm:text-sm font-bold text-white">地域統括ディレクター</h5>
-                                <p className="text-[10px] text-slate-300 leading-snug">
+                              <div className="bg-white/75 backdrop-blur-md border-t-4 border-cyan-600 rounded-xl p-3 space-y-1 shadow-xs">
+                                <span className="text-[10px] text-cyan-800 font-bold block font-sans">STEP 3 / キャリア進化</span>
+                                <h5 className="text-xs sm:text-sm font-black text-slate-900">地域統括ディレクター</h5>
+                                <p className="text-[10px] text-slate-600 leading-snug font-sans">
                                   施術者からエリアを束ねる運営管理・教育リーダーへの昇格キャリア。
                                 </p>
                               </div>
@@ -932,64 +1127,69 @@ export default function AdminGuidePage() {
                         {/* スライド 6: CTA・コンバージョン型 */}
                         {slide.id === 6 && (
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
-                            <div className="sm:col-span-2 space-y-2.5">
-                              <h3 className="text-base sm:text-xl font-black text-white leading-tight">
-                                あなたの技術が、地域のかけがえのない希望になる。
+                            <div className="sm:col-span-2 space-y-2 bg-white/75 backdrop-blur-md p-4 rounded-2xl border border-white/60 shadow-xs">
+                              <h3 className="text-base sm:text-xl font-black text-slate-900 leading-tight">
+                                あなたの専門性が、地域のかけがえのない希望になる。
                               </h3>
-                              <p className="text-xs text-emerald-200">
+                              <p className="text-xs text-emerald-800 font-bold font-sans">
                                 登録・掲載は完全無料。リスクゼロで新しい一歩を。
                               </p>
-                              <div className="flex flex-col gap-1.5 text-[11px] text-slate-200">
+                              <div className="flex flex-col gap-1 text-[11px] text-slate-700 font-sans">
                                 <div className="flex items-center gap-2">
-                                  <span className="w-5 h-5 rounded-full bg-emerald-500 text-slate-950 font-bold text-xs flex items-center justify-center">1</span>
+                                  <span className="w-5 h-5 rounded-full bg-slate-900 text-white font-bold text-xs flex items-center justify-center">1</span>
                                   <span>スマホで専用フォームに入力（所要約3分）</span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <span className="w-5 h-5 rounded-full bg-emerald-500 text-slate-950 font-bold text-xs flex items-center justify-center">2</span>
+                                  <span className="w-5 h-5 rounded-full bg-slate-900 text-white font-bold text-xs flex items-center justify-center">2</span>
                                   <span>運営が資格確認・パートナーアカウント発行</span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <span className="w-5 h-5 rounded-full bg-emerald-500 text-slate-950 font-bold text-xs flex items-center justify-center">3</span>
+                                  <span className="w-5 h-5 rounded-full bg-slate-900 text-white font-bold text-xs flex items-center justify-center">3</span>
                                   <span>空き時間を設定して、無理のないペースでスタート！</span>
                                 </div>
                               </div>
                             </div>
 
-                            <div className="bg-emerald-950/70 border border-emerald-500/40 rounded-xl p-3 text-center space-y-1.5">
-                              <QrCode className="w-14 h-14 sm:w-16 sm:h-16 text-emerald-400 mx-auto" />
-                              <div className="text-[11px] font-bold text-white">無料先行パートナー登録</div>
-                              <div className="text-[9px] text-emerald-300">★管理側参画の個別相談も受付中</div>
+                            <div className="bg-white/80 backdrop-blur-md border border-white/60 rounded-2xl p-3.5 text-center space-y-1.5 shadow-xs">
+                              <QrCode className="w-14 h-14 sm:w-16 sm:h-16 text-slate-800 mx-auto" />
+                              <div className="text-[11px] font-black text-slate-900">無料先行パートナー登録</div>
+                              <div className="text-[9px] text-emerald-800 font-bold font-sans">★管理側参画の個別相談も受付中</div>
                             </div>
                           </div>
                         )}
 
                         {/* スライド 7: Q&A / FAQ 型 */}
                         {slide.id === 7 && (
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-left">
-                            <div className="bg-slate-800/80 border border-slate-700 rounded-xl p-2.5">
-                              <div className="text-[11px] font-bold text-emerald-300">Q. 勤務先があり副業ですが大丈夫？</div>
-                              <div className="text-[10px] text-slate-300 mt-0.5">A. 完全自由シフトです。休日の数時間のみでも問題ありません。</div>
-                            </div>
-                            <div className="bg-slate-800/80 border border-slate-700 rounded-xl p-2.5">
-                              <div className="text-[11px] font-bold text-emerald-300">Q. 万が一の物損・事故補償は？</div>
-                              <div className="text-[10px] text-slate-300 mt-0.5">A. 包括的な賠償責任保険制度の連携ガイドを用意しています。</div>
-                            </div>
-                            <div className="bg-slate-800/80 border border-slate-700 rounded-xl p-2.5">
-                              <div className="text-[11px] font-bold text-emerald-300">Q. 稼働ノルマや違約金はありますか？</div>
-                              <div className="text-[10px] text-slate-300 mt-0.5">A. ノルマは一切ありません。休止・再開もいつでも自由です。</div>
-                            </div>
-                            <div className="bg-slate-800/80 border border-slate-700 rounded-xl p-2.5">
-                              <div className="text-[11px] font-bold text-emerald-300">Q. 管理・運営側に回りたい場合は？</div>
-                              <div className="text-[10px] text-slate-300 mt-0.5">A. 発表終了後に個別相談デスクへお越しいただくかアンケートへ。</div>
+                          <div className="space-y-2">
+                            <h3 className="text-lg sm:text-2xl font-black text-slate-900 tracking-wide text-center sm:text-left drop-shadow-xs">
+                              Q&A / よくあるご質問 ＆ 個別相談
+                            </h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5 text-left font-sans">
+                              <div className="bg-white/75 backdrop-blur-md border border-white/60 rounded-xl p-2.5 shadow-xs">
+                                <div className="text-[11px] font-black text-slate-900">Q. 勤務先があり副業ですが大丈夫？</div>
+                                <div className="text-[10px] text-slate-700 mt-0.5">A. 完全自由シフトです。休日の数時間のみでも問題ありません。</div>
+                              </div>
+                              <div className="bg-white/75 backdrop-blur-md border border-white/60 rounded-xl p-2.5 shadow-xs">
+                                <div className="text-[11px] font-black text-slate-900">Q. 万が一の物損・事故補償は？</div>
+                                <div className="text-[10px] text-slate-700 mt-0.5">A. 包括的な賠償責任保険制度の連携ガイドを用意しています。</div>
+                              </div>
+                              <div className="bg-white/75 backdrop-blur-md border border-white/60 rounded-xl p-2.5 shadow-xs">
+                                <div className="text-[11px] font-black text-slate-900">Q. 稼働ノルマや違約金はありますか？</div>
+                                <div className="text-[10px] text-slate-700 mt-0.5">A. ノルマは一切ありません。休止・再開もいつでも自由です。</div>
+                              </div>
+                              <div className="bg-white/75 backdrop-blur-md border border-white/60 rounded-xl p-2.5 shadow-xs">
+                                <div className="text-[11px] font-black text-slate-900">Q. 管理・運営側に回りたい場合は？</div>
+                                <div className="text-[10px] text-slate-700 mt-0.5">A. 発表終了後に個別相談デスクへお越しいただくかアンケートへ。</div>
+                              </div>
                             </div>
                           </div>
                         )}
                       </div>
 
-                      {/* スライド内フッター */}
-                      <div className="relative z-10 flex items-center justify-between border-t border-slate-800/80 pt-2 text-[10px] text-slate-400">
-                        <span>{currentBrand.name} Healthcare On-Demand Pitch Deck</span>
-                        <span className="font-mono">{slide.timeRange}</span>
+                      {/* スライド内フッター（添付画像の Author and Date 準拠） */}
+                      <div className="relative z-10 flex items-center justify-between border-t border-slate-700/20 pt-2 text-[10px] text-slate-700 font-serif">
+                        <span>大塚 和宏 / yaShine ｜ Author and Date</span>
+                        <span className="font-mono font-sans">{slide.timeRange}</span>
                       </div>
                     </div>
                   </div>
@@ -999,7 +1199,7 @@ export default function AdminGuidePage() {
                      ======================================================== */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 bg-slate-50 p-5 rounded-2xl border border-slate-200">
                     <div className="space-y-3">
-                      <h4 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                      <h4 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-1.5 font-serif">
                         <FileText className="w-4 h-4 text-emerald-600" />
                         <span>スライド投影テキスト（箇条書き概要）</span>
                       </h4>
@@ -1014,7 +1214,7 @@ export default function AdminGuidePage() {
                     </div>
 
                     <div className="space-y-3 border-t lg:border-t-0 lg:border-l border-slate-200 pt-4 lg:pt-0 lg:pl-6">
-                      <h4 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                      <h4 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-1.5 font-serif">
                         <Target className="w-4 h-4 text-teal-600" />
                         <span>スライドの狙いと聴衆心理</span>
                       </h4>
@@ -1029,6 +1229,12 @@ export default function AdminGuidePage() {
                             {slide.audienceState}
                           </span>
                         </div>
+                        <div className="pt-1">
+                          <strong className="text-slate-800 block text-xs">Keynote推奨サイズ:</strong>
+                          <span className="text-slate-600 font-mono text-[11px]">
+                            {slide.keynoteFontSizes}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1036,23 +1242,23 @@ export default function AdminGuidePage() {
                   {/* ========================================================
                       3. そのまま話せるトークスクリプト（口頭原稿・語りかけ例）
                      ======================================================== */}
-                  <div className="space-y-3 bg-emerald-950 text-white p-5 sm:p-6 rounded-2xl shadow-sm border border-emerald-800">
-                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-emerald-800/80 pb-2.5">
-                      <h4 className="text-xs sm:text-sm font-black text-emerald-300 flex items-center gap-2">
+                  <div className="space-y-3 bg-slate-900 text-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-800">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
+                      <h4 className="text-xs sm:text-sm font-black text-emerald-300 flex items-center gap-2 font-serif">
                         <Mic className="w-4 h-4 text-emerald-400" />
-                        <span>🎙 そのまま話せるトークスクリプト（口頭原稿・語りかけ例）</span>
+                        <span>🎙 そのまま話せるトークスクリプト（大塚和宏 / yaShine 様 語りかけ原稿）</span>
                       </h4>
-                      <span className="text-[11px] font-mono text-emerald-400 bg-emerald-900/80 px-2.5 py-0.5 rounded-full border border-emerald-700">
+                      <span className="text-[11px] font-mono text-emerald-400 bg-emerald-950 px-2.5 py-0.5 rounded-full border border-emerald-800">
                         発話目安: 約{slide.durationSec}
                       </span>
                     </div>
 
-                    <div className="text-xs sm:text-sm text-emerald-50 leading-relaxed whitespace-pre-line font-normal">
+                    <div className="text-xs sm:text-sm text-slate-200 leading-relaxed whitespace-pre-line font-normal font-sans">
                       {slide.scriptText}
                     </div>
 
                     {/* 発表のコツ・立ち振る舞い */}
-                    <div className="pt-3 border-t border-emerald-900 flex items-start gap-2 text-xs text-emerald-300/90">
+                    <div className="pt-3 border-t border-slate-800 flex items-start gap-2 text-xs text-emerald-300/90">
                       <Sparkles className="w-3.5 h-3.5 text-amber-300 shrink-0 mt-0.5" />
                       <span><strong>発表のコツ:</strong> {slide.tips}</span>
                     </div>
@@ -1064,28 +1270,28 @@ export default function AdminGuidePage() {
 
           {/* プレゼン本番前の最終チェックリスト */}
           <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-4 print-avoid-break">
-            <h3 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
+            <h3 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2 font-serif">
               <CheckCircle2 className="w-5 h-5 text-emerald-600" />
               <span>5分プレゼン本番の成功チェックリスト（発表直前用）</span>
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs sm:text-sm text-slate-700">
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
-                <strong className="font-bold text-slate-900 block">① 最初の30秒で心をつかむ</strong>
+                <strong className="font-bold text-slate-900 block font-serif">① 最初の30秒で心をつかむ</strong>
                 <p className="text-xs text-slate-500 leading-relaxed">
                   「自分たちのための仕組みだ」と感じてもらえるよう、PTや助産師などの職種名を具体的に口にして呼びかけます。
                 </p>
               </div>
 
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
-                <strong className="font-bold text-slate-900 block">② 不安を先回りして解消する</strong>
+                <strong className="font-bold text-slate-900 block font-serif">② 不安を先回りして解消する</strong>
                 <p className="text-xs text-slate-500 leading-relaxed">
                   「出張や個人活動は安全面が心配…」という会場の空気をスライド4でしっかり受け止め、事前決済と審査体制をアピールします。
                 </p>
               </div>
 
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
-                <strong className="font-bold text-slate-900 block">③ 管理者候補への導線を作る</strong>
+                <strong className="font-bold text-slate-900 block font-serif">③ 管理者候補への導線を作る</strong>
                 <p className="text-xs text-slate-500 leading-relaxed">
                   「運営や管理に興味がある方向けの相談デスク」を一言添えることで、意欲の高いリーダー層を確実に拾い上げられます。
                 </p>
@@ -1300,7 +1506,7 @@ export default function AdminGuidePage() {
               </div>
             </div>
 
-            {/* 4. 口コミ・レビューモデレーション */}
+            {/* 4. 口コミ・レビューモデレーション & 顧客視点切替 */}
             <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-3.5 print-avoid-break">
               <div className="w-12 h-12 rounded-2xl bg-teal-100 text-teal-700 flex items-center justify-center font-black">
                 <Smile className="w-6 h-6 print:stroke-[2.5]" />
