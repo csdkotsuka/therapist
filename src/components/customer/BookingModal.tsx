@@ -71,8 +71,23 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   const [dateType, setDateType] = useState<'today' | 'tomorrow' | 'dayAfter' | 'custom'>('tomorrow');
   const [customDate, setCustomDate] = useState<string>(getTodayString(1));
 
-  // 時間指定: 30分刻みスロット または 直接指定
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>('14:00');
+  // 時間指定: 時間（Hour）と分（Minute: 10分刻み）をそれぞれ独立管理
+  const [selectedHour, setSelectedHour] = useState<string>('14');
+  const [selectedMinute, setSelectedMinute] = useState<string>('00');
+  const selectedTimeSlot = `${selectedHour}:${selectedMinute}`;
+
+  // 選択肢定義
+  const HOURS = ['09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22'];
+  const MINUTES = ['00', '10', '20', '30', '40', '50'];
+
+  // 日付ボタン表示用（月/日 曜日）
+  const getDateLabel = (addDays: number) => {
+    const d = new Date();
+    d.setDate(d.getDate() + addDays);
+    const days = ['日', '月', '火', '水', '木', '金', '土'];
+    return `${d.getMonth() + 1}/${d.getDate()} (${days[d.getDay()]})`;
+  };
+
   const [visitAddress, setVisitAddress] = useState<string>(
     currentUser.address || '愛媛県松山市一番町1-1-1'
   );
@@ -133,16 +148,17 @@ export const BookingModal: React.FC<BookingModalProps> = ({
     return `${dt.getFullYear()}年${dt.getMonth() + 1}月${dt.getDate()}日 (${days[dt.getDay()]})`;
   };
 
-  // 今すぐ（最短30分後）をセット
+  // 今すぐ（最短30分後・10分単位）をセット
   const handleSetQuickSoon = () => {
     const now = new Date();
     now.setMinutes(now.getMinutes() + 30);
-    const roundMinutes = Math.ceil(now.getMinutes() / 15) * 15;
+    const roundMinutes = Math.ceil(now.getMinutes() / 10) * 10;
     now.setMinutes(roundMinutes);
     const h = String(now.getHours()).padStart(2, '0');
     const m = String(now.getMinutes() % 60).padStart(2, '0');
     setDateType('today');
-    setSelectedTimeSlot(`${h}:${m}`);
+    setSelectedHour(h);
+    setSelectedMinute(m);
   };
 
   const handleSubmitBooking = async () => {
@@ -398,114 +414,166 @@ export const BookingModal: React.FC<BookingModalProps> = ({
               </div>
 
               {/* 日時選択 */}
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                    3. 希望日時の詳細指定
+                    3. ご希望日時の指定
                   </label>
                   <button
                     type="button"
                     onClick={handleSetQuickSoon}
-                    className="text-[11px] font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg border border-emerald-200 transition flex items-center gap-1"
+                    className="text-[11px] font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1.5 rounded-xl border border-emerald-200 transition flex items-center gap-1 shadow-2xs cursor-pointer"
                   >
-                    <Sparkles className="w-3 h-3 text-emerald-600" />
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-600 animate-pulse" />
                     <span>今すぐ最短で依頼（約30分後〜）</span>
                   </button>
                 </div>
 
-                {/* 日付の選択肢 */}
+                {/* ① 日付の選択肢（少し大きめの押しやすいカード型ボタン） */}
                 <div className="space-y-2">
-                  <div className="grid grid-cols-4 gap-2">
+                  <label className="block text-xs font-bold text-slate-700">
+                    予約日を選択
+                  </label>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                     {[
-                      { id: 'today', label: '本日' },
-                      { id: 'tomorrow', label: '明日' },
-                      { id: 'dayAfter', label: '明後日' },
-                      { id: 'custom', label: 'カレンダー指定' },
-                    ].map((d) => (
-                      <button
-                        key={d.id}
-                        type="button"
-                        onClick={() => setDateType(d.id as any)}
-                        className={`py-2 px-1 text-center rounded-xl text-xs font-bold border transition ${
-                          dateType === d.id
-                            ? 'bg-emerald-600 border-emerald-600 text-white shadow-xs'
-                            : 'border-slate-200 text-slate-700 hover:bg-slate-50'
-                        }`}
-                      >
-                        {d.label}
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* カレンダー直接指定の場合の入力欄 */}
-                  {dateType === 'custom' && (
-                    <div className="p-3 bg-emerald-50/50 rounded-xl border border-emerald-200 flex items-center gap-3">
-                      <Calendar className="w-4 h-4 text-emerald-700 shrink-0" />
-                      <div className="flex-1">
-                        <label className="block text-[10px] font-bold text-emerald-900 mb-0.5">予約希望日</label>
-                        <input
-                          type="date"
-                          min={getTodayString()}
-                          value={customDate}
-                          onChange={(e) => setCustomDate(e.target.value)}
-                          className="w-full bg-white border border-emerald-300 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-800 focus:outline-emerald-500"
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 選択中の日付バナー */}
-                  <div className="text-xs text-slate-600 font-bold bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 flex items-center justify-between">
-                    <span>選択日: <strong className="text-emerald-700">{getFormattedSelectedDateString()}</strong></span>
-                    <span className="text-[11px] text-slate-400 font-medium">コース: {currentService?.duration_minutes}分</span>
-                  </div>
-                </div>
-
-                {/* 時間帯スロット選択 */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-slate-500">希望開始時間（30分刻み）:</span>
-                    <div className="flex items-center gap-1.5 text-xs">
-                      <span className="text-slate-400 text-[10px]">直接指定:</span>
-                      <input
-                        type="time"
-                        value={selectedTimeSlot}
-                        onChange={(e) => setSelectedTimeSlot(e.target.value)}
-                        className="px-2 py-0.5 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-800 focus:outline-emerald-500"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-4 sm:grid-cols-7 gap-1.5 max-h-36 overflow-y-auto p-1 bg-slate-50/50 rounded-2xl border border-slate-200">
-                    {timeSlots.map((slot) => {
-                      const isSelected = selectedTimeSlot === slot;
+                      { id: 'today', label: '本日', sub: getDateLabel(0) },
+                      { id: 'tomorrow', label: '明日', sub: getDateLabel(1) },
+                      { id: 'dayAfter', label: '明後日', sub: getDateLabel(2) },
+                      { id: 'custom', label: '日付を指定', sub: dateType === 'custom' && customDate ? customDate : 'カレンダー選択' },
+                    ].map((d) => {
+                      const isSelected = dateType === d.id;
                       return (
                         <button
-                          key={slot}
+                          key={d.id}
                           type="button"
-                          onClick={() => setSelectedTimeSlot(slot)}
-                          className={`py-1.5 rounded-lg text-xs font-mono transition ${
+                          onClick={() => setDateType(d.id as any)}
+                          className={`py-3 px-3 rounded-2xl border text-center transition-all flex flex-col items-center justify-center min-h-[66px] cursor-pointer ${
                             isSelected
-                              ? 'bg-emerald-600 text-white font-bold shadow-xs'
-                              : 'bg-white border border-slate-200 text-slate-700 hover:border-emerald-300'
+                              ? 'bg-emerald-600 border-emerald-600 text-white shadow-md ring-2 ring-emerald-500/30'
+                              : 'border-slate-200 bg-white text-slate-700 hover:border-emerald-300 hover:bg-slate-50'
                           }`}
                         >
-                          {slot}
+                          <span className={`text-xs sm:text-sm font-bold ${isSelected ? 'text-white' : 'text-slate-900'}`}>
+                            {d.label}
+                          </span>
+                          <span className={`text-[10px] mt-0.5 font-medium ${isSelected ? 'text-emerald-100 font-semibold' : 'text-slate-500'}`}>
+                            {d.sub}
+                          </span>
                         </button>
                       );
                     })}
                   </div>
 
-                  {/* 施術終了予定プレビュー */}
-                  <div className="p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-200 text-xs text-emerald-950 flex items-center justify-between font-medium">
-                    <div className="flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                      <span>
-                        予定時間: <strong>{selectedTimeSlot}</strong> 〜 <strong>{calculateEndTime(selectedTimeSlot, currentService?.duration_minutes)}</strong>
+                  {/* カレンダー直接指定の場合の入力欄 */}
+                  {dateType === 'custom' && (
+                    <div className="p-3 bg-emerald-50/70 rounded-2xl border border-emerald-200 flex items-center gap-3 mt-2 animate-fadeIn">
+                      <Calendar className="w-5 h-5 text-emerald-700 shrink-0" />
+                      <div className="flex-1">
+                        <label className="block text-[11px] font-bold text-emerald-950 mb-1">
+                          カレンダーから希望日を選択してください
+                        </label>
+                        <input
+                          type="date"
+                          min={getTodayString()}
+                          value={customDate}
+                          onChange={(e) => setCustomDate(e.target.value)}
+                          className="w-full bg-white border border-emerald-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-emerald-500 shadow-2xs"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* ② 時間（Hour）と分（Minute: 10分刻み）の選択 */}
+                <div className="p-4 bg-slate-50/70 rounded-2xl border border-slate-200 space-y-4">
+                  {/* 時間（Hour）の選択 */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>開始「時間」を選択:</span>
+                      </label>
+                      <span className="text-xs font-black text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded-md font-mono">
+                        {selectedHour} 時
                       </span>
                     </div>
-                    <span className="text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-bold">
-                      {currentService?.duration_minutes}分間
+
+                    <div className="grid grid-cols-4 sm:grid-cols-7 gap-1.5">
+                      {HOURS.map((h) => {
+                        const isSelected = selectedHour === h;
+                        return (
+                          <button
+                            key={h}
+                            type="button"
+                            onClick={() => setSelectedHour(h)}
+                            className={`py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center cursor-pointer ${
+                              isSelected
+                                ? 'bg-emerald-600 text-white font-black shadow-xs ring-2 ring-emerald-500/20'
+                                : 'bg-white border border-slate-200 text-slate-700 hover:border-emerald-300 hover:bg-slate-100'
+                            }`}
+                          >
+                            <span>{h}時</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* 分（Minute: 10分刻み）の選択 */}
+                  <div className="space-y-2 pt-2 border-t border-slate-200/80">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>開始「分」を選択（10分単位）:</span>
+                      </label>
+                      <span className="text-xs font-black text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded-md font-mono">
+                        {selectedMinute} 分
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                      {MINUTES.map((m) => {
+                        const isSelected = selectedMinute === m;
+                        return (
+                          <button
+                            key={m}
+                            type="button"
+                            onClick={() => setSelectedMinute(m)}
+                            className={`py-3 rounded-xl text-xs sm:text-sm font-bold font-mono transition flex items-center justify-center cursor-pointer ${
+                              isSelected
+                                ? 'bg-emerald-600 text-white font-black shadow-xs ring-2 ring-emerald-500/20'
+                                : 'bg-white border border-slate-200 text-slate-700 hover:border-emerald-300 hover:bg-slate-100'
+                            }`}
+                          >
+                            <span>{m}分</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 施術時間プレビューバナー */}
+                <div className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border border-emerald-200 flex flex-col sm:flex-row items-center justify-between gap-2 shadow-2xs">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold shrink-0 shadow-xs">
+                      <Clock className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="text-[10px] text-emerald-800 font-bold uppercase tracking-wider">
+                        ご予約日時
+                      </div>
+                      <div className="text-xs sm:text-sm font-black text-slate-900 flex items-baseline gap-1.5">
+                        <span>{getFormattedSelectedDateString()}</span>
+                        <span className="text-emerald-700 font-mono text-sm sm:text-base">{selectedHour}:{selectedMinute}</span>
+                        <span className="text-slate-400 font-normal text-xs">〜 {calculateEndTime(`${selectedHour}:${selectedMinute}`, currentService?.duration_minutes)}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[11px] text-slate-500">所要時間:</span>
+                    <span className="text-xs bg-emerald-600 text-white px-2.5 py-0.5 rounded-full font-bold shadow-2xs">
+                      {currentService?.duration_minutes}分コース
                     </span>
                   </div>
                 </div>
