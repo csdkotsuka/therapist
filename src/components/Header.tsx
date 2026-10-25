@@ -373,6 +373,18 @@ export const Header: React.FC = () => {
                       </Link>
                     );
                   })}
+
+                  {/* セラピスト向け公式実務マニュアル */}
+                  <a
+                    href="/guide/therapist"
+                    className="p-3 rounded-xl flex items-center justify-between text-xs font-bold text-emerald-800 bg-emerald-50/70 hover:bg-emerald-100/70 border border-emerald-200 transition"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-base">📖</span>
+                      <span>セラピスト実務運用マニュアル</span>
+                    </div>
+                    <span className="text-[10px] font-bold text-emerald-600">↗</span>
+                  </a>
                 </div>
               </div>
             )}
@@ -414,6 +426,18 @@ export const Header: React.FC = () => {
                       </Link>
                     );
                   })}
+
+                  {/* 管理者向けマニュアル & ピッチ */}
+                  <a
+                    href="/guide/admin"
+                    className="p-3 rounded-xl flex items-center justify-between text-xs font-bold text-purple-900 bg-purple-50/80 hover:bg-purple-100 border border-purple-200 transition"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-base">📚</span>
+                      <span>管理者マニュアル & ピッチスライド</span>
+                    </div>
+                    <span className="text-[10px] font-bold text-purple-600">↗</span>
+                  </a>
                 </div>
               </div>
             )}
@@ -463,6 +487,18 @@ export const Header: React.FC = () => {
                     </div>
                     <ChevronRight className="w-3.5 h-3.5 text-slate-300" />
                   </Link>
+
+                  {/* 顧客向け安心ご利用ガイド */}
+                  <a
+                    href="/guide/customer"
+                    className="p-3 rounded-xl flex items-center justify-between text-xs font-bold text-blue-900 bg-blue-50/70 hover:bg-blue-100 border border-blue-200 transition"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-base">🔰</span>
+                      <span>安心ご利用ガイド & マニュアル</span>
+                    </div>
+                    <span className="text-[10px] font-bold text-blue-600">↗</span>
+                  </a>
                 </div>
               </div>
             )}

@@ -108,9 +108,9 @@ export function TherapistSectionClient({
           </div>
 
           <div className="flex items-center gap-4 text-slate-500">
-            <Link href="/guide/therapist" className="hover:text-emerald-600 transition">
+            <a href="/guide/therapist" className="hover:text-emerald-600 transition font-medium">
               セラピスト操作マニュアル
-            </Link>
+            </a>
             {isAdminViewer && (
               <Link href="/admin/therapists" className="hover:text-purple-600 font-bold transition">
                 管理ポータルへ戻る

@@ -45,6 +45,19 @@ export function AdminSectionClient({ rawSection }: { rawSection: string }) {
             <span className="font-bold bg-purple-700 px-2 py-0.5 rounded text-[11px]">
               ⚙️ 管理ポータル
             </span>
+            <span className="text-purple-300 hidden sm:inline text-[11px]">
+              プラットフォーム統括・審査監視コンソール
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <a
+              href="/guide/admin"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-800/80 hover:bg-purple-700 text-white text-[11px] font-bold transition border border-purple-600/60 shadow-xs"
+            >
+              <span>📚 統括マニュアル & ピッチスライド</span>
+              <span className="text-[10px] text-purple-300">↗</span>
+            </a>
           </div>
         </div>
       </div>
@@ -67,9 +80,9 @@ export function AdminSectionClient({ rawSection }: { rawSection: string }) {
           </div>
 
           <div className="flex items-center gap-4 text-slate-500">
-            <Link href="/guide/admin" className="hover:text-emerald-600 transition">
-              管理者マニュアル
-            </Link>
+            <a href="/guide/admin" className="hover:text-emerald-600 transition font-medium">
+              管理者マニュアル・ピッチ資料
+            </a>
           </div>
         </div>
       </footer>
