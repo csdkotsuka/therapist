@@ -1234,7 +1234,7 @@ export default function AdminGuidePage() {
 
                     <div className="pt-2 flex items-center justify-between text-[11px]">
                       <a
-                        href="https://docs.google.com/forms/d/1MJCsuBPNSjXW_RCXljlWY3Fn3FznVKDAje9UuAeakeI/edit"
+                        href="https://docs.google.com/forms/d/1K9YU-1YzA3o-d3n9ITUl8TdV8XWqMJ5jQV-rKzCbt9U/edit"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1 text-emerald-800 font-bold hover:underline"
