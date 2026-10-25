@@ -81,29 +81,59 @@ export default function AdminGuidePage() {
     }
   }, []);
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const GOOGLE_FORM_ACTION_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeyYvNKwzr0ArZmd9lDhPAjvSK_lfKxretaVWbL3AesUdxpuQ/formResponse';
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setTimeout(() => {
-      const newEntry = {
-        id: Date.now(),
-        name: formState.name,
-        qualification: formState.qualification === 'その他' && formState.customQualification ? formState.customQualification : formState.qualification,
-        email: formState.email,
-        phone: formState.phone,
-        motivation: formState.motivation,
-        question: formState.question,
-        wantManagement: formState.wantManagement,
-        submittedAt: new Date().toLocaleString('ja-JP'),
-      };
-      const updated = [newEntry, ...registrations];
-      setRegistrations(updated);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('carearia_partner_registrations', JSON.stringify(updated));
+
+    const qualificationValue = formState.qualification === 'その他' && formState.customQualification ? formState.customQualification : formState.qualification;
+
+    try {
+      // 1. Googleフォームの formResponse エンドポイントへPOST送信
+      const formData = new URLSearchParams();
+      formData.append('entry.708907587', formState.name);
+      formData.append('entry.1812767749', qualificationValue);
+      formData.append('entry.1551756406', formState.email);
+      formData.append('entry.2084178998', formState.phone || '');
+      formData.append('entry.1964723477', formState.motivation || '');
+      formData.append('entry.1976094168', formState.question || '');
+      if (formState.wantManagement) {
+        formData.append('entry.153284917', '希望する');
       }
-      setIsSubmitting(false);
-      setIsSubmitted(true);
-    }, 600);
+
+      await fetch(GOOGLE_FORM_ACTION_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData.toString(),
+      });
+    } catch (err) {
+      console.warn('Google Form submission via fetch encountered an issue:', err);
+    }
+
+    // 2. localStorageにもバックアップ保存
+    const newEntry = {
+      id: Date.now(),
+      name: formState.name,
+      qualification: qualificationValue,
+      email: formState.email,
+      phone: formState.phone,
+      motivation: formState.motivation,
+      question: formState.question,
+      wantManagement: formState.wantManagement,
+      submittedAt: new Date().toLocaleString('ja-JP'),
+    };
+    const updated = [newEntry, ...registrations];
+    setRegistrations(updated);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('carearia_partner_registrations', JSON.stringify(updated));
+    }
+
+    setIsSubmitting(false);
+    setIsSubmitted(true);
   };
 
   const handleCopyQuestionItem = (text: string, index: number) => {
@@ -1232,15 +1262,24 @@ export default function AdminGuidePage() {
                       ))}
                     </div>
 
-                    <div className="pt-2 flex items-center justify-between text-[11px]">
+                    <div className="pt-2 flex flex-wrap items-center justify-between gap-2 text-[11px]">
                       <a
-                        href="https://docs.google.com/forms/d/1K9YU-1YzA3o-d3n9ITUl8TdV8XWqMJ5jQV-rKzCbt9U/edit"
+                        href="https://docs.google.com/forms/d/e/1FAIpQLSeyYvNKwzr0ArZmd9lDhPAjvSK_lfKxretaVWbL3AesUdxpuQ/viewform"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1 text-emerald-800 font-bold hover:underline"
                       >
                         <ExternalLink className="w-3.5 h-3.5" />
-                        <span>Googleフォームの編集画面を新しいタブで開く</span>
+                        <span>Googleフォーム（回答用画面）を直接開く</span>
+                      </a>
+                      <a
+                        href="https://docs.google.com/forms/d/1K9YU-1YzA3o-d3n9ITUl8TdV8XWqMJ5jQV-rKzCbt9U/edit"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-slate-500 hover:text-slate-800 font-medium hover:underline"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span>フォーム編集・GAS設定画面</span>
                       </a>
                     </div>
                   </div>
@@ -1259,8 +1298,9 @@ export default function AdminGuidePage() {
                         先行エントリーを受け付けました！
                       </h3>
                       <p className="text-xs sm:text-sm text-slate-700 max-w-md mx-auto leading-relaxed font-sans">
-                        {formState.name} 様、熱い想いとご登録を誠にありがとうございます。
-                        創業パートナーとしての初期シード枠を確保いたしました。後ほど大塚和宏 / 運営事務局よりご案内をお送りいたします。
+                        {formState.name} 様、熱い想いとご登録を誠にありがとうございます。<br />
+                        創業パートナーとしての初期シード枠を確保いたしました。<br />
+                        ご登録のメールアドレス（<span className="font-bold text-slate-900">{formState.email}</span>）宛に自動確認メールをお送りしております。
                       </p>
                     </div>
 
