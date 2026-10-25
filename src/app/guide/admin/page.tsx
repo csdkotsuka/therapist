@@ -50,99 +50,7 @@ export default function AdminGuidePage() {
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
   const [timerSeconds, setTimerSeconds] = useState<number>(0);
 
-  // 創業パートナー登録フォーム用ステート
-  const [formState, setFormState] = useState({
-    name: '',
-    qualification: '理学療法士 (PT)',
-    customQualification: '',
-    email: '',
-    phone: '',
-    motivation: '',
-    question: '',
-    wantManagement: false,
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [registrations, setRegistrations] = useState<any[]>([]);
-  const [showGoogleGuide, setShowGoogleGuide] = useState(false);
-  const [copiedQuestionIndex, setCopiedQuestionIndex] = useState<number | null>(null);
 
-  // localStorageから保存データをロード
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem('carearia_partner_registrations');
-        if (saved) {
-          setRegistrations(JSON.parse(saved));
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
-  }, []);
-
-  const GOOGLE_FORM_ACTION_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeyYvNKwzr0ArZmd9lDhPAjvSK_lfKxretaVWbL3AesUdxpuQ/formResponse';
-
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    const qualificationValue = formState.qualification === 'その他' && formState.customQualification ? formState.customQualification : formState.qualification;
-
-    try {
-      // 1. Googleフォームの formResponse エンドポイントへPOST送信
-      const formData = new URLSearchParams();
-      formData.append('entry.708907587', formState.name);
-      formData.append('entry.1812767749', qualificationValue);
-      formData.append('entry.1551756406', formState.email);
-      formData.append('entry.2084178998', formState.phone || '');
-      formData.append('entry.1964723477', formState.motivation || '');
-      formData.append('entry.1976094168', formState.question || '');
-      if (formState.wantManagement) {
-        formData.append('entry.153284917', '希望する');
-      }
-
-      await fetch(GOOGLE_FORM_ACTION_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: formData.toString(),
-      });
-    } catch (err) {
-      console.warn('Google Form submission via fetch encountered an issue:', err);
-    }
-
-    // 2. localStorageにもバックアップ保存
-    const newEntry = {
-      id: Date.now(),
-      name: formState.name,
-      qualification: qualificationValue,
-      email: formState.email,
-      phone: formState.phone,
-      motivation: formState.motivation,
-      question: formState.question,
-      wantManagement: formState.wantManagement,
-      submittedAt: new Date().toLocaleString('ja-JP'),
-    };
-    const updated = [newEntry, ...registrations];
-    setRegistrations(updated);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('carearia_partner_registrations', JSON.stringify(updated));
-    }
-
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-  };
-
-  const handleCopyQuestionItem = (text: string, index: number) => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(text);
-      setCopiedQuestionIndex(index);
-      setTimeout(() => setCopiedQuestionIndex(null), 2000);
-    }
-  };
 
   // プレゼンタイマー
   useEffect(() => {
@@ -1199,10 +1107,10 @@ export default function AdminGuidePage() {
             <div className="absolute top-1/4 right-1/6 w-[600px] h-[400px] bg-[#c78b7e]/40 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute -bottom-10 left-1/4 w-[500px] h-[350px] bg-[#a2b4b3]/35 rounded-full blur-3xl pointer-events-none" />
 
-            <div className="relative z-10 max-w-3xl mx-auto space-y-8">
+            <div className="relative z-10 max-w-4xl mx-auto space-y-6">
               {/* フォーム見出し */}
               <div className="text-center space-y-3">
-                <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/80 backdrop-blur-md text-emerald-900 text-xs font-bold border border-white/60 shadow-xs font-sans">
+                <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/85 backdrop-blur-md text-emerald-900 text-xs font-bold border border-white/60 shadow-xs font-sans">
                   <FlameKindling className="w-3.5 h-3.5 text-amber-600" />
                   <span>創業パートナー先行エントリー受付中</span>
                 </div>
@@ -1212,303 +1120,34 @@ export default function AdminGuidePage() {
                 </h2>
 
                 <p className="text-xs sm:text-base text-slate-800 max-w-xl mx-auto leading-relaxed">
-                  理学療法士・助産師・鍼灸・柔整・エステ・整体・トレーナー、そして応援してくださる経営者の皆様。
-                  あなたの確かな腕と熱い想いを、一番喜ばれる形でお届けしましょう。初期費用・月額費用は完全 0 円です。
+                  理学療法士・助産師・鍼灸・柔整・エステ・整体・トレーナー、そして応援してくださる経営者の皆様。<br className="hidden sm:inline" />
+                  以下のフォームより必要事項をご入力の上、送信してください。（初期・月額費用 完全 0 円）
                 </p>
-              </div>
 
-              {/* Googleフォーム設定ガイド（アコーディオン） */}
-              <div className="bg-white/80 backdrop-blur-md border border-white/60 rounded-2xl p-4 shadow-sm font-sans text-xs">
-                <div className="flex items-center justify-between cursor-pointer" onClick={() => setShowGoogleGuide(!showGoogleGuide)}>
-                  <div className="flex items-center gap-2 font-bold text-slate-800">
-                    <Info className="w-4 h-4 text-emerald-700" />
-                    <span>作成いただいたGoogleフォームとの連携・設問設定について</span>
-                  </div>
-                  <button className="text-emerald-800 font-bold hover:underline">
-                    {showGoogleGuide ? '閉じる ▲' : '設問コピー手順を見る ▼'}
-                  </button>
+                <div className="pt-2 flex justify-center">
+                  <a
+                    href="https://docs.google.com/forms/d/e/1FAIpQLSeyYvNKwzr0ArZmd9lDhPAjvSK_lfKxretaVWbL3AesUdxpuQ/viewform"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/90 hover:bg-white border border-slate-300 text-emerald-900 text-xs font-bold transition shadow-sm font-sans"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5 text-emerald-700" />
+                    <span>別タブやスマートフォンで全画面表示して回答する</span>
+                  </a>
                 </div>
-
-                {showGoogleGuide && (
-                  <div className="mt-3 pt-3 border-t border-slate-200/80 space-y-3 text-slate-700 leading-relaxed">
-                    <p className="text-[11px] text-slate-600">
-                      ※ Googleフォーム（外部URL）はGoogleアカウントでのログインが必要なため、外部からAIが直接設問を書き換えることはできません。
-                      下記の本ページ内フォームからそのまま登録・受付が完了できるほか、作成いただいたGoogleフォーム（編集画面）に設問を追加される場合は、以下の内容をそのまま貼り付けて設定いただけます。
-                    </p>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
-                      {[
-                        { q: '1. お名前（氏名）', type: '記述式 [必須]' },
-                        { q: '2. ご職業・保有資格', type: 'ラジオボタン / プルダウン [必須] （PT, OT, 助産師, 鍼灸, 柔整, マッサージ, エステ, 整体, トレーナー, 経営者, その他）' },
-                        { q: '3. メールアドレス', type: '記述式 [必須]' },
-                        { q: '4. お電話番号', type: '記述式 [任意]' },
-                        { q: '5. 参画への意気込み・メッセージ', type: '段落 [任意]' },
-                        { q: '6. ご質問・ご相談事項', type: '段落 [任意]' },
-                        { q: '7. 管理・運営への参画希望', type: 'チェックボックス [任意]' },
-                      ].map((item, idx) => (
-                        <div key={idx} className="p-2.5 bg-slate-50/90 rounded-xl border border-slate-200 flex items-start justify-between gap-2">
-                          <div>
-                            <strong className="text-slate-900 block font-bold">{item.q}</strong>
-                            <span className="text-slate-500 whitespace-pre-line">形式: {item.type}</span>
-                          </div>
-                          <button
-                            onClick={() => handleCopyQuestionItem(item.q, idx)}
-                            className="p-1 text-slate-400 hover:text-emerald-700 transition shrink-0"
-                            title="項目名をコピー"
-                          >
-                            {copiedQuestionIndex === idx ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="pt-2 flex flex-wrap items-center justify-between gap-2 text-[11px]">
-                      <a
-                        href="https://docs.google.com/forms/d/e/1FAIpQLSeyYvNKwzr0ArZmd9lDhPAjvSK_lfKxretaVWbL3AesUdxpuQ/viewform"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-emerald-800 font-bold hover:underline"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                        <span>Googleフォーム（回答用画面）を直接開く</span>
-                      </a>
-                      <a
-                        href="https://docs.google.com/forms/d/1K9YU-1YzA3o-d3n9ITUl8TdV8XWqMJ5jQV-rKzCbt9U/edit"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-slate-500 hover:text-slate-800 font-medium hover:underline"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                        <span>フォーム編集・GAS設定画面</span>
-                      </a>
-                    </div>
-                  </div>
-                )}
               </div>
 
-              {/* 入力フォーム本体（白すりガラスカード） */}
-              <div className="bg-white/85 backdrop-blur-md border border-white/70 shadow-xl rounded-3xl p-6 sm:p-10 font-sans">
-                {isSubmitted ? (
-                  <div className="text-center py-8 space-y-4 font-serif">
-                    <div className="w-16 h-16 bg-emerald-100 text-emerald-800 rounded-full flex items-center justify-center mx-auto shadow-sm">
-                      <CheckCircle2 className="w-8 h-8" />
-                    </div>
-                    <div className="space-y-1.5">
-                      <h3 className="text-xl sm:text-2xl font-black text-slate-900">
-                        先行エントリーを受け付けました！
-                      </h3>
-                      <p className="text-xs sm:text-sm text-slate-700 max-w-md mx-auto leading-relaxed font-sans">
-                        {formState.name} 様、熱い想いとご登録を誠にありがとうございます。<br />
-                        創業パートナーとしての初期シード枠を確保いたしました。<br />
-                        ご登録のメールアドレス（<span className="font-bold text-slate-900">{formState.email}</span>）宛に自動確認メールをお送りしております。
-                      </p>
-                    </div>
-
-                    <div className="pt-4">
-                      <button
-                        onClick={() => {
-                          setIsSubmitted(false);
-                          setFormState({
-                            name: '',
-                            qualification: '理学療法士 (PT)',
-                            customQualification: '',
-                            email: '',
-                            phone: '',
-                            motivation: '',
-                            question: '',
-                            wantManagement: false,
-                          });
-                        }}
-                        className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition cursor-pointer font-sans"
-                      >
-                        続けて別の登録を行う
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <form onSubmit={handleFormSubmit} className="space-y-6">
-                    {/* 1. お名前 */}
-                    <div className="space-y-1.5">
-                      <label className="block text-xs sm:text-sm font-bold text-slate-800 font-serif flex items-center justify-between">
-                        <span>① お名前（氏名） <span className="text-rose-600 font-sans text-xs">*必須</span></span>
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="例: 山田 太郎"
-                        value={formState.name}
-                        onChange={(e) => setFormState({ ...formState, name: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white/90 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-slate-900 text-sm transition"
-                      />
-                    </div>
-
-                    {/* 2. ご職業・保有資格 */}
-                    <div className="space-y-1.5">
-                      <label className="block text-xs sm:text-sm font-bold text-slate-800 font-serif flex items-center justify-between">
-                        <span>② ご職業・専門資格・事業領域 <span className="text-rose-600 font-sans text-xs">*必須</span></span>
-                      </label>
-                      <select
-                        value={formState.qualification}
-                        onChange={(e) => setFormState({ ...formState, qualification: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white/90 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-slate-900 text-sm transition cursor-pointer"
-                      >
-                        <option value="理学療法士 (PT)">理学療法士 (PT)</option>
-                        <option value="作業療法士 (OT)">作業療法士 (OT)</option>
-                        <option value="言語聴覚士 (ST)">言語聴覚士 (ST)</option>
-                        <option value="助産師 (産前産後ケア)">助産師 (産前産後ケア)</option>
-                        <option value="鍼灸師 (はり・きゅう)">鍼灸師 (はり・きゅう)</option>
-                        <option value="柔道整復師 (整骨・外傷)">柔道整復師 (整骨・外傷)</option>
-                        <option value="あん摩マッサージ指圧師">あん摩マッサージ指圧師</option>
-                        <option value="訪問エステ・美容セラピスト">訪問エステ・美容セラピスト</option>
-                        <option value="整体師 / カイロプラクター">整体師 / カイロプラクター</option>
-                        <option value="パーソナルトレーナー / 運動指導">パーソナルトレーナー / 運動指導</option>
-                        <option value="リラクゼーション / アロマセラピスト">リラクゼーション / アロマセラピスト</option>
-                        <option value="管理栄養士 / 栄養士">管理栄養士 / 栄養士</option>
-                        <option value="歯科衛生士 (訪問口腔ケア)">歯科衛生士 (訪問口腔ケア)</option>
-                        <option value="経営者・役員（社内福利厚生・提携希望）">経営者・役員（社内福利厚生・提携希望）</option>
-                        <option value="その他">その他（自由入力）</option>
-                      </select>
-
-                      {formState.qualification === 'その他' && (
-                        <input
-                          type="text"
-                          required
-                          placeholder="保有資格や現在のご職業をご記入ください"
-                          value={formState.customQualification}
-                          onChange={(e) => setFormState({ ...formState, customQualification: e.target.value })}
-                          className="w-full mt-2 px-4 py-2.5 rounded-xl border border-slate-300 bg-white/90 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-slate-900 text-sm transition"
-                        />
-                      )}
-                    </div>
-
-                    {/* 3. メールアドレス ＆ 4. 電話番号 */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-1.5">
-                        <label className="block text-xs sm:text-sm font-bold text-slate-800 font-serif">
-                          ③ メールアドレス <span className="text-rose-600 font-sans text-xs">*必須</span>
-                        </label>
-                        <input
-                          type="email"
-                          required
-                          placeholder="example@domain.com"
-                          value={formState.email}
-                          onChange={(e) => setFormState({ ...formState, email: e.target.value })}
-                          className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white/90 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-slate-900 text-sm transition"
-                        />
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="block text-xs sm:text-sm font-bold text-slate-800 font-serif">
-                          ④ お電話番号 <span className="text-slate-500 font-sans text-xs">（任意）</span>
-                        </label>
-                        <input
-                          type="tel"
-                          placeholder="090-1234-5678"
-                          value={formState.phone}
-                          onChange={(e) => setFormState({ ...formState, phone: e.target.value })}
-                          className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white/90 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-slate-900 text-sm transition"
-                        />
-                      </div>
-                    </div>
-
-                    {/* 5. 参画への意気込み・メッセージ */}
-                    <div className="space-y-1.5">
-                      <label className="block text-xs sm:text-sm font-bold text-slate-800 font-serif">
-                        ⑤ 参画への意気込み・メッセージ <span className="text-slate-500 font-sans text-xs">（任意）</span>
-                      </label>
-                      <textarea
-                        rows={3}
-                        placeholder="例: 自分の腕で独立・副業に挑戦したい、地域の高齢者に直接リハビリを届けたい、サロンの信頼性を高めたい、など熱い想いをご自由にお聞かせください。"
-                        value={formState.motivation}
-                        onChange={(e) => setFormState({ ...formState, motivation: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white/90 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-slate-900 text-sm transition resize-none leading-relaxed"
-                      />
-                    </div>
-
-                    {/* 6. ご質問・ご相談事項 */}
-                    <div className="space-y-1.5">
-                      <label className="block text-xs sm:text-sm font-bold text-slate-800 font-serif">
-                        ⑥ ご質問・ご相談事項 <span className="text-slate-500 font-sans text-xs">（任意）</span>
-                      </label>
-                      <textarea
-                        rows={2}
-                        placeholder="例: 病院勤務での副業規定について、出張エリアの決め方、法人での導入方法など、気になることがあればお気軽にどうぞ。"
-                        value={formState.question}
-                        onChange={(e) => setFormState({ ...formState, question: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white/90 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-slate-900 text-sm transition resize-none leading-relaxed"
-                      />
-                    </div>
-
-                    {/* 7. 管理・運営への参画希望チェック */}
-                    <div className="p-3.5 bg-emerald-50/80 rounded-2xl border border-emerald-200/80">
-                      <label className="flex items-start gap-3 cursor-pointer text-xs sm:text-sm text-slate-800 font-medium">
-                        <input
-                          type="checkbox"
-                          checked={formState.wantManagement}
-                          onChange={(e) => setFormState({ ...formState, wantManagement: e.target.checked })}
-                          className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 mt-0.5 shrink-0"
-                        />
-                        <span>
-                          <strong>地域の統括マネジメント・管理運営側（審査・品質管理等）への参画にも興味がある</strong>
-                          <span className="block text-xs text-slate-500 mt-0.5">
-                            ※ チェックいただいた方には、大塚より個別にリーダー面談・個別相談の機会をご案内いたします。
-                          </span>
-                        </span>
-                      </label>
-                    </div>
-
-                    {/* 送信ボタン */}
-                    <div className="pt-2">
-                      <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-700 via-teal-700 to-emerald-800 hover:from-emerald-600 hover:to-teal-600 text-white font-black text-sm sm:text-base tracking-wider shadow-lg shadow-emerald-950/20 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-                      >
-                        {isSubmitting ? (
-                          <span>送信処理中...</span>
-                        ) : (
-                          <>
-                            <Sparkles className="w-5 h-5 text-amber-300" />
-                            <span>創業パートナーとして先行エントリーする（無料）</span>
-                          </>
-                        )}
-                      </button>
-                      <p className="text-center text-[11px] text-slate-500 mt-2">
-                        ※ ご登録いただいた情報は、パートナー選考・ご連絡以外の目的には一切使用いたしません。
-                      </p>
-                    </div>
-                  </form>
-                )}
-
-                {/* 登録済みエントリーの一覧（ローカルストレージ確認用） */}
-                {registrations.length > 0 && (
-                  <div className="mt-8 pt-6 border-t border-slate-200">
-                    <div className="flex items-center justify-between text-xs font-bold text-slate-700 mb-3">
-                      <span className="flex items-center gap-1.5">
-                        <Users className="w-4 h-4 text-emerald-600" />
-                        <span>先行登録エントリー記録（現在 {registrations.length} 件）</span>
-                      </span>
-                      <span className="text-[10px] text-slate-400 font-normal">ブラウザ内一時保存</span>
-                    </div>
-
-                    <div className="space-y-2 max-h-48 overflow-y-auto pr-1 text-xs">
-                      {registrations.slice(0, 5).map((reg) => (
-                        <div key={reg.id} className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-2">
-                          <div>
-                            <strong className="text-slate-900 font-bold">{reg.name} 様</strong>
-                            <span className="text-emerald-700 font-medium ml-2 font-mono">({reg.qualification})</span>
-                            {reg.wantManagement && (
-                              <span className="ml-2 px-1.5 py-0.5 rounded text-[10px] bg-amber-100 text-amber-800 font-bold">
-                                管理側希望
-                              </span>
-                            )}
-                          </div>
-                          <span className="text-slate-400 text-[10px] font-mono shrink-0">{reg.submittedAt}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+              {/* Googleフォーム iframe埋め込みカード */}
+              <div className="bg-white/90 backdrop-blur-md border border-white/80 shadow-2xl rounded-3xl p-2 sm:p-6 overflow-hidden">
+                <iframe
+                  src="https://docs.google.com/forms/d/e/1FAIpQLSeyYvNKwzr0ArZmd9lDhPAjvSK_lfKxretaVWbL3AesUdxpuQ/viewform?embedded=true"
+                  width="100%"
+                  height="960"
+                  className="w-full rounded-2xl border-0 bg-white"
+                  title="参加・登録申込みフォーム"
+                >
+                  読み込んでいます…
+                </iframe>
               </div>
             </div>
           </div>
