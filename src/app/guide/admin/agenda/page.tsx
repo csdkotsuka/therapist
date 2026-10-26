@@ -14,6 +14,12 @@ import {
   Copy,
   Check,
   Printer,
+  Scale,
+  Coins,
+  Building,
+  Globe,
+  Layers,
+  ShieldAlert,
 } from 'lucide-react';
 
 export default function AgendaPage() {
@@ -52,21 +58,23 @@ export default function AgendaPage() {
 ・検討案・背景: 初期立ち上げ期はハードルを下げて登録者数を集めたいため「無料（0円）」でスタートし、一定規模後に審査手数料（5,000円程度）を有料化する案。
 ・会長への相談内容: 初期起業時点は「無料」で一気に集める方針でよろしいでしょうか？あるいは初期から覚悟料として少額でもいただくべきでしょうか？
 
-② 手数料率（プラットフォーム取り分）
-・検討案・背景: 施術者が自由に価格設定を行い、予約成立時にプラットフォームが「20%」を手数料として徴収するモデル。
-・会長への相談内容: 手数料率は「20%」の設定で問題ないでしょうか？（業界相場20〜30%）
+② プラットフォーム収益・手数料モデル（定数料 / 会費設定）
+・検討案・背景: 以前の検討では「NEOFAMILYメンバー1万円、メンバー外は少し高め」という設定案を想定。一方、業界の相場はもう少し安価（または成果報酬型）な側面もあります。
+・会長への相談内容: 「NEOFAMILYメンバー1万円・メンバー外少し高め」という案について、あるいは市場相場を踏まえ、どのような価格設定・モデルが良いか会長のご意見・肌感覚を伺えますでしょうか？
 
-③ 収益受取口座の指定
-・検討案・背景: 手数料（20%）を受け取るためのStripe連携メイン口座。
+③ 収益受取口座の指定（法人・口座の決定）
+・検討案・背景: プラットフォームの利用料・会費・手数料決済を受け取るためのStripe連携メイン口座の指定。
 ・会長への相談内容: プラットフォーム側の売上受取口座は、どの法人（または口座）に紐付ける形にいたしますか？
 
-④ 公開URL（ドメイン）
+④ 公開URL・ドメインの確認（2段階でのご相談）
 ・検討案・背景: 信頼性を担保するため、既存のブランドドメイン傘下での公開を想定。
-・会長への相談内容: Webアプリの公開URLとして、「NEOFAMILY」関連のドメイン（サブドメイン等）を使用させていただいてよろしいでしょうか？
+・会長への相談内容:
+  1) そもそも「NEOFAMILY」関連で活用可能なドメインやWeb基盤はございますでしょうか？
+  2) もしある場合、そのサブドメイン（例: carekuru.neofamily.jp 等）を使用させていただくことは可能でしょうか？
 
-⑤ インフラ初期経費（Supabase等）
-・検討案・背景: データベース・ユーザー管理にかかる月額費用（1プロジェクトあたり月額数十ドル/数千円程度）。
-・会長への相談内容: このシステム維持にかかる実費経費は、どの枠（プロジェクト予算等）から計上・精算させていただけばよろしいでしょうか？
+⑤ インフラ初期経費（Supabase等の実費）
+・検討案・背景: データベース・認証基盤の維持にかかる月額費用（月額数十ドル / 数千円〜1万円程度）。
+・会長への相談内容: このシステム維持実費は、自分で自己負担しても良いと考えておりますが、プロジェクト経費として計上・精算させていただけるものでしょうか？
 
 ⑥ 事業賠償責任保険の加入時期
 ・検討案・背景: 施術者個人の損害保険加入は必須。プラットフォーム（運営会社）全体としての施設・受託者賠償保険の要否。
@@ -372,7 +380,7 @@ export default function AgendaPage() {
               </div>
             </div>
 
-            {/* ② 手数料率（プラットフォーム取り分） */}
+            {/* ② プラットフォーム収益・手数料モデル（定数料 / 会費設定） */}
             <div className="bg-white dark:bg-[#1c1c1e] rounded-3xl p-5 sm:p-6 border border-slate-200 dark:border-white/10 shadow-xs space-y-3 transition-colors">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-2.5">
@@ -380,11 +388,11 @@ export default function AgendaPage() {
                     ②
                   </span>
                   <h3 className="text-base font-black text-slate-900 dark:text-white">
-                    手数料率（プラットフォーム取り分）
+                    プラットフォーム収益・手数料モデル（定数料 / 会費設定）
                   </h3>
                 </div>
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 shrink-0">
-                  収益モデル
+                  収益定数料モデル
                 </span>
               </div>
 
@@ -392,7 +400,7 @@ export default function AgendaPage() {
                 <div className="bg-slate-50 dark:bg-white/5 p-3.5 rounded-2xl border border-slate-200/60 dark:border-white/10 space-y-1">
                   <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">検討案・背景:</span>
                   <p className="text-slate-800 dark:text-slate-200 leading-relaxed">
-                    施術者が自由に価格設定を行い、予約成立時にプラットフォームが<span className="font-black text-emerald-700 dark:text-emerald-400">「20%」</span>を手数料として徴収するモデル。
+                    以前の検討では<span className="font-bold text-emerald-700 dark:text-emerald-400">「NEOFAMILYメンバー1万円、メンバー外は少し高め」</span>という設定案がありました。一方で、市場相場はもう少し安価な水準（または予約ごとの20%成果報酬型）も存在します。
                   </p>
                 </div>
 
@@ -402,13 +410,13 @@ export default function AgendaPage() {
                     <span>会長への相談内容:</span>
                   </span>
                   <p className="text-emerald-950 dark:text-emerald-100 font-bold leading-relaxed">
-                    手数料率は「20%」の設定で問題ないでしょうか？（※ 業界相場は20〜30%、Uber等のギグエコノミー標準は30%前後）
+                    「NEOFAMILYメンバー1万円・メンバー外少し高め」という設定案、または相場に合わせた設定について、どの水準が最適か会長のご意見・肌感覚を伺えますでしょうか？
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* ③ 収益受取口座の指定 */}
+            {/* ③ 収益受取口座の指定（法人・口座の決定） */}
             <div className="bg-white dark:bg-[#1c1c1e] rounded-3xl p-5 sm:p-6 border border-slate-200 dark:border-white/10 shadow-xs space-y-3 transition-colors">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-2.5">
@@ -416,7 +424,7 @@ export default function AgendaPage() {
                     ③
                   </span>
                   <h3 className="text-base font-black text-slate-900 dark:text-white">
-                    収益受取口座の指定
+                    収益受取口座の指定（法人・口座の決定）
                   </h3>
                 </div>
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 shrink-0">
@@ -428,7 +436,7 @@ export default function AgendaPage() {
                 <div className="bg-slate-50 dark:bg-white/5 p-3.5 rounded-2xl border border-slate-200/60 dark:border-white/10 space-y-1">
                   <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">検討案・背景:</span>
                   <p className="text-slate-800 dark:text-slate-200 leading-relaxed">
-                    手数料（20%）を受け取るためのStripe連携メイン口座の指定。
+                    プラットフォーム利用料・会費・手数料の決済を受け取るための、Stripe連携メイン口座の指定が必要です。
                   </p>
                 </div>
 
@@ -444,7 +452,7 @@ export default function AgendaPage() {
               </div>
             </div>
 
-            {/* ④ 公開URL（ドメイン） */}
+            {/* ④ 公開URL・ドメインの確認（2段階でのご相談） */}
             <div className="bg-white dark:bg-[#1c1c1e] rounded-3xl p-5 sm:p-6 border border-slate-200 dark:border-white/10 shadow-xs space-y-3 transition-colors">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-2.5">
@@ -452,7 +460,7 @@ export default function AgendaPage() {
                     ④
                   </span>
                   <h3 className="text-base font-black text-slate-900 dark:text-white">
-                    公開URL（ドメイン）
+                    公開URL・ドメインの確認（2段階でのご相談）
                   </h3>
                 </div>
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 dark:bg-indigo-950 text-indigo-800 dark:text-indigo-300 shrink-0">
@@ -464,23 +472,24 @@ export default function AgendaPage() {
                 <div className="bg-slate-50 dark:bg-white/5 p-3.5 rounded-2xl border border-slate-200/60 dark:border-white/10 space-y-1">
                   <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">検討案・背景:</span>
                   <p className="text-slate-800 dark:text-slate-200 leading-relaxed">
-                    信頼性を担保するため、既存のブランドドメイン傘下での公開を想定。
+                    サービスの信頼性と安心感を担保するため、既存のNEOFAMILYブランド傘下でのWebアプリ公開を想定しております。
                   </p>
                 </div>
 
-                <div className="bg-indigo-50/70 dark:bg-indigo-950/30 p-3.5 rounded-2xl border border-indigo-200 dark:border-indigo-800 space-y-1">
+                <div className="bg-indigo-50/70 dark:bg-indigo-950/30 p-3.5 rounded-2xl border border-indigo-200 dark:border-indigo-800 space-y-1.5">
                   <span className="text-[11px] font-bold text-indigo-800 dark:text-indigo-300 flex items-center gap-1">
                     <HelpCircle className="w-3.5 h-3.5" />
-                    <span>会長への相談内容:</span>
+                    <span>会長への相談内容（2段階）:</span>
                   </span>
-                  <p className="text-indigo-950 dark:text-indigo-100 font-bold leading-relaxed">
-                    Webアプリの公開URLとして、「NEOFAMILY」関連のドメイン（サブドメイン等）を使用させていただいてよろしいでしょうか？
-                  </p>
+                  <div className="space-y-1 text-indigo-950 dark:text-indigo-100 font-bold leading-relaxed">
+                    <p>1) そもそも「NEOFAMILY」関連で活用可能なドメインやWeb基盤はございますでしょうか？</p>
+                    <p>2) もしある場合、そのサブドメイン（例: carekuru.neofamily.jp 等）を使用させていただくことは可能でしょうか？</p>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* ⑤ インフラ初期経費（Supabase等） */}
+            {/* ⑤ インフラ初期経費（Supabase等の実費） */}
             <div className="bg-white dark:bg-[#1c1c1e] rounded-3xl p-5 sm:p-6 border border-slate-200 dark:border-white/10 shadow-xs space-y-3 transition-colors">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-2.5">
@@ -488,7 +497,7 @@ export default function AgendaPage() {
                     ⑤
                   </span>
                   <h3 className="text-base font-black text-slate-900 dark:text-white">
-                    インフラ初期経費（Supabase等）
+                    インフラ初期経費（Supabase等の実費）
                   </h3>
                 </div>
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 dark:bg-purple-950 text-purple-800 dark:text-purple-300 shrink-0">
@@ -500,7 +509,7 @@ export default function AgendaPage() {
                 <div className="bg-slate-50 dark:bg-white/5 p-3.5 rounded-2xl border border-slate-200/60 dark:border-white/10 space-y-1">
                   <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">検討案・背景:</span>
                   <p className="text-slate-800 dark:text-slate-200 leading-relaxed">
-                    データベース・ユーザー管理にかかる月額費用（1プロジェクトあたり月額数十ドル/数千円程度）。
+                    データベース・認証基盤の維持にかかる月額費用（月額数十ドル / 数千円〜1万円程度）。
                   </p>
                 </div>
 
@@ -510,7 +519,7 @@ export default function AgendaPage() {
                     <span>会長への相談内容:</span>
                   </span>
                   <p className="text-purple-950 dark:text-purple-100 font-bold leading-relaxed">
-                    このシステム維持にかかる実費経費は、どの枠（プロジェクト予算等）から計上・精算させていただけばよろしいでしょうか？
+                    このシステム維持にかかる実費経費は、自分で自己負担しても良いと考えておりますが、プロジェクト経費として計上・精算させていただけるものでしょうか？
                   </p>
                 </div>
               </div>
