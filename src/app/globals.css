@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8fafc;
+  --foreground: #0f172a;
 }
 
 @theme inline {
@@ -14,14 +14,59 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #000000;
+    --foreground: #f8fafc;
+  }
+
+  /* iOS High-Contrast Native Dark Mode (美しい白黒反転と漆黒OLED対応) */
+  .bg-white {
+    background-color: #1c1c1e !important;
+  }
+  .bg-white\/95, .bg-white\/90, .bg-white\/85, .bg-white\/80 {
+    background-color: rgba(28, 28, 30, 0.85) !important;
+  }
+  .bg-slate-50, .bg-slate-50\/50, .bg-slate-50\/80, .bg-slate-100 {
+    background-color: #000000 !important;
+  }
+  .bg-slate-200, .bg-slate-200\/80 {
+    background-color: #2c2c2e !important;
+  }
+
+  .text-slate-900, .text-slate-800 {
+    color: #f8fafc !important;
+  }
+  .text-slate-700, .text-slate-600 {
+    color: #cbd5e1 !important;
+  }
+  .text-slate-500, .text-slate-400 {
+    color: #94a3b8 !important;
+  }
+
+  .border-slate-200, .border-slate-200\/60, .border-slate-200\/80, .border-slate-200\/90, .border-slate-100 {
+    border-color: rgba(255, 255, 255, 0.12) !important;
+  }
+  .divide-slate-100, .divide-slate-200 {
+    border-color: rgba(255, 255, 255, 0.08) !important;
+  }
+
+  /* 入力フォーム＆セレクトボックス */
+  input:not([type="checkbox"]):not([type="radio"]), select, textarea {
+    background-color: #2c2c2e !important;
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.18) !important;
+  }
+  input::placeholder, textarea::placeholder {
+    color: #8e8e93 !important;
   }
 }
 
-body {
-  background: var(--background);
+html, body {
+  background-color: var(--background);
   color: var(--foreground);
+  min-height: 100%;
+}
+
+body {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro JP", "SF Pro Text", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -30,6 +75,20 @@ body {
 /* iOS Native App-like Feel: Remove tap highlight box */
 * {
   -webkit-tap-highlight-color: transparent;
+}
+
+/* iOS Floating Island Pill Material (最新OS 透過カプセルバー) */
+.ios-glass-pill {
+  background: rgba(255, 255, 255, 0.78) !important;
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+}
+
+@media (prefers-color-scheme: dark) {
+  .ios-glass-pill {
+    background: rgba(24, 24, 27, 0.82) !important;
+    border-color: rgba(255, 255, 255, 0.18) !important;
+  }
 }
 
 /* iOS Safe Area Utilities */

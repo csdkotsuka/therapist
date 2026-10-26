@@ -20,34 +20,17 @@ export default function HomePage() {
   }, [isLoggedIn, currentUser.role, customers, switchUser]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50/50">
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-black text-slate-800 dark:text-slate-100 transition-colors">
       <Header />
 
-      {/* Main Content Area (iOS Bottom Tab Bar分の余白を確保) */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
+      {/* Main Content Area (フローティングタブバー分のpb-24を確保) */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-6 pb-28">
         <CustomerView />
       </main>
 
-      {/* Footer (ボトムバーと重ならないよう下部にpb-24を確保) */}
-      <footer className="border-t border-slate-200/80 bg-white/60 backdrop-blur-sm py-6 mt-12 pb-24 sm:pb-20 text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div
-              className="w-5 h-5 rounded-md overflow-hidden shrink-0"
-              dangerouslySetInnerHTML={{ __html: currentBrand.iconSvg }}
-            />
-            <span className="font-bold text-slate-800">{currentBrand.japaneseName} ({currentBrand.name})</span>
-            <span className="text-[11px] text-slate-400">
-              - {currentBrand.catchphrase}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-4 text-slate-500">
-            <Link href="/guide/customer" className="hover:text-emerald-600 transition">
-              ご利用ガイド
-            </Link>
-          </div>
-        </div>
+      {/* ミニマルなすっきりフッター (各種ガイドはハンバーガーメニューに完全集約) */}
+      <footer className="border-t border-slate-200/60 dark:border-white/10 bg-slate-50 dark:bg-black py-4 text-center text-[11px] text-slate-400 dark:text-slate-600 transition-colors pb-safe">
+        <span>© {currentBrand.name}. All rights reserved.</span>
       </footer>
     </div>
   );

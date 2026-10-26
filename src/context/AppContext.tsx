@@ -167,6 +167,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const defaultBranding: CustomBrandingSettings = {
       appName: 'Care KURU',
       appJapaneseName: 'ケアクル',
+      appTagline: 'CARE KURU',
       appCatchphrase: 'プロがあなたの元へ届く。出張・店舗ヘルスケア＆ボディケア',
       selectedIcon: '/branding/icon_carearia_symbol.png',
       selectedLogo: '/branding/logo_carearia_text.png',
@@ -177,10 +178,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const saved = localStorage.getItem('carehub_custom_branding');
         if (saved) {
           const parsed = JSON.parse(saved);
-          // 以前の仮決定名称（Carearia Go / Carea Go）が残っている場合は新決定名称 'Care KURU' に更新
-          if (!parsed.appName || parsed.appName === 'Carearia Go' || parsed.appName === 'Carea Go') {
+          // 以前の仮決定名称（Carearia Go / Carea Go / CAREARIA GO など）が残っている場合は新決定名称 'Care KURU' に更新
+          const isLegacy =
+            !parsed.appName ||
+            parsed.appName === 'Carearia Go' ||
+            parsed.appName === 'Carea Go' ||
+            parsed.appTagline === 'CAREARIA GO' ||
+            parsed.appTagline === 'CAREA GO' ||
+            parsed.appTagline === 'CARE GO';
+
+          if (isLegacy) {
             parsed.appName = defaultBranding.appName;
             parsed.appJapaneseName = defaultBranding.appJapaneseName;
+            parsed.appTagline = defaultBranding.appTagline;
             parsed.appCatchphrase = defaultBranding.appCatchphrase;
             localStorage.setItem('carehub_custom_branding', JSON.stringify(parsed));
           }

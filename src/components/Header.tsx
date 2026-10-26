@@ -7,7 +7,6 @@ import { useApp } from '@/context/AppContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import {
   KeyRound,
-  UserPlus,
   Calendar,
   User,
   Menu,
@@ -25,11 +24,10 @@ import {
   Users,
   Settings,
   Home,
-  CheckCircle2,
   MessageCircle,
   Search,
-  Sparkles,
   BookOpen,
+  ArrowLeftRight,
 } from 'lucide-react';
 
 export const Header: React.FC = () => {
@@ -37,7 +35,6 @@ export const Header: React.FC = () => {
   const router = useRouter();
   const {
     currentUser,
-    allUsers,
     bookings,
     messages,
     isLiveSupabase,
@@ -72,19 +69,40 @@ export const Header: React.FC = () => {
   const therapistMatch = pathname.match(/\/therapist\/([^\/]+)/);
   const currentTherapistId = therapistMatch ? therapistMatch[1] : currentUser.id;
 
+  // タグラインの旧名称安全補正 (CAREAREA GOなどの残骸を CARE KURU に修正)
+  const displayTagline =
+    !currentBrand.tagline ||
+    currentBrand.tagline === 'CAREAREA GO' ||
+    currentBrand.tagline === 'CAREA GO' ||
+    currentBrand.tagline === 'CARE GO'
+      ? 'CARE KURU'
+      : currentBrand.tagline;
+
   const getRoleBadge = (role: string) => {
     switch (role) {
       case 'admin':
-        return <span className="bg-purple-100 text-purple-700 text-[10px] px-2 py-0.5 rounded-full font-bold">管理者</span>;
+        return (
+          <span className="bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 text-[10px] px-2 py-0.5 rounded-full font-bold">
+            管理者
+          </span>
+        );
       case 'therapist':
-        return <span className="bg-emerald-100 text-emerald-700 text-[10px] px-2 py-0.5 rounded-full font-bold">セラピスト</span>;
+        return (
+          <span className="bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[10px] px-2 py-0.5 rounded-full font-bold">
+            セラピスト
+          </span>
+        );
       case 'customer':
       default:
-        return <span className="bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded-full font-bold">顧客</span>;
+        return (
+          <span className="bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 text-[10px] px-2 py-0.5 rounded-full font-bold">
+            顧客
+          </span>
+        );
     }
   };
 
-  // モード選択のハンドラー（ルーター競合・戻るボタンでの履歴破損を防ぐため直接遷移）
+  // モード選択のハンドラー
   const handleModeChange = (mode: 'customer' | 'therapist' | 'admin') => {
     setIsDrawerOpen(false);
     let target = '/';
@@ -98,7 +116,7 @@ export const Header: React.FC = () => {
     }
   };
 
-  // セラピスト画面用メニュー項目（iOS風アイコンカラー定義つき）
+  // セラピスト画面用メニュー項目
   const therapistMenuItems = [
     { id: 'requests', label: '予約リクエスト・進行中', icon: Calendar, color: 'bg-emerald-500', badge: pendingRequestsCount > 0 ? `${pendingRequestsCount}件` : undefined },
     { id: 'schedule', label: '営業時間・シフト・出張設定', icon: Clock, color: 'bg-sky-500' },
@@ -127,7 +145,7 @@ export const Header: React.FC = () => {
       {/* ======================================================== */}
       {/* 1. iOS風 ナビゲーションバー (Top Navigation Bar) */}
       {/* ======================================================== */}
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 shadow-xs transition-colors">
+      <header className="sticky top-0 z-40 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-slate-200/60 dark:border-white/10 shadow-xs transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14">
             {/* Left: Brand Logo & App Title */}
@@ -137,7 +155,7 @@ export const Header: React.FC = () => {
                 className="flex items-center gap-2 group py-1 min-w-0 active:scale-95 transition-transform"
                 title={`${currentBrand.japaneseName} (${currentBrand.name})`}
               >
-                <div className="w-8 h-8 rounded-xl overflow-hidden shadow-xs border border-slate-200/80 bg-white flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-xl overflow-hidden shadow-xs border border-slate-200/80 dark:border-white/15 bg-white dark:bg-slate-900 flex items-center justify-center shrink-0">
                   {currentBrand.iconUrl ? (
                     <img
                       src={currentBrand.iconUrl}
@@ -152,55 +170,60 @@ export const Header: React.FC = () => {
                   )}
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span className="text-base font-black tracking-tight text-slate-900 group-hover:text-emerald-700 transition truncate leading-tight">
+                  <span className="text-base font-black tracking-tight text-slate-900 dark:text-white group-hover:text-emerald-600 transition truncate leading-tight">
                     {currentBrand.japaneseName}
                   </span>
-                  <span className="text-[10px] font-semibold text-slate-400 truncate leading-tight">
-                    {currentBrand.tagline}
+                  <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 truncate leading-tight">
+                    {displayTagline}
                   </span>
                 </div>
               </Link>
 
+              {/* 現在のモード表示バッジ (セラピスト・管理者のとき) */}
+              {!isCustomerPage && (
+                <div className="hidden sm:flex items-center ml-2">
+                  {isTherapistPage && (
+                    <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-100/80 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                      セラピスト管理
+                    </span>
+                  )}
+                  {isAdminPage && (
+                    <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-purple-100/80 dark:bg-purple-950/60 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                      管理ポータル
+                    </span>
+                  )}
+                </div>
+              )}
+
               {/* Supabase 接続中ステータス */}
               {isLiveSupabase && (
-                <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-300/80 shrink-0">
+                <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-300/80 dark:border-emerald-800 shrink-0">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
                   <span>LIVE</span>
                 </span>
               )}
             </div>
 
-            {/* Right: Actions & User Info */}
+            {/* Right: Actions */}
             <div className="flex items-center gap-2 shrink-0">
-              {/* PC用: マイ予約ショートカット */}
-              {isLoggedIn && (
-                <Link
-                  href="/bookings"
-                  className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition border active:scale-95 ${
-                    pathname === '/bookings'
-                      ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
-                      : 'bg-slate-100 hover:bg-slate-200/80 text-slate-700 border-transparent'
-                  }`}
+              {/* セラピスト/管理者画面のとき: 顧客画面へのクイック復帰リンク */}
+              {!isCustomerPage && (
+                <button
+                  type="button"
+                  onClick={() => handleModeChange('customer')}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/15 text-slate-700 dark:text-slate-200 text-xs font-bold transition active:scale-95"
+                  title="顧客画面に切り替える"
                 >
-                  <Calendar className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>マイ予約</span>
-                  {awaitingPaymentCount > 0 ? (
-                    <span className="px-1.5 py-0.2 bg-rose-500 text-white text-[10px] rounded-full font-bold animate-pulse">
-                      💳 {awaitingPaymentCount}
-                    </span>
-                  ) : myBookingsCount > 0 ? (
-                    <span className="px-1.5 py-0.2 bg-emerald-500 text-white text-[10px] rounded-full font-bold">
-                      {myBookingsCount}
-                    </span>
-                  ) : null}
-                </Link>
+                  <ArrowLeftRight className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                  <span className="hidden sm:inline">顧客画面へ</span>
+                </button>
               )}
 
-              {/* User Avatar / Login */}
+              {/* ユーザーアバター / ログインボタン */}
               {isLoggedIn ? (
                 <Link
                   href="/profile"
-                  className="flex items-center gap-1.5 p-1 rounded-full hover:bg-slate-100/80 transition active:scale-95"
+                  className="flex items-center gap-1.5 p-1 rounded-full hover:bg-slate-100/80 dark:hover:bg-white/10 transition active:scale-95"
                   title="プロフィール・アカウント設定"
                 >
                   <img
@@ -208,7 +231,7 @@ export const Header: React.FC = () => {
                     alt={currentUser.name}
                     className="w-7 h-7 rounded-full object-cover ring-2 ring-emerald-500/20"
                   />
-                  <span className="text-xs font-bold text-slate-800 max-w-[80px] truncate hidden md:inline">
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200 max-w-[80px] truncate hidden md:inline">
                     {currentUser.name}
                   </span>
                 </Link>
@@ -223,146 +246,121 @@ export const Header: React.FC = () => {
                 </button>
               )}
 
-              {/* iOS風 丸型メニューボタン */}
-              <button
-                type="button"
-                onClick={() => setIsDrawerOpen(true)}
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200/80 text-slate-700 flex items-center justify-center transition active:scale-90 relative"
-                aria-label="メニューを開く"
-              >
-                <Menu className="w-4 h-4 text-slate-700" />
-                {(pendingRequestsCount > 0 || awaitingPaymentCount > 0) && (
-                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-white absolute top-0 right-0 animate-pulse" />
-                )}
-              </button>
+              {/* セラピスト・管理者画面の時だけ右上にメニューボタンを配置 (業務項目が多いため集約) */}
+              {!isCustomerPage && (
+                <button
+                  type="button"
+                  onClick={() => setIsDrawerOpen(true)}
+                  className="p-1.5 sm:px-2.5 sm:py-1 rounded-full bg-slate-900 dark:bg-white text-white dark:text-black flex items-center gap-1.5 transition active:scale-95 shadow-xs relative"
+                  aria-label="メニューを開く"
+                >
+                  <Menu className="w-4 h-4" />
+                  <span className="text-xs font-bold hidden sm:inline">メニュー</span>
+                  {(pendingRequestsCount > 0 || awaitingPaymentCount > 0) && (
+                    <span className="w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-white dark:ring-black absolute top-0 right-0 animate-pulse" />
+                  )}
+                </button>
+              )}
             </div>
           </div>
         </div>
       </header>
 
       {/* ======================================================== */}
-      {/* 2. iOS風 フッター常駐ボトムタブバー (Bottom Tab Bar) */}
+      {/* 2. 最新OS風 フローティング透過アイランドタブバー (顧客画面のみ表示) */}
       {/* ======================================================== */}
-      <nav
-        aria-label="主要ナビゲーション"
-        className="fixed bottom-0 inset-x-0 z-40 bg-white/85 backdrop-blur-2xl border-t border-slate-200/80 shadow-[0_-4px_20px_rgba(0,0,0,0.04)]"
-      >
-        <div className="max-w-lg mx-auto px-3 pt-1.5 pb-safe">
-          <div className="grid grid-cols-5 items-center">
+      {isCustomerPage && (
+        <nav
+          aria-label="主要ナビゲーション"
+          className="fixed bottom-6 inset-x-0 z-40 flex justify-center px-4 pointer-events-none pb-[env(safe-area-inset-bottom)]"
+        >
+          {/* iOS最新アイランド型 透過カプセルバー (Floating Glass Pill) */}
+          <div className="ios-glass-pill pointer-events-auto flex items-center gap-1 sm:gap-2 p-1.5 rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.18),0_2px_6px_rgba(0,0,0,0.08)] border border-white/60 dark:border-white/15 ring-1 ring-black/5 dark:ring-white/10 transition-all">
             {/* Tab 1: さがす (Explore / Home) */}
             <Link
               href="/"
-              className={`flex flex-col items-center justify-center py-1 rounded-xl transition active:scale-95 ${
-                pathname === '/' ? 'text-emerald-700' : 'text-slate-500 hover:text-slate-800'
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full transition active:scale-95 ${
+                pathname === '/'
+                  ? 'bg-slate-900 text-white dark:bg-white dark:text-black shadow-xs font-black'
+                  : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white font-medium'
               }`}
             >
-              <div className="relative">
-                <Search className={`w-5 h-5 ${pathname === '/' ? 'stroke-[2.5]' : 'stroke-[1.8]'}`} />
-              </div>
-              <span className={`text-[10px] tracking-tight mt-0.5 ${pathname === '/' ? 'font-black' : 'font-semibold'}`}>
-                さがす
-              </span>
+              <Search className={`w-4 h-4 ${pathname === '/' ? 'stroke-[2.5]' : 'stroke-[2]'}`} />
+              <span className="text-xs tracking-tight">さがす</span>
             </Link>
 
             {/* Tab 2: マイ予約 (Bookings) */}
             <Link
               href="/bookings"
-              className={`flex flex-col items-center justify-center py-1 rounded-xl transition active:scale-95 relative ${
-                pathname === '/bookings' ? 'text-emerald-700' : 'text-slate-500 hover:text-slate-800'
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full transition active:scale-95 relative ${
+                pathname === '/bookings'
+                  ? 'bg-slate-900 text-white dark:bg-white dark:text-black shadow-xs font-black'
+                  : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white font-medium'
               }`}
             >
               <div className="relative">
-                <Calendar className={`w-5 h-5 ${pathname === '/bookings' ? 'stroke-[2.5]' : 'stroke-[1.8]'}`} />
+                <Calendar className={`w-4 h-4 ${pathname === '/bookings' ? 'stroke-[2.5]' : 'stroke-[2]'}`} />
                 {awaitingPaymentCount > 0 ? (
-                  <span className="absolute -top-1 -right-2 px-1 min-w-[15px] h-[15px] bg-rose-500 text-white text-[9px] font-black rounded-full flex items-center justify-center ring-2 ring-white animate-pulse">
+                  <span className="absolute -top-1 -right-2 px-1 min-w-[14px] h-[14px] bg-rose-500 text-white text-[9px] font-black rounded-full flex items-center justify-center ring-2 ring-white dark:ring-black animate-pulse">
                     {awaitingPaymentCount}
                   </span>
                 ) : myBookingsCount > 0 ? (
-                  <span className="absolute -top-1 -right-2 px-1 min-w-[15px] h-[15px] bg-emerald-600 text-white text-[9px] font-black rounded-full flex items-center justify-center ring-2 ring-white">
+                  <span className="absolute -top-1 -right-2 px-1 min-w-[14px] h-[14px] bg-emerald-500 text-white text-[9px] font-black rounded-full flex items-center justify-center ring-2 ring-white dark:ring-black">
                     {myBookingsCount}
                   </span>
                 ) : null}
               </div>
-              <span className={`text-[10px] tracking-tight mt-0.5 ${pathname === '/bookings' ? 'font-black' : 'font-semibold'}`}>
-                マイ予約
-              </span>
+              <span className="text-xs tracking-tight">予約</span>
             </Link>
 
-            {/* Tab 3: セラピスト画面 (Therapist Portal) */}
-            <button
-              type="button"
-              onClick={() => handleModeChange('therapist')}
-              className={`flex flex-col items-center justify-center py-1 rounded-xl transition active:scale-95 relative ${
-                isTherapistPage ? 'text-emerald-700' : 'text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              <div className="relative">
-                <Sparkles className={`w-5 h-5 ${isTherapistPage ? 'stroke-[2.5] text-emerald-600' : 'stroke-[1.8]'}`} />
-                {pendingRequestsCount > 0 && (
-                  <span className="absolute -top-1 -right-2 px-1 min-w-[15px] h-[15px] bg-rose-500 text-white text-[9px] font-black rounded-full flex items-center justify-center ring-2 ring-white animate-pulse">
-                    {pendingRequestsCount}
-                  </span>
-                )}
-              </div>
-              <span className={`text-[10px] tracking-tight mt-0.5 ${isTherapistPage ? 'font-black' : 'font-semibold'}`}>
-                セラピスト
-              </span>
-            </button>
-
-            {/* Tab 4: マイページ (Account / Profile) */}
+            {/* Tab 3: マイページ (Account / Profile) */}
             {isLoggedIn ? (
               <Link
                 href="/profile"
-                className={`flex flex-col items-center justify-center py-1 rounded-xl transition active:scale-95 ${
-                  pathname === '/profile' ? 'text-emerald-700' : 'text-slate-500 hover:text-slate-800'
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full transition active:scale-95 ${
+                  pathname === '/profile'
+                    ? 'bg-slate-900 text-white dark:bg-white dark:text-black shadow-xs font-black'
+                    : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white font-medium'
                 }`}
               >
-                <div className="relative">
-                  <User className={`w-5 h-5 ${pathname === '/profile' ? 'stroke-[2.5]' : 'stroke-[1.8]'}`} />
-                </div>
-                <span className={`text-[10px] tracking-tight mt-0.5 ${pathname === '/profile' ? 'font-black' : 'font-semibold'}`}>
-                  マイページ
-                </span>
+                <User className={`w-4 h-4 ${pathname === '/profile' ? 'stroke-[2.5]' : 'stroke-[2]'}`} />
+                <span className="text-xs tracking-tight">マイページ</span>
               </Link>
             ) : (
               <button
                 type="button"
                 onClick={() => setIsAuthModalOpen(true)}
-                className="flex flex-col items-center justify-center py-1 rounded-xl text-slate-500 hover:text-slate-800 transition active:scale-95"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white font-medium transition active:scale-95"
               >
-                <div className="relative">
-                  <KeyRound className="w-5 h-5 stroke-[1.8]" />
-                </div>
-                <span className="text-[10px] tracking-tight font-semibold mt-0.5">
-                  ログイン
-                </span>
+                <KeyRound className="w-4 h-4 stroke-[2]" />
+                <span className="text-xs tracking-tight">ログイン</span>
               </button>
             )}
 
-            {/* Tab 5: メニュー (More / Drawer) */}
+            {/* Tab 4: メニュー (More / Drawer) */}
             <button
               type="button"
               onClick={() => setIsDrawerOpen(true)}
-              className={`flex flex-col items-center justify-center py-1 rounded-xl transition active:scale-95 relative ${
-                isDrawerOpen ? 'text-emerald-700' : 'text-slate-500 hover:text-slate-800'
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full transition active:scale-95 relative ${
+                isDrawerOpen
+                  ? 'bg-slate-900 text-white dark:bg-white dark:text-black shadow-xs font-black'
+                  : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white font-medium'
               }`}
             >
               <div className="relative">
-                <Menu className={`w-5 h-5 ${isDrawerOpen ? 'stroke-[2.5]' : 'stroke-[1.8]'}`} />
+                <Menu className={`w-4 h-4 ${isDrawerOpen ? 'stroke-[2.5]' : 'stroke-[2]'}`} />
                 {(pendingRequestsCount > 0 || awaitingPaymentCount > 0) && (
-                  <span className="w-2 h-2 rounded-full bg-rose-500 ring-1 ring-white absolute top-0 -right-1 animate-pulse" />
+                  <span className="w-2 h-2 rounded-full bg-rose-500 ring-1 ring-white dark:ring-black absolute top-0 -right-1 animate-pulse" />
                 )}
               </div>
-              <span className={`text-[10px] tracking-tight mt-0.5 ${isDrawerOpen ? 'font-black' : 'font-semibold'}`}>
-                メニュー
-              </span>
+              <span className="text-xs tracking-tight">メニュー</span>
             </button>
           </div>
-        </div>
-      </nav>
+        </nav>
+      )}
 
       {/* ======================================================== */}
-      {/* 3. iOS Grouped Sheet スタイル ドロワーメニュー */}
+      {/* 3. iOS Grouped Sheet スタイル ドロワーメニュー (ダークモード完全対応) */}
       {/* ======================================================== */}
       <div
         className={`fixed inset-0 z-50 transition-opacity duration-300 ${
@@ -371,20 +369,20 @@ export const Header: React.FC = () => {
       >
         {/* Backdrop overlay */}
         <div
-          className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
+          className="absolute inset-0 bg-black/40 dark:bg-black/70 backdrop-blur-sm transition-opacity"
           onClick={() => setIsDrawerOpen(false)}
         />
 
-        {/* Drawer panel (iOS Sheet / Slide over) */}
+        {/* Drawer panel */}
         <div
-          className={`absolute top-0 right-0 bottom-0 w-full max-w-sm sm:max-w-md bg-slate-100 shadow-2xl z-10 flex flex-col transition-transform duration-300 ease-out transform ${
+          className={`absolute top-0 right-0 bottom-0 w-full max-w-sm sm:max-w-md bg-slate-100 dark:bg-[#121212] text-slate-900 dark:text-white shadow-2xl z-10 flex flex-col transition-transform duration-300 ease-out transform ${
             isDrawerOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
         >
           {/* iOS Sheet Header */}
-          <div className="px-5 py-3.5 border-b border-slate-200/80 flex items-center justify-between bg-white/90 backdrop-blur-md sticky top-0 z-10">
+          <div className="px-5 py-3.5 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between bg-white/90 dark:bg-black/90 backdrop-blur-md sticky top-0 z-10">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-lg overflow-hidden shrink-0 flex items-center justify-center bg-white border border-slate-200/80">
+              <div className="w-6 h-6 rounded-lg overflow-hidden shrink-0 flex items-center justify-center bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-white/10">
                 {currentBrand.iconUrl ? (
                   <img
                     src={currentBrand.iconUrl}
@@ -398,14 +396,14 @@ export const Header: React.FC = () => {
                   />
                 )}
               </div>
-              <span className="font-black text-slate-900 text-sm tracking-tight">
+              <span className="font-black text-slate-900 dark:text-white text-sm tracking-tight">
                 {currentBrand.japaneseName}
               </span>
             </div>
             {/* iOS丸型クローズボタン */}
             <button
               onClick={() => setIsDrawerOpen(false)}
-              className="w-7 h-7 rounded-full bg-slate-200/80 hover:bg-slate-300 text-slate-600 flex items-center justify-center transition active:scale-90"
+              className="w-7 h-7 rounded-full bg-slate-200/80 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20 text-slate-600 dark:text-slate-300 flex items-center justify-center transition active:scale-90"
               aria-label="メニューを閉じる"
             >
               <X className="w-4 h-4 stroke-[2.5]" />
@@ -415,7 +413,7 @@ export const Header: React.FC = () => {
           {/* Drawer Body (iOS Grouped Layout) */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {/* iOS Apple ID 風 ユーザーカード */}
-            <div className="bg-white rounded-2xl p-3.5 shadow-2xs border border-slate-200/60 flex items-center justify-between">
+            <div className="bg-white dark:bg-[#1c1c1e] rounded-2xl p-3.5 shadow-2xs border border-slate-200/60 dark:border-white/10 flex items-center justify-between">
               <div className="flex items-center gap-3 min-w-0">
                 <img
                   src={currentUser.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'}
@@ -423,10 +421,10 @@ export const Header: React.FC = () => {
                   className="w-11 h-11 rounded-full object-cover ring-2 ring-emerald-500/20 shrink-0"
                 />
                 <div className="min-w-0">
-                  <h4 className="font-bold text-sm text-slate-900 truncate">
+                  <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate">
                     {currentUser.name}
                   </h4>
-                  <p className="text-[11px] text-slate-400 truncate">
+                  <p className="text-[11px] text-slate-400 dark:text-slate-500 truncate">
                     {currentUser.email || 'carekuru.user@example.com'}
                   </p>
                 </div>
@@ -434,15 +432,15 @@ export const Header: React.FC = () => {
               <div>{getRoleBadge(currentUser.role)}</div>
             </div>
 
-            {/* iOS Segmented Control 風 モード切り替え */}
-            <div className="bg-slate-200/80 p-1 rounded-2xl flex gap-1">
+            {/* iOS Segmented Control モード切り替え */}
+            <div className="bg-slate-200/80 dark:bg-white/10 p-1 rounded-2xl flex gap-1">
               <button
                 type="button"
                 onClick={() => handleModeChange('customer')}
                 className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer active:scale-95 ${
                   isCustomerPage
-                    ? 'bg-white text-slate-900 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-white dark:bg-[#2c2c2e] text-slate-900 dark:text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 <span>🏠</span>
@@ -454,8 +452,8 @@ export const Header: React.FC = () => {
                 onClick={() => handleModeChange('therapist')}
                 className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer active:scale-95 ${
                   isTherapistPage
-                    ? 'bg-white text-slate-900 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-white dark:bg-[#2c2c2e] text-slate-900 dark:text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 <span>💆‍♀️</span>
@@ -467,8 +465,8 @@ export const Header: React.FC = () => {
                 onClick={() => handleModeChange('admin')}
                 className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer active:scale-95 ${
                   isAdminPage
-                    ? 'bg-white text-slate-900 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-white dark:bg-[#2c2c2e] text-slate-900 dark:text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 <span>⚙️</span>
@@ -481,10 +479,10 @@ export const Header: React.FC = () => {
             {/* ======================================================== */}
             {isTherapistPage && (
               <div className="space-y-1.5">
-                <span className="text-[11px] font-bold text-slate-500 px-3 uppercase tracking-wider block">
+                <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 px-3 uppercase tracking-wider block">
                   セラピスト業務メニュー
                 </span>
-                <div className="bg-white rounded-2xl border border-slate-200/60 overflow-hidden divide-y divide-slate-100 shadow-2xs">
+                <div className="bg-white dark:bg-[#1c1c1e] rounded-2xl border border-slate-200/60 dark:border-white/10 overflow-hidden divide-y divide-slate-100 dark:divide-white/5 shadow-2xs">
                   {therapistMenuItems.map((item) => {
                     const Icon = item.icon;
                     const isActive =
@@ -495,8 +493,10 @@ export const Header: React.FC = () => {
                         key={item.id}
                         href={`/therapist/${currentTherapistId}/${item.id}`}
                         onClick={() => setIsDrawerOpen(false)}
-                        className={`px-3.5 py-3 flex items-center justify-between text-xs font-bold transition active:bg-slate-100 ${
-                          isActive ? 'bg-emerald-50/50 text-emerald-950 font-black' : 'text-slate-800'
+                        className={`px-3.5 py-3 flex items-center justify-between text-xs font-bold transition active:bg-slate-100 dark:active:bg-white/5 ${
+                          isActive
+                            ? 'bg-emerald-50/50 dark:bg-emerald-950/30 text-emerald-950 dark:text-emerald-300 font-black'
+                            : 'text-slate-800 dark:text-slate-200'
                         }`}
                       >
                         <div className="flex items-center gap-3">
@@ -511,7 +511,7 @@ export const Header: React.FC = () => {
                               {item.badge}
                             </span>
                           )}
-                          <ChevronRight className="w-4 h-4 text-slate-300" />
+                          <ChevronRight className="w-4 h-4 text-slate-300 dark:text-slate-600" />
                         </div>
                       </Link>
                     );
@@ -522,7 +522,7 @@ export const Header: React.FC = () => {
                 <div className="pt-1">
                   <a
                     href="/guide/therapist"
-                    className="bg-white rounded-2xl border border-slate-200/60 px-3.5 py-3 flex items-center justify-between text-xs font-bold text-emerald-800 shadow-2xs active:bg-slate-50 transition"
+                    className="bg-white dark:bg-[#1c1c1e] rounded-2xl border border-slate-200/60 dark:border-white/10 px-3.5 py-3 flex items-center justify-between text-xs font-bold text-emerald-800 dark:text-emerald-300 shadow-2xs active:bg-slate-50 dark:active:bg-white/5 transition"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center text-white shrink-0 shadow-2xs">
@@ -530,7 +530,7 @@ export const Header: React.FC = () => {
                       </div>
                       <span>セラピスト実務運用マニュアル</span>
                     </div>
-                    <span className="text-xs text-slate-400">↗</span>
+                    <span className="text-xs text-slate-400 dark:text-slate-500">↗</span>
                   </a>
                 </div>
               </div>
@@ -541,10 +541,10 @@ export const Header: React.FC = () => {
             {/* ======================================================== */}
             {isAdminPage && (
               <div className="space-y-1.5">
-                <span className="text-[11px] font-bold text-slate-500 px-3 uppercase tracking-wider block">
+                <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 px-3 uppercase tracking-wider block">
                   管理ポータルメニュー
                 </span>
-                <div className="bg-white rounded-2xl border border-slate-200/60 overflow-hidden divide-y divide-slate-100 shadow-2xs">
+                <div className="bg-white dark:bg-[#1c1c1e] rounded-2xl border border-slate-200/60 dark:border-white/10 overflow-hidden divide-y divide-slate-100 dark:divide-white/5 shadow-2xs">
                   {adminMenuItems.map((item) => {
                     const Icon = item.icon;
                     const isActive = pathname === `/admin/${item.id}` || (item.id === 'therapists' && pathname === '/admin');
@@ -553,8 +553,10 @@ export const Header: React.FC = () => {
                         key={item.id}
                         href={`/admin/${item.id}`}
                         onClick={() => setIsDrawerOpen(false)}
-                        className={`px-3.5 py-3 flex items-center justify-between text-xs font-bold transition active:bg-slate-100 ${
-                          isActive ? 'bg-purple-50/50 text-purple-950 font-black' : 'text-slate-800'
+                        className={`px-3.5 py-3 flex items-center justify-between text-xs font-bold transition active:bg-slate-100 dark:active:bg-white/5 ${
+                          isActive
+                            ? 'bg-purple-50/50 dark:bg-purple-950/30 text-purple-950 dark:text-purple-300 font-black'
+                            : 'text-slate-800 dark:text-slate-200'
                         }`}
                       >
                         <div className="flex items-center gap-3">
@@ -565,11 +567,11 @@ export const Header: React.FC = () => {
                         </div>
                         <div className="flex items-center gap-1.5">
                           {item.badge && (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 dark:bg-purple-950 text-purple-800 dark:text-purple-200">
                               {item.badge}
                             </span>
                           )}
-                          <ChevronRight className="w-4 h-4 text-slate-300" />
+                          <ChevronRight className="w-4 h-4 text-slate-300 dark:text-slate-600" />
                         </div>
                       </Link>
                     );
@@ -579,15 +581,15 @@ export const Header: React.FC = () => {
                 <div className="pt-1">
                   <a
                     href="/guide/admin"
-                    className="bg-white rounded-2xl border border-slate-200/60 px-3.5 py-3 flex items-center justify-between text-xs font-bold text-purple-900 shadow-2xs active:bg-slate-50 transition"
+                    className="bg-white dark:bg-[#1c1c1e] rounded-2xl border border-slate-200/60 dark:border-white/10 px-3.5 py-3 flex items-center justify-between text-xs font-bold text-purple-900 dark:text-purple-300 shadow-2xs active:bg-slate-50 dark:active:bg-white/5 transition"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center text-white shrink-0 shadow-2xs">
                         <BookOpen className="w-4 h-4" />
                       </div>
-                      <span>管理者マニュアル & ピッチスライド</span>
+                      <span>管理者マニュアル & ピッチ資料</span>
                     </div>
-                    <span className="text-xs text-slate-400">↗</span>
+                    <span className="text-xs text-slate-400 dark:text-slate-500">↗</span>
                   </a>
                 </div>
               </div>
@@ -598,14 +600,14 @@ export const Header: React.FC = () => {
             {/* ======================================================== */}
             {isCustomerPage && (
               <div className="space-y-1.5">
-                <span className="text-[11px] font-bold text-slate-500 px-3 uppercase tracking-wider block">
+                <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 px-3 uppercase tracking-wider block">
                   顧客メニュー
                 </span>
-                <div className="bg-white rounded-2xl border border-slate-200/60 overflow-hidden divide-y divide-slate-100 shadow-2xs">
+                <div className="bg-white dark:bg-[#1c1c1e] rounded-2xl border border-slate-200/60 dark:border-white/10 overflow-hidden divide-y divide-slate-100 dark:divide-white/5 shadow-2xs">
                   <Link
                     href="/"
                     onClick={() => setIsDrawerOpen(false)}
-                    className="px-3.5 py-3 flex items-center justify-between text-xs font-bold text-slate-800 active:bg-slate-100 transition"
+                    className="px-3.5 py-3 flex items-center justify-between text-xs font-bold text-slate-800 dark:text-slate-200 active:bg-slate-100 dark:active:bg-white/5 transition"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-7 h-7 rounded-lg bg-emerald-500 flex items-center justify-center text-white shrink-0 shadow-2xs">
@@ -613,12 +615,12 @@ export const Header: React.FC = () => {
                       </div>
                       <span>セラピスト検索・予約トップ</span>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-slate-300" />
+                    <ChevronRight className="w-4 h-4 text-slate-300 dark:text-slate-600" />
                   </Link>
                   <Link
                     href="/bookings"
                     onClick={() => setIsDrawerOpen(false)}
-                    className="px-3.5 py-3 flex items-center justify-between text-xs font-bold text-slate-800 active:bg-slate-100 transition"
+                    className="px-3.5 py-3 flex items-center justify-between text-xs font-bold text-slate-800 dark:text-slate-200 active:bg-slate-100 dark:active:bg-white/5 transition"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-7 h-7 rounded-lg bg-blue-500 flex items-center justify-center text-white shrink-0 shadow-2xs">
@@ -628,17 +630,17 @@ export const Header: React.FC = () => {
                     </div>
                     <div className="flex items-center gap-1.5">
                       {myBookingsCount > 0 && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-200">
                           {myBookingsCount}件
                         </span>
                       )}
-                      <ChevronRight className="w-4 h-4 text-slate-300" />
+                      <ChevronRight className="w-4 h-4 text-slate-300 dark:text-slate-600" />
                     </div>
                   </Link>
                   <Link
                     href="/profile"
                     onClick={() => setIsDrawerOpen(false)}
-                    className="px-3.5 py-3 flex items-center justify-between text-xs font-bold text-slate-800 active:bg-slate-100 transition"
+                    className="px-3.5 py-3 flex items-center justify-between text-xs font-bold text-slate-800 dark:text-slate-200 active:bg-slate-100 dark:active:bg-white/5 transition"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-7 h-7 rounded-lg bg-slate-600 flex items-center justify-center text-white shrink-0 shadow-2xs">
@@ -646,14 +648,14 @@ export const Header: React.FC = () => {
                       </div>
                       <span>プロフィール・お届け先住所</span>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-slate-300" />
+                    <ChevronRight className="w-4 h-4 text-slate-300 dark:text-slate-600" />
                   </Link>
                 </div>
 
                 <div className="pt-1">
                   <a
                     href="/guide/customer"
-                    className="bg-white rounded-2xl border border-slate-200/60 px-3.5 py-3 flex items-center justify-between text-xs font-bold text-blue-900 shadow-2xs active:bg-slate-50 transition"
+                    className="bg-white dark:bg-[#1c1c1e] rounded-2xl border border-slate-200/60 dark:border-white/10 px-3.5 py-3 flex items-center justify-between text-xs font-bold text-blue-900 dark:text-blue-300 shadow-2xs active:bg-slate-50 dark:active:bg-white/5 transition"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center text-white shrink-0 shadow-2xs">
@@ -661,7 +663,7 @@ export const Header: React.FC = () => {
                       </div>
                       <span>安心ご利用ガイド & マニュアル</span>
                     </div>
-                    <span className="text-xs text-slate-400">↗</span>
+                    <span className="text-xs text-slate-400 dark:text-slate-500">↗</span>
                   </a>
                 </div>
               </div>
@@ -669,9 +671,9 @@ export const Header: React.FC = () => {
           </div>
 
           {/* iOS Sheet Footer */}
-          <div className="p-4 border-t border-slate-200/80 bg-white/80 backdrop-blur-md pb-safe">
+          <div className="p-4 border-t border-slate-200/80 dark:border-white/10 bg-white/80 dark:bg-black/80 backdrop-blur-md pb-safe">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-500 truncate max-w-[200px]">
+              <span className="text-slate-500 dark:text-slate-400 truncate max-w-[200px]">
                 {isLoggedIn ? currentUser.name : 'ゲスト利用中'}
               </span>
               {isLoggedIn ? (
@@ -679,10 +681,9 @@ export const Header: React.FC = () => {
                   type="button"
                   onClick={() => {
                     setIsDrawerOpen(false);
-                    // ログアウトまたはプロフィールへ
                     router.push('/profile');
                   }}
-                  className="font-bold text-slate-600 hover:text-slate-900"
+                  className="font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
                 >
                   設定を開く
                 </button>
@@ -693,7 +694,7 @@ export const Header: React.FC = () => {
                     setIsDrawerOpen(false);
                     setIsAuthModalOpen(true);
                   }}
-                  className="font-bold text-emerald-700 hover:underline"
+                  className="font-bold text-emerald-700 dark:text-emerald-400 hover:underline"
                 >
                   ログイン / 新規登録
                 </button>
