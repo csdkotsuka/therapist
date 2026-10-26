@@ -827,63 +827,6 @@ export const CustomerView: React.FC = () => {
         </div>
       )}
 
-      {/* トップヘッダーエリア (顧客名挨拶 & 現在地・検索) */}
-      <div className="space-y-3">
-        {/* 顧客名表示バナー & 現在地 */}
-        <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <img
-              src={currentUser.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'}
-              alt={currentUser.name}
-              className="w-11 h-11 rounded-2xl object-cover ring-2 ring-emerald-500/20 shrink-0"
-            />
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs text-slate-500 font-medium">ようこそ</span>
-                <h2 className="text-base font-black text-slate-900">
-                  {currentUser.name} <span className="text-xs font-normal text-slate-500">様</span>
-                </h2>
-              </div>
-              <p className="text-xs text-slate-500 mt-0.5">
-                本日も安心の出張・店舗施術をお届けします
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 text-slate-600 bg-slate-50 px-3.5 py-2 rounded-2xl border border-slate-200/80 w-full sm:w-auto">
-            <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
-              <MapPin className="w-3.5 h-3.5" />
-            </div>
-            <div className="min-w-0">
-              <div className="text-[10px] font-bold text-slate-400">施術場所</div>
-              <div className="text-xs font-bold text-slate-800 truncate max-w-[200px] sm:max-w-[260px]">
-                {userLocation.name}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 検索バー */}
-        <div className="relative">
-          <Search className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="セラピスト名、もみほぐし、理学・作業療法、言語、鍼灸、栄養指導、特典などで検索..."
-            className="w-full pl-12 pr-14 py-3 bg-white border border-slate-200 rounded-3xl text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-emerald-500 focus:border-emerald-500 shadow-2xs transition"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-[11px] font-bold text-slate-400 hover:text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-full px-2 py-0.5 transition"
-            >
-              クリア
-            </button>
-          )}
-        </div>
-      </div>
-
       {!isViewingTherapists ? (
         /* ========================================================
            メニュー選択画面 (2段階ステップ: ①大ジャンル選択 → ②詳細カテゴリー選択)
@@ -893,35 +836,11 @@ export const CustomerView: React.FC = () => {
              Step 1: 大ジャンル (グループ) 選択画面
              -------------------------------------------------------- */
           <div className="space-y-4 pt-1 animate-fadeIn">
-            <div className="flex items-baseline justify-between">
-              <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+            <div>
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
                 施術ジャンルから探す
               </h2>
-              <span className="text-xs text-slate-400">タップして詳細カテゴリーを選択</span>
             </div>
-
-            {/* クイックアクセス: すべての施術者から探す */}
-            <button
-              onClick={() => setSelectedCategory('all')}
-              className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white p-3.5 sm:p-4 rounded-3xl shadow-xs hover:shadow-md transition-all duration-200 active:scale-[0.99] flex items-center justify-between text-left cursor-pointer group"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center text-white shrink-0 shadow-2xs group-hover:scale-105 transition">
-                  <Sparkles className="w-5 h-5 text-amber-300" />
-                </div>
-                <div>
-                  <span className="font-black text-sm sm:text-base tracking-tight">
-                    すべての登録施術者から探す（全{getCategoryCount('all')}名）
-                  </span>
-                  <p className="text-[11px] text-white/80 mt-0.5 hidden sm:block">
-                    現在地からの距離順やオススメ順で一覧表示します
-                  </p>
-                </div>
-              </div>
-              <div className="w-8 h-8 rounded-full bg-white/20 group-hover:bg-white group-hover:text-emerald-800 text-white flex items-center justify-center transition shrink-0 ml-2">
-                <ChevronRight className="w-4 h-4" />
-              </div>
-            </button>
 
             {/* 4つの大ジャンルカード (2x2グリッド) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4.5 pt-1">
@@ -987,64 +906,22 @@ export const CustomerView: React.FC = () => {
              Step 2: 詳細カテゴリー (各職種) 選択画面
              -------------------------------------------------------- */
           <div className="space-y-4 pt-1 animate-fadeIn">
-            {/* 上部ナビゲーション: ジャンル一覧に戻るボタン */}
-            <div className="flex items-center justify-between gap-3 pb-2 border-b border-slate-100">
+            {/* 上部ナビゲーション: ジャンル一覧に戻るボタン（色付きで目立たせる） & 現在のジャンル表示 */}
+            <div className="flex items-center justify-between gap-3 pb-2 border-b border-slate-200">
               <button
                 onClick={() => setSelectedGenre(null)}
-                className="px-3.5 py-2 rounded-2xl bg-white border border-slate-200 hover:border-slate-300 text-slate-700 hover:text-slate-900 text-xs font-bold shadow-2xs hover:shadow-xs transition flex items-center gap-1.5 active:scale-95 group cursor-pointer shrink-0"
+                className="px-4 py-2 rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-black shadow-md hover:shadow-lg transition flex items-center gap-2 active:scale-95 cursor-pointer shrink-0"
               >
-                <ArrowLeft className="w-4 h-4 text-slate-500 group-hover:-translate-x-0.5 transition-transform" />
+                <ArrowLeft className="w-4 h-4 text-emerald-200" />
                 <span>ジャンル一覧に戻る</span>
               </button>
 
               {currentGenreInfo && (
-                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
-                  <span>ジャンル:</span>
-                  <span className="text-slate-900 font-black">{currentGenreInfo.name}</span>
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-slate-100 border border-slate-200 text-xs">
+                  <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">選択中:</span>
+                  <span className="text-slate-900 font-black text-xs sm:text-sm">{currentGenreInfo.name}</span>
                 </div>
               )}
-            </div>
-
-            {/* 選択中ジャンルのバナー案内 */}
-            {currentGenreInfo && (
-              <div className={`p-4 sm:p-5 rounded-3xl ${currentGenreInfo.cardBg} border-2 ${currentGenreInfo.borderColor} flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs`}>
-                <div className="flex items-center gap-3.5">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-2xs ${currentGenreInfo.iconBg}`}>
-                    {React.createElement(currentGenreInfo.icon, { className: 'w-6 h-6' })}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-black text-base sm:text-lg text-slate-900">
-                        {currentGenreInfo.name}
-                      </h3>
-                      <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${currentGenreInfo.badgeBg}`}>
-                        計{getGenreCount(currentGenreInfo.categoryIds)}名在籍
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-600 mt-0.5">
-                      {currentGenreInfo.description}
-                    </p>
-                  </div>
-                </div>
-
-                {/* このジャンル全員をまとめて見るボタン */}
-                <button
-                  onClick={() => setSelectedCategory(`genre_${currentGenreInfo.id}`)}
-                  className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs shrink-0 cursor-pointer self-start sm:self-auto"
-                >
-                  <span>このジャンル全員を見る</span>
-                  <ChevronRight className="w-3.5 h-3.5 text-amber-300" />
-                </button>
-              </div>
-            )}
-
-            <div>
-              <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
-                詳しいカテゴリー（専門職）をお選びください
-              </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                目的の専門職・施術内容をタップすると、対応可能なセラピスト一覧が表示されます
-              </p>
             </div>
 
             {/* ジャンルに属する詳細カテゴリーボタン一覧 */}
@@ -1104,16 +981,16 @@ export const CustomerView: React.FC = () => {
            ======================================================== */
         <div className="space-y-4 animate-fadeIn">
           {/* 上部ナビゲーション: 戻るボタン ＆ 選択中のジャンル/カテゴリー表示 */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-200">
             <div className="flex items-center gap-2">
               <button
                 onClick={() => {
                   setSelectedCategory(null);
                   setSearchQuery('');
                 }}
-                className="px-3.5 py-2 rounded-2xl bg-white border border-slate-200 hover:border-slate-300 text-slate-700 hover:text-slate-900 text-xs font-bold shadow-2xs hover:shadow-xs transition flex items-center gap-1.5 active:scale-95 group shrink-0 cursor-pointer"
+                className="px-4 py-2 rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-black shadow-md hover:shadow-lg transition flex items-center gap-2 active:scale-95 shrink-0 cursor-pointer"
               >
-                <ArrowLeft className="w-4 h-4 text-slate-500 group-hover:-translate-x-0.5 transition-transform" />
+                <ArrowLeft className="w-4 h-4 text-emerald-200" />
                 <span>{selectedGenre ? 'カテゴリー選択に戻る' : 'メニュー一覧に戻る'}</span>
               </button>
 
@@ -1124,7 +1001,7 @@ export const CustomerView: React.FC = () => {
                     setSelectedGenre(null);
                     setSearchQuery('');
                   }}
-                  className="text-[11px] font-bold text-slate-400 hover:text-slate-700 hover:underline px-2 py-1 transition cursor-pointer"
+                  className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border border-slate-200 transition cursor-pointer"
                 >
                   ジャンル一覧へ
                 </button>

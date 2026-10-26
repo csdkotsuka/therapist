@@ -81,10 +81,18 @@ export const Header: React.FC = () => {
     }
   };
 
-  // モード選択のハンドラー
-  const handleModeChange = (modePath: string) => {
+  // モード選択のハンドラー（ルーター競合・戻るボタンでの履歴破損を防ぐため直接遷移）
+  const handleModeChange = (mode: 'customer' | 'therapist' | 'admin') => {
     setIsDrawerOpen(false);
-    router.push(modePath);
+    let target = '/';
+    if (mode === 'admin') {
+      target = '/admin/therapists';
+    } else if (mode === 'therapist') {
+      target = `/therapist/${currentTherapistId}/requests`;
+    }
+    if (typeof window !== 'undefined') {
+      window.location.href = target;
+    }
   };
 
   // セラピスト画面用メニュー項目
@@ -293,8 +301,8 @@ export const Header: React.FC = () => {
               <div className="grid grid-cols-3 gap-2">
                 <button
                   type="button"
-                  onClick={() => handleModeChange('/')}
-                  className={`py-2 px-2 rounded-xl text-xs font-bold transition text-center border ${
+                  onClick={() => handleModeChange('customer')}
+                  className={`py-2 px-2 rounded-xl text-xs font-bold transition text-center border cursor-pointer ${
                     isCustomerPage
                       ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
                       : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
@@ -306,8 +314,8 @@ export const Header: React.FC = () => {
 
                 <button
                   type="button"
-                  onClick={() => handleModeChange('/therapist')}
-                  className={`py-2 px-2 rounded-xl text-xs font-bold transition text-center border ${
+                  onClick={() => handleModeChange('therapist')}
+                  className={`py-2 px-2 rounded-xl text-xs font-bold transition text-center border cursor-pointer ${
                     isTherapistPage
                       ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
                       : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
@@ -319,8 +327,8 @@ export const Header: React.FC = () => {
 
                 <button
                   type="button"
-                  onClick={() => handleModeChange('/admin')}
-                  className={`py-2 px-2 rounded-xl text-xs font-bold transition text-center border ${
+                  onClick={() => handleModeChange('admin')}
+                  className={`py-2 px-2 rounded-xl text-xs font-bold transition text-center border cursor-pointer ${
                     isAdminPage
                       ? 'bg-purple-700 text-white border-purple-700 shadow-xs'
                       : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'

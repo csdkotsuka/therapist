@@ -1,25 +1,23 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { isTherapistCertified } from '@/lib/verification';
 
 export default function TherapistRootRedirectPage() {
-  const router = useRouter();
   const { currentUser, allUsers, therapistProfiles } = useApp();
 
   useEffect(() => {
     const therapists = allUsers.filter((u) => u.role === 'therapist');
     const target = (currentUser.role === 'therapist' ? currentUser : therapists[0]) || null;
 
-    if (target) {
+    if (target && typeof window !== 'undefined') {
       const tp = therapistProfiles[target.id];
       const certified = isTherapistCertified(tp);
       const section = certified ? 'requests' : 'verification';
-      router.replace(`/therapist/${target.id}/${section}`);
+      window.location.replace(`/therapist/${target.id}/${section}`);
     }
-  }, [currentUser, allUsers, therapistProfiles, router]);
+  }, [currentUser, allUsers, therapistProfiles]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white">
