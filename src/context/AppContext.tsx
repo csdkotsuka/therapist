@@ -164,18 +164,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [platformFeeRate, setPlatformFeeRateState] = useState<number>(20);
   const [appBrand, setAppBrandState] = useState<AppBrandId>(DEFAULT_BRAND_ID);
   const [customBranding, setCustomBrandingState] = useState<CustomBrandingSettings>(() => {
+    const defaultBranding: CustomBrandingSettings = {
+      appName: 'Care KURU',
+      appJapaneseName: 'ケアクル',
+      appCatchphrase: 'プロがあなたの元へ届く。出張・店舗ヘルスケア＆ボディケア',
+      selectedIcon: '/branding/icon_carearia_symbol.png',
+      selectedLogo: '/branding/logo_carearia_text.png',
+    };
+
     if (typeof window !== 'undefined') {
       try {
         const saved = localStorage.getItem('carehub_custom_branding');
-        if (saved) return JSON.parse(saved);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          // 以前の仮決定名称（Carearia Go / Carea Go）が残っている場合は新決定名称 'Care KURU' に更新
+          if (!parsed.appName || parsed.appName === 'Carearia Go' || parsed.appName === 'Carea Go') {
+            parsed.appName = defaultBranding.appName;
+            parsed.appJapaneseName = defaultBranding.appJapaneseName;
+            parsed.appCatchphrase = defaultBranding.appCatchphrase;
+            localStorage.setItem('carehub_custom_branding', JSON.stringify(parsed));
+          }
+          return parsed;
+        }
       } catch (e) {
         console.warn('Failed to parse local custom branding', e);
       }
     }
-    return {
-      selectedIcon: '/branding/icon_carearia_symbol.png',
-      selectedLogo: '/branding/logo_carearia_text.png',
-    };
+    return defaultBranding;
   });
 
   // ベースブランドと独立カスタム設定を合成したアクティブブランド

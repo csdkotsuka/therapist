@@ -23,13 +23,13 @@ export default function HomePage() {
     <div className="min-h-screen flex flex-col bg-slate-50/50">
       <Header />
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      {/* Main Content Area (iOS Bottom Tab Bar分の余白を確保) */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
         <CustomerView />
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-200 bg-white py-6 mt-12 text-xs text-slate-500">
+      {/* Footer (ボトムバーと重ならないよう下部にpb-24を確保) */}
+      <footer className="border-t border-slate-200/80 bg-white/60 backdrop-blur-sm py-6 mt-12 pb-24 sm:pb-20 text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div

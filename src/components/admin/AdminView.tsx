@@ -387,7 +387,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
           { id: 'customers' as const, label: `顧客一覧 & 視点切替 (${customers.length})`, icon: Users, desc: '登録顧客リストの確認・代理ログイン視点切替' },
           { id: 'messages' as const, label: `全メッセージ監視 (${messages.length})`, icon: MessageCircle, desc: 'トラブル防止・直契約監視・連絡履歴の確認' },
           { id: 'reviews' as const, label: `口コミ・レビュー管理 (${reviews.length})`, icon: Star, desc: 'お客様評価・口コミのソートとモデレーション' },
-          { id: 'branding' as const, label: 'ブランド・ロゴ設定', icon: Palette, desc: 'サービス名（Carea Go等）やアプリアイコンの一括切替' },
+          { id: 'branding' as const, label: 'ブランド・ロゴ設定', icon: Palette, desc: 'サービス名（Care KURU等）やアプリアイコンの一括切替' },
           { id: 'settings' as const, label: '手数料率・プラットフォーム設定', icon: Sliders, desc: '基本手数料率の設定と保存' },
         ];
         const currentSec = adminSections.find((s) => s.id === activeTab) || adminSections[0];
@@ -2096,6 +2096,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
               <div className="flex flex-wrap items-center gap-1.5">
                 <span className="text-[10px] font-bold text-slate-400">候補から選ぶ:</span>
                 {[
+                  { jp: 'ケアクル', en: 'Care KURU', cp: 'プロがあなたの元へ届く。出張・店舗ヘルスケア＆ボディケア' },
                   { jp: 'ケアリアゴー', en: 'Carearia Go', cp: 'あなたの「したい」叶える場所。' },
                   { jp: 'セラリンク', en: 'Theralink', cp: '内側から輝く、本当の美しさを。' },
                   { jp: 'ケアゴー', en: 'Care Go', cp: 'その一歩が、もっとキレイな未来をつくる。' },
@@ -2109,9 +2110,13 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                       setAppNameInput(preset.en);
                       setAppCatchphraseInput(preset.cp);
                     }}
-                    className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 text-[11px] font-bold text-slate-600 transition border border-slate-200/80 cursor-pointer"
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition border cursor-pointer ${
+                      idx === 0
+                        ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700 shadow-2xs'
+                        : 'bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 text-slate-600 border-slate-200/80'
+                    }`}
                   >
-                    {preset.jp} ({preset.en})
+                    {idx === 0 ? `★ ${preset.jp} (${preset.en})` : `${preset.jp} (${preset.en})`}
                   </button>
                 ))}
               </div>
@@ -2124,7 +2129,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                   type="text"
                   value={appJpNameInput}
                   onChange={(e) => setAppJpNameInput(e.target.value)}
-                  placeholder="例: ケアリアゴー"
+                  placeholder="例: ケアクル"
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-bold focus:outline-emerald-500"
                 />
               </div>
@@ -2135,7 +2140,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                   type="text"
                   value={appNameInput}
                   onChange={(e) => setAppNameInput(e.target.value)}
-                  placeholder="例: Carearia Go"
+                  placeholder="例: Care KURU"
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-bold focus:outline-emerald-500"
                 />
               </div>
@@ -2146,7 +2151,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                   type="text"
                   value={appCatchphraseInput}
                   onChange={(e) => setAppCatchphraseInput(e.target.value)}
-                  placeholder="例: あなたの「したい」叶える場所。"
+                  placeholder="例: プロがあなたの元へ届く。出張・店舗ヘルスケア＆ボディケア"
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-medium focus:outline-emerald-500"
                 />
               </div>
