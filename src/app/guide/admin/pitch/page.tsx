@@ -4,7 +4,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import confetti from 'canvas-confetti';
 import { useApp } from '@/context/AppContext';
-import { AdminGuideNav } from '../AdminGuideNav';
 import {
   ExternalLink,
   Info,
@@ -275,8 +274,6 @@ export default function PitchGuidePage() {
 
   return (
     <div className="space-y-6 pb-16 text-slate-800 dark:text-slate-200">
-      <AdminGuideNav currentTab="pitch" />
-
       {/* フルスクリーンモーダル */}
       {isFullscreenMode && (
         <div className="fixed inset-0 z-50 bg-slate-950 text-white flex flex-col justify-between p-6 sm:p-12 animate-fadeIn select-none print:hidden">

@@ -3,7 +3,6 @@
 import React from 'react';
 import Link from 'next/link';
 import { useApp } from '@/context/AppContext';
-import { AdminGuideNav } from '../AdminGuideNav';
 import {
   ShieldCheck,
   CheckCircle2,
@@ -28,9 +27,7 @@ export default function OperationsGuidePage() {
 
   return (
     <div className="space-y-6 pb-16 text-slate-800 dark:text-slate-200">
-      <AdminGuideNav currentTab="operations" />
-
-        <div className="space-y-8">
+      <div className="space-y-8">
           <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-10 shadow-xl border border-slate-800 print-avoid-break">
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></span>

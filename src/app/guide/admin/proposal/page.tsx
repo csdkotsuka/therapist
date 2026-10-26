@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useApp } from '@/context/AppContext';
-import { AdminGuideNav } from '../AdminGuideNav';
 import {
   ShieldAlert,
   Users,
@@ -235,12 +234,10 @@ export default function ProposalGuidePage() {
 
   return (
     <div className="space-y-6 pb-16 text-slate-800 dark:text-slate-200">
-      <AdminGuideNav currentTab="proposal" />
-
-        /* ========================================================
-           経営上申・事業戦略提案書 (Proposal View)
-           ======================================================== */
-        <div className="space-y-10">
+      {/* ========================================================
+          経営上申・事業戦略提案書 (Proposal View)
+         ======================================================== */}
+      <div className="space-y-10">
           {/* 表紙・エグゼクティブサマリー */}
           <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 text-white rounded-3xl p-6 sm:p-10 shadow-2xl border border-slate-800 relative overflow-hidden print-avoid-break">
             <div className="absolute right-0 top-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />

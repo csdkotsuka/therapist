@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { ArrowLeft } from 'lucide-react';
 
@@ -11,6 +12,10 @@ export default function GuideLayout({
   children: React.ReactNode;
 }) {
   const { currentBrand } = useApp();
+  const pathname = usePathname();
+
+  // /guide/admin/* 以下の個別サブページ（/guide/admin 本文一覧以外）の場合は、管理ドキュメント一覧に戻る
+  const isAdminSubpage = pathname.startsWith('/guide/admin/') && pathname !== '/guide/admin';
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col text-slate-800">
@@ -30,13 +35,23 @@ export default function GuideLayout({
             </div>
           </Link>
 
-          <Link
-            href="/"
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-xs font-bold text-slate-700 transition shadow-2xs"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>アプリトップに戻る</span>
-          </Link>
+          {isAdminSubpage ? (
+            <Link
+              href="/guide/admin"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-xs font-bold text-slate-700 transition shadow-2xs"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>管理ドキュメント一覧に戻る</span>
+            </Link>
+          ) : (
+            <Link
+              href="/"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-xs font-bold text-slate-700 transition shadow-2xs"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>アプリトップに戻る</span>
+            </Link>
+          )}
         </div>
       </header>
 
