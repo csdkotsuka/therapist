@@ -28,6 +28,7 @@ import {
   Search,
   BookOpen,
   ArrowLeftRight,
+  Crown,
 } from 'lucide-react';
 
 export const Header: React.FC = () => {
@@ -578,7 +579,25 @@ export const Header: React.FC = () => {
                   })}
                 </div>
 
-                <div className="pt-1">
+                <div className="pt-1 space-y-1.5">
+                  {/* 会長事前相談・決裁アジェンダへの直通リンク */}
+                  <Link
+                    href="/guide/admin/agenda"
+                    onClick={() => setIsDrawerOpen(false)}
+                    className="bg-emerald-50 dark:bg-emerald-950/40 rounded-2xl border border-emerald-300 dark:border-emerald-800 px-3.5 py-3 flex items-center justify-between text-xs font-bold text-emerald-900 dark:text-emerald-200 shadow-2xs active:bg-emerald-100 dark:active:bg-emerald-900/40 transition"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center text-white shrink-0 shadow-2xs">
+                        <Crown className="w-4 h-4 text-amber-300" />
+                      </div>
+                      <div className="flex flex-col text-left">
+                        <span className="font-black">👑 会長事前相談・決裁アジェンダ</span>
+                        <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-normal">重要確認事項・基本設計報告</span>
+                      </div>
+                    </div>
+                    <span className="text-xs text-emerald-600 dark:text-emerald-400">↗</span>
+                  </Link>
+
                   <a
                     href="/guide/admin"
                     className="bg-white dark:bg-[#1c1c1e] rounded-2xl border border-slate-200/60 dark:border-white/10 px-3.5 py-3 flex items-center justify-between text-xs font-bold text-purple-900 dark:text-purple-300 shadow-2xs active:bg-slate-50 dark:active:bg-white/5 transition"
@@ -587,7 +606,7 @@ export const Header: React.FC = () => {
                       <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center text-white shrink-0 shadow-2xs">
                         <BookOpen className="w-4 h-4" />
                       </div>
-                      <span>管理者マニュアル & ピッチ資料</span>
+                      <span>役員ドキュメントハブ（ピッチ・計画・運用）</span>
                     </div>
                     <span className="text-xs text-slate-400 dark:text-slate-500">↗</span>
                   </a>

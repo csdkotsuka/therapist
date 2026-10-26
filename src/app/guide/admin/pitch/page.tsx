@@ -1,0 +1,1318 @@
+'use client';
+
+import React, { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
+import confetti from 'canvas-confetti';
+import { useApp } from '@/context/AppContext';
+import { AdminGuideNav } from '../AdminGuideNav';
+import {
+  ExternalLink,
+  Info,
+  ShieldCheck,
+  CheckCircle2,
+  FileText,
+  AlertTriangle,
+  Activity,
+  Sparkles,
+  Printer,
+  ChevronRight,
+  ChevronLeft,
+  Building,
+  Target,
+  Award,
+  Layers,
+  Sliders,
+  Compass,
+  CreditCard,
+  Presentation,
+  Clock,
+  Mic,
+  Copy,
+  Check,
+  Play,
+  QrCode,
+  Smartphone,
+  Type,
+  Maximize2,
+  Minimize2,
+  FlameKindling,
+  Users,
+  HeartHandshake,
+  TrendingUp,
+  X,
+  Send,
+  BadgeCheck,
+  Lock,
+} from 'lucide-react';
+
+export default function PitchGuidePage() {
+  const { currentBrand } = useApp();
+  const [activeSlideIndex, setActiveSlideIndex] = useState<number>(0);
+  const [isFullscreenMode, setIsFullscreenMode] = useState<boolean>(false);
+  const [copiedSlide, setCopiedSlide] = useState<number | null>(null);
+  const [copiedAll, setCopiedAll] = useState<boolean>(false);
+  const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
+  const [timerSeconds, setTimerSeconds] = useState<number>(0);
+
+  // 創業パートナー登録フォーム用ステート
+  const [formState, setFormState] = useState({
+    name: '',
+    qualification: 'PT',
+    customQualification: '',
+    email: '',
+    phone: '',
+    motivation: '',
+    question: '',
+    wantManagement: false,
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const handleNativeFormSubmit = () => {
+    setIsSubmitting(true);
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setIsSubmitted(true);
+      try {
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#047857', '#0d9488', '#f59e0b', '#10b981', '#34d399'],
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }, 700);
+  };
+
+  const QUALIFICATION_OPTIONS = [
+    { id: 'PT', label: '理学療法士 (PT)', category: '医療国家資格', desc: '運動機能・自立回復' },
+    { id: 'OT', label: '作業療法士 (OT)', category: '医療国家資格', desc: '生活・精神機能回復' },
+    { id: '助産師', label: '助産師', category: '医療国家資格', desc: '産前産後・母子ケア' },
+    { id: '鍼灸', label: '鍼灸師 (はり・きゅう)', category: '国家資格', desc: '東洋医学・自律神経' },
+    { id: '柔整', label: '柔道整復師', category: '国家資格', desc: '骨関節・外傷ケア' },
+    { id: 'マッサージ', label: 'あん摩マッサージ指圧師', category: '国家資格', desc: '筋緊張・循環改善' },
+    { id: 'エステ', label: '訪問エステ・美容セラピスト', category: '美容・サロン', desc: '整肌・エイジングケア' },
+    { id: '整体', label: '整体師 / カイロプラクター', category: 'ヘルスケア', desc: '骨格調整・姿勢改善' },
+    { id: 'トレーナー', label: 'パーソナルトレーナー', category: 'フィットネス', desc: '運動指導・肉体改造' },
+    { id: 'その他', label: 'その他（自由入力）', category: 'その他', desc: '専門分野・資格を記入' },
+  ];
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (isTimerRunning) {
+      interval = setInterval(() => {
+        setTimerSeconds((prev) => prev + 1);
+      }, 1000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isTimerRunning]);
+
+  const formatTimer = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  };
+
+  const presentationSlides = [
+    {
+      id: 1,
+      title: 'プロフェッショナルの解放。',
+      subTitle: '医療・美・健康の常識を覆す「プロフェッショナル連合軍」構想',
+      presenter: '大塚 和宏 / yaShine（理学療法士・元教員・現システムエンジニア）',
+      timeRange: '00:00 〜 00:30 (30秒)',
+      layoutName: 'オープニング・宣言型（大迫力タイトル ＆ ビジョン提示）',
+      keynoteFontSizes: 'メイン見出し: 60〜72pt / 登壇者名: 28〜32pt / キャッチ: 24〜28pt',
+      punchlines: [
+        '#プロフェッショナルの解放',
+        '#安売り競争の終焉',
+        '#美と健康の連合軍',
+        '#会長直下プロジェクト',
+      ],
+      coreMessage: '高度な専門技術を持つプロが、正当に評価され、自分の腕一本で誇り高く稼げる世界を創る。',
+      slideBulleted: [
+        '【登壇者】大塚 和宏 / yaShine（理学療法士・元教員・現システムエンジニア）',
+        '【プロジェクト】「医療」「美」「健康」の分断を壊し、プロの価値を最大化する新インフラ',
+        '【対象】理学療法士からエステ・整体・トレーナーまで、確かな腕を持つすべての仲間たち',
+      ],
+      speakerPoints: [
+        '自己紹介は短く強烈に。「理学療法士で元教員、今はエンジニアの大塚です」。',
+        '「今日はシステムの取扱説明書を話に来たのではありません。皆さんの腕と技術が正当に報われ、誇らしく稼げる未来を創る話をしに来ました！」と熱く宣言。',
+      ],
+    },
+    {
+      id: 2,
+      title: 'なぜ、本物の技術を持つプロが報われないのか？',
+      subTitle: '保険点数の壁 × 安売りクーポン競争のジレンマ',
+      presenter: '大塚 和宏 / yaShine',
+      timeRange: '00:30 〜 01:20 (50秒)',
+      layoutName: '左右2カラム・共通の敵（医療職の壁 ⇄ サロン・整体の壁）',
+      keynoteFontSizes: 'スライド見出し: 48〜54pt / カード見出し: 26〜30pt / 本文: 20〜22pt',
+      punchlines: [
+        '#死ぬほど勉強したのに',
+        '#月給20数万の頭打ち',
+        '#クーポン荒らしで疲弊',
+        '#この構造おかしくないですか？',
+      ],
+      coreMessage: 'プロが安売りさせられ、生活者は信頼できるプロに出会えない難民になっている。',
+      slideBulleted: [
+        '【医療職の現実】国家資格を取り、命と身体を支える超高度スキルがあるのに、保険点数の壁で給料は頭打ち。',
+        '【サロン・整体の現実】確かな現場力があるのに、無資格もみほぐしと一括りにされ、ポータルのクーポン安売りに巻き込まれる。',
+        '【生活者の悲劇】病院リハを断られた人、どこへ行けば本物のプロに会えるか分からない人が地域に溢れている。',
+      ],
+      speakerPoints: [
+        '会場の理学療法士・施術者に目を合わせ、「おかしくないですか？」と共感を呼び起こす。',
+        '「プロが疲弊し、怪しい民間療法が儲かり、顧客が迷子になっている。この業界の理不尽を今こそ終わらせたい」と訴えかける。',
+      ],
+    },
+    {
+      id: 3,
+      title: '「治す」医療 ×「癒やし・美」サロンが手を組む必然性',
+      subTitle: '健康と美のグラデーション ｜ 人生100年時代を美しく健康に生ききるために',
+      presenter: '大塚 和宏 / yaShine',
+      timeRange: '01:20 〜 02:20 (60秒)',
+      layoutName: '3カラム・チームヘルスケア連携図（医療の限界 ⇄ 美容の現場力 ➔ 連合軍結成）',
+      keynoteFontSizes: 'スライド見出し: 48〜54pt / カラム見出し: 24〜28pt / 本文: 18〜20pt',
+      punchlines: [
+        '#健康と美のグラデーション',
+        '#治すだけじゃ幸せになれない',
+        '#医療の壁を壊す',
+        '#身体のプロフェッショナル連合軍',
+      ],
+      coreMessage: '「治す（医療）」と「整える・美しくする（美容）」が統合して初めて、一人の人生を一生涯支えられる。',
+      slideBulleted: [
+        '【医療職の限界】痛みは取れる。でも日常の疲れを癒やし、肌を綺麗にし、美しいボディを作るのはエステ・整体の専門分野。',
+        '【サロンのジレンマ】美と活力を届ける素晴らしい現場力があるが、重い病気のリスクや「国家資格がない信頼の壁」がある。',
+        '【必然の答え】だからこそ手を組む！ PTが作ったアプリに呼ぶのではない。医療と美の壁を壊す「プロ連合軍」の結成！',
+      ],
+      speakerPoints: [
+        'ここが一番重要！「PT発祥だけど、エステや整体の皆さんの力が絶対に不可欠なんです」とリスペクトを込めて語る。',
+        '「痛みを取る医療と、美と活力をつくるサロンがタッグを組んで初めて、顧客の健康寿命をまるごと背負える」という大義を示す。',
+      ],
+    },
+    {
+      id: 4,
+      title: 'なぜ、今この船に乗るべきなのか？【3大実利】',
+      subTitle: '安売りからの完全脱却 × 最高峰の信頼ステータス',
+      presenter: '大塚 和宏 / yaShine',
+      timeRange: '02:20 〜 03:20 (60秒)',
+      layoutName: '3大インセンティブ・グリッド（最高級の下駄 × 相互送客 × スマホ完結高還元）',
+      keynoteFontSizes: 'スライド見出し: 48〜54pt / メリット見出し: 26〜30pt / 説明: 18〜20pt',
+      punchlines: [
+        '#最高級の下駄を履く',
+        '#クーポン荒らしからの脱却',
+        '#顧客の相互紹介ループ',
+        '#初期月額0円で高還元',
+      ],
+      coreMessage: '奪い合うのではなく、仲間で顧客を回し合い、適正価格で勝負できる最高峰のブランド力を手に入れる。',
+      slideBulleted: [
+        '①【最高級の下駄を履ける】厳格な資格・身元審査を通った証。クーポン安売りから抜け出し、適正価格で選ばれるステータス。',
+        '②【顧客の相互紹介ループ】痛みが引いた患者をエステ・ピラティスへ。重い痛みを抱える客をPTへ。お互いに客を回し合う。',
+        '③【初期・月額 0 円 ＆ 高還元】店舗・固定費ゼロ。事前カード決済で未回収・ドタキャンリスクも完全ゼロ。',
+      ],
+      speakerPoints: [
+        '「ホットペッパーの値下げ競争はもう終わりにしましょう！」と力強く切り込む。',
+        '「医療職の患者がエステに来て、エステのお客様の身体の悩みをPTがバックアップする。これが仲間同士の最強のエコシステムです」。',
+      ],
+    },
+    {
+      id: 5,
+      title: '会長と400人の仲間だから起こせる業界革命',
+      subTitle: 'これは僕一人のアプリではない。全員で創る次世代インフラ',
+      presenter: '大塚 和宏 / yaShine',
+      timeRange: '03:20 〜 04:15 (55秒)',
+      layoutName: '左右共犯者レイアウト（施術者への呼びかけ ⇄ 経営者・リーダーへの呼びかけ）',
+      keynoteFontSizes: 'スライド見出し: 48〜54pt / ターゲット見出し: 26〜30pt / 本文: 20〜22pt',
+      punchlines: [
+        '#会長の心意気による事業化',
+        '#400人の仲間が共犯者',
+        '#社員の健康と美を守るインフラ',
+        '#創業パートナー枠は限定',
+      ],
+      coreMessage: '会長の想いと400人の情熱があるからこそ成立する。施術する人も、しない人も、全員に役割がある。',
+      slideBulleted: [
+        '【施術ができるプロへ】自分の腕一本で新しい収入の柱を作ってください。誇りと正当な報酬をその手に。',
+        '【施術をしない経営者・リーダーへ】ご自身・ご家族、そして大切な社員の健康と美を守るインフラとして使い倒してください！',
+        '【限定枠の告知】各地域・各ジャンルで「初期シードパートナー（創業認定枠）」の席を限定。早い者勝ちです。',
+      ],
+      speakerPoints: [
+        '会場全体（施術者＋経営者・リーダー）を巻き込む！「施術をしない経営者の皆さん、社員の健康を守る福利厚生として使ってください！」。',
+        '「地元のライバルに枠を取られる前に、今すぐこの船に乗ってください！」と適度な焦燥感と熱気を作る。',
+      ],
+    },
+    {
+      id: 6,
+      title: '最初の乗組員として、業界の常識をひっくり返そう！',
+      subTitle: '健康的に長生きし、美しくあり続ける。みんなが望む未来を、ここから創る',
+      presenter: '大塚 和宏 / yaShine',
+      timeRange: '04:15 〜 05:00 (45秒)',
+      layoutName: 'CTA・クロージング（先行登録QR ＋ 創業相談デスク案内 ＋ 力強い決断）',
+      keynoteFontSizes: 'メイン見出し: 50〜60pt / サブ見出し: 26〜30pt / ボタン・QR: 22〜26pt',
+      punchlines: [
+        '#最初の乗組員になれ',
+        '#先行登録所要3分',
+        '#完全無料・リスクゼロ',
+        '#歴史を一緒に創ろう',
+      ],
+      coreMessage: '今日、この400人の熱気から、日本の美と健康の新しい常識が始まります。',
+      slideBulleted: [
+        '【スマホで今すぐ先行登録】登録所要3分 ｜ 初期費用・月額利用料 完全 0 円',
+        '【創業パートナー相談デスク】「地域のマネジメントや運営側に回りたい」方は終了後デスクへ直行！',
+        '【未来への約束】誰かの健康と美を支え、自分たちも誇り高く豊かになる。一緒に新しい時代を創りましょう！',
+      ],
+      speakerPoints: [
+        '最高潮のテンションで会場全体を見渡し、熱い握手を求めるように語りかける。',
+        '「ご清聴ありがとうございました！ 創業パートナーとして、皆さんと一緒に船を出せることを楽しみにしています！」と深々とお辞儀。',
+      ],
+    },
+  ];
+
+
+  const handleCopyAll = () => {
+    const text = presentationSlides
+      .map(
+        (s) =>
+          `========================================\n【スライド ${s.id}】${s.title}\n時間目安: ${s.timeRange}\nサブタイトル: ${s.subTitle}\nKeynote推奨文字サイズ: ${s.keynoteFontSizes}\nパンチライン: ${s.punchlines.join(' ')}\n\n■ スライド投影テキスト:\n${s.slideBulleted.map((p) => `・${p}`).join('\n')}\n\n■ 登壇メモ・語るポイント:\n${s.speakerPoints.map((n) => `▶ ${n}`).join('\n')}\n`
+      )
+      .join('\n\n');
+
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      setCopiedAll(true);
+      setTimeout(() => setCopiedAll(false), 2500);
+    }
+  };
+
+
+  const handleCopySingle = (slide: typeof presentationSlides[0]) => {
+    const text = `【スライド ${slide.id}】${slide.title}\n時間目安: ${slide.timeRange}\nサブタイトル: ${slide.subTitle}\nKeynote推奨文字サイズ: ${slide.keynoteFontSizes}\nパンチライン: ${slide.punchlines.join(' ')}\n\n■ スライド投影テキスト:\n${slide.slideBulleted.map((p) => `・${p}`).join('\n')}\n\n■ 登壇メモ:\n${slide.speakerPoints.map((n) => `▶ ${n}`).join('\n')}`;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      setCopiedSlide(slide.id);
+      setTimeout(() => setCopiedSlide(null), 2000);
+    }
+  };
+
+
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (!isFullscreenMode) return;
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
+        setActiveSlideIndex((prev) => Math.min(prev + 1, presentationSlides.length - 1));
+      } else if (e.key === 'ArrowLeft') {
+        setActiveSlideIndex((prev) => Math.max(prev - 1, 0));
+      } else if (e.key === 'Escape') {
+        setIsFullscreenMode(false);
+      }
+    },
+    [isFullscreenMode, presentationSlides.length]
+  );
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
+
+  const currentSlide = presentationSlides[activeSlideIndex];
+
+  return (
+    <div className="space-y-6 pb-16 text-slate-800 dark:text-slate-200">
+      <AdminGuideNav currentTab="pitch" />
+
+      {/* フルスクリーンモーダル */}
+      {isFullscreenMode && (
+        <div className="fixed inset-0 z-50 bg-slate-950 text-white flex flex-col justify-between p-6 sm:p-12 animate-fadeIn select-none print:hidden">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+            <div className="flex items-center gap-3">
+              <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-mono font-bold rounded-full border border-emerald-500/40">
+                SLIDE {currentSlide.id} / {presentationSlides.length}
+              </span>
+              <span className="text-xs text-slate-400 font-mono">
+                推奨時間: {currentSlide.timeRange}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 bg-slate-900 px-3 py-1.5 rounded-full border border-slate-800 font-mono text-xs">
+                <Clock className="w-3.5 h-3.5 text-amber-400" />
+                <span className="text-amber-400 font-bold">{formatTimer(timerSeconds)}</span>
+                <button
+                  onClick={() => setIsTimerRunning(!isTimerRunning)}
+                  className="ml-1 text-[10px] text-slate-400 hover:text-white underline cursor-pointer"
+                >
+                  {isTimerRunning ? 'PAUSE' : 'START'}
+                </button>
+              </div>
+
+              <button
+                onClick={() => setIsFullscreenMode(false)}
+                className="w-9 h-9 rounded-full bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition border border-slate-800 cursor-pointer"
+                title="ESCキーでも終了できます"
+              >
+                <Minimize2 className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          <div className="flex-1 flex flex-col justify-center max-w-5xl mx-auto w-full my-8 space-y-8">
+            <div className="space-y-3">
+              <span className="text-emerald-400 text-sm sm:text-base font-bold font-serif tracking-wider">
+                {currentSlide.subTitle}
+              </span>
+              <h2 className="text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-tight leading-tight font-serif">
+                {currentSlide.title}
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
+              <div className="space-y-4">
+                <span className="text-xs uppercase font-mono tracking-widest text-emerald-400 font-bold flex items-center gap-1.5">
+                  <Play className="w-3.5 h-3.5 fill-emerald-400" />
+                  Key Message
+                </span>
+                <div className="space-y-3">
+                  {currentSlide.punchlines.map((p, idx) => (
+                    <p key={idx} className="text-xl sm:text-2xl font-bold text-slate-100 leading-snug border-l-4 border-emerald-500 pl-4">
+                      {p}
+                    </p>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-slate-900/90 rounded-3xl p-6 border border-slate-800 space-y-3">
+                <span className="text-xs uppercase font-mono tracking-widest text-slate-400 font-bold flex items-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5" />
+                  Visual Points
+                </span>
+                <ul className="space-y-2 text-sm text-slate-300">
+                  {currentSlide.slideBulleted.map((item, idx) => (
+                    <li key={idx} className="flex items-start gap-2">
+                      <span className="text-emerald-400 font-bold">・</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between border-t border-slate-800 pt-4">
+            <button
+              onClick={() => setActiveSlideIndex((prev) => Math.max(prev - 1, 0))}
+              disabled={activeSlideIndex === 0}
+              className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold transition flex items-center gap-1.5 border border-slate-800 cursor-pointer"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span>前へ (←キー)</span>
+            </button>
+
+            <div className="flex items-center gap-2">
+              {presentationSlides.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setActiveSlideIndex(idx)}
+                  className={`w-2.5 h-2.5 rounded-full transition-all cursor-pointer ${
+                    idx === activeSlideIndex ? 'w-8 bg-emerald-400' : 'bg-slate-800 hover:bg-slate-700'
+                  }`}
+                />
+              ))}
+            </div>
+
+            <button
+              onClick={() => setActiveSlideIndex((prev) => Math.min(prev + 1, presentationSlides.length - 1))}
+              disabled={activeSlideIndex === presentationSlides.length - 1}
+              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-emerald-950/50 cursor-pointer"
+            >
+              <span>次へ (スペース / →キー)</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-10">
+          {/* プレゼン・サマリーカード */}
+          <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white rounded-3xl p-6 sm:p-10 shadow-2xl border border-slate-700 relative overflow-hidden print-avoid-break">
+            <div className="absolute right-0 top-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="relative z-10 space-y-5">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-black uppercase tracking-wider border border-emerald-500/30 flex items-center gap-1.5 font-mono">
+                    <FlameKindling className="w-3.5 h-3.5 text-amber-400" />
+                    High-Impact Pitch Deck
+                  </span>
+                  <span className="text-xs sm:text-sm text-slate-300 font-bold font-serif">
+                    登壇者: 大塚 和宏 / yaShine ｜ 対象: 熱量の高い経営者・リーダー・施術者 約400名
+                  </span>
+                </div>
+
+                {/* ★ フルスクリーンスライドショー起動ボタン */}
+                <button
+                  onClick={() => setIsFullscreenMode(true)}
+                  className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs sm:text-sm font-black rounded-2xl shadow-lg shadow-emerald-950/40 transition flex items-center gap-2 cursor-pointer border border-emerald-400/30"
+                  title="全画面プロジェクター投影モードを開始します"
+                >
+                  <Maximize2 className="w-4 h-4" />
+                  <span>大画面スライドショー開始 (投影モード)</span>
+                </button>
+              </div>
+
+              <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight leading-snug font-serif">
+                プロフェッショナルの解放。<br />
+                <span className="text-emerald-400 text-xl sm:text-2xl font-bold font-sans">
+                  医療・美・健康の常識を覆す「プロフェッショナル連合軍」構想
+                </span>
+              </h1>
+
+              {/* 400人を巻き込む「3つのピース」の宣言 */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 text-xs font-sans">
+                <div className="p-3.5 rounded-2xl bg-slate-800/90 border border-slate-700 space-y-1">
+                  <strong className="text-amber-300 font-bold block flex items-center gap-1.5">
+                    <span>1. 共通の敵（業界の理不尽）</span>
+                  </strong>
+                  <p className="text-slate-300 leading-relaxed text-[11px]">
+                    死ぬほど勉強した国家資格者が保険点数で安売りされ、街の無資格が儲かり、生活者が迷子になっている矛盾を打破。
+                  </p>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-slate-800/90 border border-slate-700 space-y-1">
+                  <strong className="text-teal-300 font-bold block flex items-center gap-1.5">
+                    <span>2. 大義（健康と美のグラデーション）</span>
+                  </strong>
+                  <p className="text-slate-300 leading-relaxed text-[11px]">
+                    「治す医療」と「癒やす・美しくするサロン」がタッグを組んで初めて、顧客の健康寿命を一生涯支えられる。
+                  </p>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-slate-800/90 border border-slate-700 space-y-1">
+                  <strong className="text-emerald-300 font-bold block flex items-center gap-1.5">
+                    <span>3. 会長と400人を共犯者に</span>
+                  </strong>
+                  <p className="text-slate-300 leading-relaxed text-[11px]">
+                    施術者は新しい高収入の柱を作り、経営者は社員を守るインフラとして使い倒す。全員が主役の業界革命。
+                  </p>
+                </div>
+              </div>
+
+              {/* タイマーツール ＆ 原稿一括コピー */}
+              <div className="pt-3 border-t border-slate-700/80 flex flex-wrap items-center justify-between gap-4 font-sans">
+                <div className="flex flex-wrap items-center gap-6 text-xs sm:text-sm text-slate-300 font-medium">
+                  <div>
+                    <span className="text-slate-400 block text-xs">発表持ち時間</span>
+                    <strong className="text-white font-bold flex items-center gap-1">
+                      <Clock className="w-4 h-4 text-emerald-400" />
+                      5分00秒（アップテンポ）
+                    </strong>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-xs">スライド構成</span>
+                    <strong className="text-emerald-400 font-bold">全6スライド（厳選・大迫力）</strong>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-xs">デザイン</span>
+                    <strong className="text-white font-bold font-serif">Keynoteセージグラデーション × 明朝体</strong>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 bg-slate-900/90 border border-slate-700 px-3 py-1.5 rounded-xl">
+                    <span className="text-xs text-slate-400 font-mono">タイマー:</span>
+                    <span className="text-sm font-mono font-bold text-emerald-400">{formatTimer(timerSeconds)}</span>
+                    <button
+                      onClick={() => setIsTimerRunning(!isTimerRunning)}
+                      className="px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-bold transition flex items-center gap-1 cursor-pointer"
+                    >
+                      <Play className="w-3 h-3" />
+                      {isTimerRunning ? '一時停止' : 'スタート'}
+                    </button>
+                    {timerSeconds > 0 && (
+                      <button
+                        onClick={() => {
+                          setIsTimerRunning(false);
+                          setTimerSeconds(0);
+                        }}
+                        className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs transition cursor-pointer"
+                      >
+                        リセット
+                      </button>
+                    )}
+                  </div>
+
+                  <button
+                    onClick={handleCopyAll}
+                    className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow transition flex items-center gap-1.5 cursor-pointer"
+                    title="全スライドのテキストと登壇メモを一括コピー"
+                  >
+                    {copiedAll ? <Check className="w-4 h-4 text-emerald-200" /> : <Copy className="w-4 h-4" />}
+                    <span>{copiedAll ? 'コピー完了！' : '全スライドを一括コピー'}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ストーリーライン・クイックナビ */}
+          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2 font-serif">
+                  <Clock className="w-5 h-5 text-emerald-600" />
+                  <span>5分間の熱狂ストーリーライン（全6スライド）</span>
+                </h3>
+              </div>
+              <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full">
+                問いかけ ➔ 共通の敵 ➔ 連合軍の大義 ➔ 3大実利 ➔ 共犯者へ ➔ 決断
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 pt-1 font-serif">
+              {presentationSlides.map((s, idx) => (
+                <div
+                  key={s.id}
+                  onClick={() => {
+                    setActiveSlideIndex(idx);
+                    const el = document.getElementById(`slide-${s.id}`);
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className={`p-3 rounded-2xl border transition cursor-pointer flex flex-col justify-between text-left ${
+                    activeSlideIndex === idx
+                      ? 'border-emerald-600 bg-emerald-50/70 shadow-xs ring-2 ring-emerald-500/20'
+                      : 'border-slate-200 bg-slate-50 hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-[11px] font-bold font-sans">
+                      <span className="text-emerald-700">SLIDE {s.id}</span>
+                      <span className="text-slate-400 font-mono">{s.timeRange.split(' ')[2]}</span>
+                    </div>
+                    <div className="text-xs font-bold text-slate-800 line-clamp-1">{s.title}</div>
+                  </div>
+                  <div className="text-[10px] text-slate-500 font-mono font-sans mt-2 pt-1 border-t border-slate-200/60">
+                    {s.timeRange.split(' ')[0]}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 各スライド詳細カード */}
+          <div className="space-y-12">
+            {presentationSlides.map((slide, index) => (
+              <div
+                key={slide.id}
+                id={`slide-${slide.id}`}
+                className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden print-avoid-break transition hover:shadow-md"
+              >
+                {/* スライドヘッダー */}
+                <div className="p-4 sm:px-6 bg-slate-900 text-white flex flex-wrap items-center justify-between gap-3 border-b border-slate-800">
+                  <div className="flex items-center gap-3">
+                    <span className="px-3 py-1 rounded-xl bg-emerald-500 text-slate-950 font-black text-xs sm:text-sm tracking-wider font-mono">
+                      SLIDE {slide.id}
+                    </span>
+                    <div>
+                      <h3 className="font-black text-sm sm:text-base text-white font-serif">{slide.title}</h3>
+                      <div className="text-xs text-slate-400 flex items-center gap-3 mt-0.5 font-sans">
+                        <span className="text-emerald-400 font-mono flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5" />
+                          {slide.timeRange}
+                        </span>
+                        <span>•</span>
+                        <span className="text-slate-300">形式: {slide.layoutName}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        setActiveSlideIndex(index);
+                        setIsFullscreenMode(true);
+                      }}
+                      className="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer font-sans"
+                      title="このスライドからフルスクリーン投影"
+                    >
+                      <Maximize2 className="w-3.5 h-3.5" />
+                      <span>投影モード</span>
+                    </button>
+
+                    <button
+                      onClick={() => handleCopySingle(slide)}
+                      className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer border border-slate-700 font-sans"
+                      title="このスライドのテキストと登壇メモをコピー"
+                    >
+                      {copiedSlide === slide.id ? (
+                        <>
+                          <Check className="w-3.5 h-3.5 text-emerald-400" />
+                          <span className="text-emerald-400">コピー済</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3.5 h-3.5 text-slate-400" />
+                          <span>原稿コピー</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="p-6 sm:p-8 space-y-6">
+                  {/* スライド画面プレビュー（Keynoteセージグラデーション × 明朝体） */}
+                  <div className="space-y-2">
+                    <div className="flex flex-wrap items-center justify-between text-xs font-bold text-slate-500 gap-2 font-sans">
+                      <span className="flex items-center gap-1.5 uppercase tracking-wider text-slate-700 font-serif">
+                        <Presentation className="w-4 h-4 text-emerald-600" />
+                        【Keynote 16:9 スライド画面プレビュー（推奨レイアウト ＆ 文字階層）】
+                      </span>
+                      <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-md text-[11px] font-mono">
+                        Keynote推奨: {slide.keynoteFontSizes}
+                      </span>
+                    </div>
+
+                    <div
+                      className="w-full aspect-[16/9] max-h-[480px] rounded-2xl p-6 sm:p-10 flex flex-col justify-between shadow-md relative overflow-hidden select-none border border-slate-300 font-serif"
+                      style={{
+                        background: 'linear-gradient(135deg, #879798 0%, #9cb0af 28%, #c58d81 68%, #b27b72 82%, #798086 100%)',
+                      }}
+                    >
+                      <div className="absolute top-1/4 right-1/6 w-[450px] h-[300px] bg-[#c78b7e]/45 rounded-full blur-3xl pointer-events-none" />
+                      <div className="absolute -bottom-10 left-1/4 w-[400px] h-[250px] bg-[#a2b4b3]/40 rounded-full blur-3xl pointer-events-none" />
+
+                      {/* スライド内ヘッダー */}
+                      <div className="relative z-10 flex items-center justify-between border-b border-slate-700/20 pb-2 text-slate-800 font-sans">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="w-6 h-6 rounded-md overflow-hidden shrink-0 shadow-xs"
+                            dangerouslySetInnerHTML={{ __html: currentBrand.iconSvg }}
+                          />
+                          <span className="text-xs sm:text-sm font-bold tracking-wider text-slate-800 font-serif">
+                            {currentBrand.japaneseName}
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-slate-600 font-mono tracking-widest font-bold">
+                          SLIDE {slide.id} / 06
+                        </div>
+                      </div>
+
+                      {/* スライド内メイン */}
+                      <div className="relative z-10 my-auto py-2">
+                        {slide.id === 1 && (
+                          <div className="space-y-4 max-w-2xl text-left py-4">
+                            <div className="space-y-2">
+                              <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-wide leading-tight drop-shadow-xs">
+                                プロフェッショナルの解放。
+                              </h2>
+                              <p className="text-base sm:text-xl text-slate-800 font-normal tracking-wide">
+                                大塚 和宏 / yaShine
+                              </p>
+                            </div>
+                            <div className="pt-2">
+                              <span className="inline-block px-3.5 py-1.5 rounded-xl bg-white/80 backdrop-blur-md text-slate-900 text-xs sm:text-base font-sans font-medium border border-white/60 shadow-xs">
+                                医療・美・健康の常識を覆す「プロフェッショナル連合軍」構想
+                              </span>
+                            </div>
+                          </div>
+                        )}
+
+                        {slide.id === 2 && (
+                          <div className="space-y-3">
+                            <h3 className="text-xl sm:text-3xl font-black text-slate-900 tracking-wide drop-shadow-xs">
+                              なぜ、本物の技術を持つプロが報われないのか？
+                            </h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                              <div className="bg-white/80 backdrop-blur-md border border-white/60 rounded-2xl p-4 space-y-2 shadow-xs">
+                                <div className="text-rose-900 text-xs sm:text-sm font-black">
+                                  【医療職の現実】保険点数の壁
+                                </div>
+                                <p className="text-[11px] sm:text-xs text-slate-700 leading-relaxed font-sans">
+                                  国家資格を取り命や身体を支える超高度スキルがあるのに、保険点数に縛られて給料は頭打ち。病院の中でスキルを安売りさせられている。
+                                </p>
+                              </div>
+                              <div className="bg-white/80 backdrop-blur-md border border-white/60 rounded-2xl p-4 space-y-2 shadow-xs">
+                                <div className="text-rose-900 text-xs sm:text-sm font-black">
+                                  【サロン・整体の現実】安売りクーポン競争
+                                </div>
+                                <p className="text-[11px] sm:text-xs text-slate-700 leading-relaxed font-sans">
+                                  確かな現場力があるのに、無資格もみほぐしと一括りにされポータルの値下げ競争で疲弊。顧客も「誰を信じればいいか分からない難民」に。
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {slide.id === 3 && (
+                          <div className="space-y-3">
+                            <h3 className="text-xl sm:text-3xl font-black text-slate-900 tracking-wide drop-shadow-xs">
+                              「治す」医療 ×「癒やし・美」サロンが手を組む必然性
+                            </h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                              <div className="bg-white/80 backdrop-blur-md border border-white/60 rounded-2xl p-3.5 space-y-1.5 shadow-xs">
+                                <div className="text-slate-900 font-black text-xs sm:text-sm">① 医療職の限界</div>
+                                <p className="text-[11px] text-slate-700 leading-snug font-sans">
+                                  痛みは取れる。でも日々の疲れを癒やし、美肌やボディメイクを作るのはサロン・整体の専門分野。
+                                </p>
+                              </div>
+                              <div className="bg-white/80 backdrop-blur-md border border-white/60 rounded-2xl p-3.5 space-y-1.5 shadow-xs">
+                                <div className="text-slate-900 font-black text-xs sm:text-sm">② サロンのジレンマ</div>
+                                <p className="text-[11px] text-slate-700 leading-snug font-sans">
+                                  美と活力を作る現場力があるが、病気リスクの不安や「国家資格がない信頼の壁」がある。
+                                </p>
+                              </div>
+                              <div className="bg-white/85 backdrop-blur-md border-2 border-emerald-600 rounded-2xl p-3.5 space-y-1.5 shadow-xs">
+                                <div className="text-emerald-900 font-black text-xs sm:text-sm">③ プロ連合軍の結成</div>
+                                <p className="text-[11px] text-slate-700 leading-snug font-sans">
+                                  「治す」と「整える・美しくする」が統合して初めて、一人の顧客の健康寿命を一生涯背負える！
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {slide.id === 4 && (
+                          <div className="space-y-3">
+                            <h3 className="text-xl sm:text-3xl font-black text-slate-900 tracking-wide drop-shadow-xs">
+                              なぜ、今この船に乗るべきなのか？【3大実利】
+                            </h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                              <div className="bg-white/80 backdrop-blur-md border border-white/60 rounded-2xl p-3.5 space-y-1.5 shadow-xs">
+                                <h4 className="text-slate-900 font-black text-xs sm:text-sm">① 最高級の下駄を履く</h4>
+                                <p className="text-[11px] text-slate-700 leading-snug font-sans">
+                                  厳格審査を通った証。クーポン荒らしから抜け出し、適正価格で勝負できる最高峰のブランド力を獲得。
+                                </p>
+                              </div>
+                              <div className="bg-white/80 backdrop-blur-md border border-white/60 rounded-2xl p-3.5 space-y-1.5 shadow-xs">
+                                <h4 className="text-slate-900 font-black text-xs sm:text-sm">② 顧客の相互紹介ループ</h4>
+                                <p className="text-[11px] text-slate-700 leading-snug font-sans">
+                                  痛みが引いた患者をエステ・ピラティスへ。重い痛みを抱える客をPTへ。奪い合わず仲間で回し合う。
+                                </p>
+                              </div>
+                              <div className="bg-white/80 backdrop-blur-md border border-white/60 rounded-2xl p-3.5 space-y-1.5 shadow-xs">
+                                <h4 className="text-slate-900 font-black text-xs sm:text-sm">③ 初期・月額0円高還元</h4>
+                                <p className="text-[11px] text-slate-700 leading-snug font-sans">
+                                  店舗・固定費リスクゼロ。事前カード決済で未回収・ドタキャンリスクも完全ゼロ。
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {slide.id === 5 && (
+                          <div className="space-y-3">
+                            <h3 className="text-xl sm:text-3xl font-black text-slate-900 tracking-wide drop-shadow-xs">
+                              会長と400人の仲間だから起こせる業界革命
+                            </h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                              <div className="bg-white/80 backdrop-blur-md border border-white/60 rounded-2xl p-4 space-y-2 shadow-xs">
+                                <div className="text-slate-900 font-black text-xs sm:text-sm">
+                                  【施術ができるプロへ】
+                                </div>
+                                <p className="text-[11px] sm:text-xs text-slate-700 leading-relaxed font-sans">
+                                  自分の腕一本で新しい収入の柱を作ってください。安売りはもう終わりです。誇りと正当な報酬をその手に。
+                                </p>
+                              </div>
+                              <div className="bg-white/80 backdrop-blur-md border border-white/60 rounded-2xl p-4 space-y-2 shadow-xs">
+                                <div className="text-slate-900 font-black text-xs sm:text-sm">
+                                  【経営者・リーダーへ】
+                                </div>
+                                <p className="text-[11px] sm:text-xs text-slate-700 leading-relaxed font-sans">
+                                  ご自身・ご家族、そして大切な社員の健康と美を守る福利厚生インフラとして使い倒してください！
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {slide.id === 6 && (
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+                            <div className="sm:col-span-2 space-y-2 bg-white/80 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-white/60 shadow-xs">
+                              <h3 className="text-base sm:text-2xl font-black text-slate-900 leading-tight">
+                                最初の乗組員として、業界の常識をひっくり返そう！
+                              </h3>
+                              <p className="text-xs text-emerald-900 font-bold font-sans">
+                                健康的に長生きし、美しくあり続ける。みんなが望む未来を、ここから創る。
+                              </p>
+                              <div className="text-[11px] text-slate-700 space-y-1 font-sans">
+                                <div>• スマホで今すぐ先行登録（所要3分 ｜ 初期費用・掲載料 完全 0 円）</div>
+                                <div>• <strong>★エリア管理や運営側に興味がある方は終了後に「創業パートナー相談デスク」へ！</strong></div>
+                              </div>
+                            </div>
+
+                            <div className="bg-white/85 backdrop-blur-md border border-white/60 rounded-2xl p-3.5 text-center space-y-1.5 shadow-xs">
+                              <a
+                                href="#partner-registration"
+                                className="block group cursor-pointer"
+                                title="クリックしてページ下部の登録フォームへ移動"
+                              >
+                                <img
+                                  src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=https%3A%2F%2Ftherapist.kotsuka-folio.workers.dev%2Fguide%2Fadmin%23partner-registration"
+                                  alt="創業パートナー先行登録QRコード"
+                                  className="w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-xl p-1 bg-white border border-slate-300 shadow-sm transition group-hover:scale-105"
+                                />
+                              </a>
+                              <div className="text-xs font-black text-slate-900">創業パートナー先行登録</div>
+                              <div className="text-[9px] text-emerald-800 font-bold font-sans">★各地域・ジャンル限定枠</div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* スライド内フッター */}
+                      <div className="relative z-10 flex items-center justify-between border-t border-slate-700/20 pt-2 text-[10px] text-slate-800 font-serif">
+                        <span>大塚 和宏 / yaShine ｜ {slide.punchlines.slice(0, 3).join(' ')}</span>
+                        <span className="font-mono font-sans">{slide.timeRange}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* スライド投影テキスト ＆ 登壇メモ（最小限・スッキリ） */}
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                    {/* 左側: スライド投影箇条書き（7カラム） */}
+                    <div className="lg:col-span-7 bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2.5">
+                      <div className="flex flex-wrap items-center justify-between gap-1">
+                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-1.5 font-serif">
+                          <FileText className="w-4 h-4 text-emerald-600" />
+                          <span>スライド投影内容（最小限の要点）</span>
+                        </h4>
+                        <div className="flex flex-wrap gap-1">
+                          {slide.punchlines.map((kw, kwIdx) => (
+                            <span key={kwIdx} className="text-[10px] bg-white border border-slate-200 text-slate-700 font-bold px-1.5 py-0.5 rounded font-mono">
+                              {kw}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="p-2.5 bg-emerald-50/80 rounded-xl border border-emerald-200/60 text-xs text-emerald-900 font-medium font-sans">
+                        💡 <strong>コアメッセージ:</strong> {slide.coreMessage}
+                      </div>
+
+                      <ul className="space-y-1.5 text-xs sm:text-sm text-slate-700 font-sans">
+                        {slide.slideBulleted.map((point, pIdx) => (
+                          <li key={pIdx} className="flex items-start gap-2">
+                            <span className="text-emerald-600 font-bold shrink-0">•</span>
+                            <span>{point}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* 右側: 登壇メモ・語るポイント（5カラム） */}
+                    <div className="lg:col-span-5 bg-slate-900 text-white p-4 rounded-2xl border border-slate-800 space-y-2.5">
+                      <h4 className="text-xs sm:text-sm font-black text-emerald-300 flex items-center gap-1.5 font-serif">
+                        <Mic className="w-4 h-4 text-emerald-400" />
+                        <span>登壇メモ（語るキーポイント ＆ 熱量）</span>
+                      </h4>
+                      <div className="space-y-2 text-xs text-slate-200 font-sans leading-relaxed">
+                        {slide.speakerPoints.map((note, nIdx) => (
+                          <div key={nIdx} className="flex items-start gap-1.5">
+                            <span className="text-emerald-400 font-bold shrink-0">▶</span>
+                            <span>{note}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="pt-2 border-t border-slate-800 text-[10px] text-slate-400 font-mono">
+                        Keynote推奨: {slide.keynoteFontSizes}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+      {/* ========================================================
+              ★ 創業パートナー先行登録エントリーフォーム (Keynoteテイスト完全連動・特製ネイティブUI)
+             ======================================================== */}
+          <div
+            id="partner-registration"
+            className="rounded-3xl p-6 sm:p-12 text-slate-900 border border-slate-300/80 shadow-2xl relative overflow-hidden font-serif"
+            style={{
+              background: 'linear-gradient(135deg, #879798 0%, #9cb0af 28%, #c58d81 68%, #b27b72 82%, #798086 100%)',
+            }}
+          >
+            {/* 背景の柔らかな光・オーロラグラデーション */}
+            <div className="absolute top-1/4 right-1/6 w-[600px] h-[400px] bg-[#c78b7e]/40 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-10 left-1/4 w-[500px] h-[350px] bg-[#a2b4b3]/35 rounded-full blur-3xl pointer-events-none" />
+
+            {/* 隠しiframe: バックグラウンドでGoogleフォームへPOST送信 */}
+            <iframe name="hidden_gform_iframe" id="hidden_gform_iframe" style={{ display: 'none' }} />
+
+            <div className="relative z-10 max-w-4xl mx-auto space-y-8">
+              {/* フォーム見出し */}
+              <div className="text-center space-y-3">
+                <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/90 backdrop-blur-md text-emerald-900 text-xs font-bold border border-white/60 shadow-xs font-sans">
+                  <FlameKindling className="w-3.5 h-3.5 text-amber-600" />
+                  <span>FOUNDING PARTNERSHIP INVITATION</span>
+                </div>
+
+                <h2 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-wide leading-tight drop-shadow-xs">
+                  創業パートナー 先行エントリー
+                </h2>
+
+                <p className="text-xs sm:text-base text-slate-800 max-w-2xl mx-auto leading-relaxed">
+                  医療の壁を壊し、健康と美のプロフェッショナルが正当に評価される一大インフラへ。<br className="hidden sm:inline" />
+                  理学療法士・助産師・鍼灸・柔整・エステ・整体・トレーナー、そして応援してくださる経営者の皆様、<br className="hidden sm:inline" />
+                  今だけの初期シード枠として、ぜひあなたの腕と想いをご登録ください。
+                </p>
+
+                {/* 創業3大特典ハイライトバッジ */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 max-w-3xl mx-auto font-sans text-left">
+                  <div className="p-3 rounded-2xl bg-white/80 backdrop-blur-md border border-white/60 shadow-xs flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+                      <Sparkles className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="text-[11px] font-bold text-emerald-900 uppercase tracking-wider">Benefit 01</div>
+                      <div className="text-xs font-black text-slate-900">初期・月額費用 完全0円</div>
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-2xl bg-white/80 backdrop-blur-md border border-white/60 shadow-xs flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-teal-100 text-teal-800 flex items-center justify-center shrink-0">
+                      <TrendingUp className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="text-[11px] font-bold text-teal-900 uppercase tracking-wider">Benefit 02</div>
+                      <div className="text-xs font-black text-slate-900">業界最高峰の高還元設計</div>
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-2xl bg-white/80 backdrop-blur-md border border-white/60 shadow-xs flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
+                      <HeartHandshake className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="text-[11px] font-bold text-amber-900 uppercase tracking-wider">Benefit 03</div>
+                      <div className="text-xs font-black text-slate-900">発起人・会長との直接対談</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* フォーム本体コンテナ（極上の白すりガラスカード） */}
+              <div className="bg-white/92 backdrop-blur-xl border border-white/80 shadow-2xl rounded-3xl p-6 sm:p-12 font-sans transition-all">
+                {isSubmitted ? (
+                  /* 送信完了カード（ラグジュアリー・サンクスページ） */
+                  <div className="text-center py-8 space-y-6">
+                    <div className="w-20 h-20 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center mx-auto shadow-inner animate-bounce">
+                      <CheckCircle2 className="w-10 h-10" />
+                    </div>
+
+                    <div className="space-y-2 font-serif">
+                      <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold tracking-widest uppercase">
+                        ENTRY COMPLETED
+                      </span>
+                      <h3 className="text-2xl sm:text-3xl font-black text-slate-900">
+                        先行エントリーを受け付けました！
+                      </h3>
+                      <p className="text-xs sm:text-sm text-slate-700 max-w-lg mx-auto leading-relaxed font-sans pt-2">
+                        <strong className="text-slate-900 text-base">{formState.name}</strong> 様、熱い想いとご登録を誠にありがとうございます。<br />
+                        創業パートナーとしての初期シード枠（初期・月額無料・高還元）を最優先で確保いたしました。
+                      </p>
+                    </div>
+
+                    {/* エントリー内容控えカード */}
+                    <div className="max-w-md mx-auto p-4 rounded-2xl bg-slate-50 border border-slate-200 text-left text-xs space-y-2">
+                      <div className="flex justify-between border-b border-slate-200 pb-2">
+                        <span className="text-slate-500">お名前</span>
+                        <span className="font-bold text-slate-800">{formState.name} 様</span>
+                      </div>
+                      <div className="flex justify-between border-b border-slate-200 pb-2">
+                        <span className="text-slate-500">ご職業・資格</span>
+                        <span className="font-bold text-emerald-700">
+                          {QUALIFICATION_OPTIONS.find((q) => q.id === formState.qualification)?.label || formState.qualification}
+                          {formState.qualification === 'その他' && formState.customQualification && ` (${formState.customQualification})`}
+                        </span>
+                      </div>
+                      <div className="flex justify-between border-b border-slate-200 pb-2">
+                        <span className="text-slate-500">メールアドレス</span>
+                        <span className="font-mono text-slate-800">{formState.email}</span>
+                      </div>
+                      {formState.phone && (
+                        <div className="flex justify-between border-b border-slate-200 pb-2">
+                          <span className="text-slate-500">お電話番号</span>
+                          <span className="font-mono text-slate-800">{formState.phone}</span>
+                        </div>
+                      )}
+                      {formState.wantManagement && (
+                        <div className="flex justify-between pt-1">
+                          <span className="text-slate-500">運営参画希望</span>
+                          <span className="font-bold text-amber-700">★ 管理運営・リーダー候補を希望</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200/80 max-w-md mx-auto text-xs text-emerald-900 leading-relaxed font-serif">
+                      ご登録いただいたメールアドレス（{formState.email}）宛に自動確認メールをお送りしております。届かない場合は迷惑メールフォルダをご確認ください。
+                    </div>
+
+                    <div className="pt-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsSubmitted(false);
+                          setFormState({
+                            name: '',
+                            qualification: 'PT',
+                            customQualification: '',
+                            email: '',
+                            phone: '',
+                            motivation: '',
+                            question: '',
+                            wantManagement: false,
+                          });
+                        }}
+                        className="px-6 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-md cursor-pointer"
+                      >
+                        続けて別の方の登録を行う
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  /* 入力フォーム本体 */
+                  <form
+                    action="https://docs.google.com/forms/d/e/1FAIpQLSeyYvNKwzr0ArZmd9lDhPAjvSK_lfKxretaVWbL3AesUdxpuQ/formResponse"
+                    method="POST"
+                    target="hidden_gform_iframe"
+                    onSubmit={handleNativeFormSubmit}
+                    className="space-y-8"
+                  >
+                    {/* Googleフォーム対応 隠しPOST項目 */}
+                    <input type="hidden" name="emailAddress" value={formState.email} />
+                    <input type="hidden" name="entry.1551756406" value={formState.email} />
+                    <input type="hidden" name="entry.708907587" value={formState.name} />
+                    <input
+                      type="hidden"
+                      name="entry.1812767749"
+                      value={formState.qualification === 'その他' && formState.customQualification ? formState.customQualification : formState.qualification}
+                    />
+                    <input type="hidden" name="entry.2084178998" value={formState.phone} />
+                    <input type="hidden" name="entry.1964723477" value={formState.motivation} />
+                    <input type="hidden" name="entry.1976094168" value={formState.question} />
+                    {formState.wantManagement && (
+                      <input type="hidden" name="entry.153284917" value="希望する" />
+                    )}
+
+                    {/* SECTION 1: ご職業・保有資格の選択カード */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs sm:text-sm font-bold text-slate-900 font-serif flex items-center gap-2">
+                          <span className="w-5 h-5 rounded-full bg-emerald-800 text-white text-[11px] font-mono flex items-center justify-center font-bold">1</span>
+                          <span>ご職業・保有資格・専門領域を選択してください</span>
+                          <span className="text-rose-600 font-sans text-xs">*必須</span>
+                        </label>
+                      </div>
+
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
+                        {QUALIFICATION_OPTIONS.map((opt) => {
+                          const isSelected = formState.qualification === opt.id;
+                          return (
+                            <button
+                              key={opt.id}
+                              type="button"
+                              onClick={() => setFormState({ ...formState, qualification: opt.id })}
+                              className={`p-3 rounded-2xl text-left border transition-all relative flex flex-col justify-between cursor-pointer ${
+                                isSelected
+                                  ? 'bg-emerald-50/90 border-emerald-600 ring-2 ring-emerald-500/40 shadow-sm'
+                                  : 'bg-white/80 hover:bg-slate-50 border-slate-200 text-slate-700'
+                              }`}
+                            >
+                              <div className="flex items-start justify-between gap-1">
+                                <span className="text-[10px] font-mono text-slate-600 uppercase tracking-wider font-semibold">
+                                  {opt.category}
+                                </span>
+                                {isSelected && (
+                                  <span className="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                                    <Check className="w-3 h-3 stroke-[3]" />
+                                  </span>
+                                )}
+                              </div>
+                              <div className="mt-1">
+                                <div className={`text-xs sm:text-sm font-bold ${isSelected ? 'text-emerald-950 font-black' : 'text-slate-800'}`}>
+                                  {opt.label}
+                                </div>
+                                <div className="text-[10px] text-slate-600 mt-0.5 leading-tight font-sans">
+                                  {opt.desc}
+                                </div>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* 「その他」選択時の自由入力欄 */}
+                      {formState.qualification === 'その他' && (
+                        <div className="pt-2">
+                          <input
+                            type="text"
+                            required
+                            placeholder="保有資格やご職業、専門領域をご記入ください（例: 視能訓練士、ピラティスインストラクター 等）"
+                            value={formState.customQualification}
+                            onChange={(e) => setFormState({ ...formState, customQualification: e.target.value })}
+                            className="w-full px-4 py-3 rounded-xl border border-emerald-400 bg-emerald-50/40 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-slate-900 text-xs sm:text-sm transition"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* SECTION 2: お名前 & ご連絡先 */}
+                    <div className="space-y-4 pt-2 border-t border-slate-200">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* お名前 */}
+                        <div className="space-y-1.5">
+                          <label className="text-xs sm:text-sm font-bold text-slate-900 font-serif flex items-center gap-2">
+                            <span className="w-5 h-5 rounded-full bg-emerald-800 text-white text-[11px] font-mono flex items-center justify-center font-bold">2</span>
+                            <span>お名前（氏名）</span>
+                            <span className="text-rose-600 font-sans text-xs">*必須</span>
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="例: 山田 太郎"
+                            value={formState.name}
+                            onChange={(e) => setFormState({ ...formState, name: e.target.value })}
+                            className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white/90 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-slate-900 text-sm transition"
+                          />
+                        </div>
+
+                        {/* メールアドレス */}
+                        <div className="space-y-1.5">
+                          <label className="text-xs sm:text-sm font-bold text-slate-900 font-serif flex items-center gap-2">
+                            <span className="w-5 h-5 rounded-full bg-emerald-800 text-white text-[11px] font-mono flex items-center justify-center font-bold">3</span>
+                            <span>メールアドレス</span>
+                            <span className="text-rose-600 font-sans text-xs">*必須</span>
+                          </label>
+                          <input
+                            type="email"
+                            required
+                            placeholder="example@domain.com"
+                            value={formState.email}
+                            onChange={(e) => setFormState({ ...formState, email: e.target.value })}
+                            className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white/90 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-slate-900 text-sm transition"
+                          />
+                        </div>
+                      </div>
+
+                      {/* 電話番号 */}
+                      <div className="space-y-1.5">
+                        <label className="text-xs sm:text-sm font-bold text-slate-900 font-serif flex items-center gap-2">
+                          <span className="w-5 h-5 rounded-full bg-slate-600 text-white text-[11px] font-mono flex items-center justify-center font-bold">4</span>
+                          <span>お電話番号</span>
+                          <span className="text-slate-500 font-sans text-xs">（任意・ショートメッセージ連絡用）</span>
+                        </label>
+                        <input
+                          type="tel"
+                          placeholder="例: 090-1234-5678"
+                          value={formState.phone}
+                          onChange={(e) => setFormState({ ...formState, phone: e.target.value })}
+                          className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white/90 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-slate-900 text-sm transition"
+                        />
+                      </div>
+                    </div>
+
+                    {/* SECTION 3: 意気込み・メッセージ & ご質問 */}
+                    <div className="space-y-4 pt-2 border-t border-slate-200">
+                      <div className="space-y-1.5">
+                        <label className="text-xs sm:text-sm font-bold text-slate-900 font-serif flex items-center gap-2">
+                          <span className="w-5 h-5 rounded-full bg-slate-600 text-white text-[11px] font-mono flex items-center justify-center font-bold">5</span>
+                          <span>参画への意気込み・想い</span>
+                          <span className="text-slate-500 font-sans text-xs">（任意）</span>
+                        </label>
+                        <textarea
+                          rows={3}
+                          placeholder="例: 病院のリハビリ勤務から一歩踏み出し、地域の困っている人に直接腕を届けたい / サロンの信頼性を高めたい / 自分の専門スキルを正当に評価されたい、など自由な想いをお聞かせください。"
+                          value={formState.motivation}
+                          onChange={(e) => setFormState({ ...formState, motivation: e.target.value })}
+                          className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white/90 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-slate-900 text-xs sm:text-sm transition resize-none leading-relaxed"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs sm:text-sm font-bold text-slate-900 font-serif flex items-center gap-2">
+                          <span className="w-5 h-5 rounded-full bg-slate-600 text-white text-[11px] font-mono flex items-center justify-center font-bold">6</span>
+                          <span>ご質問・ご相談事項</span>
+                          <span className="text-slate-500 font-sans text-xs">（任意）</span>
+                        </label>
+                        <textarea
+                          rows={2}
+                          placeholder="例: 副業規定についての相談、出張可能エリアの決め方、法人提携について 等"
+                          value={formState.question}
+                          onChange={(e) => setFormState({ ...formState, question: e.target.value })}
+                          className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white/90 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-slate-900 text-xs sm:text-sm transition resize-none leading-relaxed"
+                        />
+                      </div>
+                    </div>
+
+                    {/* SECTION 4: 管理・運営への参画希望チェック（特別プレミアム枠） */}
+                    <div className="p-4 sm:p-5 bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 rounded-2xl border-2 border-emerald-300/80 shadow-xs">
+                      <label className="flex items-start gap-3.5 cursor-pointer text-xs sm:text-sm text-slate-900">
+                        <input
+                          type="checkbox"
+                          checked={formState.wantManagement}
+                          onChange={(e) => setFormState({ ...formState, wantManagement: e.target.checked })}
+                          className="w-5 h-5 rounded text-emerald-700 focus:ring-emerald-500 mt-0.5 shrink-0 cursor-pointer"
+                        />
+                        <span className="space-y-1">
+                          <strong className="block text-emerald-950 font-bold font-serif text-sm">
+                            ★ 地域の統括マネジメント・管理運営側（審査・品質管理・リーダー等）への参画にも興味がある
+                          </strong>
+                          <span className="block text-xs text-slate-600 leading-relaxed font-sans">
+                            施術だけでなく、プラットフォームの初期ルール作りや審査、地域マネジメントを一緒にリードしてくださる仲間を求めています。
+                            チェックいただいた方には、発起人の大塚より個別に特別面談のご案内をお送りいたします。
+                          </span>
+                        </span>
+                      </label>
+                    </div>
+
+                    {/* 送信アクション */}
+                    <div className="pt-2 space-y-3">
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="w-full py-4 sm:py-5 px-8 rounded-2xl bg-gradient-to-r from-emerald-700 via-teal-700 to-emerald-800 hover:from-emerald-600 hover:to-teal-600 text-white font-black text-sm sm:text-base tracking-wider shadow-xl shadow-emerald-950/20 transition-all flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50 hover:scale-[1.01] active:scale-[0.99]"
+                      >
+                        {isSubmitting ? (
+                          <div className="flex items-center gap-2">
+                            <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                            <span>エントリー送信中...</span>
+                          </div>
+                        ) : (
+                          <>
+                            <Sparkles className="w-5 h-5 text-amber-300 animate-pulse" />
+                            <span>創業パートナーとして先行エントリーする（完全無料）</span>
+                            <Send className="w-4 h-4 ml-1" />
+                          </>
+                        )}
+                      </button>
+
+                      <div className="flex flex-wrap items-center justify-center gap-4 text-[11px] text-slate-700 font-sans">
+                        <span className="flex items-center gap-1">
+                          <ShieldCheck className="w-3.5 h-3.5 text-emerald-800" />
+                          <span>SSL暗号化通信</span>
+                        </span>
+                        <span>•</span>
+                        <span>初期・月額費用 完全0円保証</span>
+                        <span>•</span>
+                        <a
+                          href="https://docs.google.com/forms/d/e/1FAIpQLSeyYvNKwzr0ArZmd9lDhPAjvSK_lfKxretaVWbL3AesUdxpuQ/viewform"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-emerald-800 hover:underline inline-flex items-center gap-0.5"
+                        >
+                          <span>Googleフォーム本体で開く</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    </div>
+                  </form>
+                )}
+              </div>
+            </div>
+          </div>
+    </div>
+  );
+}
