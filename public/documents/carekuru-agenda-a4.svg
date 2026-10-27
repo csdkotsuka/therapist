@@ -1,0 +1,261 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 1754" width="1240" height="1754" style="background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, sans-serif;">
+  <defs>
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="60%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#064e3b" />
+    </linearGradient>
+    <filter id="shadow" x="-5%" y="-2%" width="110%" height="106%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.06"/>
+    </filter>
+  </defs>
+
+  <!-- Document Canvas -->
+  <rect x="0" y="0" width="1240" height="1754" fill="#f8fafc" />
+  
+  <!-- Outer Paper with Border -->
+  <rect x="40" y="40" width="1160" height="1674" rx="16" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" filter="url(#shadow)" />
+
+  <!-- Header Banner -->
+  <g transform="translate(60, 60)">
+    <rect x="0" y="0" width="1120" height="100" rx="12" fill="url(#headerGrad)" />
+    <text x="30" y="40" fill="#34d399" font-size="13" font-weight="900" letter-spacing="1.5">EXECUTIVE CONSULTATION &amp; DECISION AGENDA</text>
+    <text x="30" y="74" fill="#ffffff" font-size="24" font-weight="900" letter-spacing="-0.5">【事前相談・報告アジェンダ】「Care KURU」プロジェクト推進計画</text>
+    <text x="1080" y="42" text-anchor="end" fill="#94a3b8" font-size="11">Care KURU Platform Operations</text>
+  </g>
+
+  <!-- Section 1: 決定事項のご報告 -->
+  <g transform="translate(60, 180)">
+    <!-- Section Title -->
+    <rect x="0" y="0" width="24" height="24" rx="6" fill="#0f172a" />
+    <text x="12" y="17" fill="#ffffff" font-size="13" font-weight="900" text-anchor="middle">1</text>
+    <text x="34" y="18" fill="#0f172a" font-size="16" font-weight="900">決定事項のご報告（前提共有・基本設計）</text>
+    <text x="1120" y="17" text-anchor="end" fill="#059669" font-size="11" font-weight="bold">最速リリース＆ゼロリスク設計</text>
+
+    <!-- Table 1 -->
+    <g transform="translate(0, 34)">
+      <!-- Header Row -->
+      <rect x="0" y="0" width="1120" height="32" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
+      <text x="20" y="21" fill="#475569" font-size="12" font-weight="900">項目</text>
+      <text x="240" y="21" fill="#475569" font-size="12" font-weight="900">決定内容・アーキテクチャ</text>
+      <text x="640" y="21" fill="#475569" font-size="12" font-weight="900">メリット・事業上の狙い</text>
+
+      <!-- Row 1: アプリ名称 -->
+      <g transform="translate(0, 32)">
+        <rect x="0" y="0" width="1120" height="42" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" />
+        <text x="20" y="26" fill="#0f172a" font-size="13" font-weight="bold">アプリ名称</text>
+        <text x="240" y="26" fill="#065f46" font-size="13" font-weight="bold">Care KURU（ケア・クル） <tspan fill="#94a3b8" font-size="11" font-weight="normal">※ロゴ検討中</tspan></text>
+        <text x="640" y="26" fill="#475569" font-size="12">「ケアが来る・クルマで来る」オンデマンド出張ヘルスケアの明快な想起と親しみやすさ。</text>
+      </g>
+
+      <!-- Row 2: 提供形態 (PWA) -->
+      <g transform="translate(0, 74)">
+        <rect x="0" y="0" width="1120" height="44" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
+        <text x="20" y="27" fill="#0f172a" font-size="13" font-weight="bold">提供形態（PWA）</text>
+        <rect x="238" y="11" width="160" height="22" rx="4" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1" />
+        <text x="246" y="26" fill="#1e40af" font-size="11" font-weight="bold">アプリ風Web（審査不要）</text>
+        <text x="408" y="27" fill="#475569" font-size="12">ホーム画面追加で通常アプリ同様</text>
+        <text x="640" y="27" fill="#0f172a" font-size="12"><tspan font-weight="bold">App Store審査・規約リスクを完全回避。</tspan> 最短で実用リリースが可能。</text>
+      </g>
+
+      <!-- Row 3: セキュリティ対策 -->
+      <g transform="translate(0, 118)">
+        <rect x="0" y="0" width="1120" height="44" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" />
+        <text x="20" y="27" fill="#0f172a" font-size="13" font-weight="bold">セキュリティ対策</text>
+        <rect x="238" y="11" width="160" height="22" rx="4" fill="#eef2ff" stroke="#c7d2fe" stroke-width="1" />
+        <text x="246" y="26" fill="#3730a3" font-size="11" font-weight="bold">Stripe連携（ゼロリスク）</text>
+        <text x="408" y="27" fill="#475569" font-size="12">免許証・口座は自社DBに保持せず</text>
+        <text x="640" y="27" fill="#475569" font-size="12">万一の攻撃時も<tspan font-weight="bold" fill="#0f172a">「盗まれる重要情報自体が存在しない」</tspan>完全遮断構造（テスト運用中）。</text>
+      </g>
+
+      <!-- Row 4: 施術者の信頼性担保 -->
+      <g transform="translate(0, 162)">
+        <rect x="0" y="0" width="1120" height="44" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+        <text x="20" y="27" fill="#0f172a" font-size="13" font-weight="bold">信頼性担保フロー</text>
+        <rect x="238" y="11" width="160" height="22" rx="4" fill="#ecfdf5" stroke="#a7f3d0" stroke-width="1" />
+        <text x="246" y="26" fill="#065f46" font-size="11" font-weight="bold">厳格な5段階チェック体制</text>
+        <text x="408" y="27" fill="#64748b" font-size="11">①審査料 ②誓約 ③本人確認 ④資格 ⑤保険</text>
+        <text x="640" y="27" fill="#475569" font-size="12">提出された資格証・保険証書画像は承認と同時に<tspan font-weight="bold" fill="#0f172a">自動削除破棄</tspan>（漏洩ゼロ）。</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Section 2: 会長への相談・決裁事項 (全9項目) -->
+  <g transform="translate(60, 440)">
+    <!-- Section Title -->
+    <rect x="0" y="0" width="24" height="24" rx="6" fill="#d97706" />
+    <text x="12" y="17" fill="#ffffff" font-size="13" font-weight="900" text-anchor="middle">2</text>
+    <text x="34" y="18" fill="#0f172a" font-size="16" font-weight="900">会長への相談・決裁事項（全9項目）</text>
+    <rect x="1000" y="2" width="120" height="20" rx="4" fill="#fef3c7" stroke="#fde68a" stroke-width="1" />
+    <text x="1060" y="16" text-anchor="middle" fill="#92400e" font-size="10" font-weight="bold">役員決裁対象 全9項目</text>
+
+    <!-- Table 2 Header -->
+    <g transform="translate(0, 32)">
+      <rect x="0" y="0" width="1120" height="32" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
+      <text x="24" y="21" fill="#475569" font-size="12" font-weight="900" text-anchor="middle">No</text>
+      <text x="60" y="21" fill="#475569" font-size="12" font-weight="900">相談項目</text>
+      <text x="260" y="21" fill="#475569" font-size="12" font-weight="900">検討案（背景）</text>
+      <text x="620" y="21" fill="#92400e" font-size="12" font-weight="900">会長への相談・確認内容（判断ポイント）</text>
+
+      <!-- ① 施術者の入会金 -->
+      <g transform="translate(0, 32)">
+        <rect x="0" y="0" width="1120" height="104" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" />
+        <rect x="14" y="14" width="20" height="20" rx="4" fill="#f59e0b" />
+        <text x="24" y="28" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">1</text>
+        <text x="60" y="28" fill="#0f172a" font-size="13" font-weight="bold">施術者入会金</text>
+        <text x="60" y="46" fill="#d97706" font-size="10">（初期登録料）</text>
+        
+        <text x="260" y="26" fill="#475569" font-size="12">初期は施術者を広く集めるため<tspan font-weight="bold" fill="#059669">「入会金0円（無料）」</tspan>で開始。</text>
+        <text x="260" y="46" fill="#475569" font-size="12">マッチング・運営が安定した段階で、</text>
+        <text x="260" y="66" fill="#0f172a" font-size="12" font-weight="bold">「入会金: メンバー1万円 / 外部少し高め」</text>
+        <text x="260" y="86" fill="#64748b" font-size="11">へ有料化する移行計画。</text>
+
+        <rect x="610" y="6" width="500" height="92" rx="6" fill="#fffbeb" stroke="#fef3c7" stroke-width="1" />
+        <text x="625" y="28" fill="#78350f" font-size="12" font-weight="bold">・初期0円スタート ➔ 安定後に「入会金: メンバー1万円／</text>
+        <text x="635" y="48" fill="#78350f" font-size="12" font-weight="bold">外部少し高め」とする移行方針でよろしいでしょうか？</text>
+        <text x="625" y="74" fill="#78350f" font-size="11">・業界相場を踏まえ、適切な入会金水準や有料化のタイミング</text>
+        <text x="635" y="90" fill="#78350f" font-size="11">について会長のご意見を伺えますでしょうか？</text>
+      </g>
+
+      <!-- ② 手数料率・想定利益率 -->
+      <g transform="translate(0, 136)">
+        <rect x="0" y="0" width="1120" height="84" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
+        <rect x="14" y="14" width="20" height="20" rx="4" fill="#10b981" />
+        <text x="24" y="28" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">2</text>
+        <text x="60" y="28" fill="#0f172a" font-size="13" font-weight="bold">手数料率・粗利率</text>
+        <text x="60" y="46" fill="#059669" font-size="10">手数料20%・粗利16.4%</text>
+
+        <text x="260" y="26" fill="#475569" font-size="12">・予約手数料率（テイクレイト）: <tspan font-weight="bold" fill="#0f172a">20%</tspan>（相場20〜30%）</text>
+        <text x="260" y="46" fill="#475569" font-size="12">・Stripe決済手数料: <tspan font-weight="bold" fill="#e11d48">▲ 約3.6%</tspan>（クレカ決済実費）</text>
+        <text x="260" y="66" fill="#059669" font-size="12" font-weight="bold">・実質粗利益率: 約 16.4% <tspan font-size="11" font-weight="normal" fill="#64748b">（売上1万円あたり粗利1,640円）</tspan></text>
+
+        <rect x="610" y="6" width="500" height="72" rx="6" fill="#fffbeb" stroke="#fef3c7" stroke-width="1" />
+        <text x="625" y="28" fill="#78350f" font-size="12" font-weight="bold">1) 手数料率は「20%」の設定で問題ないでしょうか？</text>
+        <text x="635" y="46" fill="#92400e" font-size="11">（あるいは初期利用促進のためさらに低めに設定すべきでしょうか？）</text>
+        <text x="625" y="66" fill="#78350f" font-size="12" font-weight="bold">2) Stripe決済費控除後の実質粗利率（約16.4%）へのご意見。</text>
+      </g>
+
+      <!-- ③ 収益受取口座 -->
+      <g transform="translate(0, 220)">
+        <rect x="0" y="0" width="1120" height="72" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" />
+        <rect x="14" y="14" width="20" height="20" rx="4" fill="#2563eb" />
+        <text x="24" y="28" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">3</text>
+        <text x="60" y="28" fill="#0f172a" font-size="13" font-weight="bold">収益受取口座</text>
+        <text x="60" y="46" fill="#2563eb" font-size="10">法人・税務</text>
+
+        <text x="260" y="28" fill="#475569" font-size="12">プラットフォーム利用料・入会金・予約手数料決済を</text>
+        <text x="260" y="48" fill="#475569" font-size="12">受け取るための、Stripe連携メイン口座の指定が必要。</text>
+
+        <rect x="610" y="6" width="500" height="60" rx="6" fill="#fffbeb" stroke="#fef3c7" stroke-width="1" />
+        <text x="625" y="32" fill="#78350f" font-size="12" font-weight="bold">プラットフォーム側の売上・手数料を受け取る口座は、</text>
+        <text x="625" y="52" fill="#78350f" font-size="12" font-weight="bold"><tspan fill="#b45309" text-decoration="underline">どの法人（または口座）</tspan>に紐付ける形にいたしますか？</text>
+      </g>
+
+      <!-- ④ 公開URL・ドメイン確認 -->
+      <g transform="translate(0, 292)">
+        <rect x="0" y="0" width="1120" height="84" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
+        <rect x="14" y="14" width="20" height="20" rx="4" fill="#4f46e5" />
+        <text x="24" y="28" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">4</text>
+        <text x="60" y="28" fill="#0f172a" font-size="13" font-weight="bold">公開URL・ドメイン</text>
+        <text x="60" y="46" fill="#4f46e5" font-size="10">ブランド信用力</text>
+
+        <text x="260" y="28" fill="#475569" font-size="12">サービスの信頼性と安心感を担保するため、</text>
+        <text x="260" y="48" fill="#475569" font-size="12">既存のNEOFAMILYブランド傘下でのWeb公開を想定。</text>
+
+        <rect x="610" y="6" width="500" height="72" rx="6" fill="#fffbeb" stroke="#fef3c7" stroke-width="1" />
+        <text x="625" y="28" fill="#78350f" font-size="12" font-weight="bold">1) 「NEOFAMILY」関連で活用可能なドメインはあるか？</text>
+        <text x="625" y="48" fill="#78350f" font-size="12" font-weight="bold">2) ある場合、そのサブドメイン（例: carekuru.neofamily.jp 等）</text>
+        <text x="635" y="66" fill="#78350f" font-size="12" font-weight="bold">を使用させていただくことは可能でしょうか？（2段階相談）</text>
+      </g>
+
+      <!-- ⑤ インフラ初期経費 -->
+      <g transform="translate(0, 376)">
+        <rect x="0" y="0" width="1120" height="72" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" />
+        <rect x="14" y="14" width="20" height="20" rx="4" fill="#9333ea" />
+        <text x="24" y="28" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">5</text>
+        <text x="60" y="28" fill="#0f172a" font-size="13" font-weight="bold">インフラ初期実費</text>
+        <text x="60" y="46" fill="#9333ea" font-size="10">予算・経費精算</text>
+
+        <text x="260" y="28" fill="#475569" font-size="12">データベース・認証基盤（Supabase等）の維持費。</text>
+        <text x="260" y="48" fill="#64748b" font-size="11">（月額数千円〜1万円程度の実費経費）</text>
+
+        <rect x="610" y="6" width="500" height="60" rx="6" fill="#fffbeb" stroke="#fef3c7" stroke-width="1" />
+        <text x="625" y="28" fill="#78350f" font-size="12" font-weight="bold">このシステム維持実費は、自己負担しても良いと考えておりますが、</text>
+        <text x="625" y="48" fill="#78350f" font-size="12" font-weight="bold"><tspan fill="#b45309" text-decoration="underline">プロジェクト経費として計上・精算</tspan>させていただけるでしょうか？</text>
+      </g>
+
+      <!-- ⑥ 事業賠償責任保険 -->
+      <g transform="translate(0, 448)">
+        <rect x="0" y="0" width="1120" height="80" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
+        <rect x="14" y="14" width="20" height="20" rx="4" fill="#e11d48" />
+        <text x="24" y="28" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">6</text>
+        <text x="60" y="28" fill="#0f172a" font-size="13" font-weight="bold">事業賠償責任保険</text>
+        <text x="60" y="46" fill="#e11d48" font-size="10">リスク管理</text>
+
+        <text x="260" y="28" fill="#475569" font-size="12">施術者個人の損害保険加入は必須条件化。</text>
+        <text x="260" y="48" fill="#475569" font-size="12">プラットフォーム運営会社全体としての包括保険の要否。</text>
+
+        <rect x="610" y="6" width="500" height="68" rx="6" fill="#fffbeb" stroke="#fef3c7" stroke-width="1" />
+        <text x="625" y="28" fill="#78350f" font-size="12" font-weight="bold">スタート時は個人の保険徹底で立ち上げ、</text>
+        <text x="625" y="48" fill="#78350f" font-size="12" font-weight="bold"><tspan fill="#b45309">本格稼働・規模拡大時に会社として包括加入する2段階想定</tspan>で</text>
+        <text x="625" y="64" fill="#78350f" font-size="12" font-weight="bold">よろしいでしょうか？</text>
+      </g>
+
+      <!-- ⑦ 個人情報保管（AI事業部） -->
+      <g transform="translate(0, 528)">
+        <rect x="0" y="0" width="1120" height="84" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" />
+        <rect x="14" y="14" width="20" height="20" rx="4" fill="#059669" />
+        <text x="24" y="28" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">7</text>
+        <text x="60" y="28" fill="#0f172a" font-size="13" font-weight="bold">残存個人情報保管</text>
+        <text x="60" y="46" fill="#059669" font-size="10">AI事業部連携・保護</text>
+
+        <text x="260" y="26" fill="#475569" font-size="12">免許証や口座はStripe直接管理でゼロリスク化済だが、</text>
+        <text x="260" y="46" fill="#0f172a" font-size="12" font-weight="bold">訪問に不可欠な「氏名・住所・電話番号」</text>
+        <text x="260" y="66" fill="#475569" font-size="12">は自社DBで保管せざるを得ない。</text>
+
+        <rect x="610" y="6" width="500" height="72" rx="6" fill="#fffbeb" stroke="#fef3c7" stroke-width="1" />
+        <text x="625" y="26" fill="#78350f" font-size="12" font-weight="bold">残さざるを得ない個人情報の安全な暗号化保管・マスキング等について、</text>
+        <text x="625" y="46" fill="#78350f" font-size="12" font-weight="bold"><tspan fill="#b45309">「AI事業部」に相談し設計チェックやアドバイスを伺うこと</tspan>は</text>
+        <text x="625" y="66" fill="#78350f" font-size="12" font-weight="bold">可能でしょうか？推奨の良い方法はございますか？</text>
+      </g>
+
+      <!-- ⑧ PR広報活動 -->
+      <g transform="translate(0, 612)">
+        <rect x="0" y="0" width="1120" height="72" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
+        <rect x="14" y="14" width="20" height="20" rx="4" fill="#0284c7" />
+        <text x="24" y="28" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">8</text>
+        <text x="60" y="28" fill="#0f172a" font-size="13" font-weight="bold">PR広報・集客方針</text>
+        <text x="60" y="46" fill="#0284c7" font-size="10">広報・マーケティング</text>
+
+        <text x="260" y="28" fill="#475569" font-size="12">サービス公開初期の施術者・顧客双方の認知拡大に向けた</text>
+        <text x="260" y="48" fill="#475569" font-size="12">広報・プロモーション・集客展開。</text>
+
+        <rect x="610" y="6" width="500" height="60" rx="6" fill="#fffbeb" stroke="#fef3c7" stroke-width="1" />
+        <text x="625" y="28" fill="#78350f" font-size="12" font-weight="bold">初期の<tspan fill="#b45309">PR活動・広報マーケティング展開はどう進めるか？</tspan></text>
+        <text x="625" y="48" fill="#78350f" font-size="12" font-weight="bold">グループ内リソースの活用等、会長のアイデア・ご意見を伺いたい。</text>
+      </g>
+
+      <!-- ⑨ システム構造チェック依頼 -->
+      <g transform="translate(0, 684)">
+        <rect x="0" y="0" width="1120" height="76" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+        <rect x="14" y="14" width="20" height="20" rx="4" fill="#7c3aed" />
+        <text x="24" y="28" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">9</text>
+        <text x="60" y="28" fill="#0f172a" font-size="13" font-weight="bold">システム構造チェック</text>
+        <text x="60" y="46" fill="#7c3aed" font-size="10">AI事業部・技術監査</text>
+
+        <text x="260" y="28" fill="#475569" font-size="12">Next.js + Supabase + Stripe Connect の設計構造、</text>
+        <text x="260" y="48" fill="#475569" font-size="12">権限管理・セキュリティ、将来の負荷耐性。</text>
+
+        <rect x="610" y="6" width="500" height="64" rx="6" fill="#fffbeb" stroke="#fef3c7" stroke-width="1" />
+        <text x="625" y="28" fill="#78350f" font-size="12" font-weight="bold">本番稼働前に万全を期すため、<tspan fill="#b45309">「AI事業部」に依頼してシステム全体の</tspan></text>
+        <text x="625" y="48" fill="#78350f" font-size="12" font-weight="bold"><tspan fill="#b45309">構造チェック・セキュリティ技術レビュー</tspan>を行っていただくことは可能か？</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Document Footer Stamp -->
+  <g transform="translate(60, 1690)">
+    <text x="0" y="0" fill="#94a3b8" font-size="10">Care KURU (ケア・クル) プロジェクト推進計画書 — 役員・会長事前相談アジェンダ A4資料版</text>
+    <text x="1120" y="0" text-anchor="end" fill="#94a3b8" font-size="10">Confidential / 株式会社NEOFAMILY</text>
+  </g>
+</svg>
