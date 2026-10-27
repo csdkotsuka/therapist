@@ -91,6 +91,17 @@ body {
   }
 }
 
+/* 顧客ボトムメニューの表示位置: ブラウザ表示時(デフォルト)はURLバー直上(8px)、PWAアプリ起動時(standalone)はセーフエリア考慮の浮遊位置 */
+.customer-bottom-nav {
+  bottom: 0.5rem; /* 8px */
+}
+
+@media (display-mode: standalone) {
+  .customer-bottom-nav {
+    bottom: max(1.25rem, calc(env(safe-area-inset-bottom) + 0.5rem)) !important;
+  }
+}
+
 /* iOS Safe Area Utilities */
 .pb-safe {
   padding-bottom: max(env(safe-area-inset-bottom), 1rem);

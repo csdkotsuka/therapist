@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
@@ -29,6 +29,10 @@ import {
   BookOpen,
   ArrowLeftRight,
   Crown,
+  Smartphone,
+  Share,
+  PlusSquare,
+  Sparkles,
 } from 'lucide-react';
 
 export const Header: React.FC = () => {
@@ -45,6 +49,29 @@ export const Header: React.FC = () => {
 
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
+  const [isPwaModalOpen, setIsPwaModalOpen] = useState(false);
+
+  // PWA (ホーム画面から起動しているか) の判定
+  useEffect(() => {
+    const checkStandalone = () => {
+      const isStandaloneMode =
+        typeof window !== 'undefined' &&
+        (window.matchMedia('(display-mode: standalone)').matches ||
+          (window.navigator as unknown as { standalone?: boolean }).standalone === true);
+      setIsStandalone(Boolean(isStandaloneMode));
+    };
+
+    checkStandalone();
+    const mediaQuery = window.matchMedia('(display-mode: standalone)');
+    try {
+      mediaQuery.addEventListener('change', checkStandalone);
+      return () => mediaQuery.removeEventListener('change', checkStandalone);
+    } catch (e) {
+      // 古いブラウザ向けフォールバック
+      return undefined;
+    }
+  }, []);
 
   // 未承認予約のリクエスト数（セラピスト用バッジ）
   const pendingRequestsCount = bookings.filter(
@@ -273,9 +300,13 @@ export const Header: React.FC = () => {
       {isCustomerPage && (
         <nav
           aria-label="主要ナビゲーション"
-          className="fixed bottom-2 sm:bottom-4 inset-x-0 z-40 flex justify-center px-2 pointer-events-none"
+          className={`fixed customer-bottom-nav inset-x-0 z-40 flex justify-center px-2 pointer-events-none transition-all duration-300 ${
+            isStandalone
+              ? 'bottom-6 pb-[env(safe-area-inset-bottom)]'
+              : 'bottom-2'
+          }`}
         >
-          {/* iOS最新アイランド型 透過カプセルバー (Floating Glass Pill - ギリギリまで下部に配置) */}
+          {/* iOS最新アイランド型 透過カプセルバー (Floating Glass Pill - アプリ時は浮遊/ブラウザ時はURLバー直上ギリギリ) */}
           <div className="ios-glass-pill pointer-events-auto flex items-center gap-1 sm:gap-2 p-1 sm:p-1.5 rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.18),0_2px_6px_rgba(0,0,0,0.08)] border border-white/60 dark:border-white/15 ring-1 ring-black/5 dark:ring-white/10 transition-all">
             {/* Tab 1: さがす (Explore / Home) */}
             <Link
@@ -432,6 +463,33 @@ export const Header: React.FC = () => {
               </div>
               <div>{getRoleBadge(currentUser.role)}</div>
             </div>
+
+            {/* PWA ホーム画面追加プロンプト (ブラウザ閲覧時のみ表示) */}
+            {!isStandalone && (
+              <div className="bg-gradient-to-r from-emerald-500/15 via-teal-500/10 to-indigo-500/15 rounded-2xl p-3 border border-emerald-500/30 flex items-center justify-between gap-3 shadow-2xs">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <Smartphone className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <h5 className="font-black text-xs text-slate-900 dark:text-white flex items-center gap-1">
+                      <span>ホーム画面に追加</span>
+                      <Sparkles className="w-3 h-3 text-amber-500" />
+                    </h5>
+                    <p className="text-[10px] text-slate-600 dark:text-slate-400 truncate">
+                      URLバーが消え、全画面アプリに変わります
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsPwaModalOpen(true)}
+                  className="px-2.5 py-1.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-black font-bold text-[11px] shrink-0 active:scale-95 transition shadow-xs"
+                >
+                  手順を見る
+                </button>
+              </div>
+            )}
 
             {/* iOS Segmented Control モード切り替え */}
             <div className="bg-slate-200/80 dark:bg-white/10 p-1 rounded-2xl flex gap-1">
@@ -725,6 +783,66 @@ export const Header: React.FC = () => {
 
       {/* Supabase Auth Modal */}
       {isAuthModalOpen && <AuthModal onClose={() => setIsAuthModalOpen(false)} />}
+
+      {/* PWA インストール手順モーダル */}
+      {isPwaModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white dark:bg-[#1c1c1e] text-slate-900 dark:text-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 dark:border-white/10 space-y-4 relative">
+            <button
+              onClick={() => setIsPwaModalOpen(false)}
+              className="absolute top-4 right-4 w-7 h-7 rounded-full bg-slate-100 dark:bg-white/10 text-slate-500 flex items-center justify-center active:scale-90 transition"
+              aria-label="閉じる"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                <Smartphone className="w-6 h-6" />
+              </div>
+              <div>
+                <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block">
+                  PWA Quick Install
+                </span>
+                <h3 className="text-base font-black">
+                  アプリとして使う（全画面起動）
+                </h3>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+              スマホのホーム画面に追加すると、下のURLバーが完全に消え、App Storeから入れたアプリと全く同じ全画面・快適スピードでご利用いただけます。
+            </p>
+
+            {/* iOS Safari手順 */}
+            <div className="bg-slate-50 dark:bg-white/5 rounded-2xl p-3.5 border border-slate-200/60 dark:border-white/10 space-y-2.5 text-xs">
+              <span className="font-bold text-[11px] text-slate-500 dark:text-slate-400 block">
+                【iPhone (Safari) での追加手順】
+              </span>
+              <div className="flex items-center gap-2.5">
+                <span className="w-5 h-5 rounded-full bg-emerald-600 text-white font-black text-[10px] flex items-center justify-center shrink-0">1</span>
+                <p className="text-slate-700 dark:text-slate-300">
+                  画面下部の <strong className="text-slate-900 dark:text-white">「共有アイコン（四角から上矢印）」</strong> をタップ
+                </p>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <span className="w-5 h-5 rounded-full bg-emerald-600 text-white font-black text-[10px] flex items-center justify-center shrink-0">2</span>
+                <p className="text-slate-700 dark:text-slate-300">
+                  メニューから <strong className="text-slate-900 dark:text-white">「ホーム画面に追加」</strong> を選択
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsPwaModalOpen(false)}
+              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition active:scale-95"
+            >
+              わかりました
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 };
