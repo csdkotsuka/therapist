@@ -184,25 +184,28 @@
         <text x="625" y="48" fill="#78350f" font-size="12" font-weight="bold"><tspan fill="#b45309" text-decoration="underline">プロジェクト経費として計上・精算</tspan>させていただけるでしょうか？</text>
       </g>
 
-      <!-- ⑥ 事業賠償責任保険 -->
+      <!-- ⑥ 損害賠償保険（NEO保険事業連携） -->
       <g transform="translate(0, 448)">
-        <rect x="0" y="0" width="1120" height="80" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
+        <rect x="0" y="0" width="1120" height="90" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
         <rect x="14" y="14" width="20" height="20" rx="4" fill="#e11d48" />
         <text x="24" y="28" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">6</text>
-        <text x="60" y="28" fill="#0f172a" font-size="13" font-weight="bold">事業賠償責任保険</text>
-        <text x="60" y="46" fill="#e11d48" font-size="10">リスク管理</text>
+        <text x="60" y="28" fill="#0f172a" font-size="13" font-weight="bold">損害賠償保険</text>
+        <text x="60" y="46" fill="#e11d48" font-size="10">NEO保険事業連携</text>
 
-        <text x="260" y="28" fill="#475569" font-size="12">施術者個人の損害保険加入は必須条件化。</text>
-        <text x="260" y="48" fill="#475569" font-size="12">プラットフォーム運営会社全体としての包括保険の要否。</text>
+        <text x="260" y="24" fill="#475569" font-size="12">出張訪問のため、施術事故（怪我等）に加え、</text>
+        <text x="260" y="42" fill="#0f172a" font-size="12" font-weight="bold">「顧客宅の家具・家電破損（受託物物損）」</text>
+        <text x="260" y="60" fill="#475569" font-size="12">は全職種共通リスク。原則、全専門職に保険加入必須化。</text>
+        <text x="260" y="78" fill="#64748b" font-size="11">（相談系職種も訪問時の物損リスクがあるため要加入）</text>
 
-        <rect x="610" y="6" width="500" height="68" rx="6" fill="#fffbeb" stroke="#fef3c7" stroke-width="1" />
-        <text x="625" y="28" fill="#78350f" font-size="12" font-weight="bold">スタート時は個人の保険徹底で立ち上げ、</text>
-        <text x="625" y="48" fill="#78350f" font-size="12" font-weight="bold"><tspan fill="#b45309">本格稼働・規模拡大時に会社として包括加入する2段階想定</tspan>で</text>
-        <text x="625" y="64" fill="#78350f" font-size="12" font-weight="bold">よろしいでしょうか？</text>
+        <rect x="610" y="6" width="500" height="78" rx="6" fill="#fffbeb" stroke="#fef3c7" stroke-width="1" />
+        <text x="625" y="24" fill="#78350f" font-size="12" font-weight="bold">1) <tspan fill="#b45309">「NEO FAMILY 保険事業」</tspan>のサービス・相談枠を、登録者の</text>
+        <text x="635" y="42" fill="#78350f" font-size="12" font-weight="bold">推奨損害保険窓口として利用・連携させていただくことは可能か？</text>
+        <text x="625" y="62" fill="#78350f" font-size="11">2) 訪問型のため全職種必須とし、まずは専門職個人の加入徹底、</text>
+        <text x="635" y="76" fill="#78350f" font-size="11">規模拡大時に会社包括保険を検討する2段階想定でよろしいか？</text>
       </g>
 
       <!-- ⑦ 個人情報保管（AI事業部） -->
-      <g transform="translate(0, 528)">
+      <g transform="translate(0, 538)">
         <rect x="0" y="0" width="1120" height="84" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" />
         <rect x="14" y="14" width="20" height="20" rx="4" fill="#059669" />
         <text x="24" y="28" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">7</text>
@@ -220,7 +223,7 @@
       </g>
 
       <!-- ⑧ PR広報活動 -->
-      <g transform="translate(0, 612)">
+      <g transform="translate(0, 622)">
         <rect x="0" y="0" width="1120" height="72" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
         <rect x="14" y="14" width="20" height="20" rx="4" fill="#0284c7" />
         <text x="24" y="28" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">8</text>
@@ -236,7 +239,7 @@
       </g>
 
       <!-- ⑨ システム構造チェック依頼 -->
-      <g transform="translate(0, 684)">
+      <g transform="translate(0, 694)">
         <rect x="0" y="0" width="1120" height="76" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
         <rect x="14" y="14" width="20" height="20" rx="4" fill="#7c3aed" />
         <text x="24" y="28" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">9</text>
