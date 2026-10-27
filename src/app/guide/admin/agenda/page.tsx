@@ -148,24 +148,25 @@ export default function AgendaPage() {
                 </td>
               </tr>
 
-              {/* ② 手数料率・粗利率 */}
+              {/* ② 手数料率・粗利率・利益配分 */}
               <tr className="hover:bg-slate-50/50">
                 <td className="py-3 px-3 text-center font-bold text-emerald-700 border-r border-slate-200">2</td>
                 <td className="py-3 px-4 font-bold text-slate-900 border-r border-slate-200">
-                  <div>手数料率・粗利率</div>
-                  <span className="text-[11px] font-normal text-emerald-600">手数料20%・粗利16.4%</span>
+                  <div>手数料・利益配分</div>
+                  <span className="text-[11px] font-normal text-emerald-600">粗利16.4%・大塚折半案</span>
                 </td>
                 <td className="py-3 px-4 border-r border-slate-200 leading-relaxed text-slate-600">
-                  ・予約手数料率（テイクレイト）: <strong className="text-slate-900">20%</strong>（相場20〜30%）<br />
-                  ・Stripe決済手数料: <strong className="text-rose-600">▲ 約3.6%</strong>（クレカ決済実費）<br />
-                  ・実質粗利益率: <strong className="text-emerald-700">約 16.4%</strong>（売上1万円あたり粗利1,640円）
+                  ・手数料率: <strong className="text-slate-900">20%</strong>（相場20〜30%）<br />
+                  ・Stripe決済手数料: <strong className="text-rose-600">▲ 約3.6%</strong><br />
+                  ・実質粗利益率: <strong className="text-emerald-700">約 16.4%</strong><br />
+                  <span className="text-[11px] text-slate-500">（売上1万円あたり粗利1,640円）</span>
                 </td>
                 <td className="py-3 px-4 bg-amber-50/30 text-amber-950 leading-relaxed">
                   <div className="font-bold text-slate-900">
-                    1) 手数料率は「20%」の設定で問題ないでしょうか？（初期利用促進のためさらに低めにする案の要否）
+                    1) 手数料率は「20%」（実質粗利 約16.4%）の設定でよろしいでしょうか？
                   </div>
                   <div className="font-bold text-slate-900 mt-1">
-                    2) Stripe決済費控除後の実質粗利率（約16.4%）へのご意見。
+                    2) 大塚の開発・運用取り分について、当初仰っていただいた通り<span className="underline decoration-amber-500 font-black">「実質粗利益（約16.4%）を会社と大塚で50%ずつ折半（各 約8.2%）」</span>とする配分でよろしいでしょうか？
                   </div>
                 </td>
               </tr>
@@ -258,7 +259,7 @@ export default function AgendaPage() {
                 </td>
                 <td className="py-3 px-4 bg-amber-50/30 text-amber-950 leading-relaxed">
                   <div className="font-bold text-slate-900">
-                    残さざるを得ない個人情報の安全な暗号化保管・マスキング等について、<span className="underline decoration-amber-500 font-black">「AI事業部」に相談し設計チェックやアドバイスを伺うこと</span>は可能でしょうか？推奨の良い方法はございますか？
+                    残さざるを得ない個人情報の安全な暗号化保管・マスキング等について、<span className="underline decoration-amber-500 font-black">「AI事業部」に相談し設計チェックやアドバイスを伺うこと</span>は可能でしょうか？
                   </div>
                 </td>
               </tr>
@@ -275,7 +276,7 @@ export default function AgendaPage() {
                 </td>
                 <td className="py-3 px-4 bg-amber-50/30 text-amber-950 leading-relaxed">
                   <div className="font-bold text-slate-900">
-                    初期の<span className="underline decoration-amber-500 font-black">PR活動・広報マーケティング展開はどう進めるべきか？</span> グループ内リソースの活用等、会長のアイデア・ご意見を伺いたい。
+                    初期の<span className="underline decoration-amber-500 font-black">PR広報活動・マーケティング展開</span>について、グループ内リソースの活用等も含め、会長のお考えやアドバイスを伺えますでしょうか？
                   </div>
                 </td>
               </tr>

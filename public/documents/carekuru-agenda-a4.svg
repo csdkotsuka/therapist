@@ -117,22 +117,22 @@
         <text x="635" y="90" fill="#78350f" font-size="11">について会長のご意見を伺えますでしょうか？</text>
       </g>
 
-      <!-- ② 手数料率・想定利益率 -->
+      <!-- ② 手数料率・粗利率・利益配分 -->
       <g transform="translate(0, 136)">
         <rect x="0" y="0" width="1120" height="84" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
         <rect x="14" y="14" width="20" height="20" rx="4" fill="#10b981" />
         <text x="24" y="28" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">2</text>
-        <text x="60" y="28" fill="#0f172a" font-size="13" font-weight="bold">手数料率・粗利率</text>
-        <text x="60" y="46" fill="#059669" font-size="10">手数料20%・粗利16.4%</text>
+        <text x="60" y="28" fill="#0f172a" font-size="13" font-weight="bold">手数料・利益配分</text>
+        <text x="60" y="46" fill="#059669" font-size="10">粗利16.4%・大塚折半案</text>
 
         <text x="260" y="26" fill="#475569" font-size="12">・予約手数料率（テイクレイト）: <tspan font-weight="bold" fill="#0f172a">20%</tspan>（相場20〜30%）</text>
         <text x="260" y="46" fill="#475569" font-size="12">・Stripe決済手数料: <tspan font-weight="bold" fill="#e11d48">▲ 約3.6%</tspan>（クレカ決済実費）</text>
         <text x="260" y="66" fill="#059669" font-size="12" font-weight="bold">・実質粗利益率: 約 16.4% <tspan font-size="11" font-weight="normal" fill="#64748b">（売上1万円あたり粗利1,640円）</tspan></text>
 
         <rect x="610" y="6" width="500" height="72" rx="6" fill="#fffbeb" stroke="#fef3c7" stroke-width="1" />
-        <text x="625" y="28" fill="#78350f" font-size="12" font-weight="bold">1) 手数料率は「20%」の設定で問題ないでしょうか？</text>
-        <text x="635" y="46" fill="#92400e" font-size="11">（あるいは初期利用促進のためさらに低めに設定すべきでしょうか？）</text>
-        <text x="625" y="66" fill="#78350f" font-size="12" font-weight="bold">2) Stripe決済費控除後の実質粗利率（約16.4%）へのご意見。</text>
+        <text x="625" y="26" fill="#78350f" font-size="12" font-weight="bold">1) 手数料率は「20%」（実質粗利 約16.4%）でよろしいでしょうか？</text>
+        <text x="625" y="46" fill="#78350f" font-size="12" font-weight="bold">2) 大塚の開発・運用取り分について、当初仰っていただいた通り</text>
+        <text x="635" y="66" fill="#78350f" font-size="12" font-weight="bold"><tspan fill="#b45309">「実質粗利益（16.4%）を会社と大塚で50%折半（各 約8.2%）」</tspan>でよろしいでしょうか？</text>
       </g>
 
       <!-- ③ 収益受取口座 -->
@@ -234,8 +234,8 @@
         <text x="260" y="48" fill="#475569" font-size="12">広報・プロモーション・集客展開。</text>
 
         <rect x="610" y="6" width="500" height="60" rx="6" fill="#fffbeb" stroke="#fef3c7" stroke-width="1" />
-        <text x="625" y="28" fill="#78350f" font-size="12" font-weight="bold">初期の<tspan fill="#b45309">PR活動・広報マーケティング展開はどう進めるか？</tspan></text>
-        <text x="625" y="48" fill="#78350f" font-size="12" font-weight="bold">グループ内リソースの活用等、会長のアイデア・ご意見を伺いたい。</text>
+        <text x="625" y="28" fill="#78350f" font-size="12" font-weight="bold">初期の<tspan fill="#b45309">PR広報活動・マーケティング展開</tspan>について、グループ内</text>
+        <text x="625" y="48" fill="#78350f" font-size="12" font-weight="bold">リソースの活用等も含め、会長のお考えやアドバイスを伺えますでしょうか？</text>
       </g>
 
       <!-- ⑨ システム構造チェック依頼 -->
