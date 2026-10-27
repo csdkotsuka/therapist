@@ -8,6 +8,8 @@ export type BookingType = 'visit' | 'store';
 
 export type BookingStatus = 'pending' | 'awaiting_payment' | 'confirmed' | 'completed' | 'cancelled';
 
+export type AuthProvider = 'line' | 'google' | 'email' | 'passkey';
+
 export interface Profile {
   id: string;
   role: UserRole;
@@ -19,6 +21,26 @@ export interface Profile {
   postal_code?: string;
   lat?: number;
   lng?: number;
+  auth_provider?: AuthProvider;
+  line_user_id?: string;
+  google_sub?: string;
+  passkey_required?: boolean;
+  is_admin?: boolean;
+  last_sign_in_at?: string;
+  last_passkey_verified_at?: string;
+}
+
+export interface PasskeyCredential {
+  id: string;
+  user_id: string;
+  credential_id: string;
+  public_key: string;
+  counter: number;
+  device_name?: string;
+  aaguid?: string;
+  transports?: string[];
+  created_at: string;
+  last_used_at?: string;
 }
 
 export interface TherapistProfile {
