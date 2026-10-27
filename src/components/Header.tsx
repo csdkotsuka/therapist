@@ -306,32 +306,32 @@ export const Header: React.FC = () => {
               : 'bottom-2'
           }`}
         >
-          {/* iOS最新アイランド型 透過カプセルバー (Floating Glass Pill - アプリ時は浮遊/ブラウザ時はURLバー直上ギリギリ) */}
-          <div className="ios-glass-pill pointer-events-auto flex items-center gap-1 sm:gap-2 p-1 sm:p-1.5 rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.18),0_2px_6px_rgba(0,0,0,0.08)] border border-white/60 dark:border-white/15 ring-1 ring-black/5 dark:ring-white/10 transition-all">
+          {/* iOS最新アイランド型 透過カプセルバー (Floating Glass Pill - 指で押しやすい高さとパディングに最適化) */}
+          <div className="ios-glass-pill pointer-events-auto flex items-center gap-1 sm:gap-2 p-1.5 sm:p-2 rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.18),0_2px_6px_rgba(0,0,0,0.08)] border border-white/60 dark:border-white/15 ring-1 ring-black/5 dark:ring-white/10 transition-all">
             {/* Tab 1: さがす (Explore / Home) */}
             <Link
               href="/"
-              className={`flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full transition active:scale-95 ${
+              className={`flex items-center gap-1.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full transition active:scale-95 ${
                 pathname === '/'
                   ? 'bg-slate-900 text-white dark:bg-white dark:text-black shadow-xs font-black'
-                  : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white font-medium'
+                  : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white font-semibold'
               }`}
             >
-              <Search className={`w-4 h-4 ${pathname === '/' ? 'stroke-[2.5]' : 'stroke-[2]'}`} />
+              <Search className={`w-4 h-4 sm:w-4.5 sm:h-4.5 ${pathname === '/' ? 'stroke-[2.5]' : 'stroke-[2]'}`} />
               <span className="text-xs tracking-tight">さがす</span>
             </Link>
 
             {/* Tab 2: マイ予約 (Bookings) */}
             <Link
               href="/bookings"
-              className={`flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full transition active:scale-95 relative ${
+              className={`flex items-center gap-1.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full transition active:scale-95 relative ${
                 pathname === '/bookings'
                   ? 'bg-slate-900 text-white dark:bg-white dark:text-black shadow-xs font-black'
-                  : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white font-medium'
+                  : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white font-semibold'
               }`}
             >
               <div className="relative">
-                <Calendar className={`w-4 h-4 ${pathname === '/bookings' ? 'stroke-[2.5]' : 'stroke-[2]'}`} />
+                <Calendar className={`w-4 h-4 sm:w-4.5 sm:h-4.5 ${pathname === '/bookings' ? 'stroke-[2.5]' : 'stroke-[2]'}`} />
                 {awaitingPaymentCount > 0 ? (
                   <span className="absolute -top-1 -right-2 px-1 min-w-[14px] h-[14px] bg-rose-500 text-white text-[9px] font-black rounded-full flex items-center justify-center ring-2 ring-white dark:ring-black animate-pulse">
                     {awaitingPaymentCount}
@@ -349,22 +349,22 @@ export const Header: React.FC = () => {
             {isLoggedIn ? (
               <Link
                 href="/profile"
-                className={`flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full transition active:scale-95 ${
+                className={`flex items-center gap-1.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full transition active:scale-95 ${
                   pathname === '/profile'
                     ? 'bg-slate-900 text-white dark:bg-white dark:text-black shadow-xs font-black'
-                    : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white font-medium'
+                    : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white font-semibold'
                 }`}
               >
-                <User className={`w-4 h-4 ${pathname === '/profile' ? 'stroke-[2.5]' : 'stroke-[2]'}`} />
+                <User className={`w-4 h-4 sm:w-4.5 sm:h-4.5 ${pathname === '/profile' ? 'stroke-[2.5]' : 'stroke-[2]'}`} />
                 <span className="text-xs tracking-tight">マイページ</span>
               </Link>
             ) : (
               <button
                 type="button"
                 onClick={() => setIsAuthModalOpen(true)}
-                className="flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white font-medium transition active:scale-95"
+                className="flex items-center gap-1.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white font-semibold transition active:scale-95"
               >
-                <KeyRound className="w-4 h-4 stroke-[2]" />
+                <KeyRound className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-[2]" />
                 <span className="text-xs tracking-tight">ログイン</span>
               </button>
             )}
@@ -373,14 +373,14 @@ export const Header: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsDrawerOpen(true)}
-              className={`flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full transition active:scale-95 relative ${
+              className={`flex items-center gap-1.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full transition active:scale-95 relative ${
                 isDrawerOpen
                   ? 'bg-slate-900 text-white dark:bg-white dark:text-black shadow-xs font-black'
-                  : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white font-medium'
+                  : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white font-semibold'
               }`}
             >
               <div className="relative">
-                <Menu className={`w-4 h-4 ${isDrawerOpen ? 'stroke-[2.5]' : 'stroke-[2]'}`} />
+                <Menu className={`w-4 h-4 sm:w-4.5 sm:h-4.5 ${isDrawerOpen ? 'stroke-[2.5]' : 'stroke-[2]'}`} />
                 {(pendingRequestsCount > 0 || awaitingPaymentCount > 0) && (
                   <span className="w-2 h-2 rounded-full bg-rose-500 ring-1 ring-white dark:ring-black absolute top-0 -right-1 animate-pulse" />
                 )}
@@ -748,7 +748,7 @@ export const Header: React.FC = () => {
           </div>
 
           {/* iOS Sheet Footer */}
-          <div className="p-4 border-t border-slate-200/80 dark:border-white/10 bg-white/80 dark:bg-black/80 backdrop-blur-md pb-safe">
+          <div className="p-4 border-t border-slate-200/80 dark:border-white/10 bg-white/80 dark:bg-black/80 backdrop-blur-md pb-safe space-y-2.5">
             <div className="flex items-center justify-between text-xs">
               <span className="text-slate-500 dark:text-slate-400 truncate max-w-[200px]">
                 {isLoggedIn ? currentUser.name : 'ゲスト利用中'}
@@ -776,6 +776,11 @@ export const Header: React.FC = () => {
                   ログイン / 新規登録
                 </button>
               )}
+            </div>
+
+            {/* コピーライトクレジット (顧客画面のWebフッターをメニュー内に集約) */}
+            <div className="pt-2 text-center text-[10px] text-slate-400 dark:text-slate-600 border-t border-slate-200/60 dark:border-white/5">
+              <span>© {currentBrand.name}. All rights reserved.</span>
             </div>
           </div>
         </div>
