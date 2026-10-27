@@ -1,15 +1,106 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
+import confetti from 'canvas-confetti';
+import { Copy, Check, Printer } from 'lucide-react';
 
 export default function AgendaPage() {
+  const [copied, setCopied] = useState<boolean>(false);
+
+  // LINE・メール送信用サマリーテキスト
+  const AGENDA_TEXT = `【事前相談・報告アジェンダ】「Care KURU」プロジェクト推進計画
+
+■ 1. 決定事項のご報告（前提共有）
+┌────────────┬─────────────────────────────┬──────────────────────────────────────────┐
+│ 項目       │ 決定内容                    │ メリット・狙い                           │
+├────────────┼─────────────────────────────┼──────────────────────────────────────────┤
+│ アプリ名称 │ Care KURU（ケア・クル）     │ オンデマンド出張ヘルスケアの明快な想起   │
+│ 提供形態   │ PWA（アプリ風Web・審査なし）│ App Store審査・規約回避で最速リリース    │
+│            │                             │ ※スマホホーム画面追加で通常アプリ同様    │
+│ セキュリティ│ Stripe連携（ゼロリスク設計）│ 免許証・口座は自社DBに一切保存せずStripe │
+│            │                             │ で管理。万一の攻撃時も漏洩情報自体が存在 │
+│            │                             │ しない安心設計（現在テスト運用・調整中） │
+│ 信頼性担保 │ 5段階チェック体制           │ 審査料・誓約書・Stripe本人確認・資格証・ │
+│            │                             │ 保険証書（証明書画像は確認後即時自動破棄）│
+└────────────┴─────────────────────────────┴──────────────────────────────────────────┘
+
+■ 2. 会長への相談・決裁事項（全9項目）
+┌────┬──────────────┬───────────────────────────────┬──────────────────────────────────────────┐
+│ No │ 相談項目     │ 検討案（背景）                │ 会長への相談・確認事項                   │
+├────┼──────────────┼───────────────────────────────┼──────────────────────────────────────────┤
+│ ①  │ 登録料・会費 │ 初期0円 → 安定後月1万円       │ 初期無料方針でよいか？相場を踏まえた     │
+│    │              │ （外部は少し高め）            │ 価格水準や移行時期についてのご意見       │
+├────┼──────────────┼───────────────────────────────┼──────────────────────────────────────────┤
+│ ②  │ 手数料・粗利 │ 手数料20%・実質粗利約16.4%   │ 手数料20%・粗利率16.4%の設定でよいか？   │
+│    │              │ （Stripe決済費▲約3.6%控除後） │ （業界相場20〜30%）                      │
+├────┼──────────────┼───────────────────────────────┼──────────────────────────────────────────┤
+│ ③  │ 売上受取口座 │ Stripe連携メイン口座          │ プラットフォーム側の売上・手数料を受け取 │
+│    │              │                               │ る法人（または口座）の指定               │
+├────┼──────────────┼───────────────────────────────┼──────────────────────────────────────────┤
+│ ④  │ 公開ドメイン │ ブランド信用力の活用          │ 活用できる「NEOFAMILY」関連ドメインは    │
+│    │              │                               │ あるか？使わせていただけるか？(2段階)    │
+├────┼──────────────┼───────────────────────────────┼──────────────────────────────────────────┤
+│ ⑤  │ インフラ実費 │ 月額数千円〜1万円程度         │ 自己負担も可能だが、プロジェクト経費とし │
+│    │              │ （DB・サーバー代）            │ て計上・精算させていただけるか？         │
+├────┼──────────────┼───────────────────────────────┼──────────────────────────────────────────┤
+│ ⑥  │ 事業賠償保険 │ 2段階導入                     │ スタート時は個人の保険加入徹底で立ち上げ │
+│    │              │                               │ 規模拡大時に会社として包括加入でよいか？ │
+├────┼──────────────┼───────────────────────────────┼──────────────────────────────────────────┤
+│ ⑦  │ 個人情報保管 │ 残存する個人情報（氏名・住所）│ 訪問に不可欠な情報の安全な暗号化・保管に │
+│    │ （AI事業部） │ の保管・アクセス制御          │ ついて、AI事業部に伺えるか？いい方法あるか│
+├────┼──────────────┼───────────────────────────────┼──────────────────────────────────────────┤
+│ ⑧  │ PR広報活動   │ 初期集客・認知拡大の方針      │ サービス公開時のPR活動・広報展開はどう進 │
+│    │              │                               │ めるか？会長のアイデア・ご意見を伺いたい │
+├────┼──────────────┼───────────────────────────────┼──────────────────────────────────────────┤
+│ ⑨  │ 構造チェック │ システムアーキテクチャ監査    │ 本格ローンチ前に、AI事業部に依頼してシス │
+│    │ （AI事業部） │ （Next.js + Supabase等）      │ テム構造・セキュリティのチェック可能か？ │
+└────┴──────────────┴───────────────────────────────┴──────────────────────────────────────────┘`;
+
+  const handleCopy = () => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(AGENDA_TEXT);
+      setCopied(true);
+      try {
+        confetti({ particleCount: 40, spread: 50, origin: { y: 0.7 } });
+      } catch (e) {}
+      setTimeout(() => setCopied(false), 2500);
+    }
+  };
+
+  const handlePrint = () => {
+    if (typeof window !== 'undefined') {
+      window.print();
+    }
+  };
+
   return (
     <div className="space-y-4 max-w-5xl mx-auto -mt-2">
-      {/* タイトルのみのシンプルなヘッダー */}
-      <div className="pb-2.5 border-b border-slate-300">
+      {/* タイトル ＆ ワンクリック操作バー */}
+      <div className="pb-2.5 border-b border-slate-300 flex flex-wrap items-center justify-between gap-2 print:border-none">
         <h1 className="text-sm sm:text-base font-black text-slate-900 tracking-tight">
           【事前相談・報告アジェンダ】「Care KURU」プロジェクト推進計画
         </h1>
+
+        <div className="flex items-center gap-2 print:hidden">
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-2xs transition active:scale-95"
+            title="全文テキストをコピーします"
+          >
+            {copied ? <Check className="w-3.5 h-3.5 text-emerald-200" /> : <Copy className="w-3.5 h-3.5" />}
+            <span>{copied ? 'コピー完了' : 'LINE用に全文コピー'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handlePrint}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border border-slate-300 transition active:scale-95"
+          >
+            <Printer className="w-3.5 h-3.5" />
+            <span>A4印刷・PDF出力</span>
+          </button>
+        </div>
       </div>
 
       {/* ======================================================== */}
@@ -91,15 +182,15 @@ export default function AgendaPage() {
       </div>
 
       {/* ======================================================== */}
-      {/* 第2部: 会長への相談・決裁事項（全6項目） */}
+      {/* 第2部: 会長への相談・決裁事項（全9項目） */}
       {/* ======================================================== */}
       <div className="space-y-1.5 pt-1">
         <div className="flex items-center justify-between px-1">
           <h2 className="text-xs font-black text-slate-800 flex items-center gap-1.5">
             <span className="w-4 h-4 rounded bg-amber-600 text-white text-[10px] font-bold inline-flex items-center justify-center">2</span>
-            <span>会長への相談・決裁事項（全6項目）</span>
+            <span>会長への相談・決裁事項（全9項目）</span>
           </h2>
-          <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded">要決裁</span>
+          <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded">要決裁 全9項目</span>
         </div>
 
         <div className="overflow-x-auto rounded-lg border border-slate-300 shadow-2xs bg-white">
@@ -218,6 +309,57 @@ export default function AgendaPage() {
                 </td>
                 <td className="py-2 px-3.5 bg-amber-50/30 font-medium text-slate-900 leading-normal">
                   スタート時は個人の保険徹底で立ち上げ、<strong>本格稼働・規模拡大時に会社として包括加入する2段階想定</strong>でよいか？
+                </td>
+              </tr>
+
+              {/* ⑦ 個人情報保管（AI事業部） */}
+              <tr className="hover:bg-slate-50/70">
+                <td className="py-2 px-2.5 text-center font-bold text-slate-500 border-r border-slate-200">
+                  7
+                </td>
+                <td className="py-2 px-3 font-bold text-slate-900 border-r border-slate-200">
+                  <div>残存個人情報の保管方法</div>
+                  <span className="text-[10px] font-normal text-emerald-700">AI事業部連携・情報保護</span>
+                </td>
+                <td className="py-2 px-3 border-r border-slate-200 leading-normal text-slate-600">
+                  免許証・口座はStripeでゼロリスク化済だが、訪問施術に不可欠な<strong>「顧客の氏名・訪問先住所・電話番号」</strong>は自社DBで保持せざるを得ない。
+                </td>
+                <td className="py-2 px-3.5 bg-amber-50/30 font-medium text-slate-900 leading-normal">
+                  残さざるを得ない個人情報の安全な暗号化保管・マスキング・アクセス制御について、<strong>「AI事業部」に相談し設計チェックやアドバイスを伺うことは可能か？</strong> 推奨の良い方法はあるか？
+                </td>
+              </tr>
+
+              {/* ⑧ PR活動・初期集客方針 */}
+              <tr className="hover:bg-slate-50/70">
+                <td className="py-2 px-2.5 text-center font-bold text-slate-500 border-r border-slate-200">
+                  8
+                </td>
+                <td className="py-2 px-3 font-bold text-slate-900 border-r border-slate-200">
+                  <div>PR広報活動・集客方針</div>
+                  <span className="text-[10px] font-normal text-sky-700">広報・マーケティング</span>
+                </td>
+                <td className="py-2 px-3 border-r border-slate-200 leading-normal text-slate-600">
+                  サービス公開初期の施術者・顧客双方の認知拡大に向けたプロモーション展開。
+                </td>
+                <td className="py-2 px-3.5 bg-amber-50/30 font-medium text-slate-900 leading-normal">
+                  初期の<strong>PR活動・広報マーケティング展開はどう進めるか？</strong> グループ内リソースや発信経路の活用について会長のアイデア・ご意見を伺いたい。
+                </td>
+              </tr>
+
+              {/* ⑨ システム構造チェックの依頼（AI事業部） */}
+              <tr className="hover:bg-slate-50/70">
+                <td className="py-2 px-2.5 text-center font-bold text-slate-500 border-r border-slate-200">
+                  9
+                </td>
+                <td className="py-2 px-3 font-bold text-slate-900 border-r border-slate-200">
+                  <div>システム構造チェック依頼</div>
+                  <span className="text-[10px] font-normal text-purple-700">AI事業部・技術監査</span>
+                </td>
+                <td className="py-2 px-3 border-r border-slate-200 leading-normal text-slate-600">
+                  Next.js + Supabase + Stripe Connect の設計構造、権限・セキュリティ、負荷耐性。
+                </td>
+                <td className="py-2 px-3.5 bg-amber-50/30 font-medium text-slate-900 leading-normal">
+                  本番稼働前に万全を期すため、<strong>「AI事業部」に依頼してシステム全体の構造チェック・セキュリティ技術レビューを行っていただくことは可能か？</strong>
                 </td>
               </tr>
             </tbody>

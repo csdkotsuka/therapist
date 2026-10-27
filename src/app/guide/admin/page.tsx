@@ -34,11 +34,11 @@ export default function AdminGuidePortalPage() {
       iconColor: 'bg-emerald-500 text-white',
       accentBorder: 'border-emerald-500/40 hover:border-emerald-500',
       description:
-        '決定事項（アプリ名、PWA最速リリース、Stripe Connectによるゼロリスク個人情報保護、5段階信頼フロー）のご報告と、会長への6大相談・決裁事項（初期無料・安定後会費制、手数料率・粗利率、売上口座、NEOFAMILYドメイン、インフラ経費、事業保険）。',
+        '決定事項（アプリ名、PWA最速リリース、Stripe Connectによるゼロリスク個人情報保護、5段階信頼フロー）のご報告と、会長への9大相談・決裁事項（初期無料・安定後会費、手数料・粗利率、売上口座、ドメイン、経費、保険、個人情報保管・AI事業部相談、PR方針、構造チェック）。',
       highlights: [
         'LINE・メール用ワンクリック全文コピー機能つき',
         'Stripe連携による「漏洩リスク完全遮断」ゼロリスク設計',
-        '6つの重要相談・決裁論点（一覧表形式）',
+        '9つの重要相談・決裁論点（一覧表形式）',
       ],
       ctaText: 'アジェンダ本文を開く',
       ctaClass: 'bg-emerald-600 hover:bg-emerald-700 text-white',
