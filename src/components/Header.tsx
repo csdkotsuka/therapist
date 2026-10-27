@@ -97,13 +97,15 @@ export const Header: React.FC = () => {
   const therapistMatch = pathname.match(/\/therapist\/([^\/]+)/);
   const currentTherapistId = therapistMatch ? therapistMatch[1] : currentUser.id;
 
-  // タグラインの旧名称安全補正 (CAREAREA GOなどの残骸を CARE KURU に修正)
+  // タグラインの旧名称安全補正 (旧名称の残骸を CareKURU. に修正)
   const displayTagline =
     !currentBrand.tagline ||
+    currentBrand.tagline === 'CARE KURU' ||
+    currentBrand.tagline === 'Care KURU' ||
     currentBrand.tagline === 'CAREAREA GO' ||
     currentBrand.tagline === 'CAREA GO' ||
     currentBrand.tagline === 'CARE GO'
-      ? 'CARE KURU'
+      ? 'CareKURU.'
       : currentBrand.tagline;
 
   const getRoleBadge = (role: string) => {

@@ -4,8 +4,8 @@ import './globals.css';
 import { AppProvider } from '@/context/AppContext';
 
 export const metadata: Metadata = {
-  title: 'Care KURU（ケアクル） - ON-DEMAND WELLNESS | 出張・店舗ヘルスケア＆ボディケア',
-  description: '理学療法士、エステ、整体、カイロなどのプロによる出張＆店舗訪問オンデマンド予約・決済プラットフォーム「Care KURU（ケアクル）」',
+  title: 'CareKURU. - ON-DEMAND WELLNESS | 出張・店舗ヘルスケア＆ボディケア',
+  description: '理学療法士、エステ、整体、カイロなどのプロによる出張＆店舗訪問オンデマンド予約・決済プラットフォーム「CareKURU.」',
   icons: {
     icon: '/branding/icon_carearia_symbol.png',
     apple: '/branding/icon_carearia_symbol.png',

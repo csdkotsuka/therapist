@@ -16,7 +16,7 @@ export default function AgendaPage() {
               役員・会長事前相談用
             </div>
             <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white">
-              【事前相談・報告アジェンダ】「Care KURU」プロジェクト推進計画
+              【事前相談・報告アジェンダ】「CareKURU.」プロジェクト推進計画
             </h1>
             <p className="text-xs sm:text-sm text-slate-300 mt-1">
               決定済み仕様の前提共有と、推進にあたり会長のご判断・ご助言を仰ぎたい相談事項（全9項目）
@@ -62,7 +62,7 @@ export default function AgendaPage() {
               <tr className="hover:bg-slate-50/50">
                 <td className="py-3 px-4 font-bold text-slate-900 bg-slate-50/30 border-r border-slate-200">アプリ名称</td>
                 <td className="py-3 px-4 font-bold text-emerald-800 border-r border-slate-200">
-                  Care KURU（ケア・クル）
+                  CareKURU.
                 </td>
                 <td className="py-3 px-4 text-slate-600">
                   「ケアが来る」というオンデマンド出張ヘルスケアの明快な想起と親しみやすさ。

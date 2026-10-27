@@ -510,7 +510,7 @@ export const TherapistProfileEdit: React.FC<{ therapistId?: string }> = ({ thera
                   type="text"
                   value={storeName}
                   onChange={(e) => setStoreName(e.target.value)}
-                  placeholder="例: Care KURU 松山中央サロン"
+                  placeholder="例: CareKURU. 松山中央サロン"
                   className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-teal-500 shadow-2xs"
                 />
               </div>

@@ -387,7 +387,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
           { id: 'customers' as const, label: `顧客一覧 & 視点切替 (${customers.length})`, icon: Users, desc: '登録顧客リストの確認・代理ログイン視点切替' },
           { id: 'messages' as const, label: `全メッセージ監視 (${messages.length})`, icon: MessageCircle, desc: 'トラブル防止・直契約監視・連絡履歴の確認' },
           { id: 'reviews' as const, label: `口コミ・レビュー管理 (${reviews.length})`, icon: Star, desc: 'お客様評価・口コミのソートとモデレーション' },
-          { id: 'branding' as const, label: 'ブランド・ロゴ設定', icon: Palette, desc: 'サービス名（Care KURU等）やアプリアイコンの一括切替' },
+          { id: 'branding' as const, label: 'ブランド・ロゴ設定', icon: Palette, desc: 'サービス名（CareKURU.）やアプリアイコンの切替・カスタマイズ' },
           { id: 'settings' as const, label: '手数料率・プラットフォーム設定', icon: Sliders, desc: '基本手数料率の設定と保存' },
         ];
         const currentSec = adminSections.find((s) => s.id === activeTab) || adminSections[0];
@@ -2074,7 +2074,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                 <div className="min-w-0">
                   <span className="text-[10px] text-slate-400 font-bold block">採用中のアプリ名</span>
                   <strong className="text-xs font-black text-slate-900 truncate block">
-                    {currentBrand.japaneseName} ({currentBrand.name})
+                    {currentBrand.name}
                   </strong>
                 </div>
               </div>
@@ -2096,11 +2096,10 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
               <div className="flex flex-wrap items-center gap-1.5">
                 <span className="text-[10px] font-bold text-slate-400">候補から選ぶ:</span>
                 {[
-                  { jp: 'ケアクル', en: 'Care KURU', cp: 'プロがあなたの元へ届く。出張・店舗ヘルスケア＆ボディケア' },
-                  { jp: 'ケアリアゴー', en: 'Carearia Go', cp: 'あなたの「したい」叶える場所。' },
-                  { jp: 'セラリンク', en: 'Theralink', cp: '内側から輝く、本当の美しさを。' },
-                  { jp: 'ケアゴー', en: 'Care Go', cp: 'その一歩が、もっとキレイな未来をつくる。' },
-                  { jp: 'ケアリアゴー', en: 'Careia Go', cp: 'あなたのキレイと健康をプロの手で。' },
+                  { jp: 'CareKURU.', en: 'CareKURU.', cp: 'プロがあなたの元へ届く。出張・店舗ヘルスケア＆ボディケア' },
+                  { jp: 'Carearia Go', en: 'Carearia Go', cp: 'あなたの「したい」叶える場所。' },
+                  { jp: 'Theralink', en: 'Theralink', cp: '内側から輝く、本当の美しさを。' },
+                  { jp: 'Care Go', en: 'Care Go', cp: 'その一歩が、もっとキレイな未来をつくる。' },
                 ].map((preset, idx) => (
                   <button
                     key={idx}
@@ -2116,7 +2115,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                         : 'bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 text-slate-600 border-slate-200/80'
                     }`}
                   >
-                    {idx === 0 ? `★ ${preset.jp} (${preset.en})` : `${preset.jp} (${preset.en})`}
+                    {idx === 0 ? `★ 公式確定: ${preset.en}` : preset.en}
                   </button>
                 ))}
               </div>
@@ -2124,23 +2123,23 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
 
             <form onSubmit={handleSaveAppName} className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">アプリ名 (日本語)</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">アプリ名 (メイン表示)</label>
                 <input
                   type="text"
                   value={appJpNameInput}
                   onChange={(e) => setAppJpNameInput(e.target.value)}
-                  placeholder="例: ケアクル"
+                  placeholder="例: CareKURU."
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-bold focus:outline-emerald-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">アプリ名 (英字 / 英語)</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">アプリ名 (英字 / サブ)</label>
                 <input
                   type="text"
                   value={appNameInput}
                   onChange={(e) => setAppNameInput(e.target.value)}
-                  placeholder="例: Care KURU"
+                  placeholder="例: CareKURU."
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-bold focus:outline-emerald-500"
                 />
               </div>
@@ -2173,10 +2172,10 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
             <div className="border-b border-slate-100 pb-3">
               <h5 className="font-bold text-slate-900 text-sm flex items-center gap-2">
                 <span className="w-6 h-6 rounded-lg bg-teal-100 text-teal-800 flex items-center justify-center text-xs font-black">2</span>
-                <span>アプリアイコン ＆ ファビコン設定 (独立選択)</span>
+                <span>アプリアイコン ＆ ファビコン設定</span>
               </h5>
               <p className="text-xs text-slate-500 mt-0.5">
-                ブラウザのタブアイコンやヘッダーのシンボルマークとして使用するアイコンを選択します。提供画像の赤枠ロゴからテキストをトリミングした高品質シンボルマークを選択可能です。
+                ブラウザタブやホーム画面、ヘッダーに表示されるシンボルアイコンを選択します。
               </p>
             </div>
 
@@ -2188,12 +2187,26 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                   <div
                     key={iconItem.id}
                     onClick={() => handleSelectIcon(iconItem.url)}
-                    className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col items-center justify-between text-center ${
+                    className={`p-4 rounded-2xl transition-all cursor-pointer flex flex-col items-center justify-between text-center relative ${
                       isSelected
-                        ? 'border-emerald-500 bg-emerald-50/40 ring-2 ring-emerald-500/20 shadow-sm'
-                        : 'border-slate-200 hover:border-emerald-300 hover:bg-slate-50/50'
+                        ? 'border-2 border-emerald-500 bg-emerald-50/70 ring-4 ring-emerald-500/20 shadow-md'
+                        : 'border border-slate-200 bg-white hover:border-emerald-400 hover:bg-slate-50/60 hover:shadow-md'
                     }`}
                   >
+                    {/* 上部状態バッジ */}
+                    <div className="w-full mb-3">
+                      {isSelected ? (
+                        <div className="w-full py-1 px-2 rounded-lg bg-emerald-600 text-white text-[11px] font-black flex items-center justify-center gap-1 shadow-xs">
+                          <Check className="w-3.5 h-3.5 stroke-[3]" />
+                          <span>現在適用中</span>
+                        </div>
+                      ) : (
+                        <div className="w-full py-1 px-2 rounded-lg bg-slate-100 text-slate-500 text-[11px] font-bold">
+                          未選択（選べます）
+                        </div>
+                      )}
+                    </div>
+
                     <div className="w-20 h-20 rounded-2xl bg-white border border-slate-200 flex items-center justify-center p-2 shadow-xs overflow-hidden mb-3">
                       {iconItem.url ? (
                         <img
@@ -2220,19 +2233,19 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
 
                     <button
                       type="button"
-                      className={`w-full py-1.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 ${
+                      className={`w-full py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 ${
                         isSelected
-                          ? 'bg-emerald-600 text-white font-black'
-                          : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                          ? 'bg-emerald-600 text-white font-black shadow-xs cursor-default'
+                          : 'bg-slate-100 hover:bg-emerald-600 hover:text-white text-slate-700'
                       }`}
                     >
                       {isSelected ? (
                         <>
-                          <Check className="w-3.5 h-3.5" />
-                          <span>適用中</span>
+                          <Check className="w-3.5 h-3.5 stroke-[3]" />
+                          <span>適用されています</span>
                         </>
                       ) : (
-                        <span>このアイコンを適用</span>
+                        <span>このアイコンを適用する →</span>
                       )}
                     </button>
                   </div>
@@ -2246,7 +2259,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
             <div className="border-b border-slate-100 pb-3">
               <h5 className="font-bold text-slate-900 text-sm flex items-center gap-2">
                 <span className="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-800 flex items-center justify-center text-xs font-black">3</span>
-                <span>ヘッダー用ブランドロゴ設定 (独立選択)</span>
+                <span>ヘッダー用ブランドロゴ設定</span>
               </h5>
               <p className="text-xs text-slate-500 mt-0.5">ヘッダーや資料ページに掲載するロゴ画像のタイプを選択できます。</p>
             </div>
@@ -2259,12 +2272,26 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                   <div
                     key={logoItem.id}
                     onClick={() => handleSelectLogo(logoItem.url)}
-                    className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col items-center justify-between text-center ${
+                    className={`p-4 rounded-2xl transition-all cursor-pointer flex flex-col items-center justify-between text-center relative ${
                       isSelected
-                        ? 'border-indigo-500 bg-indigo-50/40 ring-2 ring-indigo-500/20 shadow-sm'
-                        : 'border-slate-200 hover:border-indigo-300 hover:bg-slate-50/50'
+                        ? 'border-2 border-indigo-500 bg-indigo-50/70 ring-4 ring-indigo-500/20 shadow-md'
+                        : 'border border-slate-200 bg-white hover:border-indigo-400 hover:bg-slate-50/60 hover:shadow-md'
                     }`}
                   >
+                    {/* 上部状態バッジ */}
+                    <div className="w-full mb-3">
+                      {isSelected ? (
+                        <div className="w-full py-1 px-2 rounded-lg bg-indigo-600 text-white text-[11px] font-black flex items-center justify-center gap-1 shadow-xs">
+                          <Check className="w-3.5 h-3.5 stroke-[3]" />
+                          <span>現在適用中</span>
+                        </div>
+                      ) : (
+                        <div className="w-full py-1 px-2 rounded-lg bg-slate-100 text-slate-500 text-[11px] font-bold">
+                          未選択（選べます）
+                        </div>
+                      )}
+                    </div>
+
                     <div className="w-full h-24 rounded-2xl bg-white border border-slate-200 flex items-center justify-center p-2 shadow-xs overflow-hidden mb-3">
                       <img
                         src={logoItem.url}
@@ -2273,25 +2300,30 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                       />
                     </div>
 
-                    <h6 className="font-bold text-xs text-slate-900 leading-tight mb-3">
-                      {logoItem.label}
-                    </h6>
+                    <div className="space-y-1 mb-3">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 block">
+                        {logoItem.badge}
+                      </span>
+                      <h6 className="font-bold text-xs text-slate-900 leading-tight">
+                        {logoItem.label}
+                      </h6>
+                    </div>
 
                     <button
                       type="button"
-                      className={`w-full py-1.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 ${
+                      className={`w-full py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 ${
                         isSelected
-                          ? 'bg-indigo-600 text-white font-black'
-                          : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                          ? 'bg-indigo-600 text-white font-black shadow-xs cursor-default'
+                          : 'bg-slate-100 hover:bg-indigo-600 hover:text-white text-slate-700'
                       }`}
                     >
                       {isSelected ? (
                         <>
-                          <Check className="w-3.5 h-3.5" />
-                          <span>適用中</span>
+                          <Check className="w-3.5 h-3.5 stroke-[3]" />
+                          <span>適用されています</span>
                         </>
                       ) : (
-                        <span>このロゴを適用</span>
+                        <span>このロゴを適用する →</span>
                       )}
                     </button>
                   </div>
@@ -2308,7 +2340,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {(['carearia_go_green', 'theralink', 'care_go_blue', 'careia_go_pink', 'carea_go', 'thera_go'] as AppBrandId[]).map((brandKey) => {
+              {(['care_kuru', 'carearia_go_green', 'theralink', 'care_go_blue', 'careia_go_pink'] as AppBrandId[]).map((brandKey) => {
                 const brand = APP_BRANDS[brandKey];
                 if (!brand) return null;
                 const isSelected = appBrand === brandKey;
@@ -2316,15 +2348,34 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                 return (
                   <div
                     key={brandKey}
-                    className={`bg-white rounded-3xl border-2 transition-all duration-200 overflow-hidden flex flex-col justify-between shadow-xs ${
+                    className={`bg-white rounded-3xl border-2 transition-all duration-200 overflow-hidden flex flex-col justify-between ${
                       isSelected
-                        ? 'border-emerald-500 ring-2 ring-emerald-500/20 shadow-lg -translate-y-0.5'
+                        ? 'border-emerald-500 ring-4 ring-emerald-500/20 shadow-xl bg-emerald-50/20 -translate-y-0.5'
                         : 'border-slate-200 hover:border-slate-300 hover:shadow-md'
                     }`}
                   >
                     <div>
+                      {/* 上部ステータスバッジ */}
+                      <div className="px-4 pt-3 pb-1 flex items-center justify-between">
+                        {isSelected ? (
+                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-600 text-white text-xs font-black shadow-xs">
+                            <Check className="w-3.5 h-3.5 stroke-[3]" />
+                            <span>現在適用中</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[11px] font-bold">
+                            未選択
+                          </span>
+                        )}
+                        {brandKey === 'care_kuru' && (
+                          <span className="text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md">
+                            ★ 公式確定ブランド
+                          </span>
+                        )}
+                      </div>
+
                       {/* 上部: アイコン単体プレビュー */}
-                      <div className="relative h-36 bg-gradient-to-b from-slate-50 to-slate-100/60 border-b border-slate-100 flex flex-col items-center justify-center p-3">
+                      <div className="relative h-32 bg-gradient-to-b from-slate-50 to-slate-100/60 border-y border-slate-100 flex flex-col items-center justify-center p-3">
                         <div className="w-16 h-16 rounded-2xl shadow-md overflow-hidden bg-white p-1 border border-slate-200 flex items-center justify-center">
                           {brand.iconUrl ? (
                             <img
@@ -2339,20 +2390,12 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                             />
                           )}
                         </div>
-                        {isSelected && (
-                          <div className="absolute top-2.5 right-2.5">
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-black shadow-md">
-                              <Check className="w-3 h-3" />
-                              <span>適用中</span>
-                            </span>
-                          </div>
-                        )}
                       </div>
 
                       {/* ブランド情報 */}
                       <div className="p-4 space-y-2">
                         <div className="flex items-baseline justify-between gap-2">
-                          <h3 className="font-black text-base text-slate-900 tracking-tight">
+                          <h3 className="font-black text-lg text-slate-900 tracking-tight">
                             {brand.japaneseName}
                           </h3>
                           <span

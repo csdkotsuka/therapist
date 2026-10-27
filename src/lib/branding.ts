@@ -5,7 +5,7 @@ import { AppBrandConfig, AppBrandId } from '@/types';
 // ※ ファビコンやヘッダー用アイコンとして、極小サイズでも視認性抜群のベクター描画
 // ========================================================
 
-/** 公式決定ブランド: Care KURU (ケアクル) - エメラルド＆スカイブルーの「C」×「K」× 新緑・躍動シンボル */
+/** 公式決定ブランド: CareKURU. - エメラルド＆スカイブルーの「C」×「K」× 新緑・躍動シンボル */
 export const ICON_CARE_KURU = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <defs>
     <linearGradient id="ck_grad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -156,12 +156,12 @@ export const ICON_THERA_GO_CLASSIC = `<svg xmlns="http://www.w3.org/2000/svg" vi
 // ========================================================
 
 export const APP_BRANDS: Record<AppBrandId, AppBrandConfig> = {
-  // ★ 公式決定ブランド: Care KURU (ケアクル)
+  // ★ 公式決定ブランド: CareKURU.
   care_kuru: {
     id: 'care_kuru',
-    name: 'Care KURU',
-    japaneseName: 'ケアクル',
-    tagline: 'CARE KURU',
+    name: 'CareKURU.',
+    japaneseName: 'CareKURU.',
+    tagline: 'CareKURU.',
     catchphrase: 'プロがあなたの元へ届く。出張・店舗ヘルスケア＆ボディケア',
     description: '理学療法士・セラピスト・トレーナーがあなたの元へ届くオンデマンドマッチングプラットフォーム',
     themeColor: '#059669',
@@ -272,76 +272,63 @@ export const APP_BRANDS: Record<AppBrandId, AppBrandConfig> = {
 
 export const DEFAULT_BRAND_ID: AppBrandId = 'care_kuru';
 
-// 独立選択用: アプリアイコン（＝ファビコン）一覧
+// 独立選択用: アプリアイコン（＝ファビコン）一覧（URL完全重複なし）
 export const AVAILABLE_ICONS = [
   {
     id: 'icon_care_kuru_symbol',
-    label: '公式決定: Care KURU (ケアクル) シンボル',
+    label: '公式決定: CareKURU. シンボル',
     url: '/branding/icon_carearia_symbol.png',
-    badge: '公式決定 (Care KURU)',
-    themeColor: '#059669',
-  },
-  {
-    id: 'icon_carearia_symbol',
-    label: '赤枠ロゴ 13: ケアリア 若葉シンボル',
-    url: '/branding/icon_carearia_symbol.png',
-    badge: '赤枠ロゴ (提供画像)',
+    badge: '公式決定 (CareKURU.)',
     themeColor: '#059669',
   },
   {
     id: 'icon_theralink_symbol',
-    label: '赤枠ロゴ 12: セラリンク リースシンボル',
+    label: '候補: セラリンク リースシンボル',
     url: '/branding/icon_theralink_symbol.png',
-    badge: '赤枠ロゴ (提供画像)',
+    badge: '候補デザイン',
     themeColor: '#059669',
   },
   {
     id: 'icon_care_go_blue',
-    label: 'ロゴ 2: ケアゴー ブルーC × 若葉',
+    label: '候補: ケアゴー ブルーC × 若葉',
     url: '/branding/icon_care_go_symbol.png',
-    badge: '提供画像トリミング',
+    badge: '候補デザイン',
     themeColor: '#0284c7',
   },
   {
     id: 'icon_careia_pink',
-    label: 'ロゴ 10: ケアリア ピンクハート × ゴールド',
+    label: '候補: ケアリア ピンクハート × ゴールド',
     url: '/branding/icon_careia_pink_symbol.png',
-    badge: '提供画像トリミング',
+    badge: '候補デザイン',
     themeColor: '#e11d48',
   },
 ];
 
-// 独立選択用: ブランドロゴ画像一覧
+// 独立選択用: ブランドロゴ画像一覧（URL完全重複なし）
 export const AVAILABLE_LOGOS = [
   {
     id: 'logo_care_kuru_full',
-    label: 'Care KURU (ケアクル) フルロゴ',
+    label: 'CareKURU. フルロゴ (シンボル＋テキスト)',
     url: '/branding/logo_carearia_text.png',
-  },
-  {
-    id: 'logo_carearia_full',
-    label: 'ケアリア フルロゴ (シンボル＋テキスト)',
-    url: '/branding/logo_carearia_text.png',
+    badge: '公式決定',
   },
   {
     id: 'logo_theralink_full',
-    label: 'セラリンク フルロゴ (シンボル＋テキスト)',
+    label: 'セラリンク フルロゴ',
     url: '/branding/logo_theralink_text.png',
+    badge: '候補デザイン',
   },
   {
     id: 'logo_care_go_full',
-    label: 'ケアゴー フルロゴ (シンボル＋テキスト)',
+    label: 'ケアゴー フルロゴ',
     url: '/branding/logo-care-go.png',
+    badge: '候補デザイン',
   },
   {
-    id: 'logo_carearia_symbol_only',
-    label: 'Care KURU / ケアリア シンボルマークのみ',
+    id: 'logo_symbol_only',
+    label: 'シンボルマーク単体表示 (テキストなし)',
     url: '/branding/icon_carearia_symbol.png',
-  },
-  {
-    id: 'logo_theralink_symbol_only',
-    label: 'セラリンク シンボルマークのみ',
-    url: '/branding/icon_theralink_symbol.png',
+    badge: 'シンプル表示',
   },
 ];
 
