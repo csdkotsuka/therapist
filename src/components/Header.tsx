@@ -273,14 +273,14 @@ export const Header: React.FC = () => {
       {isCustomerPage && (
         <nav
           aria-label="主要ナビゲーション"
-          className="fixed bottom-6 inset-x-0 z-40 flex justify-center px-4 pointer-events-none pb-[env(safe-area-inset-bottom)]"
+          className="fixed bottom-2 sm:bottom-4 inset-x-0 z-40 flex justify-center px-2 pointer-events-none"
         >
-          {/* iOS最新アイランド型 透過カプセルバー (Floating Glass Pill) */}
-          <div className="ios-glass-pill pointer-events-auto flex items-center gap-1 sm:gap-2 p-1.5 rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.18),0_2px_6px_rgba(0,0,0,0.08)] border border-white/60 dark:border-white/15 ring-1 ring-black/5 dark:ring-white/10 transition-all">
+          {/* iOS最新アイランド型 透過カプセルバー (Floating Glass Pill - ギリギリまで下部に配置) */}
+          <div className="ios-glass-pill pointer-events-auto flex items-center gap-1 sm:gap-2 p-1 sm:p-1.5 rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.18),0_2px_6px_rgba(0,0,0,0.08)] border border-white/60 dark:border-white/15 ring-1 ring-black/5 dark:ring-white/10 transition-all">
             {/* Tab 1: さがす (Explore / Home) */}
             <Link
               href="/"
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full transition active:scale-95 ${
+              className={`flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full transition active:scale-95 ${
                 pathname === '/'
                   ? 'bg-slate-900 text-white dark:bg-white dark:text-black shadow-xs font-black'
                   : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white font-medium'
@@ -293,7 +293,7 @@ export const Header: React.FC = () => {
             {/* Tab 2: マイ予約 (Bookings) */}
             <Link
               href="/bookings"
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full transition active:scale-95 relative ${
+              className={`flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full transition active:scale-95 relative ${
                 pathname === '/bookings'
                   ? 'bg-slate-900 text-white dark:bg-white dark:text-black shadow-xs font-black'
                   : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white font-medium'
@@ -318,7 +318,7 @@ export const Header: React.FC = () => {
             {isLoggedIn ? (
               <Link
                 href="/profile"
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full transition active:scale-95 ${
+                className={`flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full transition active:scale-95 ${
                   pathname === '/profile'
                     ? 'bg-slate-900 text-white dark:bg-white dark:text-black shadow-xs font-black'
                     : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white font-medium'
@@ -331,7 +331,7 @@ export const Header: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsAuthModalOpen(true)}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white font-medium transition active:scale-95"
+                className="flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white font-medium transition active:scale-95"
               >
                 <KeyRound className="w-4 h-4 stroke-[2]" />
                 <span className="text-xs tracking-tight">ログイン</span>
@@ -342,7 +342,7 @@ export const Header: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsDrawerOpen(true)}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full transition active:scale-95 relative ${
+              className={`flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full transition active:scale-95 relative ${
                 isDrawerOpen
                   ? 'bg-slate-900 text-white dark:bg-white dark:text-black shadow-xs font-black'
                   : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white font-medium'

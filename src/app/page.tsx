@@ -28,8 +28,8 @@ export default function HomePage() {
         <CustomerView />
       </main>
 
-      {/* ミニマルなすっきりフッター (各種ガイドはハンバーガーメニューに完全集約) */}
-      <footer className="border-t border-slate-200/60 dark:border-white/10 bg-slate-50 dark:bg-black py-4 text-center text-[11px] text-slate-400 dark:text-slate-600 transition-colors pb-safe">
+      {/* ミニマルなすっきりフッター (各種ガイドはハンバーガーメニューに完全集約、最下部メニューに重ならないよう余白pb-24確保) */}
+      <footer className="border-t border-slate-200/60 dark:border-white/10 bg-slate-50 dark:bg-black pt-5 pb-24 text-center text-[11px] text-slate-400 dark:text-slate-600 transition-colors">
         <span>© {currentBrand.name}. All rights reserved.</span>
       </footer>
     </div>
