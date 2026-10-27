@@ -213,9 +213,9 @@ export interface ChatMessage {
   is_read: boolean;
 }
 
-// アプリのブランド切り替え (公式決定: CareKURU. + 候補ブランド)
+// アプリのブランド切り替え (公式決定: CareKuru + 候補ブランド)
 export type AppBrandId =
-  | 'care_kuru'          // 公式決定ブランド: CareKURU.
+  | 'care_kuru'          // 公式決定ブランド: CareKuru
   | 'care_go_blue'       // 画像1-②: ケアゴー CARE GO (ブルーC×若葉)
   | 'carearia_go_green'  // 画像1-⑬: ケアリアゴー CAREARIA GO (グリーン芽吹き＆人)
   | 'careia_go_pink'     // 画像2-⑩: ケアリアゴー CAREIA GO (ピンクハート×ゴールドリーフ)

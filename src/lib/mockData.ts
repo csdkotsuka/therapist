@@ -2527,7 +2527,7 @@ export const initialTherapistProfiles: Record<string, TherapistProfile> = {
     "campaign": {
       "badge": "初回1,000円OFF",
       "title": "初回来店・出張キャンペーン",
-      "description": "初めてCareKURU.からご予約いただいた方に施術代1,000円割引を実施中！",
+      "description": "初めてCareKuruからご予約いただいた方に施術代1,000円割引を実施中！",
       "discount_type": "fixed",
       "discount_value": 1000
     }

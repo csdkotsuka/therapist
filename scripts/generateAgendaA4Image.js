@@ -28,8 +28,8 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${hei
   <g transform="translate(60, 60)">
     <rect x="0" y="0" width="${width - 120}" height="100" rx="12" fill="url(#headerGrad)" />
     <text x="30" y="40" fill="#34d399" font-size="13" font-weight="900" letter-spacing="1.5">EXECUTIVE CONSULTATION &amp; DECISION AGENDA</text>
-    <text x="30" y="74" fill="#ffffff" font-size="24" font-weight="900" letter-spacing="-0.5">【事前相談・報告アジェンダ】「CareKURU.」プロジェクト推進計画</text>
-    <text x="${width - 160}" y="42" text-anchor="end" fill="#94a3b8" font-size="11">CareKURU. Platform Operations</text>
+    <text x="30" y="74" fill="#ffffff" font-size="24" font-weight="900" letter-spacing="-0.5">【事前相談・報告アジェンダ】「CareKuru」プロジェクト推進計画</text>
+    <text x="${width - 160}" y="42" text-anchor="end" fill="#94a3b8" font-size="11">CareKuru Platform Operations</text>
   </g>
 
   <!-- Section 1: 決定事項のご報告 -->
@@ -52,7 +52,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${hei
       <g transform="translate(0, 32)">
         <rect x="0" y="0" width="${width - 120}" height="42" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" />
         <text x="20" y="26" fill="#0f172a" font-size="13" font-weight="bold">アプリ名称</text>
-        <text x="240" y="26" fill="#065f46" font-size="13" font-weight="bold">CareKURU. <tspan fill="#94a3b8" font-size="11" font-weight="normal">※正式確定</tspan></text>
+        <text x="240" y="26" fill="#065f46" font-size="13" font-weight="bold">CareKuru <tspan fill="#94a3b8" font-size="11" font-weight="normal">※正式確定</tspan></text>
         <text x="640" y="26" fill="#475569" font-size="12">「ケアが来る・クルマで来る」オンデマンド出張ヘルスケアの明快な想起と親しみやすさ。</text>
       </g>
 
@@ -187,7 +187,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${hei
         <text x="260" y="46" fill="#475569" font-size="12">チーム内（グループ内）の事業でロゴ制作が可能。</text>
 
         <rect x="610" y="6" width="${width - 740}" height="54" rx="6" fill="#fffbeb" stroke="#fef3c7" stroke-width="1" />
-        <text x="625" y="24" fill="#78350f" font-size="12" font-weight="bold">正式な「CareKURU.」公式ロゴ・アイコン制作について、</text>
+        <text x="625" y="24" fill="#78350f" font-size="12" font-weight="bold">正式な「CareKuru」公式ロゴ・アイコン制作について、</text>
         <text x="625" y="44" fill="#78350f" font-size="12" font-weight="bold"><tspan fill="#b45309">チーム内（グループ内）の制作事業に依頼して進める形</tspan>でよろしいでしょうか？</text>
       </g>
 
@@ -277,7 +277,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${hei
 
   <!-- Document Footer Stamp -->
   <g transform="translate(60, 1690)">
-    <text x="0" y="0" fill="#94a3b8" font-size="10">CareKURU. プロジェクト推進計画書 — 役員・会長事前相談アジェンダ A4資料版</text>
+    <text x="0" y="0" fill="#94a3b8" font-size="10">CareKuru プロジェクト推進計画書 — 役員・会長事前相談アジェンダ A4資料版</text>
     <text x="${width - 120}" y="0" text-anchor="end" fill="#94a3b8" font-size="10">Confidential / 株式会社NEOFAMILY</text>
   </g>
 </svg>`;

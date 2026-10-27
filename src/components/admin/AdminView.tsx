@@ -133,28 +133,6 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
     }, 4500);
   };
 
-  // 独立設定フォーム用のローカルstate
-  const [appNameInput, setAppNameInput] = useState(currentBrand.name);
-  const [appJpNameInput, setAppJpNameInput] = useState(currentBrand.japaneseName);
-  const [appCatchphraseInput, setAppCatchphraseInput] = useState(currentBrand.catchphrase);
-
-  useEffect(() => {
-    setAppNameInput(currentBrand.name);
-    setAppJpNameInput(currentBrand.japaneseName);
-    setAppCatchphraseInput(currentBrand.catchphrase);
-  }, [currentBrand.name, currentBrand.japaneseName, currentBrand.catchphrase]);
-
-  const handleSaveAppName = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await updateCustomBranding({
-      appName: appNameInput,
-      appJapaneseName: appJpNameInput,
-      appCatchphrase: appCatchphraseInput,
-    });
-    setBrandSaveMessage(`アプリ名を「${appJpNameInput} (${appNameInput})」に更新しました。`);
-    setTimeout(() => setBrandSaveMessage(null), 4000);
-  };
-
   const handleSelectIcon = async (iconUrl?: string) => {
     await updateCustomBranding({ selectedIcon: iconUrl });
     setBrandSaveMessage('アプリアイコン・ファビコンを更新しました。');
@@ -387,7 +365,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
           { id: 'customers' as const, label: `顧客一覧 & 視点切替 (${customers.length})`, icon: Users, desc: '登録顧客リストの確認・代理ログイン視点切替' },
           { id: 'messages' as const, label: `全メッセージ監視 (${messages.length})`, icon: MessageCircle, desc: 'トラブル防止・直契約監視・連絡履歴の確認' },
           { id: 'reviews' as const, label: `口コミ・レビュー管理 (${reviews.length})`, icon: Star, desc: 'お客様評価・口コミのソートとモデレーション' },
-          { id: 'branding' as const, label: 'ブランド・ロゴ設定', icon: Palette, desc: 'サービス名（CareKURU.）やアプリアイコンの切替・カスタマイズ' },
+          { id: 'branding' as const, label: 'ブランド・ロゴ設定', icon: Palette, desc: 'アプリアイコンやロゴデザインの切替・カスタマイズ' },
           { id: 'settings' as const, label: '手数料率・プラットフォーム設定', icon: Sliders, desc: '基本手数料率の設定と保存' },
         ];
         const currentSec = adminSections.find((s) => s.id === activeTab) || adminSections[0];
@@ -2003,10 +1981,10 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
               <div>
                 <h4 className="font-black text-slate-900 text-lg flex items-center gap-2">
                   <Palette className="w-5 h-5 text-emerald-600" />
-                  <span>ブランド・ロゴ・アイコン 独立設定</span>
+                  <span>ブランド・ロゴ・アイコン設定</span>
                 </h4>
                 <p className="text-xs text-slate-500 mt-1 max-w-2xl leading-relaxed">
-                  「アプリアイコン（＝ファビコン）」「ブランドロゴ」「アプリ名（テキスト）」をそれぞれ選ぶだけで、選んだ組み合わせが即座にアプリ全体（ヘッダー、ブラウザタブ、トップ画面）へ採用されます。
+                  「アプリアイコン（＝ファビコン）」および「ブランドロゴ」を選択できます。選んだデザインが即座にアプリ全体（ヘッダー、ブラウザタブ、トップ画面）へ採用されます。公式アプリ名は<strong>「CareKuru」</strong>で確定・固定されています。
                 </p>
               </div>
 
@@ -2066,112 +2044,26 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                 </div>
               </div>
 
-              {/* 3. 採用中アプリ名 */}
+              {/* 3. 公式確定アプリ名 */}
               <div className="bg-white p-3 rounded-xl border border-slate-200 flex items-center gap-3 shadow-2xs">
                 <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center justify-center shrink-0 font-black text-sm">
                   Aa
                 </div>
                 <div className="min-w-0">
-                  <span className="text-[10px] text-slate-400 font-bold block">採用中のアプリ名</span>
-                  <strong className="text-xs font-black text-slate-900 truncate block">
-                    {currentBrand.name}
+                  <span className="text-[10px] text-slate-400 font-bold block">公式アプリ名（確定・固定）</span>
+                  <strong className="text-sm font-black text-slate-900 truncate block">
+                    CareKuru
                   </strong>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* 独立設定 1: アプリ名設定 */}
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 space-y-4">
-            <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div>
-                <h5 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center text-xs font-black">1</span>
-                  <span>アプリ名称・キャッチコピー設定 (テキスト入力 / 候補選択)</span>
-                </h5>
-                <p className="text-xs text-slate-500 mt-0.5">ヘッダーやブラウザタイトルに表示されるサービス名を直接編集できます。</p>
-              </div>
-
-              {/* クイック選択候補 */}
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-[10px] font-bold text-slate-400">候補から選ぶ:</span>
-                {[
-                  { jp: 'CareKURU.', en: 'CareKURU.', cp: 'プロがあなたの元へ届く。出張・店舗ヘルスケア＆ボディケア' },
-                  { jp: 'Carearia Go', en: 'Carearia Go', cp: 'あなたの「したい」叶える場所。' },
-                  { jp: 'Theralink', en: 'Theralink', cp: '内側から輝く、本当の美しさを。' },
-                  { jp: 'Care Go', en: 'Care Go', cp: 'その一歩が、もっとキレイな未来をつくる。' },
-                ].map((preset, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => {
-                      setAppJpNameInput(preset.jp);
-                      setAppNameInput(preset.en);
-                      setAppCatchphraseInput(preset.cp);
-                    }}
-                    className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition border cursor-pointer ${
-                      idx === 0
-                        ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700 shadow-2xs'
-                        : 'bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 text-slate-600 border-slate-200/80'
-                    }`}
-                  >
-                    {idx === 0 ? `★ 公式確定: ${preset.en}` : preset.en}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <form onSubmit={handleSaveAppName} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">アプリ名 (メイン表示)</label>
-                <input
-                  type="text"
-                  value={appJpNameInput}
-                  onChange={(e) => setAppJpNameInput(e.target.value)}
-                  placeholder="例: CareKURU."
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-bold focus:outline-emerald-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">アプリ名 (英字 / サブ)</label>
-                <input
-                  type="text"
-                  value={appNameInput}
-                  onChange={(e) => setAppNameInput(e.target.value)}
-                  placeholder="例: CareKURU."
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-bold focus:outline-emerald-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">キャッチコピー</label>
-                <input
-                  type="text"
-                  value={appCatchphraseInput}
-                  onChange={(e) => setAppCatchphraseInput(e.target.value)}
-                  placeholder="例: プロがあなたの元へ届く。出張・店舗ヘルスケア＆ボディケア"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-medium focus:outline-emerald-500"
-                />
-              </div>
-
-              <div className="md:col-span-3 flex justify-end">
-                <button
-                  type="submit"
-                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Check className="w-3.5 h-3.5" />
-                  <span>アプリ名称を保存・反映</span>
-                </button>
-              </div>
-            </form>
-          </div>
-
-          {/* 独立設定 2: アプリアイコン / ファビコン設定 */}
+          {/* 独立設定 1: アプリアイコン / ファビコン設定 */}
           <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 space-y-4">
             <div className="border-b border-slate-100 pb-3">
               <h5 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-                <span className="w-6 h-6 rounded-lg bg-teal-100 text-teal-800 flex items-center justify-center text-xs font-black">2</span>
+                <span className="w-6 h-6 rounded-lg bg-teal-100 text-teal-800 flex items-center justify-center text-xs font-black">1</span>
                 <span>アプリアイコン ＆ ファビコン設定</span>
               </h5>
               <p className="text-xs text-slate-500 mt-0.5">
@@ -2254,11 +2146,11 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
             </div>
           </div>
 
-          {/* 独立設定 3: ブランドロゴ設定 */}
+          {/* 独立設定 2: ブランドロゴ設定 */}
           <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 space-y-4">
             <div className="border-b border-slate-100 pb-3">
               <h5 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-                <span className="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-800 flex items-center justify-center text-xs font-black">3</span>
+                <span className="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-800 flex items-center justify-center text-xs font-black">2</span>
                 <span>ヘッダー用ブランドロゴ設定</span>
               </h5>
               <p className="text-xs text-slate-500 mt-0.5">ヘッダーや資料ページに掲載するロゴ画像のタイプを選択できます。</p>

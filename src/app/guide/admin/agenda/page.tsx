@@ -16,7 +16,7 @@ export default function AgendaPage() {
               役員・会長事前相談用
             </div>
             <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white">
-              【事前相談・報告アジェンダ】「CareKURU.」プロジェクト推進計画
+              【事前相談・報告アジェンダ】「CareKuru」プロジェクト推進計画
             </h1>
             <p className="text-xs sm:text-sm text-slate-300 mt-1">
               決定済み仕様の前提共有と、推進にあたり会長のご判断・ご助言を仰ぎたい相談事項（全10項目）
@@ -62,7 +62,7 @@ export default function AgendaPage() {
               <tr className="hover:bg-slate-50/50">
                 <td className="py-3 px-4 font-bold text-slate-900 bg-slate-50/30 border-r border-slate-200">アプリ名称</td>
                 <td className="py-3 px-4 font-bold text-emerald-800 border-r border-slate-200">
-                  CareKURU.
+                  CareKuru
                 </td>
                 <td className="py-3 px-4 text-slate-600">
                   「ケアが来る」というオンデマンド出張ヘルスケアの明快な想起と親しみやすさ。
@@ -217,11 +217,11 @@ export default function AgendaPage() {
                 </td>
                 <td className="py-3 px-4 border-r border-slate-200 leading-relaxed text-slate-600">
                   現在システム上には仮のサンプルロゴ・シンボルを用意して動作検証中。<br />
-                  本番公開に向けた「CareKURU.」の正式ロゴ制作について、チーム内（グループ内）の事業・クリエイターへ制作を依頼できる見込み。
+                  本番公開に向けた「CareKuru」の正式ロゴ制作について、チーム内（グループ内）の事業・クリエイターへ制作を依頼できる見込み。
                 </td>
                 <td className="py-3 px-4 bg-amber-50/30 text-amber-950 leading-relaxed">
                   <div className="font-bold text-slate-900">
-                    正式な「CareKURU.」の公式ロゴ・アプリアイコン制作について、<span className="underline decoration-amber-500 font-black">チーム内（グループ内）の制作事業に依頼して進める形</span>でよろしいでしょうか？
+                    正式な「CareKuru」の公式ロゴ・アプリアイコン制作について、<span className="underline decoration-amber-500 font-black">チーム内（グループ内）の制作事業に依頼して進める形</span>でよろしいでしょうか？
                   </div>
                 </td>
               </tr>

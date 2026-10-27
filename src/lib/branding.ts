@@ -5,7 +5,7 @@ import { AppBrandConfig, AppBrandId } from '@/types';
 // ※ ファビコンやヘッダー用アイコンとして、極小サイズでも視認性抜群のベクター描画
 // ========================================================
 
-/** 公式決定ブランド: CareKURU. - エメラルド＆スカイブルーの「C」×「K」× 新緑・躍動シンボル */
+/** 公式決定ブランド: CareKuru - エメラルド＆スカイブルーの「C」×「K」× 新緑・躍動シンボル */
 export const ICON_CARE_KURU = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <defs>
     <linearGradient id="ck_grad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -156,12 +156,12 @@ export const ICON_THERA_GO_CLASSIC = `<svg xmlns="http://www.w3.org/2000/svg" vi
 // ========================================================
 
 export const APP_BRANDS: Record<AppBrandId, AppBrandConfig> = {
-  // ★ 公式決定ブランド: CareKURU.
+  // ★ 公式決定ブランド: CareKuru
   care_kuru: {
     id: 'care_kuru',
-    name: 'CareKURU.',
-    japaneseName: 'CareKURU.',
-    tagline: 'CareKURU.',
+    name: 'CareKuru',
+    japaneseName: 'CareKuru',
+    tagline: 'CareKuru',
     catchphrase: 'プロがあなたの元へ届く。出張・店舗ヘルスケア＆ボディケア',
     description: '理学療法士・セラピスト・トレーナーがあなたの元へ届くオンデマンドマッチングプラットフォーム',
     themeColor: '#059669',
@@ -276,9 +276,9 @@ export const DEFAULT_BRAND_ID: AppBrandId = 'care_kuru';
 export const AVAILABLE_ICONS = [
   {
     id: 'icon_care_kuru_symbol',
-    label: '公式決定: CareKURU. シンボル',
+    label: '公式決定: CareKuru シンボル',
     url: '/branding/icon_carearia_symbol.png',
-    badge: '公式決定 (CareKURU.)',
+    badge: '公式決定 (CareKuru)',
     themeColor: '#059669',
   },
   {
@@ -308,7 +308,7 @@ export const AVAILABLE_ICONS = [
 export const AVAILABLE_LOGOS = [
   {
     id: 'logo_care_kuru_full',
-    label: 'CareKURU. フルロゴ (シンボル＋テキスト)',
+    label: 'CareKuru フルロゴ (シンボル＋テキスト)',
     url: '/branding/logo_carearia_text.png',
     badge: '公式決定',
   },
