@@ -2,36 +2,10 @@
 
 import React, { useState } from 'react';
 import confetti from 'canvas-confetti';
-import { useApp } from '@/context/AppContext';
-import {
-  Crown,
-  Sparkles,
-  Smartphone,
-  Lock,
-  ShieldCheck,
-  HelpCircle,
-  Copy,
-  Check,
-  Printer,
-  Scale,
-  Coins,
-  Building,
-  Globe,
-  Layers,
-  ShieldAlert,
-  Percent,
-  TrendingUp,
-} from 'lucide-react';
+import { Copy, Check } from 'lucide-react';
 
 export default function AgendaPage() {
-  const { currentBrand } = useApp();
   const [copiedAgenda, setCopiedAgenda] = useState<boolean>(false);
-
-  const handlePrint = () => {
-    if (typeof window !== 'undefined') {
-      window.print();
-    }
-  };
 
   // 会長向け事前相談・報告アジェンダ（表形式テキスト）
   const AGENDA_TEXT = `【事前相談・報告アジェンダ】「Care KURU」プロジェクト推進計画
@@ -78,365 +52,245 @@ export default function AgendaPage() {
       navigator.clipboard.writeText(AGENDA_TEXT);
       setCopiedAgenda(true);
       try {
-        confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+        confetti({ particleCount: 30, spread: 50, origin: { y: 0.3 } });
       } catch (e) {}
-      setTimeout(() => setCopiedAgenda(false), 3000);
+      setTimeout(() => setCopiedAgenda(false), 2500);
     }
   };
 
   return (
-    <div className="space-y-6">
-      {/* ========================================================
-          会長向け事前相談・報告アジェンダ (Executive Agenda)
-         ======================================================== */}
-      <div className="space-y-8 animate-fadeIn">
-        {/* Executive Header Banner */}
-        <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 text-white rounded-3xl p-6 sm:p-10 shadow-2xl border border-slate-800 relative overflow-hidden print-avoid-break">
-          <div className="absolute -right-10 -top-10 w-80 h-80 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute right-10 bottom-0 opacity-10 pointer-events-none hidden md:block">
-            <Crown className="w-64 h-64 text-emerald-400" />
-          </div>
+    <div className="space-y-4 max-w-5xl mx-auto -mt-2">
+      {/* 最小限のヘッダーバー */}
+      <div className="flex items-center justify-between pb-2.5 border-b border-slate-300">
+        <div className="flex items-center gap-2">
+          <h1 className="text-sm sm:text-base font-black text-slate-900 tracking-tight">
+            【事前相談・報告アジェンダ】「Care KURU」プロジェクト推進計画
+          </h1>
+          <span className="text-[10px] font-bold text-slate-600 bg-slate-200/80 px-1.5 py-0.5 rounded">
+            決裁サマリー表
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={handleCopyAgenda}
+          className="text-[11px] font-semibold text-slate-600 hover:text-emerald-700 flex items-center gap-1 bg-white hover:bg-slate-100 border border-slate-300 px-2.5 py-1 rounded shadow-2xs transition shrink-0 cursor-pointer"
+          title="全文コピー"
+        >
+          {copiedAgenda ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+          <span>{copiedAgenda ? 'コピー完了' : '全文コピー'}</span>
+        </button>
+      </div>
 
-          <div className="relative z-10 space-y-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-black uppercase tracking-wider border border-emerald-500/40 flex items-center gap-1.5">
-                <Crown className="w-3.5 h-3.5 text-amber-300" />
-                <span>Executive Consultation & Decision Agenda</span>
-              </span>
-              <span className="px-2.5 py-0.5 rounded-full bg-slate-800/80 text-slate-300 text-[11px] font-bold">
-                役員・会長事前相談（決裁サマリー表）
-              </span>
-            </div>
-
-            <div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-snug font-serif">
-                【事前相談・報告アジェンダ】<br className="sm:hidden" />
-                「Care KURU」プロジェクト推進計画
-              </h1>
-              <p className="text-xs sm:text-sm text-emerald-100/90 max-w-3xl leading-relaxed mt-2">
-                オンデマンド・ヘルスケア＆ボディケアプラットフォーム「Care KURU（ケア・クル）」の正式ローンチに向け、すでに固めた基本設計のご報告と、経営判断を仰ぎたい重要決裁論点を表形式でコンパクトに整理したサマリーです。
-              </p>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="pt-2 flex flex-wrap items-center gap-3 print:hidden">
-              <button
-                type="button"
-                onClick={handleCopyAgenda}
-                className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-bold rounded-2xl shadow-lg transition flex items-center gap-2 active:scale-95 cursor-pointer"
-                title="会長へのLINEやメール送信用にサマリーテキストをコピーします"
-              >
-                {copiedAgenda ? (
-                  <>
-                    <Check className="w-4 h-4 text-emerald-200" />
-                    <span>サマリー表テキストをコピーしました！</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4" />
-                    <span>LINE・メール送信用に全文コピー</span>
-                  </>
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={handlePrint}
-                className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm font-bold rounded-2xl transition border border-white/20 flex items-center gap-2 active:scale-95 cursor-pointer"
-              >
-                <Printer className="w-4 h-4" />
-                <span>A4形式で印刷・PDF出力</span>
-              </button>
-            </div>
-          </div>
+      {/* ======================================================== */}
+      {/* 第1部: 決定事項のご報告（前提共有） */}
+      {/* ======================================================== */}
+      <div className="space-y-1">
+        <div className="flex items-center justify-between px-1">
+          <h2 className="text-xs font-black text-slate-800 flex items-center gap-1.5">
+            <span className="w-4 h-4 rounded bg-slate-700 text-white text-[10px] font-bold inline-flex items-center justify-center">1</span>
+            <span>決定事項のご報告（前提共有・基本設計）</span>
+          </h2>
+          <span className="text-[10px] text-slate-500 font-medium">最速リリース＆ゼロリスク設計</span>
         </div>
 
-        {/* ======================================================== */}
-        {/* 第1部: 決定事項・基本設計のご報告（前提共有） */}
-        {/* ======================================================== */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-2.5">
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-black text-xs shadow-xs">
-                1
-              </div>
-              <div>
-                <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight">
-                  決定事項・基本設計のご報告（前提の共有）
-                </h2>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                  最速リリースと完全なリスクヘッジを両立させたコア設計
-                </p>
-              </div>
-            </div>
-            <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
-              基本合意事項
-            </span>
-          </div>
+        <div className="overflow-hidden rounded-lg border border-slate-300 shadow-2xs bg-white">
+          <table className="w-full text-left border-collapse text-[11px] sm:text-xs">
+            <thead>
+              <tr className="bg-slate-100 border-b border-slate-300 text-slate-700 font-bold">
+                <th className="py-1.5 px-3 w-[22%] border-r border-slate-200">項目</th>
+                <th className="py-1.5 px-3 w-[38%] border-r border-slate-200">決定内容・アーキテクチャ</th>
+                <th className="py-1.5 px-3 w-[40%]">メリット・事業上の狙い</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200 text-slate-800">
+              <tr className="hover:bg-slate-50/70">
+                <td className="py-1.5 px-3 font-bold text-slate-900 border-r border-slate-200 whitespace-nowrap">
+                  アプリ名称
+                </td>
+                <td className="py-1.5 px-3 font-semibold text-emerald-800 border-r border-slate-200">
+                  Care KURU（ケア・クル）
+                  <span className="text-[10px] font-normal text-slate-400 ml-1.5">※ロゴ検討中</span>
+                </td>
+                <td className="py-1.5 px-3 text-slate-600 leading-tight">
+                  「ケアが来る・クルマで来る」オンデマンド出張ヘルスケアの明快な想起と親しみやすさ。
+                </td>
+              </tr>
 
-          {/* 第1表 */}
-          <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10 shadow-xs bg-white dark:bg-[#1c1c1e]">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-xs sm:text-sm">
-                <thead>
-                  <tr className="bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 font-bold text-[11px] uppercase tracking-wider">
-                    <th className="py-3 px-4 w-1/4 min-w-[130px]">項目</th>
-                    <th className="py-3 px-4 w-1/3 min-w-[180px]">決定内容・アーキテクチャ</th>
-                    <th className="py-3 px-4 w-5/12 min-w-[220px]">メリット・事業上の狙い</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-white/5 text-slate-700 dark:text-slate-300">
-                  <tr className="hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors">
-                    <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                      <span>アプリ名称</span>
-                    </td>
-                    <td className="py-3.5 px-4 font-bold text-emerald-700 dark:text-emerald-400">
-                      Care KURU（ケア・クル）
-                      <span className="block text-[11px] font-normal text-slate-400 mt-0.5">※ロゴは現在デザイン検討中</span>
-                    </td>
-                    <td className="py-3.5 px-4 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                      「ケアが来る・クルマで来る」オンデマンド出張ヘルスケアの明快な想起と親しみやすさ。
-                    </td>
-                  </tr>
+              <tr className="hover:bg-slate-50/70">
+                <td className="py-1.5 px-3 font-bold text-slate-900 border-r border-slate-200 whitespace-nowrap">
+                  提供形態（PWA）
+                </td>
+                <td className="py-1.5 px-3 border-r border-slate-200">
+                  <span className="font-bold text-blue-800 bg-blue-50 px-1.5 py-0.5 rounded text-[11px] mr-1.5">アプリ風Web（審査不要）</span>
+                  <span className="text-slate-600">ホーム画面追加で通常アプリ同様</span>
+                </td>
+                <td className="py-1.5 px-3 text-slate-600 leading-tight">
+                  <strong className="text-slate-900">App Store審査・規約リスク・初期ストア申請コストを完全回避。</strong> 最短で実用リリースが可能。
+                </td>
+              </tr>
 
-                  <tr className="hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors">
-                    <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
-                      <div className="flex items-center gap-2">
-                        <Smartphone className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
-                        <span>提供形態（PWA）</span>
-                      </div>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span className="inline-block px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold text-xs mb-1">
-                        アプリ風Web（審査不要）
-                      </span>
-                      <p className="text-xs text-slate-800 dark:text-slate-200">
-                        スマホの「ホーム画面追加」で通常アプリと同様に動作。
-                      </p>
-                    </td>
-                    <td className="py-3.5 px-4 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                      <strong className="text-slate-900 dark:text-white">App Store審査待ち・規約リスク・初期ストア申請コストを完全回避。</strong> 最短で実用リリースが可能。
-                    </td>
-                  </tr>
+              <tr className="hover:bg-slate-50/70">
+                <td className="py-1.5 px-3 font-bold text-slate-900 border-r border-slate-200 whitespace-nowrap">
+                  セキュリティ
+                </td>
+                <td className="py-1.5 px-3 border-r border-slate-200">
+                  <span className="font-bold text-indigo-800 bg-indigo-50 px-1.5 py-0.5 rounded text-[11px] mr-1.5">Stripe連携（ゼロリスク）</span>
+                  <span className="text-slate-600">免許証・口座は自社DBに一切保存せず</span>
+                </td>
+                <td className="py-1.5 px-3 text-slate-600 leading-tight">
+                  万一の攻撃時も<strong className="text-slate-900">「そもそも盗まれる重要情報が存在しない」</strong>ため情報漏洩リスクを遮断（テスト運用中）。
+                </td>
+              </tr>
 
-                  <tr className="hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors">
-                    <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
-                      <div className="flex items-center gap-2">
-                        <Lock className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
-                        <span>セキュリティ対策</span>
-                      </div>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span className="inline-block px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-bold text-xs mb-1">
-                        Stripe Connect直接照合
-                      </span>
-                      <p className="text-xs text-slate-800 dark:text-slate-200">
-                        免許証や銀行口座は自社DBに一切保存しないゼロリスク構造。
-                      </p>
-                    </td>
-                    <td className="py-3.5 px-4 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                      万が一のサイバー攻撃時にも<strong className="text-slate-900 dark:text-white">「そもそも盗まれる重要情報が存在しない」</strong>ため、情報漏洩リスクを根本から完全遮断。現在テスト運用・最終調整中。
-                    </td>
-                  </tr>
+              <tr className="hover:bg-slate-50/70">
+                <td className="py-1.5 px-3 font-bold text-slate-900 border-r border-slate-200 whitespace-nowrap">
+                  信頼性担保
+                </td>
+                <td className="py-1.5 px-3 border-r border-slate-200">
+                  <span className="font-bold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded text-[11px] mr-1.5">厳格な5段階チェック体制</span>
+                  <span className="text-[10px] text-slate-500">①審査料 ②誓約 ③Stripe確認 ④国家資格 ⑤保険証書</span>
+                </td>
+                <td className="py-1.5 px-3 text-slate-600 leading-tight">
+                  提出された証明書画像は運営確認完了と同時に<strong className="text-slate-900">自動破棄</strong>（承認ログのみ保持し漏洩防止）。
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-                  <tr className="hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors">
-                    <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
-                      <div className="flex items-center gap-2">
-                        <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                        <span>施術者の信頼性担保</span>
-                      </div>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span className="inline-block px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold text-xs mb-1">
-                        厳格な5段階チェック体制
-                      </span>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                        ①審査料 ②電子誓約 ③Stripe本人確認 ④国家資格証 ⑤損害保険証書
-                      </p>
-                    </td>
-                    <td className="py-3.5 px-4 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                      提出された資格証・保険証書画像は運営確認完了と同時に<strong className="text-slate-900 dark:text-white">ストレージから自動削除</strong>（承認ログのみ保持し漏洩防止）。
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
+      {/* ======================================================== */}
+      {/* 第2部: 会長への相談・決裁事項（全6項目） */}
+      {/* ======================================================== */}
+      <div className="space-y-1 pt-1">
+        <div className="flex items-center justify-between px-1">
+          <h2 className="text-xs font-black text-slate-800 flex items-center gap-1.5">
+            <span className="w-4 h-4 rounded bg-amber-600 text-white text-[10px] font-bold inline-flex items-center justify-center">2</span>
+            <span>会長への相談・決裁事項（全6項目）</span>
+          </h2>
+          <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded">要決裁</span>
         </div>
 
-        {/* ======================================================== */}
-        {/* 第2部: 会長への相談・決裁事項（全6項目） */}
-        {/* ======================================================== */}
-        <div className="space-y-3 pt-2">
-          <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-2.5">
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-amber-500 text-white flex items-center justify-center font-black text-xs shadow-xs">
-                2
-              </div>
-              <div>
-                <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight">
-                  会長への相談・決裁事項（全6項目）
-                </h2>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                  事業立ち上げにあたり、ご判断・ご意見をいただきたい重要論点
-                </p>
-              </div>
-            </div>
-            <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 px-2.5 py-0.5 rounded-full border border-amber-200 dark:border-amber-800">
-              決裁対象 全6項目
-            </span>
-          </div>
+        <div className="overflow-hidden rounded-lg border border-slate-300 shadow-2xs bg-white">
+          <table className="w-full text-left border-collapse text-[11px] sm:text-xs">
+            <thead>
+              <tr className="bg-slate-100 border-b border-slate-300 text-slate-700 font-bold">
+                <th className="py-1.5 px-2 w-8 text-center border-r border-slate-200">No</th>
+                <th className="py-1.5 px-2.5 w-[20%] border-r border-slate-200">相談項目</th>
+                <th className="py-1.5 px-3 w-[34%] border-r border-slate-200">検討案（背景）</th>
+                <th className="py-1.5 px-3 w-[43%] bg-amber-50/70 text-amber-950">会長への相談・確認内容</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200 text-slate-800">
+              {/* ① 登録料・月額会費設定 */}
+              <tr className="hover:bg-slate-50/70">
+                <td className="py-1.5 px-2 text-center font-bold text-slate-500 border-r border-slate-200">
+                  1
+                </td>
+                <td className="py-1.5 px-2.5 font-bold text-slate-900 border-r border-slate-200">
+                  <div>施術者登録料・月額会費</div>
+                  <span className="text-[10px] font-normal text-amber-700">初期供給数最大化</span>
+                </td>
+                <td className="py-1.5 px-3 border-r border-slate-200 leading-tight">
+                  初期は登録者を増やすため<strong className="text-emerald-700">「無料（0円）」</strong>で開始し、安定後に<strong className="text-slate-900">「メンバー月額1万円 / 外部少し高め」</strong>へ移行する計画。
+                </td>
+                <td className="py-1.5 px-3 bg-amber-50/30 font-medium text-slate-900 leading-tight">
+                  初期0円→安定後「メンバー1万円・外部高め」の段階移行でよいか？また相場を踏まえた価格水準や移行時期についてのご意見。
+                </td>
+              </tr>
 
-          {/* 第2表 */}
-          <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10 shadow-xs bg-white dark:bg-[#1c1c1e]">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-xs sm:text-sm">
-                <thead>
-                  <tr className="bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 font-bold text-[11px] uppercase tracking-wider">
-                    <th className="py-3 px-3 w-12 text-center">No</th>
-                    <th className="py-3 px-4 w-1/4 min-w-[140px]">相談項目</th>
-                    <th className="py-3 px-4 w-1/3 min-w-[200px]">検討案・背景</th>
-                    <th className="py-3 px-4 w-5/12 min-w-[240px]">会長への相談・確認内容</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-white/5 text-slate-700 dark:text-slate-300">
-                  {/* ① 登録料・月額会費設定 */}
-                  <tr className="hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors">
-                    <td className="py-3.5 px-3 text-center">
-                      <span className="w-6 h-6 rounded-lg bg-amber-500 text-white font-black text-xs inline-flex items-center justify-center">
-                        1
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
-                      <span>施術者登録料・月額会費</span>
-                      <span className="block text-[11px] font-normal text-amber-600 dark:text-amber-400 mt-0.5">
-                        初期供給数の最大化
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 text-xs leading-relaxed text-slate-800 dark:text-slate-200">
-                      初期立ち上げ期はハードルを下げて登録者数を集めたいため<strong className="text-emerald-700 dark:text-emerald-400">「無料（0円）」</strong>でスタートし、運営安定後に<strong className="text-emerald-700 dark:text-emerald-400">「NEOFAMILYメンバー月額1万円 / メンバー外は少し高め」</strong>の定額会費へ移行する計画。
-                    </td>
-                    <td className="py-3.5 px-4 text-xs font-bold text-amber-950 dark:text-amber-100 bg-amber-50/40 dark:bg-amber-950/20 leading-relaxed">
-                      初期0円スタート→運営安定後に「NEOFAMILYメンバー1万円・メンバー外少し高め」へと段階的に移行する方針でよろしいでしょうか？また、業界相場を踏まえ、どのような価格水準・移行時期が良いかご意見を伺えますでしょうか？
-                    </td>
-                  </tr>
+              {/* ② 手数料率・想定利益率 */}
+              <tr className="hover:bg-slate-50/70">
+                <td className="py-1.5 px-2 text-center font-bold text-slate-500 border-r border-slate-200">
+                  2
+                </td>
+                <td className="py-1.5 px-2.5 font-bold text-slate-900 border-r border-slate-200">
+                  <div>手数料率・想定利益率</div>
+                  <span className="text-[10px] font-normal text-emerald-700">手数料20%・粗利16.4%</span>
+                </td>
+                <td className="py-1.5 px-3 border-r border-slate-200 leading-tight">
+                  <div className="space-y-0.5">
+                    <div>・手数料率: <strong className="text-slate-900">20%</strong>（業界相場20〜30%）</div>
+                    <div>・Stripe決済費: <span className="text-rose-600 font-semibold">▲約3.6%</span></div>
+                    <div>・プラットフォーム粗利: <strong className="text-emerald-700">約16.4%</strong>（1万円で1,640円）</div>
+                  </div>
+                </td>
+                <td className="py-1.5 px-3 bg-amber-50/30 font-medium text-slate-900 leading-tight">
+                  1) 手数料率20%の設定で問題ないか？（初期は利用促進のためさらに低めにするか？）<br />
+                  2) Stripe控除後の実質粗利率（約16.4%）および利益率設計へのご意見。
+                </td>
+              </tr>
 
-                  {/* ② 手数料率・想定利益率 */}
-                  <tr className="hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors">
-                    <td className="py-3.5 px-3 text-center">
-                      <span className="w-6 h-6 rounded-lg bg-emerald-600 text-white font-black text-xs inline-flex items-center justify-center">
-                        2
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
-                      <span>手数料率・想定利益率</span>
-                      <span className="block text-[11px] font-normal text-emerald-600 dark:text-emerald-400 mt-0.5">
-                        手数料20%・実質粗利16.4%
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 text-xs leading-relaxed text-slate-800 dark:text-slate-200">
-                      <div className="space-y-1">
-                        <p>・手数料率（テイクレイト）: <strong className="text-slate-900 dark:text-white">20%</strong>（相場20〜30%）</p>
-                        <p>・Stripe決済手数料: <span className="text-rose-600 dark:text-rose-400 font-bold">▲ 約3.6%</span></p>
-                        <p>・プラットフォーム実質粗利: <strong className="text-emerald-600 dark:text-emerald-400">約16.4%</strong>（1万円決済で粗利1,640円）</p>
-                        <p className="text-[11px] text-slate-500">※月額会費＋予約手数料のハイブリッド構造</p>
-                      </div>
-                    </td>
-                    <td className="py-3.5 px-4 text-xs font-bold text-emerald-950 dark:text-emerald-100 bg-emerald-50/40 dark:bg-emerald-950/20 leading-relaxed">
-                      1) 手数料率は「20%」の設定で問題ないでしょうか？（あるいは初期は利用促進のためさらに低めに設定すべきでしょうか？）<br />
-                      2) Stripe決済費控除後の実質粗利益率（約16.4%）および利益率設計についてご意見を伺えますでしょうか？
-                    </td>
-                  </tr>
+              {/* ③ 収益受取口座 */}
+              <tr className="hover:bg-slate-50/70">
+                <td className="py-1.5 px-2 text-center font-bold text-slate-500 border-r border-slate-200">
+                  3
+                </td>
+                <td className="py-1.5 px-2.5 font-bold text-slate-900 border-r border-slate-200">
+                  <div>収益受取口座の指定</div>
+                  <span className="text-[10px] font-normal text-blue-700">法人・税務</span>
+                </td>
+                <td className="py-1.5 px-3 border-r border-slate-200 leading-tight text-slate-600">
+                  プラットフォーム利用料・会費・手数料決済を受け取るための、Stripe連携メイン口座の指定が必要。
+                </td>
+                <td className="py-1.5 px-3 bg-amber-50/30 font-medium text-slate-900 leading-tight">
+                  プラットフォーム側の売上受取口座は、<strong>どの法人（または口座）</strong>に紐付ける形にするか？
+                </td>
+              </tr>
 
-                  {/* ③ 収益受取口座 */}
-                  <tr className="hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors">
-                    <td className="py-3.5 px-3 text-center">
-                      <span className="w-6 h-6 rounded-lg bg-blue-600 text-white font-black text-xs inline-flex items-center justify-center">
-                        3
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
-                      <span>収益受取口座の指定</span>
-                      <span className="block text-[11px] font-normal text-blue-600 dark:text-blue-400 mt-0.5">
-                        法人・税務
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 text-xs leading-relaxed text-slate-800 dark:text-slate-200">
-                      プラットフォームの利用料・会費・予約手数料決済を受け取るための、Stripe連携メイン口座の指定が必要です。
-                    </td>
-                    <td className="py-3.5 px-4 text-xs font-bold text-blue-950 dark:text-blue-100 bg-blue-50/40 dark:bg-blue-950/20 leading-relaxed">
-                      プラットフォーム側の売上受取口座は、<strong>どの法人（または口座）</strong>に紐付ける形にいたしますか？
-                    </td>
-                  </tr>
+              {/* ④ 公開ドメイン */}
+              <tr className="hover:bg-slate-50/70">
+                <td className="py-1.5 px-2 text-center font-bold text-slate-500 border-r border-slate-200">
+                  4
+                </td>
+                <td className="py-1.5 px-2.5 font-bold text-slate-900 border-r border-slate-200">
+                  <div>公開URL・ドメイン確認</div>
+                  <span className="text-[10px] font-normal text-indigo-700">ブランド信用力</span>
+                </td>
+                <td className="py-1.5 px-3 border-r border-slate-200 leading-tight text-slate-600">
+                  安心感と信頼性を担保するため、既存のNEOFAMILYブランド傘下でのWebアプリ公開を想定。
+                </td>
+                <td className="py-1.5 px-3 bg-amber-50/30 font-medium text-slate-900 leading-tight">
+                  1) 「NEOFAMILY」関連で活用可能なドメインはあるか？<br />
+                  2) ある場合、サブドメイン（例: carekuru.neofamily.jp 等）を使用させていただけるか？
+                </td>
+              </tr>
 
-                  {/* ④ 公開ドメイン */}
-                  <tr className="hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors">
-                    <td className="py-3.5 px-3 text-center">
-                      <span className="w-6 h-6 rounded-lg bg-indigo-600 text-white font-black text-xs inline-flex items-center justify-center">
-                        4
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
-                      <span>公開URL・ドメイン確認</span>
-                      <span className="block text-[11px] font-normal text-indigo-600 dark:text-indigo-400 mt-0.5">
-                        ブランド信用力の活用
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 text-xs leading-relaxed text-slate-800 dark:text-slate-200">
-                      サービスの信頼性と安心感を担保するため、既存のNEOFAMILYブランド傘下でのWebアプリ公開を想定しております。
-                    </td>
-                    <td className="py-3.5 px-4 text-xs font-bold text-indigo-950 dark:text-indigo-100 bg-indigo-50/40 dark:bg-indigo-950/20 leading-relaxed">
-                      1) そもそも「NEOFAMILY」関連で活用可能なドメインやWeb基盤はございますでしょうか？<br />
-                      2) もしある場合、そのサブドメイン（例: carekuru.neofamily.jp 等）を使用させていただくことは可能でしょうか？
-                    </td>
-                  </tr>
+              {/* ⑤ インフラ初期経費 */}
+              <tr className="hover:bg-slate-50/70">
+                <td className="py-1.5 px-2 text-center font-bold text-slate-500 border-r border-slate-200">
+                  5
+                </td>
+                <td className="py-1.5 px-2.5 font-bold text-slate-900 border-r border-slate-200">
+                  <div>インフラ初期実費経費</div>
+                  <span className="text-[10px] font-normal text-purple-700">予算・経費精算</span>
+                </td>
+                <td className="py-1.5 px-3 border-r border-slate-200 leading-tight text-slate-600">
+                  データベース・認証基盤（Supabase等）の維持費（月額数千円〜1万円程度）。
+                </td>
+                <td className="py-1.5 px-3 bg-amber-50/30 font-medium text-slate-900 leading-tight">
+                  自己負担も可能だが、<strong>プロジェクト経費として計上・精算</strong>させていただけるか？
+                </td>
+              </tr>
 
-                  {/* ⑤ インフラ初期経費 */}
-                  <tr className="hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors">
-                    <td className="py-3.5 px-3 text-center">
-                      <span className="w-6 h-6 rounded-lg bg-purple-600 text-white font-black text-xs inline-flex items-center justify-center">
-                        5
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
-                      <span>インフラ初期実費経費</span>
-                      <span className="block text-[11px] font-normal text-purple-600 dark:text-purple-400 mt-0.5">
-                        予算・経費精算
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 text-xs leading-relaxed text-slate-800 dark:text-slate-200">
-                      データベース・認証基盤（Supabase等）の維持にかかる月額費用（月額数十ドル / 数千円〜1万円程度）。
-                    </td>
-                    <td className="py-3.5 px-4 text-xs font-bold text-purple-950 dark:text-purple-100 bg-purple-50/40 dark:bg-purple-950/20 leading-relaxed">
-                      このシステム維持実費は、自分で自己負担しても良いと考えておりますが、<strong>プロジェクト経費として計上・精算</strong>させていただけるものでしょうか？
-                    </td>
-                  </tr>
-
-                  {/* ⑥ 事業賠償責任保険 */}
-                  <tr className="hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors">
-                    <td className="py-3.5 px-3 text-center">
-                      <span className="w-6 h-6 rounded-lg bg-rose-600 text-white font-black text-xs inline-flex items-center justify-center">
-                        6
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
-                      <span>事業賠償責任保険の時期</span>
-                      <span className="block text-[11px] font-normal text-rose-600 dark:text-rose-400 mt-0.5">
-                        リスクマネジメント
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 text-xs leading-relaxed text-slate-800 dark:text-slate-200">
-                      施術者個人の損害保険加入は必須。プラットフォーム（運営会社）全体としての施設・受託者賠償保険の要否。
-                    </td>
-                    <td className="py-3.5 px-4 text-xs font-bold text-rose-950 dark:text-rose-100 bg-rose-50/40 dark:bg-rose-950/20 leading-relaxed">
-                      スタート時は個人の保険徹底で立ち上げ、<strong>本格稼働・規模拡大のタイミングで会社として事業保険に加入する2段階の想定</strong>でよろしいでしょうか？
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
+              {/* ⑥ 事業賠償責任保険 */}
+              <tr className="hover:bg-slate-50/70">
+                <td className="py-1.5 px-2 text-center font-bold text-slate-500 border-r border-slate-200">
+                  6
+                </td>
+                <td className="py-1.5 px-2.5 font-bold text-slate-900 border-r border-slate-200">
+                  <div>事業賠償責任保険の時期</div>
+                  <span className="text-[10px] font-normal text-rose-700">リスク管理</span>
+                </td>
+                <td className="py-1.5 px-3 border-r border-slate-200 leading-tight text-slate-600">
+                  施術者個人の損害保険加入は必須。プラットフォーム（運営会社）全体としての事業保険の要否。
+                </td>
+                <td className="py-1.5 px-3 bg-amber-50/30 font-medium text-slate-900 leading-tight">
+                  スタート時は個人の保険徹底で立ち上げ、<strong>本格稼働・規模拡大時に会社として包括加入する2段階想定</strong>でよいか？
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
