@@ -19,7 +19,7 @@ export default function AgendaPage() {
               【事前相談・報告アジェンダ】「CareKURU.」プロジェクト推進計画
             </h1>
             <p className="text-xs sm:text-sm text-slate-300 mt-1">
-              決定済み仕様の前提共有と、推進にあたり会長のご判断・ご助言を仰ぎたい相談事項（全9項目）
+              決定済み仕様の前提共有と、推進にあたり会長のご判断・ご助言を仰ぎたい相談事項（全10項目）
             </p>
           </div>
           <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
@@ -102,15 +102,15 @@ export default function AgendaPage() {
         </div>
       </div>
 
-      {/* セクション 2: 会長への相談・決裁事項 (全9項目) */}
+      {/* セクション 2: 会長への相談・決裁事項 (全10項目) */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="bg-amber-50/80 px-4 py-3 border-b border-amber-200 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="w-6 h-6 rounded-md bg-amber-600 text-white flex items-center justify-center text-xs font-bold">2</span>
-            <h2 className="text-sm sm:text-base font-bold text-slate-900">会長への相談・決裁事項（全9項目）</h2>
+            <h2 className="text-sm sm:text-base font-bold text-slate-900">会長への相談・決裁事項（全10項目）</h2>
           </div>
           <span className="text-xs font-bold text-amber-800 bg-amber-100/80 px-2.5 py-0.5 rounded-full border border-amber-300">
-            役員決裁対象 全9項目
+            役員決裁対象 全10項目
           </span>
         </div>
 
@@ -208,9 +208,27 @@ export default function AgendaPage() {
                 </td>
               </tr>
 
-              {/* ⑤ インフラ初期実費 */}
+              {/* ⑤ 公式ロゴ制作（チーム内事業への依頼） */}
               <tr className="hover:bg-slate-50/50">
-                <td className="py-3 px-3 text-center font-bold text-purple-700 border-r border-slate-200">5</td>
+                <td className="py-3 px-3 text-center font-bold text-pink-700 border-r border-slate-200">5</td>
+                <td className="py-3 px-4 font-bold text-slate-900 border-r border-slate-200">
+                  <div>公式ロゴ制作の依頼</div>
+                  <span className="text-[11px] font-normal text-pink-600 font-bold">チーム内制作事業連携</span>
+                </td>
+                <td className="py-3 px-4 border-r border-slate-200 leading-relaxed text-slate-600">
+                  現在システム上には仮のサンプルロゴ・シンボルを用意して動作検証中。<br />
+                  本番公開に向けた「CareKURU.」の正式ロゴ制作について、チーム内（グループ内）の事業・クリエイターへ制作を依頼できる見込み。
+                </td>
+                <td className="py-3 px-4 bg-amber-50/30 text-amber-950 leading-relaxed">
+                  <div className="font-bold text-slate-900">
+                    正式な「CareKURU.」の公式ロゴ・アプリアイコン制作について、<span className="underline decoration-amber-500 font-black">チーム内（グループ内）の制作事業に依頼して進める形</span>でよろしいでしょうか？
+                  </div>
+                </td>
+              </tr>
+
+              {/* ⑥ インフラ初期実費 */}
+              <tr className="hover:bg-slate-50/50">
+                <td className="py-3 px-3 text-center font-bold text-purple-700 border-r border-slate-200">6</td>
                 <td className="py-3 px-4 font-bold text-slate-900 border-r border-slate-200">
                   <div>インフラ初期実費</div>
                   <span className="text-[11px] font-normal text-purple-600">予算・経費精算</span>
@@ -226,9 +244,9 @@ export default function AgendaPage() {
                 </td>
               </tr>
 
-              {/* ⑥ 損害賠償責任保険（NEO保険事業連携） */}
+              {/* ⑦ 損害賠償責任保険（NEO保険事業連携） */}
               <tr className="hover:bg-slate-50/50">
-                <td className="py-3 px-3 text-center font-bold text-rose-700 border-r border-slate-200">6</td>
+                <td className="py-3 px-3 text-center font-bold text-rose-700 border-r border-slate-200">7</td>
                 <td className="py-3 px-4 font-bold text-slate-900 border-r border-slate-200">
                   <div>損害賠償責任保険</div>
                   <span className="text-[11px] font-normal text-rose-600 font-bold">NEO保険事業連携</span>
@@ -247,9 +265,9 @@ export default function AgendaPage() {
                 </td>
               </tr>
 
-              {/* ⑦ 残存個人情報保管（AI事業部連携） */}
+              {/* ⑧ 残存個人情報保管（AI事業部連携） */}
               <tr className="hover:bg-slate-50/50">
-                <td className="py-3 px-3 text-center font-bold text-emerald-700 border-r border-slate-200">7</td>
+                <td className="py-3 px-3 text-center font-bold text-emerald-700 border-r border-slate-200">8</td>
                 <td className="py-3 px-4 font-bold text-slate-900 border-r border-slate-200">
                   <div>残存個人情報の保管</div>
                   <span className="text-[11px] font-normal text-emerald-600">AI事業部連携・保護</span>
@@ -264,9 +282,9 @@ export default function AgendaPage() {
                 </td>
               </tr>
 
-              {/* ⑧ PR広報活動・集客方針 */}
+              {/* ⑨ PR広報活動・集客方針 */}
               <tr className="hover:bg-slate-50/50">
-                <td className="py-3 px-3 text-center font-bold text-sky-700 border-r border-slate-200">8</td>
+                <td className="py-3 px-3 text-center font-bold text-sky-700 border-r border-slate-200">9</td>
                 <td className="py-3 px-4 font-bold text-slate-900 border-r border-slate-200">
                   <div>PR広報活動・集客方針</div>
                   <span className="text-[11px] font-normal text-sky-600">広報・マーケティング</span>
@@ -281,9 +299,9 @@ export default function AgendaPage() {
                 </td>
               </tr>
 
-              {/* ⑨ システム構造チェック依頼（AI事業部） */}
+              {/* ⑩ システム構造チェック依頼（AI事業部） */}
               <tr className="hover:bg-slate-50/50">
-                <td className="py-3 px-3 text-center font-bold text-purple-700 border-r border-slate-200">9</td>
+                <td className="py-3 px-3 text-center font-bold text-purple-700 border-r border-slate-200">10</td>
                 <td className="py-3 px-4 font-bold text-slate-900 border-r border-slate-200">
                   <div>システム構造チェック</div>
                   <span className="text-[11px] font-normal text-purple-600">AI事業部・技術監査</span>
