@@ -22,6 +22,7 @@ import {
   ArrowRight,
   Presentation,
   Footprints,
+  Download,
 } from 'lucide-react';
 
 // =====================================================================
@@ -798,15 +799,27 @@ export default function PitchGuidePage() {
               </span>
             </div>
 
-            {/* 大画面スライドショー開始ボタン */}
-            <button
-              onClick={() => setIsFullscreenMode(true)}
-              className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-bold rounded-2xl shadow-md transition flex items-center gap-2 cursor-pointer"
-              title="全画面プロジェクター投影モードを開始します"
-            >
-              <Maximize2 className="w-4 h-4 text-emerald-400" />
-              <span>大画面スライドショー開始 (投影モード)</span>
-            </button>
+            {/* 操作ボタン群（スライドDL ＆ 投影モード） */}
+            <div className="flex flex-wrap items-center gap-2">
+              <a
+                href="/CareKuru_PitchDeck_16x9.pptx"
+                download="CareKuru_PitchDeck_16x9.pptx"
+                className="px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 text-xs sm:text-sm font-bold rounded-2xl shadow-xs transition flex items-center gap-2 cursor-pointer"
+                title="MacのKeynoteやPowerPointで編集・投影できるスライドファイルをダウンロード"
+              >
+                <Download className="w-4 h-4 text-emerald-600" />
+                <span>スライドDL (.pptx / Keynote対応)</span>
+              </a>
+
+              <button
+                onClick={() => setIsFullscreenMode(true)}
+                className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-bold rounded-2xl shadow-md transition flex items-center gap-2 cursor-pointer"
+                title="全画面プロジェクター投影モードを開始します"
+              >
+                <Maximize2 className="w-4 h-4 text-emerald-400" />
+                <span>大画面スライドショー開始</span>
+              </button>
+            </div>
           </div>
 
           <div className="space-y-2">
