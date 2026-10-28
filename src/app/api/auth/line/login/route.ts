@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getEffectiveLineConfig } from '@/lib/server/lineServer';
 
 export const dynamic = 'force-dynamic';
 
@@ -7,9 +8,7 @@ export async function GET(req: Request) {
   const role = url.searchParams.get('role') || 'customer';
   const redirect = url.searchParams.get('redirect') || '/';
 
-  // サーバーサイド環境変数から取得
-  const liffId = process.env.NEXT_PUBLIC_LIFF_ID || process.env.LIFF_ID || '';
-  const channelId = process.env.NEXT_PUBLIC_LINE_CHANNEL_ID || process.env.LINE_CHANNEL_ID || '';
+  const { liffId, channelId } = getEffectiveLineConfig();
 
   // 1. LIFF ID がある場合: LIFF URL へリダイレクト
   if (liffId) {

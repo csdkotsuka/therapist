@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getEffectiveLineConfig } from '@/lib/server/lineServer';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,8 +25,7 @@ export async function GET(req: Request) {
     }
   }
 
-  const channelId = process.env.NEXT_PUBLIC_LINE_CHANNEL_ID || process.env.LINE_CHANNEL_ID || '';
-  const channelSecret = process.env.LINE_CHANNEL_SECRET || '';
+  const { channelId, channelSecret } = getEffectiveLineConfig();
   const callbackUrl = `${url.origin}/api/auth/line/callback`;
 
   try {
