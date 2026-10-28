@@ -1,49 +1,653 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
-import confetti from 'canvas-confetti';
 import { useApp } from '@/context/AppContext';
 import {
-  ExternalLink,
-  Info,
-  ShieldCheck,
-  CheckCircle2,
   FileText,
-  AlertTriangle,
-  Activity,
-  Sparkles,
-  Printer,
-  ChevronRight,
-  ChevronLeft,
-  Building,
-  Target,
-  Award,
-  Layers,
-  Sliders,
-  Compass,
-  CreditCard,
-  Presentation,
   Clock,
   Mic,
   Copy,
   Check,
   Play,
-  QrCode,
-  Smartphone,
-  Type,
   Maximize2,
   Minimize2,
-  FlameKindling,
+  ChevronRight,
+  ChevronLeft,
   Users,
   HeartHandshake,
   TrendingUp,
-  X,
-  Send,
-  BadgeCheck,
-  Lock,
+  Sparkles,
+  Scissors,
+  Stethoscope,
+  Building2,
+  CircleDollarSign,
+  CheckCircle2,
+  ArrowRight,
+  FlameKindling,
+  Presentation,
+  Footprints,
+  Compass,
 } from 'lucide-react';
 
+// =====================================================================
+// スライドデータ定義（超コンパクト・画像完全準拠）
+// =====================================================================
+interface PitchSlideData {
+  id: number;
+  title: string;
+  subTitle: string;
+  timeRange: string;
+  layoutName: string;
+  keynoteFontSizes: string;
+  punchlines: string[];
+  coreMessage: string;
+  slideBulleted: string[];
+  speakerPoints: string[];
+}
+
+const presentationSlides: PitchSlideData[] = [
+  {
+    id: 1,
+    title: 'プロフェッショナルの解放。',
+    subTitle: '医療・美・健康の常識を覆す「プロフェッショナル連合軍」構想',
+    timeRange: '00:00 〜 00:30 (30秒)',
+    layoutName: 'オープニング・宣言型（大塚 和宏 / yaShine）',
+    keynoteFontSizes: '見出し: 56〜68pt / 登壇者名: 24〜28pt / バナー: 20〜24pt',
+    punchlines: ['#プロフェッショナルの解放', '#yaShine', '#プロフェッショナル連合軍', '#常識を覆す'],
+    coreMessage: '医療・美・健康の常識を覆す「プロフェッショナル連合軍」構想',
+    slideBulleted: [
+      '【登壇者】大塚 和宏 / yaShine',
+      '【メインテーマ】プロフェッショナルの解放。',
+      '【構想】医療・美・健康の常識を覆す「プロフェッショナル連合軍」構想',
+    ],
+    speakerPoints: [
+      '自己紹介は端的に力強く：「大塚和宏です。今日は理学療法士、エステ、整体、トレーナーすべてのプロを解放する話をしに来ました。」',
+      '「医療・美・健康の分断を壊し、誰もが本物の技術で正当に報われる未来を全員で創りましょう！」',
+    ],
+  },
+  {
+    id: 2,
+    title: '本物の技術を持つプロが報われないのか？',
+    subTitle: '技術があっても、選ばれにくい業界構造の矛盾',
+    timeRange: '00:30 〜 01:20 (50秒)',
+    layoutName: '左右比較（医療職の現実 ⇄ サロン・整体の現実）',
+    keynoteFontSizes: '見出し: 44〜52pt / カード項目: 18〜22pt / フッターピル: 20〜24pt',
+    punchlines: ['#医療職の現実', '#サロン整体の現実', '#選ばれにくい', '#業界の矛盾'],
+    coreMessage: '本物の技術があっても選ばれにくい。この理不尽な業界構造を変える。',
+    slideBulleted: [
+      '【医療職の現実】国家資格で超・安定／給料も安定／でもスキルを活かし切れない',
+      '【サロン・整体の現実】技術があっても集客が難しい／無資格でも働ける／「誰を信じればいいか分からない」',
+      '【結論】技術があっても、選ばれにくい',
+    ],
+    speakerPoints: [
+      '「国家資格があっても組織の中でスキルを活かしきれない医療職。確かな技術があるのに安売り競争と信用の壁に苦しむサロン・整体職。」',
+      '「どちらも本物なのに、顧客からは選ばれにくい。この理不尽な構造を放置していいはずがありません。」',
+    ],
+  },
+  {
+    id: 3,
+    title: '「治す」医療 × 「癒やし・美」サロンが手を組む必然性',
+    subTitle: '今、動くことで、未来の安定と自由が手に入る！',
+    timeRange: '01:20 〜 02:20 (60秒)',
+    layoutName: '3連携モデル（医療職の力 × サロンの魅力 ➔ プロの連合軍）',
+    keynoteFontSizes: '見出し: 40〜48pt / 各ブロック: 20〜24pt / バナー: 20〜24pt',
+    punchlines: ['#治す医療', '#癒やし美サロン', '#安心安全', '#最強チーム'],
+    coreMessage: '「治す」医療と「癒やし・美」サロンが手を組み、最強のチームを作る。',
+    slideBulleted: [
+      '【医療職の力】安心・安全（治す力）',
+      '【サロンの魅力】癒やし・美・健康（整える・魅せる力）',
+      '【プロの連合軍】最強のチーム ➔ 今、動くことで、未来の安定と自由が手に入る！',
+    ],
+    speakerPoints: [
+      '「医療の圧倒的な安心・安全と、サロンの癒やし・美・健康。この2つが分断されているから顧客は迷子になります。」',
+      '「手を組むのは必然です。タッグを組むことで、未来の安定と自由を同時に手に入れましょう。」',
+    ],
+  },
+  {
+    id: 4,
+    title: '今こそ、船に乗るべきなのか？【 3大実利 】',
+    subTitle: 'Next Step ➔ 動く人が未来を創る',
+    timeRange: '02:20 〜 03:20 (60秒)',
+    layoutName: '3大実利グリッド（最高級の下駄 × 相互紹介 × 初期・月額0円）',
+    keynoteFontSizes: '見出し: 42〜50pt / ナンバーカード: 20〜24pt / リボン: 20〜24pt',
+    punchlines: ['#最高級の下駄を履く', '#顧客の相互紹介ループ', '#初期月額0円高還元', '#動く人が未来を創る'],
+    coreMessage: '最高級の下駄、顧客の相互紹介、固定費0円高還元。動く人が未来を創る。',
+    slideBulleted: [
+      '①【最高級の下駄を履く】厳選されたプロとしての最高峰ステータス',
+      '②【顧客の相互紹介ループ】奪い合わず、仲間同士で顧客を回し合う',
+      '③【初期・月額0円 高還元】固定費リスクゼロ、高還元率で安心スタート',
+      '【Next Step】動く人が未来を創る',
+    ],
+    speakerPoints: [
+      '「実利は極めて明快です。最高級のブランドステータス、顧客の相互紹介ループ、そして初期・月額0円の高還元。」',
+      '「リスクはありません。傍観者になるのではなく、今動く人が次の時代を創ります。」',
+    ],
+  },
+  {
+    id: 5,
+    title: '会長と400人の仲間だから起こせる業界革命',
+    subTitle: 'エリア管理や運営側に興味がある方は まずは「創業パートナー相談デスク」へ！',
+    timeRange: '03:20 〜 04:15 (55秒)',
+    layoutName: '2者共犯レイアウト（施術ができるプロ ⇄ 経営者・リーダーへ）',
+    keynoteFontSizes: '見出し: 42〜50pt / カード本文: 18〜22pt / デスクピル: 18〜22pt',
+    punchlines: ['#会長と400人の仲間', '#業界革命', '#施術ができるプロ', '#経営者リーダーへ'],
+    coreMessage: '施術者も経営者も全員が主役。健康と美を守るインフラを共に創る。',
+    slideBulleted: [
+      '【施術ができるプロ】健康的に長生き／美しくあり続ける',
+      '【経営者・リーダーへ】ご自身・ご家族、そして大切な社員の健康と美を守る',
+      '【アクション】エリア管理や運営側に興味がある方は、まずは「創業パートナー相談デスク」へ！',
+    ],
+    speakerPoints: [
+      '「この規模とスピードは、会長と400人の仲間が集まった今だからこそ実現できます。」',
+      '「施術者は腕一本で自立し、経営者は社員の健康と美を守る福利厚生として使う。全員に役割があります。」',
+    ],
+  },
+  {
+    id: 6,
+    title: '最初の乗組員として、業界の常識をひっくり返そう！',
+    subTitle: '一緒に未来を創りましょう！',
+    timeRange: '04:15 〜 05:00 (45秒)',
+    layoutName: 'CTA・先行登録クロージング（健康×成長 ＋ QRコード ＋ 出航）',
+    keynoteFontSizes: '見出し: 40〜48pt / バッジ: 20〜24pt / QR案内: 18〜22pt',
+    punchlines: ['#最初の乗組員', '#常識をひっくり返そう', '#健康的に長生き', '#仲間と共に成長'],
+    coreMessage: '最初の乗組員として、業界の常識をひっくり返そう！ 先行登録受付中。',
+    slideBulleted: [
+      '【ビジョン】健康的に長生き × 仲間と共に成長',
+      '【創業パートナー先行登録】★各地域・ジャンル限定枠（QRコード）',
+      '【メッセージ】一緒に未来を創りましょう！',
+    ],
+    speakerPoints: [
+      '「最初の乗組員として、この船に乗ってください。業界の常識を、一緒にひっくり返しましょう！」',
+      '「QRコードから先行登録をお願いします。皆様と一緒に未来を創れることを楽しみにしています！」',
+    ],
+  },
+];
+
+// =====================================================================
+// スライド画面コンポーネント（シンプルで心地の良いテイスト・画像デザイン再現）
+// =====================================================================
+function PitchSlideCanvas({
+  slideId,
+  isMini = false,
+}: {
+  slideId: number;
+  isMini?: boolean;
+}) {
+  return (
+    <div
+      className={`w-full aspect-[4/3] rounded-2xl relative overflow-hidden select-none flex flex-col justify-between transition-all duration-300 font-sans shadow-sm border border-sky-100 ${
+        isMini ? 'p-4 sm:p-6' : 'p-6 sm:p-10'
+      }`}
+      style={{
+        // シンプルで心地の良いテイスト: 透明感のある爽やかなペールブルー〜ピュアホワイト〜かすかなペールゴールド
+        background:
+          'linear-gradient(180deg, #edf6f9 0%, #f7fafc 35%, #ffffff 70%, #fdfbf7 100%)',
+      }}
+    >
+      {/* 柔らかな光のオーラ・アンビエント */}
+      <div className="absolute -top-12 -left-12 w-64 h-64 bg-sky-200/35 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/3 -right-12 w-64 h-64 bg-teal-100/30 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-10 left-1/4 w-80 h-40 bg-amber-100/25 rounded-full blur-3xl pointer-events-none" />
+
+      {/* ------------------------------------------------------------- */}
+      {/* スライド共通ヘッダー */}
+      {/* ------------------------------------------------------------- */}
+      <div className="relative z-10 flex items-center justify-between border-b border-slate-200/60 pb-2.5">
+        <div className="flex items-center gap-2">
+          {/* ケアリアゴーのアイコングラフィック */}
+          <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center shrink-0">
+            <svg
+              viewBox="0 0 24 24"
+              className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 fill-emerald-600"
+            >
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z" opacity="0.15" />
+              <circle cx="12" cy="7.5" r="2.5" fill="currentColor" />
+              <path
+                d="M7 16.5c0-2.8 2.2-5 5-5s5 2.2 5 5"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                fill="none"
+              />
+            </svg>
+          </div>
+          <span className="text-xs sm:text-sm font-bold tracking-wider text-slate-800">
+            ケアリアゴー
+          </span>
+        </div>
+        <div className="text-xs sm:text-sm font-mono font-bold text-slate-500 tracking-wider">
+          {slideId}/6
+        </div>
+      </div>
+
+      {/* ------------------------------------------------------------- */}
+      {/* スライド個別メインコンテンツ */}
+      {/* ------------------------------------------------------------- */}
+      <div className="relative z-10 my-auto py-2 flex flex-col justify-center">
+        {/* ======================= スライド 1/6 ======================= */}
+        {slideId === 1 && (
+          <div className="space-y-4 sm:space-y-6">
+            <div className="flex items-center justify-between gap-4">
+              <div className="space-y-2 sm:space-y-3">
+                <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-slate-900 font-serif leading-[1.2] tracking-tight">
+                  プロフェッショナルの<br />
+                  <span className="text-slate-950 font-black">解放。</span>
+                </h2>
+                <div className="text-sm sm:text-lg font-bold text-slate-700 font-serif tracking-wide pt-0.5">
+                  大塚 和宏 <span className="text-slate-400 font-sans font-normal">/</span> yaShine
+                </div>
+              </div>
+
+              {/* 美しく輝くダイヤモンド・クリスタル */}
+              <div className="shrink-0 relative">
+                <div className="w-24 h-24 sm:w-36 sm:h-36 relative flex items-center justify-center">
+                  <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+                    <defs>
+                      <linearGradient id="diaGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#bae6fd" />
+                        <stop offset="30%" stopColor="#e0f2fe" />
+                        <stop offset="60%" stopColor="#fed7aa" />
+                        <stop offset="100%" stopColor="#f472b6" />
+                      </linearGradient>
+                      <linearGradient id="diaGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#38bdf8" />
+                        <stop offset="50%" stopColor="#a855f7" />
+                        <stop offset="100%" stopColor="#ec4899" />
+                      </linearGradient>
+                    </defs>
+                    <polygon points="50,5 85,25 95,50 50,95 5,50 15,25" fill="url(#diaGrad1)" opacity="0.85" />
+                    <polygon points="50,5 30,25 15,25" fill="#ffffff" opacity="0.7" />
+                    <polygon points="50,5 70,25 85,25" fill="#ffffff" opacity="0.5" />
+                    <polygon points="30,25 50,25 50,5" fill="#7dd3fc" opacity="0.6" />
+                    <polygon points="50,25 70,25 50,5" fill="#bae6fd" opacity="0.6" />
+                    <polygon points="15,25 5,50 30,50 30,25" fill="#38bdf8" opacity="0.5" />
+                    <polygon points="85,25 95,50 70,50 70,25" fill="#ec4899" opacity="0.5" />
+                    <polygon points="30,25 50,25 50,50 30,50" fill="url(#diaGrad2)" opacity="0.6" />
+                    <polygon points="50,25 70,25 70,50 50,50" fill="#f43f5e" opacity="0.4" />
+                    <polygon points="30,50 50,50 50,95" fill="#6366f1" opacity="0.7" />
+                    <polygon points="50,50 70,50 50,95" fill="#db2777" opacity="0.7" />
+                    <polygon points="5,50 30,50 50,95" fill="#0284c7" opacity="0.8" />
+                    <polygon points="95,50 70,50 50,95" fill="#be185d" opacity="0.8" />
+                  </svg>
+                  <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-amber-400 absolute -top-1 -right-1 animate-pulse" />
+                </div>
+              </div>
+            </div>
+
+            {/* 下部リボン・バナー */}
+            <div className="pt-2">
+              <div className="inline-block w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 rounded-2xl bg-white/90 border border-amber-200/80 shadow-xs backdrop-blur-xs relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-amber-100/40 via-sky-100/30 to-rose-100/40 pointer-events-none" />
+                <div className="relative text-xs sm:text-base font-bold text-slate-800 text-center font-serif tracking-wide leading-relaxed">
+                  医療・美・健康の常識を覆す<br className="sm:hidden" />
+                  <span className="text-slate-900 font-black">「プロフェッショナル連合軍」</span>構想
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ======================= スライド 2/6 ======================= */}
+        {slideId === 2 && (
+          <div className="space-y-3 sm:space-y-4">
+            <h2 className="text-xl sm:text-3xl md:text-4xl font-black text-slate-900 font-serif leading-tight">
+              本物の技術を持つプロが<br />
+              <span className="text-rose-600">報われないのか？</span>
+            </h2>
+
+            {/* 左右カード */}
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-4 pt-1">
+              {/* 左: 医療職の現実 */}
+              <div className="bg-white/95 rounded-2xl p-3 sm:p-4 border-2 border-rose-200 shadow-xs space-y-2">
+                <div className="flex items-center gap-2 border-b border-rose-100 pb-1.5">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-rose-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <Stethoscope className="w-4 h-4" />
+                  </div>
+                  <div className="font-black text-xs sm:text-base text-rose-600">
+                    医療職の現実
+                  </div>
+                </div>
+                <ul className="space-y-1.5 text-[11px] sm:text-sm text-slate-800 font-medium">
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-rose-500 font-bold">✔</span>
+                    <span>国家資格で超・安定</span>
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-rose-500 font-bold">✔</span>
+                    <span>給料も安定</span>
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-rose-500 font-bold">✔</span>
+                    <span>でもスキルを活かし切れない</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* 右: サロン・整体の現実 */}
+              <div className="bg-white/95 rounded-2xl p-3 sm:p-4 border-2 border-sky-200 shadow-xs space-y-2">
+                <div className="flex items-center gap-2 border-b border-sky-100 pb-1.5">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-sky-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <Scissors className="w-4 h-4" />
+                  </div>
+                  <div className="font-black text-xs sm:text-base text-sky-600">
+                    サロン・整体の現実
+                  </div>
+                </div>
+                <ul className="space-y-1.5 text-[11px] sm:text-sm text-slate-800 font-medium">
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-sky-500 font-bold">✔</span>
+                    <span>技術があっても集客が難しい</span>
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-sky-500 font-bold">✔</span>
+                    <span>無資格でも働ける</span>
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-sky-500 font-bold">✔</span>
+                    <span>「誰を信じればいいか分からない」</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* 下部ピル */}
+            <div className="text-center pt-1">
+              <div className="inline-flex items-center justify-center px-4 sm:px-6 py-1.5 sm:py-2 rounded-full bg-rose-50/90 border border-rose-200 text-rose-600 font-bold text-xs sm:text-sm shadow-xs">
+                <span>技術があっても、選ばれにくい</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ======================= スライド 3/6 ======================= */}
+        {slideId === 3 && (
+          <div className="space-y-3 sm:space-y-4">
+            <h2 className="text-xl sm:text-2xl md:text-4xl font-black text-slate-900 font-serif leading-tight">
+              <span className="text-sky-600">「治す」</span>医療 × <span className="text-rose-500">「癒やし・美」</span>サロンが<br />
+              手を組む必然性
+            </h2>
+
+            {/* 3ブロック連携 */}
+            <div className="grid grid-cols-5 items-center gap-1 sm:gap-2 pt-1 text-center">
+              {/* 1: 医療職の力 */}
+              <div className="col-span-1 bg-white/95 rounded-2xl p-2.5 sm:p-4 border border-rose-200 shadow-xs space-y-1.5">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 mx-auto rounded-full bg-rose-100 text-rose-600 flex items-center justify-center shadow-xs">
+                  <Building2 className="w-5 h-5 sm:w-6 sm:h-6" />
+                </div>
+                <div className="font-black text-xs sm:text-sm text-rose-600">
+                  医療職の力
+                </div>
+                <div className="text-[10px] sm:text-xs text-slate-600 font-medium">
+                  安心・安全
+                </div>
+              </div>
+
+              {/* × */}
+              <div className="col-span-1 text-center font-bold text-slate-400 text-lg sm:text-2xl">
+                ✕
+              </div>
+
+              {/* 2: サロンの魅力 */}
+              <div className="col-span-1 bg-white/95 rounded-2xl p-2.5 sm:p-4 border border-sky-200 shadow-xs space-y-1.5">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 mx-auto rounded-full bg-sky-100 text-sky-600 flex items-center justify-center shadow-xs">
+                  <Users className="w-5 h-5 sm:w-6 sm:h-6" />
+                </div>
+                <div className="font-black text-xs sm:text-sm text-sky-600">
+                  サロンの魅力
+                </div>
+                <div className="text-[10px] sm:text-xs text-slate-600 font-medium">
+                  癒やし・美・健康
+                </div>
+              </div>
+
+              {/* × */}
+              <div className="col-span-1 text-center font-bold text-slate-400 text-lg sm:text-2xl">
+                ✕
+              </div>
+
+              {/* 3: プロの連合軍 */}
+              <div className="col-span-1 bg-white/95 rounded-2xl p-2.5 sm:p-4 border border-emerald-300 shadow-xs space-y-1.5 ring-1 ring-emerald-400/40">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 mx-auto rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-xs">
+                  <HeartHandshake className="w-5 h-5 sm:w-6 sm:h-6" />
+                </div>
+                <div className="font-black text-xs sm:text-sm text-emerald-700">
+                  プロの連合軍
+                </div>
+                <div className="text-[10px] sm:text-xs text-emerald-800 font-bold">
+                  最強のチーム
+                </div>
+              </div>
+            </div>
+
+            {/* 下部バナー */}
+            <div className="text-center pt-1">
+              <div className="inline-flex items-center justify-center px-4 sm:px-6 py-2 rounded-2xl bg-gradient-to-r from-amber-50 via-rose-50 to-amber-50 border border-rose-200/80 text-rose-600 font-black text-xs sm:text-sm shadow-xs">
+                <span>今、動くことで、未来の安定と自由が手に入る！</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ======================= スライド 4/6 ======================= */}
+        {slideId === 4 && (
+          <div className="space-y-3 sm:space-y-4">
+            <h2 className="text-xl sm:text-3xl md:text-4xl font-black text-slate-900 font-serif leading-tight">
+              今こそ、船に乗るべきなのか？<br />
+              <span className="text-slate-900">【 3大実利 】</span>
+            </h2>
+
+            {/* 3枚のカード */}
+            <div className="grid grid-cols-3 gap-2 sm:gap-3.5 pt-1 text-center">
+              {/* ① */}
+              <div className="bg-white/95 rounded-2xl p-3 sm:p-4 border border-rose-200 shadow-xs space-y-2 relative">
+                <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-rose-500 text-white font-mono font-bold text-xs flex items-center justify-center mx-auto">
+                  1
+                </div>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 mx-auto text-rose-500 flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 sm:w-7 sm:h-7" />
+                </div>
+                <div className="font-black text-xs sm:text-sm text-rose-600 leading-tight">
+                  最高級の<br />下駄を履く
+                </div>
+              </div>
+
+              {/* ② */}
+              <div className="bg-white/95 rounded-2xl p-3 sm:p-4 border border-sky-200 shadow-xs space-y-2 relative">
+                <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-sky-500 text-white font-mono font-bold text-xs flex items-center justify-center mx-auto">
+                  2
+                </div>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 mx-auto text-sky-500 flex items-center justify-center">
+                  <Users className="w-6 h-6 sm:w-7 sm:h-7" />
+                </div>
+                <div className="font-black text-xs sm:text-sm text-sky-600 leading-tight">
+                  顧客の<br />相互紹介ループ
+                </div>
+              </div>
+
+              {/* ③ */}
+              <div className="bg-white/95 rounded-2xl p-3 sm:p-4 border border-emerald-200 shadow-xs space-y-2 relative">
+                <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-emerald-500 text-white font-mono font-bold text-xs flex items-center justify-center mx-auto">
+                  3
+                </div>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 mx-auto text-emerald-600 flex items-center justify-center">
+                  <span className="text-xl sm:text-2xl font-black font-sans">¥</span>
+                </div>
+                <div className="font-black text-xs sm:text-sm text-emerald-700 leading-tight">
+                  初期・月額0円<br />高還元
+                </div>
+              </div>
+            </div>
+
+            {/* 下部リボン Next Step */}
+            <div className="text-center pt-1">
+              <div className="inline-flex items-center justify-center gap-3 px-6 sm:px-8 py-2 rounded-full bg-gradient-to-r from-amber-50 via-white to-amber-50 border border-amber-200 text-slate-800 shadow-xs">
+                <span className="font-serif italic font-bold text-amber-700 text-sm sm:text-base">
+                  Next Step
+                </span>
+                <ArrowRight className="w-4 h-4 text-amber-600" />
+                <span className="font-black text-xs sm:text-sm text-slate-900">
+                  動く人が未来を創る
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ======================= スライド 5/6 ======================= */}
+        {slideId === 5 && (
+          <div className="space-y-3 sm:space-y-4">
+            <h2 className="text-xl sm:text-3xl md:text-4xl font-black text-slate-900 font-serif leading-tight">
+              会長と400人の仲間だから<br />
+              起こせる<span className="text-slate-950">業界革命</span>
+            </h2>
+
+            {/* 左右2枚のカード */}
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-4 pt-1">
+              {/* 左: 施術ができるプロ */}
+              <div className="bg-white/95 rounded-2xl p-3.5 sm:p-5 border border-rose-200 shadow-xs space-y-2.5">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-rose-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                  <div className="font-black text-xs sm:text-sm text-rose-600">
+                    施術ができるプロ
+                  </div>
+                </div>
+                <div className="text-xs sm:text-sm font-bold text-slate-800 leading-relaxed pt-1">
+                  健康的に長生き<br />
+                  美しくあり続ける
+                </div>
+              </div>
+
+              {/* 右: 経営者・リーダーへ */}
+              <div className="bg-white/95 rounded-2xl p-3.5 sm:p-5 border border-sky-200 shadow-xs space-y-2.5">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-sky-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <Users className="w-4 h-4" />
+                  </div>
+                  <div className="font-black text-xs sm:text-sm text-sky-600">
+                    経営者・リーダーへ
+                  </div>
+                </div>
+                <div className="text-xs sm:text-sm font-bold text-slate-800 leading-relaxed pt-1">
+                  ご自身・ご家族、<br />
+                  そして大切な社員の<br />
+                  健康と美を守る
+                </div>
+              </div>
+            </div>
+
+            {/* 下部ピル: 創業パートナー相談デスク */}
+            <div className="text-center pt-1">
+              <div className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 rounded-full bg-rose-50/90 border border-rose-200 text-rose-600 font-bold text-xs sm:text-sm shadow-xs">
+                {/* ヨットアイコン */}
+                <svg className="w-4 h-4 text-rose-500 fill-current" viewBox="0 0 24 24">
+                  <path d="M12 2L4 14h8V2zM14 6l6 8h-6V6zM3 16h18l-2 4H5l-2-4z" />
+                </svg>
+                <span>エリア管理や運営側に興味がある方は まずは「創業パートナー相談デスク」へ！</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ======================= スライド 6/6 ======================= */}
+        {slideId === 6 && (
+          <div className="space-y-3 sm:space-y-4">
+            <h2 className="text-xl sm:text-2xl md:text-4xl font-black text-slate-900 font-serif leading-tight">
+              最初の乗組員として、<br />
+              業界の常識を<span className="text-rose-600">ひっくり返そう！</span>
+            </h2>
+
+            {/* 2つのピル */}
+            <div className="grid grid-cols-2 gap-2 sm:gap-3">
+              <div className="bg-white/95 rounded-2xl p-2.5 sm:p-3 border border-rose-200 shadow-xs flex items-center gap-2 sm:gap-3">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-rose-500 text-white flex items-center justify-center shrink-0">
+                  <Footprints className="w-4 h-4" />
+                </div>
+                <div className="font-black text-xs sm:text-sm text-slate-800 leading-tight">
+                  健康的に<br />長生き
+                </div>
+              </div>
+
+              <div className="bg-white/95 rounded-2xl p-2.5 sm:p-3 border border-sky-200 shadow-xs flex items-center gap-2 sm:gap-3">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-sky-500 text-white flex items-center justify-center shrink-0">
+                  <Users className="w-4 h-4" />
+                </div>
+                <div className="font-black text-xs sm:text-sm text-slate-800 leading-tight">
+                  仲間と共に<br />成長
+                </div>
+              </div>
+            </div>
+
+            {/* 下部エリア: 船と海 ＋ 先行登録QR */}
+            <div className="bg-white/90 rounded-2xl p-3 sm:p-4 border border-sky-100 shadow-xs relative overflow-hidden flex items-center justify-between gap-4">
+              {/* 背景の爽やかな海とヨットのイラスト */}
+              <div className="space-y-1 relative z-10">
+                <div className="text-sm sm:text-lg font-black text-sky-900 font-serif leading-tight">
+                  一緒に<br />
+                  未来を創りましょう！
+                </div>
+                <div className="text-[10px] sm:text-xs text-sky-700 font-medium">
+                  プロフェッショナル解放プロジェクト
+                </div>
+              </div>
+
+              {/* 中央ヨットシルエット */}
+              <div className="hidden sm:block absolute left-1/2 -translate-x-1/2 bottom-0 w-28 h-20 opacity-80 pointer-events-none">
+                <svg viewBox="0 0 100 80" className="w-full h-full">
+                  <path d="M45 10 L45 55 L20 55 Z" fill="#38bdf8" opacity="0.7" />
+                  <path d="M48 20 L48 55 L75 55 Z" fill="#0284c7" opacity="0.6" />
+                  <path d="M15 58 L85 58 L75 70 L25 70 Z" fill="#0f172a" opacity="0.8" />
+                  <path d="M0 72 Q 25 68, 50 72 T 100 72 L 100 80 L 0 80 Z" fill="#e0f2fe" opacity="0.8" />
+                </svg>
+              </div>
+
+              {/* QRコード案内 */}
+              <div className="relative z-10 flex items-center gap-3 shrink-0">
+                <div className="text-right space-y-0.5">
+                  <div className="font-black text-xs sm:text-sm text-slate-900">
+                    創業パートナー<br />先行登録
+                  </div>
+                  <div className="text-[9px] sm:text-[10px] text-emerald-700 font-bold">
+                    ★各地域・ジャンル限定枠
+                  </div>
+                </div>
+
+                <a
+                  href="#partner-registration"
+                  className="block group cursor-pointer"
+                  title="クリックしてページ下部の登録フォームへ移動"
+                >
+                  <img
+                    src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=https%3A%2F%2Ftherapist.kotsuka-folio.workers.dev%2Fguide%2Fadmin%23partner-registration"
+                    alt="創業パートナー先行登録QRコード"
+                    className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl p-1 bg-white border border-slate-300 shadow-xs transition group-hover:scale-105"
+                  />
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ------------------------------------------------------------- */}
+      {/* スライド共通フッター */}
+      {/* ------------------------------------------------------------- */}
+      <div className="relative z-10 flex items-center justify-between border-t border-slate-200/60 pt-2 text-[10px] sm:text-xs text-slate-500 font-sans">
+        <span className="truncate max-w-[70%]">
+          大塚 和宏 / yaShine ｜ プロフェッショナル連合軍構想
+        </span>
+        <span className="font-mono text-slate-400 shrink-0 font-bold">
+          SLIDE {slideId} OF 6
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// =====================================================================
+// メインページコンポーネント
+// =====================================================================
 export default function PitchGuidePage() {
   const { currentBrand } = useApp();
   const [activeSlideIndex, setActiveSlideIndex] = useState<number>(0);
@@ -71,165 +675,11 @@ export default function PitchGuidePage() {
     return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
 
-  const presentationSlides = [
-    {
-      id: 1,
-      title: 'プロフェッショナルの解放。',
-      subTitle: '医療・美・健康の常識を覆す「プロフェッショナル連合軍」構想',
-      presenter: '大塚 和宏 / yaShine（理学療法士・元教員・現システムエンジニア）',
-      timeRange: '00:00 〜 00:30 (30秒)',
-      layoutName: 'オープニング・宣言型（大迫力タイトル ＆ ビジョン提示）',
-      keynoteFontSizes: 'メイン見出し: 60〜72pt / 登壇者名: 28〜32pt / キャッチ: 24〜28pt',
-      punchlines: [
-        '#プロフェッショナルの解放',
-        '#安売り競争の終焉',
-        '#美と健康の連合軍',
-        '#会長直下プロジェクト',
-      ],
-      coreMessage: '高度な専門技術を持つプロが、正当に評価され、自分の腕一本で誇り高く稼げる世界を創る。',
-      slideBulleted: [
-        '【登壇者】大塚 和宏 / yaShine（理学療法士・元教員・現システムエンジニア）',
-        '【プロジェクト】「医療」「美」「健康」の分断を壊し、プロの価値を最大化する新インフラ',
-        '【対象】理学療法士からエステ・整体・トレーナーまで、確かな腕を持つすべての仲間たち',
-      ],
-      speakerPoints: [
-        '自己紹介は短く強烈に。「理学療法士で元教員、今はエンジニアの大塚です」。',
-        '「今日はシステムの取扱説明書を話に来たのではありません。皆さんの腕と技術が正当に報われ、誇らしく稼げる未来を創る話をしに来ました！」と熱く宣言。',
-      ],
-    },
-    {
-      id: 2,
-      title: 'なぜ、本物の技術を持つプロが報われないのか？',
-      subTitle: '保険点数の壁 × 安売りクーポン競争のジレンマ',
-      presenter: '大塚 和宏 / yaShine',
-      timeRange: '00:30 〜 01:20 (50秒)',
-      layoutName: '左右2カラム・共通の敵（医療職の壁 ⇄ サロン・整体の壁）',
-      keynoteFontSizes: 'スライド見出し: 48〜54pt / カード見出し: 26〜30pt / 本文: 20〜22pt',
-      punchlines: [
-        '#死ぬほど勉強したのに',
-        '#月給20数万の頭打ち',
-        '#クーポン荒らしで疲弊',
-        '#この構造おかしくないですか？',
-      ],
-      coreMessage: 'プロが安売りさせられ、生活者は信頼できるプロに出会えない難民になっている。',
-      slideBulleted: [
-        '【医療職の現実】国家資格を取り、命と身体を支える超高度スキルがあるのに、保険点数の壁で給料は頭打ち。',
-        '【サロン・整体の現実】確かな現場力があるのに、無資格もみほぐしと一括りにされ、ポータルのクーポン安売りに巻き込まれる。',
-        '【生活者の悲劇】病院リハを断られた人、どこへ行けば本物のプロに会えるか分からない人が地域に溢れている。',
-      ],
-      speakerPoints: [
-        '会場の理学療法士・施術者に目を合わせ、「おかしくないですか？」と共感を呼び起こす。',
-        '「プロが疲弊し、怪しい民間療法が儲かり、顧客が迷子になっている。この業界の理不尽を今こそ終わらせたい」と訴えかける。',
-      ],
-    },
-    {
-      id: 3,
-      title: '「治す」医療 ×「癒やし・美」サロンが手を組む必然性',
-      subTitle: '健康と美のグラデーション ｜ 人生100年時代を美しく健康に生ききるために',
-      presenter: '大塚 和宏 / yaShine',
-      timeRange: '01:20 〜 02:20 (60秒)',
-      layoutName: '3カラム・チームヘルスケア連携図（医療の限界 ⇄ 美容の現場力 ➔ 連合軍結成）',
-      keynoteFontSizes: 'スライド見出し: 48〜54pt / カラム見出し: 24〜28pt / 本文: 18〜20pt',
-      punchlines: [
-        '#健康と美のグラデーション',
-        '#治すだけじゃ幸せになれない',
-        '#医療の壁を壊す',
-        '#身体のプロフェッショナル連合軍',
-      ],
-      coreMessage: '「治す（医療）」と「整える・美しくする（美容）」が統合して初めて、一人の人生を一生涯支えられる。',
-      slideBulleted: [
-        '【医療職の限界】痛みは取れる。でも日常の疲れを癒やし、肌を綺麗にし、美しいボディを作るのはエステ・整体の専門分野。',
-        '【サロンのジレンマ】美と活力を届ける素晴らしい現場力があるが、重い病気のリスクや「国家資格がない信頼の壁」がある。',
-        '【必然の答え】だからこそ手を組む！ PTが作ったアプリに呼ぶのではない。医療と美の壁を壊す「プロ連合軍」の結成！',
-      ],
-      speakerPoints: [
-        'ここが一番重要！「PT発祥だけど、エステや整体の皆さんの力が絶対に不可欠なんです」とリスペクトを込めて語る。',
-        '「痛みを取る医療と、美と活力をつくるサロンがタッグを組んで初めて、顧客の健康寿命をまるごと背負える」という大義を示す。',
-      ],
-    },
-    {
-      id: 4,
-      title: 'なぜ、今この船に乗るべきなのか？【3大実利】',
-      subTitle: '安売りからの完全脱却 × 最高峰の信頼ステータス',
-      presenter: '大塚 和宏 / yaShine',
-      timeRange: '02:20 〜 03:20 (60秒)',
-      layoutName: '3大インセンティブ・グリッド（最高級の下駄 × 相互送客 × スマホ完結高還元）',
-      keynoteFontSizes: 'スライド見出し: 48〜54pt / メリット見出し: 26〜30pt / 説明: 18〜20pt',
-      punchlines: [
-        '#最高級の下駄を履く',
-        '#クーポン荒らしからの脱却',
-        '#顧客の相互紹介ループ',
-        '#初期月額0円で高還元',
-      ],
-      coreMessage: '奪い合うのではなく、仲間で顧客を回し合い、適正価格で勝負できる最高峰のブランド力を手に入れる。',
-      slideBulleted: [
-        '①【最高級の下駄を履ける】厳格な資格・身元審査を通った証。クーポン安売りから抜け出し、適正価格で選ばれるステータス。',
-        '②【顧客の相互紹介ループ】痛みが引いた患者をエステ・ピラティスへ。重い痛みを抱える客をPTへ。お互いに客を回し合う。',
-        '③【初期・月額 0 円 ＆ 高還元】店舗・固定費ゼロ。事前カード決済で未回収・ドタキャンリスクも完全ゼロ。',
-      ],
-      speakerPoints: [
-        '「ホットペッパーの値下げ競争はもう終わりにしましょう！」と力強く切り込む。',
-        '「医療職の患者がエステに来て、エステのお客様の身体の悩みをPTがバックアップする。これが仲間同士の最強のエコシステムです」。',
-      ],
-    },
-    {
-      id: 5,
-      title: '会長と400人の仲間だから起こせる業界革命',
-      subTitle: 'これは僕一人のアプリではない。全員で創る次世代インフラ',
-      presenter: '大塚 和宏 / yaShine',
-      timeRange: '03:20 〜 04:15 (55秒)',
-      layoutName: '左右共犯者レイアウト（施術者への呼びかけ ⇄ 経営者・リーダーへの呼びかけ）',
-      keynoteFontSizes: 'スライド見出し: 48〜54pt / ターゲット見出し: 26〜30pt / 本文: 20〜22pt',
-      punchlines: [
-        '#会長の心意気による事業化',
-        '#400人の仲間が共犯者',
-        '#社員の健康と美を守るインフラ',
-        '#創業パートナー枠は限定',
-      ],
-      coreMessage: '会長の想いと400人の情熱があるからこそ成立する。施術する人も、しない人も、全員に役割がある。',
-      slideBulleted: [
-        '【施術ができるプロへ】自分の腕一本で新しい収入の柱を作ってください。誇りと正当な報酬をその手に。',
-        '【施術をしない経営者・リーダーへ】ご自身・ご家族、そして大切な社員の健康と美を守るインフラとして使い倒してください！',
-        '【限定枠の告知】各地域・各ジャンルで「初期シードパートナー（創業認定枠）」の席を限定。早い者勝ちです。',
-      ],
-      speakerPoints: [
-        '会場全体（施術者＋経営者・リーダー）を巻き込む！「施術をしない経営者の皆さん、社員の健康を守る福利厚生として使ってください！」。',
-        '「地元のライバルに枠を取られる前に、今すぐこの船に乗ってください！」と適度な焦燥感と熱気を作る。',
-      ],
-    },
-    {
-      id: 6,
-      title: '最初の乗組員として、業界の常識をひっくり返そう！',
-      subTitle: '健康的に長生きし、美しくあり続ける。みんなが望む未来を、ここから創る',
-      presenter: '大塚 和宏 / yaShine',
-      timeRange: '04:15 〜 05:00 (45秒)',
-      layoutName: 'CTA・クロージング（先行登録QR ＋ 創業相談デスク案内 ＋ 力強い決断）',
-      keynoteFontSizes: 'メイン見出し: 50〜60pt / サブ見出し: 26〜30pt / ボタン・QR: 22〜26pt',
-      punchlines: [
-        '#最初の乗組員になれ',
-        '#先行登録所要3分',
-        '#完全無料・リスクゼロ',
-        '#歴史を一緒に創ろう',
-      ],
-      coreMessage: '今日、この400人の熱気から、日本の美と健康の新しい常識が始まります。',
-      slideBulleted: [
-        '【スマホで今すぐ先行登録】登録所要3分 ｜ 初期費用・月額利用料 完全 0 円',
-        '【創業パートナー相談デスク】「地域のマネジメントや運営側に回りたい」方は終了後デスクへ直行！',
-        '【未来への約束】誰かの健康と美を支え、自分たちも誇り高く豊かになる。一緒に新しい時代を創りましょう！',
-      ],
-      speakerPoints: [
-        '最高潮のテンションで会場全体を見渡し、熱い握手を求めるように語りかける。',
-        '「ご清聴ありがとうございました！ 創業パートナーとして、皆さんと一緒に船を出せることを楽しみにしています！」と深々とお辞儀。',
-      ],
-    },
-  ];
-
-
   const handleCopyAll = () => {
     const text = presentationSlides
       .map(
         (s) =>
-          `========================================\n【スライド ${s.id}】${s.title}\n時間目安: ${s.timeRange}\nサブタイトル: ${s.subTitle}\nKeynote推奨文字サイズ: ${s.keynoteFontSizes}\nパンチライン: ${s.punchlines.join(' ')}\n\n■ スライド投影テキスト:\n${s.slideBulleted.map((p) => `・${p}`).join('\n')}\n\n■ 登壇メモ・語るポイント:\n${s.speakerPoints.map((n) => `▶ ${n}`).join('\n')}\n`
+          `========================================\n【スライド ${s.id}/6】${s.title}\n時間目安: ${s.timeRange}\nKeynote推奨文字サイズ: ${s.keynoteFontSizes}\nパンチライン: ${s.punchlines.join(' ')}\n\n■ スライド投影テキスト:\n${s.slideBulleted.map((p) => `・${p}`).join('\n')}\n\n■ 登壇メモ・語るポイント:\n${s.speakerPoints.map((n) => `▶ ${n}`).join('\n')}\n`
       )
       .join('\n\n');
 
@@ -240,16 +690,14 @@ export default function PitchGuidePage() {
     }
   };
 
-
-  const handleCopySingle = (slide: typeof presentationSlides[0]) => {
-    const text = `【スライド ${slide.id}】${slide.title}\n時間目安: ${slide.timeRange}\nサブタイトル: ${slide.subTitle}\nKeynote推奨文字サイズ: ${slide.keynoteFontSizes}\nパンチライン: ${slide.punchlines.join(' ')}\n\n■ スライド投影テキスト:\n${slide.slideBulleted.map((p) => `・${p}`).join('\n')}\n\n■ 登壇メモ:\n${slide.speakerPoints.map((n) => `▶ ${n}`).join('\n')}`;
+  const handleCopySingle = (slide: PitchSlideData) => {
+    const text = `【スライド ${slide.id}/6】${slide.title}\n時間目安: ${slide.timeRange}\nKeynote推奨文字サイズ: ${slide.keynoteFontSizes}\nパンチライン: ${slide.punchlines.join(' ')}\n\n■ スライド投影テキスト:\n${slide.slideBulleted.map((p) => `・${p}`).join('\n')}\n\n■ 登壇メモ:\n${slide.speakerPoints.map((n) => `▶ ${n}`).join('\n')}`;
     if (navigator.clipboard) {
       navigator.clipboard.writeText(text);
       setCopiedSlide(slide.id);
       setTimeout(() => setCopiedSlide(null), 2000);
     }
   };
-
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -262,7 +710,7 @@ export default function PitchGuidePage() {
         setIsFullscreenMode(false);
       }
     },
-    [isFullscreenMode, presentationSlides.length]
+    [isFullscreenMode]
   );
 
   useEffect(() => {
@@ -273,27 +721,30 @@ export default function PitchGuidePage() {
   const currentSlide = presentationSlides[activeSlideIndex];
 
   return (
-    <div className="space-y-6 pb-16 text-slate-800 dark:text-slate-200">
-      {/* フルスクリーンモーダル */}
+    <div className="space-y-8 pb-16 text-slate-800">
+      {/* ============================================================= */}
+      {/* フルスクリーン・大画面スライドショーモーダル（心地よいテイスト） */}
+      {/* ============================================================= */}
       {isFullscreenMode && (
-        <div className="fixed inset-0 z-50 bg-slate-950 text-white flex flex-col justify-between p-6 sm:p-12 animate-fadeIn select-none print:hidden">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div className="fixed inset-0 z-50 bg-slate-900/95 backdrop-blur-md text-slate-800 flex flex-col justify-between p-4 sm:p-8 animate-fadeIn select-none print:hidden">
+          {/* 上部ツールバー */}
+          <div className="flex items-center justify-between border-b border-slate-700/60 pb-3 text-white">
             <div className="flex items-center gap-3">
-              <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-mono font-bold rounded-full border border-emerald-500/40">
-                SLIDE {currentSlide.id} / {presentationSlides.length}
+              <span className="px-3 py-1 bg-emerald-500/20 text-emerald-300 text-xs font-mono font-bold rounded-full border border-emerald-500/30">
+                SLIDE {currentSlide.id} / 6
               </span>
-              <span className="text-xs text-slate-400 font-mono">
+              <span className="text-xs text-slate-300 font-mono hidden sm:inline">
                 推奨時間: {currentSlide.timeRange}
               </span>
             </div>
 
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 bg-slate-900 px-3 py-1.5 rounded-full border border-slate-800 font-mono text-xs">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-full border border-slate-700 font-mono text-xs">
                 <Clock className="w-3.5 h-3.5 text-amber-400" />
                 <span className="text-amber-400 font-bold">{formatTimer(timerSeconds)}</span>
                 <button
                   onClick={() => setIsTimerRunning(!isTimerRunning)}
-                  className="ml-1 text-[10px] text-slate-400 hover:text-white underline cursor-pointer"
+                  className="ml-1 text-[10px] text-slate-300 hover:text-white underline cursor-pointer"
                 >
                   {isTimerRunning ? 'PAUSE' : 'START'}
                 </button>
@@ -301,7 +752,7 @@ export default function PitchGuidePage() {
 
               <button
                 onClick={() => setIsFullscreenMode(false)}
-                className="w-9 h-9 rounded-full bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition border border-slate-800 cursor-pointer"
+                className="w-9 h-9 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition border border-slate-700 cursor-pointer"
                 title="ESCキーでも終了できます"
               >
                 <Minimize2 className="w-4 h-4" />
@@ -309,53 +760,19 @@ export default function PitchGuidePage() {
             </div>
           </div>
 
-          <div className="flex-1 flex flex-col justify-center max-w-5xl mx-auto w-full my-8 space-y-8">
-            <div className="space-y-3">
-              <span className="text-emerald-400 text-sm sm:text-base font-bold font-serif tracking-wider">
-                {currentSlide.subTitle}
-              </span>
-              <h2 className="text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-tight leading-tight font-serif">
-                {currentSlide.title}
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
-              <div className="space-y-4">
-                <span className="text-xs uppercase font-mono tracking-widest text-emerald-400 font-bold flex items-center gap-1.5">
-                  <Play className="w-3.5 h-3.5 fill-emerald-400" />
-                  Key Message
-                </span>
-                <div className="space-y-3">
-                  {currentSlide.punchlines.map((p, idx) => (
-                    <p key={idx} className="text-xl sm:text-2xl font-bold text-slate-100 leading-snug border-l-4 border-emerald-500 pl-4">
-                      {p}
-                    </p>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-slate-900/90 rounded-3xl p-6 border border-slate-800 space-y-3">
-                <span className="text-xs uppercase font-mono tracking-widest text-slate-400 font-bold flex items-center gap-1.5">
-                  <FileText className="w-3.5 h-3.5" />
-                  Visual Points
-                </span>
-                <ul className="space-y-2 text-sm text-slate-300">
-                  {currentSlide.slideBulleted.map((item, idx) => (
-                    <li key={idx} className="flex items-start gap-2">
-                      <span className="text-emerald-400 font-bold">・</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+          {/* 中央スライド表示（画像と同じシンプルで心地よいテイスト） */}
+          <div className="flex-1 flex items-center justify-center max-w-4xl mx-auto w-full my-4">
+            <div className="w-full shadow-2xl rounded-2xl overflow-hidden ring-1 ring-white/10">
+              <PitchSlideCanvas slideId={currentSlide.id} />
             </div>
           </div>
 
-          <div className="flex items-center justify-between border-t border-slate-800 pt-4">
+          {/* 下部ナビゲーション */}
+          <div className="flex items-center justify-between border-t border-slate-700/60 pt-3 text-white">
             <button
               onClick={() => setActiveSlideIndex((prev) => Math.max(prev - 1, 0))}
               disabled={activeSlideIndex === 0}
-              className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold transition flex items-center gap-1.5 border border-slate-800 cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold transition flex items-center gap-1.5 border border-slate-700 cursor-pointer"
             >
               <ChevronLeft className="w-4 h-4" />
               <span>前へ (←キー)</span>
@@ -366,8 +783,8 @@ export default function PitchGuidePage() {
                 <button
                   key={idx}
                   onClick={() => setActiveSlideIndex(idx)}
-                  className={`w-2.5 h-2.5 rounded-full transition-all cursor-pointer ${
-                    idx === activeSlideIndex ? 'w-8 bg-emerald-400' : 'bg-slate-800 hover:bg-slate-700'
+                  className={`h-2.5 rounded-full transition-all cursor-pointer ${
+                    idx === activeSlideIndex ? 'w-8 bg-emerald-400' : 'w-2.5 bg-slate-700 hover:bg-slate-600'
                   }`}
                 />
               ))}
@@ -376,7 +793,7 @@ export default function PitchGuidePage() {
             <button
               onClick={() => setActiveSlideIndex((prev) => Math.min(prev + 1, presentationSlides.length - 1))}
               disabled={activeSlideIndex === presentationSlides.length - 1}
-              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-emerald-950/50 cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold transition flex items-center gap-1.5 shadow-lg cursor-pointer"
             >
               <span>次へ (スペース / →キー)</span>
               <ChevronRight className="w-4 h-4" />
@@ -385,503 +802,296 @@ export default function PitchGuidePage() {
         </div>
       )}
 
-      <div className="space-y-10">
-          {/* プレゼン・サマリーカード */}
-          <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white rounded-3xl p-6 sm:p-10 shadow-2xl border border-slate-700 relative overflow-hidden print-avoid-break">
-            <div className="absolute right-0 top-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+      {/* ============================================================= */}
+      {/* ページヘッダー・サマリーカード（シンプルで心地よいトーン） */}
+      {/* ============================================================= */}
+      <div className="bg-gradient-to-br from-sky-50 via-white to-amber-50/50 rounded-3xl p-6 sm:p-10 shadow-xs border border-sky-100 relative overflow-hidden print-avoid-break">
+        <div className="absolute right-0 top-0 w-80 h-80 bg-teal-100/30 rounded-full blur-3xl pointer-events-none" />
 
-            <div className="relative z-10 space-y-5">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex flex-wrap items-center gap-2.5">
-                  <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-black uppercase tracking-wider border border-emerald-500/30 flex items-center gap-1.5 font-mono">
-                    <FlameKindling className="w-3.5 h-3.5 text-amber-400" />
-                    High-Impact Pitch Deck
-                  </span>
-                  <span className="text-xs sm:text-sm text-slate-300 font-bold font-serif">
-                    登壇者: 大塚 和宏 / yaShine ｜ 対象: 熱量の高い経営者・リーダー・施術者 約400名
-                  </span>
-                </div>
-
-                {/* ★ フルスクリーンスライドショー起動ボタン */}
-                <button
-                  onClick={() => setIsFullscreenMode(true)}
-                  className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs sm:text-sm font-black rounded-2xl shadow-lg shadow-emerald-950/40 transition flex items-center gap-2 cursor-pointer border border-emerald-400/30"
-                  title="全画面プロジェクター投影モードを開始します"
-                >
-                  <Maximize2 className="w-4 h-4" />
-                  <span>大画面スライドショー開始 (投影モード)</span>
-                </button>
-              </div>
-
-              <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight leading-snug font-serif">
-                プロフェッショナルの解放。<br />
-                <span className="text-emerald-400 text-xl sm:text-2xl font-bold font-sans">
-                  医療・美・健康の常識を覆す「プロフェッショナル連合軍」構想
-                </span>
-              </h1>
-
-              {/* 400人を巻き込む「3つのピース」の宣言 */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 text-xs font-sans">
-                <div className="p-3.5 rounded-2xl bg-slate-800/90 border border-slate-700 space-y-1">
-                  <strong className="text-amber-300 font-bold block flex items-center gap-1.5">
-                    <span>1. 共通の敵（業界の理不尽）</span>
-                  </strong>
-                  <p className="text-slate-300 leading-relaxed text-[11px]">
-                    死ぬほど勉強した国家資格者が保険点数で安売りされ、街の無資格が儲かり、生活者が迷子になっている矛盾を打破。
-                  </p>
-                </div>
-
-                <div className="p-3.5 rounded-2xl bg-slate-800/90 border border-slate-700 space-y-1">
-                  <strong className="text-teal-300 font-bold block flex items-center gap-1.5">
-                    <span>2. 大義（健康と美のグラデーション）</span>
-                  </strong>
-                  <p className="text-slate-300 leading-relaxed text-[11px]">
-                    「治す医療」と「癒やす・美しくするサロン」がタッグを組んで初めて、顧客の健康寿命を一生涯支えられる。
-                  </p>
-                </div>
-
-                <div className="p-3.5 rounded-2xl bg-slate-800/90 border border-slate-700 space-y-1">
-                  <strong className="text-emerald-300 font-bold block flex items-center gap-1.5">
-                    <span>3. 会長と400人を共犯者に</span>
-                  </strong>
-                  <p className="text-slate-300 leading-relaxed text-[11px]">
-                    施術者は新しい高収入の柱を作り、経営者は社員を守るインフラとして使い倒す。全員が主役の業界革命。
-                  </p>
-                </div>
-              </div>
-
-              {/* タイマーツール ＆ 原稿一括コピー */}
-              <div className="pt-3 border-t border-slate-700/80 flex flex-wrap items-center justify-between gap-4 font-sans">
-                <div className="flex flex-wrap items-center gap-6 text-xs sm:text-sm text-slate-300 font-medium">
-                  <div>
-                    <span className="text-slate-400 block text-xs">発表持ち時間</span>
-                    <strong className="text-white font-bold flex items-center gap-1">
-                      <Clock className="w-4 h-4 text-emerald-400" />
-                      5分00秒（アップテンポ）
-                    </strong>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block text-xs">スライド構成</span>
-                    <strong className="text-emerald-400 font-bold">全6スライド（厳選・大迫力）</strong>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block text-xs">デザイン</span>
-                    <strong className="text-white font-bold font-serif">Keynoteセージグラデーション × 明朝体</strong>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-2 bg-slate-900/90 border border-slate-700 px-3 py-1.5 rounded-xl">
-                    <span className="text-xs text-slate-400 font-mono">タイマー:</span>
-                    <span className="text-sm font-mono font-bold text-emerald-400">{formatTimer(timerSeconds)}</span>
-                    <button
-                      onClick={() => setIsTimerRunning(!isTimerRunning)}
-                      className="px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-bold transition flex items-center gap-1 cursor-pointer"
-                    >
-                      <Play className="w-3 h-3" />
-                      {isTimerRunning ? '一時停止' : 'スタート'}
-                    </button>
-                    {timerSeconds > 0 && (
-                      <button
-                        onClick={() => {
-                          setIsTimerRunning(false);
-                          setTimerSeconds(0);
-                        }}
-                        className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs transition cursor-pointer"
-                      >
-                        リセット
-                      </button>
-                    )}
-                  </div>
-
-                  <button
-                    onClick={handleCopyAll}
-                    className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow transition flex items-center gap-1.5 cursor-pointer"
-                    title="全スライドのテキストと登壇メモを一括コピー"
-                  >
-                    {copiedAll ? <Check className="w-4 h-4 text-emerald-200" /> : <Copy className="w-4 h-4" />}
-                    <span>{copiedAll ? 'コピー完了！' : '全スライドを一括コピー'}</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* ストーリーライン・クイックナビ */}
-          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
-              <div>
-                <h3 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2 font-serif">
-                  <Clock className="w-5 h-5 text-emerald-600" />
-                  <span>5分間の熱狂ストーリーライン（全6スライド）</span>
-                </h3>
-              </div>
-              <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full">
-                問いかけ ➔ 共通の敵 ➔ 連合軍の大義 ➔ 3大実利 ➔ 共犯者へ ➔ 決断
+        <div className="relative z-10 space-y-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black uppercase tracking-wider border border-emerald-200 flex items-center gap-1.5 font-mono">
+                <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                超コンパクト版 5分ピッチデック
+              </span>
+              <span className="text-xs sm:text-sm text-slate-600 font-bold">
+                登壇者: 大塚 和宏 / yaShine ｜ 全6スライド
               </span>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 pt-1 font-serif">
-              {presentationSlides.map((s, idx) => (
-                <div
-                  key={s.id}
-                  onClick={() => {
-                    setActiveSlideIndex(idx);
-                    const el = document.getElementById(`slide-${s.id}`);
-                    if (el) el.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                  className={`p-3 rounded-2xl border transition cursor-pointer flex flex-col justify-between text-left ${
-                    activeSlideIndex === idx
-                      ? 'border-emerald-600 bg-emerald-50/70 shadow-xs ring-2 ring-emerald-500/20'
-                      : 'border-slate-200 bg-slate-50 hover:bg-slate-100'
-                  }`}
-                >
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between text-[11px] font-bold font-sans">
-                      <span className="text-emerald-700">SLIDE {s.id}</span>
-                      <span className="text-slate-400 font-mono">{s.timeRange.split(' ')[2]}</span>
-                    </div>
-                    <div className="text-xs font-bold text-slate-800 line-clamp-1">{s.title}</div>
-                  </div>
-                  <div className="text-[10px] text-slate-500 font-mono font-sans mt-2 pt-1 border-t border-slate-200/60">
-                    {s.timeRange.split(' ')[0]}
-                  </div>
-                </div>
-              ))}
-            </div>
+            {/* 大画面スライドショー開始ボタン */}
+            <button
+              onClick={() => setIsFullscreenMode(true)}
+              className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-bold rounded-2xl shadow-md transition flex items-center gap-2 cursor-pointer"
+              title="全画面プロジェクター投影モードを開始します"
+            >
+              <Maximize2 className="w-4 h-4 text-emerald-400" />
+              <span>大画面スライドショー開始 (投影モード)</span>
+            </button>
           </div>
 
-          {/* 各スライド詳細カード */}
-          <div className="space-y-12">
-            {presentationSlides.map((slide, index) => (
-              <div
-                key={slide.id}
-                id={`slide-${slide.id}`}
-                className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden print-avoid-break transition hover:shadow-md"
+          <div className="space-y-2">
+            <h1 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-snug font-serif">
+              プロフェッショナルの解放。<br />
+              <span className="text-emerald-700 text-lg sm:text-2xl font-bold font-sans">
+                医療・美・健康の常識を覆す「プロフェッショナル連合軍」構想
+              </span>
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-600 max-w-3xl leading-relaxed">
+              Instagramカルーセル投稿・Keynote発表にそのまま直結する、1枚あたり超コンパクトなテキスト構成と心地よいビジュアルトーンです。
+            </p>
+          </div>
+
+          {/* タイマー＆一括コピー */}
+          <div className="pt-3 border-t border-slate-200/80 flex flex-wrap items-center justify-between gap-4 font-sans">
+            <div className="flex flex-wrap items-center gap-6 text-xs sm:text-sm text-slate-700 font-medium">
+              <div>
+                <span className="text-slate-400 block text-xs">持ち時間目安</span>
+                <strong className="text-slate-900 font-bold flex items-center gap-1">
+                  <Clock className="w-4 h-4 text-emerald-600" />
+                  5分00秒（アップテンポ）
+                </strong>
+              </div>
+              <div>
+                <span className="text-slate-400 block text-xs">スライド構成</span>
+                <strong className="text-emerald-700 font-bold">全6スライド（超コンパクト）</strong>
+              </div>
+              <div>
+                <span className="text-slate-400 block text-xs">デザインテイスト</span>
+                <strong className="text-slate-800 font-bold">シンプル＆心地よいペールトーン</strong>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-xs">
+                <span className="text-xs text-slate-500 font-mono">タイマー:</span>
+                <span className="text-sm font-mono font-bold text-emerald-700">{formatTimer(timerSeconds)}</span>
+                <button
+                  onClick={() => setIsTimerRunning(!isTimerRunning)}
+                  className="px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-bold transition flex items-center gap-1 cursor-pointer"
+                >
+                  <Play className="w-3 h-3" />
+                  {isTimerRunning ? '一時停止' : 'スタート'}
+                </button>
+                {timerSeconds > 0 && (
+                  <button
+                    onClick={() => {
+                      setIsTimerRunning(false);
+                      setTimerSeconds(0);
+                    }}
+                    className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded text-xs transition cursor-pointer"
+                  >
+                    リセット
+                  </button>
+                )}
+              </div>
+
+              <button
+                onClick={handleCopyAll}
+                className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow transition flex items-center gap-1.5 cursor-pointer"
+                title="全スライドのテキストと登壇メモを一括コピー"
               >
-                {/* スライドヘッダー */}
-                <div className="p-4 sm:px-6 bg-slate-900 text-white flex flex-wrap items-center justify-between gap-3 border-b border-slate-800">
-                  <div className="flex items-center gap-3">
-                    <span className="px-3 py-1 rounded-xl bg-emerald-500 text-slate-950 font-black text-xs sm:text-sm tracking-wider font-mono">
-                      SLIDE {slide.id}
-                    </span>
-                    <div>
-                      <h3 className="font-black text-sm sm:text-base text-white font-serif">{slide.title}</h3>
-                      <div className="text-xs text-slate-400 flex items-center gap-3 mt-0.5 font-sans">
-                        <span className="text-emerald-400 font-mono flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5" />
-                          {slide.timeRange}
-                        </span>
-                        <span>•</span>
-                        <span className="text-slate-300">形式: {slide.layoutName}</span>
-                      </div>
-                    </div>
-                  </div>
+                {copiedAll ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                <span>{copiedAll ? 'コピー完了！' : '全原稿を一括コピー'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => {
-                        setActiveSlideIndex(index);
-                        setIsFullscreenMode(true);
-                      }}
-                      className="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer font-sans"
-                      title="このスライドからフルスクリーン投影"
-                    >
-                      <Maximize2 className="w-3.5 h-3.5" />
-                      <span>投影モード</span>
-                    </button>
+      {/* ============================================================= */}
+      {/* ストーリーライン・クイックナビ */}
+      {/* ============================================================= */}
+      <div className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <h3 className="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2">
+            <Presentation className="w-4 h-4 text-emerald-600" />
+            <span>全6スライド ナビゲーション</span>
+          </h3>
+          <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full">
+            宣言 ➔ 共通の敵 ➔ 手を組む必然性 ➔ 3大実利 ➔ 業界革命 ➔ 最初の乗組員
+          </span>
+        </div>
 
-                    <button
-                      onClick={() => handleCopySingle(slide)}
-                      className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer border border-slate-700 font-sans"
-                      title="このスライドのテキストと登壇メモをコピー"
-                    >
-                      {copiedSlide === slide.id ? (
-                        <>
-                          <Check className="w-3.5 h-3.5 text-emerald-400" />
-                          <span className="text-emerald-400">コピー済</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-3.5 h-3.5 text-slate-400" />
-                          <span>原稿コピー</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+          {presentationSlides.map((s, idx) => (
+            <div
+              key={s.id}
+              onClick={() => {
+                setActiveSlideIndex(idx);
+                const el = document.getElementById(`slide-${s.id}`);
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className={`p-3 rounded-2xl border transition cursor-pointer flex flex-col justify-between text-left ${
+                activeSlideIndex === idx
+                  ? 'border-emerald-500 bg-emerald-50/70 shadow-xs ring-2 ring-emerald-400/30'
+                  : 'border-slate-200 bg-slate-50/50 hover:bg-slate-100/70'
+              }`}
+            >
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-[11px] font-bold">
+                  <span className="text-emerald-700">{s.id}/6</span>
+                  <span className="text-slate-400 font-mono text-[10px]">{s.timeRange.split(' ')[2]}</span>
                 </div>
+                <div className="text-xs font-bold text-slate-800 line-clamp-1">{s.title}</div>
+              </div>
+              <div className="text-[10px] text-slate-500 font-mono mt-2 pt-1 border-t border-slate-200/60">
+                {s.timeRange.split(' ')[0]}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
 
-                <div className="p-6 sm:p-8 space-y-6">
-                  {/* スライド画面プレビュー（Keynoteセージグラデーション × 明朝体） */}
-                  <div className="space-y-2">
-                    <div className="flex flex-wrap items-center justify-between text-xs font-bold text-slate-500 gap-2 font-sans">
-                      <span className="flex items-center gap-1.5 uppercase tracking-wider text-slate-700 font-serif">
-                        <Presentation className="w-4 h-4 text-emerald-600" />
-                        【Keynote 16:9 スライド画面プレビュー（推奨レイアウト ＆ 文字階層）】
-                      </span>
-                      <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-md text-[11px] font-mono">
-                        Keynote推奨: {slide.keynoteFontSizes}
-                      </span>
-                    </div>
-
-                    <div
-                      className="w-full aspect-[16/9] max-h-[480px] rounded-2xl p-6 sm:p-10 flex flex-col justify-between shadow-md relative overflow-hidden select-none border border-slate-300 font-serif"
-                      style={{
-                        background: 'linear-gradient(135deg, #879798 0%, #9cb0af 28%, #c58d81 68%, #b27b72 82%, #798086 100%)',
-                      }}
-                    >
-                      <div className="absolute top-1/4 right-1/6 w-[450px] h-[300px] bg-[#c78b7e]/45 rounded-full blur-3xl pointer-events-none" />
-                      <div className="absolute -bottom-10 left-1/4 w-[400px] h-[250px] bg-[#a2b4b3]/40 rounded-full blur-3xl pointer-events-none" />
-
-                      {/* スライド内ヘッダー */}
-                      <div className="relative z-10 flex items-center justify-between border-b border-slate-700/20 pb-2 text-slate-800 font-sans">
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="w-6 h-6 rounded-md overflow-hidden shrink-0 shadow-xs"
-                            dangerouslySetInnerHTML={{ __html: currentBrand.iconSvg }}
-                          />
-                          <span className="text-xs sm:text-sm font-bold tracking-wider text-slate-800 font-serif">
-                            {currentBrand.japaneseName}
-                          </span>
-                        </div>
-                        <div className="text-[11px] text-slate-600 font-mono tracking-widest font-bold">
-                          SLIDE {slide.id} / 06
-                        </div>
-                      </div>
-
-                      {/* スライド内メイン */}
-                      <div className="relative z-10 my-auto py-2">
-                        {slide.id === 1 && (
-                          <div className="space-y-4 max-w-2xl text-left py-4">
-                            <div className="space-y-2">
-                              <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-wide leading-tight drop-shadow-xs">
-                                プロフェッショナルの解放。
-                              </h2>
-                              <p className="text-base sm:text-xl text-slate-800 font-normal tracking-wide">
-                                大塚 和宏 / yaShine
-                              </p>
-                            </div>
-                            <div className="pt-2">
-                              <span className="inline-block px-3.5 py-1.5 rounded-xl bg-white/80 backdrop-blur-md text-slate-900 text-xs sm:text-base font-sans font-medium border border-white/60 shadow-xs">
-                                医療・美・健康の常識を覆す「プロフェッショナル連合軍」構想
-                              </span>
-                            </div>
-                          </div>
-                        )}
-
-                        {slide.id === 2 && (
-                          <div className="space-y-3">
-                            <h3 className="text-xl sm:text-3xl font-black text-slate-900 tracking-wide drop-shadow-xs">
-                              なぜ、本物の技術を持つプロが報われないのか？
-                            </h3>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-                              <div className="bg-white/80 backdrop-blur-md border border-white/60 rounded-2xl p-4 space-y-2 shadow-xs">
-                                <div className="text-rose-900 text-xs sm:text-sm font-black">
-                                  【医療職の現実】保険点数の壁
-                                </div>
-                                <p className="text-[11px] sm:text-xs text-slate-700 leading-relaxed font-sans">
-                                  国家資格を取り命や身体を支える超高度スキルがあるのに、保険点数に縛られて給料は頭打ち。病院の中でスキルを安売りさせられている。
-                                </p>
-                              </div>
-                              <div className="bg-white/80 backdrop-blur-md border border-white/60 rounded-2xl p-4 space-y-2 shadow-xs">
-                                <div className="text-rose-900 text-xs sm:text-sm font-black">
-                                  【サロン・整体の現実】安売りクーポン競争
-                                </div>
-                                <p className="text-[11px] sm:text-xs text-slate-700 leading-relaxed font-sans">
-                                  確かな現場力があるのに、無資格もみほぐしと一括りにされポータルの値下げ競争で疲弊。顧客も「誰を信じればいいか分からない難民」に。
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {slide.id === 3 && (
-                          <div className="space-y-3">
-                            <h3 className="text-xl sm:text-3xl font-black text-slate-900 tracking-wide drop-shadow-xs">
-                              「治す」医療 ×「癒やし・美」サロンが手を組む必然性
-                            </h3>
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-                              <div className="bg-white/80 backdrop-blur-md border border-white/60 rounded-2xl p-3.5 space-y-1.5 shadow-xs">
-                                <div className="text-slate-900 font-black text-xs sm:text-sm">① 医療職の限界</div>
-                                <p className="text-[11px] text-slate-700 leading-snug font-sans">
-                                  痛みは取れる。でも日々の疲れを癒やし、美肌やボディメイクを作るのはサロン・整体の専門分野。
-                                </p>
-                              </div>
-                              <div className="bg-white/80 backdrop-blur-md border border-white/60 rounded-2xl p-3.5 space-y-1.5 shadow-xs">
-                                <div className="text-slate-900 font-black text-xs sm:text-sm">② サロンのジレンマ</div>
-                                <p className="text-[11px] text-slate-700 leading-snug font-sans">
-                                  美と活力を作る現場力があるが、病気リスクの不安や「国家資格がない信頼の壁」がある。
-                                </p>
-                              </div>
-                              <div className="bg-white/85 backdrop-blur-md border-2 border-emerald-600 rounded-2xl p-3.5 space-y-1.5 shadow-xs">
-                                <div className="text-emerald-900 font-black text-xs sm:text-sm">③ プロ連合軍の結成</div>
-                                <p className="text-[11px] text-slate-700 leading-snug font-sans">
-                                  「治す」と「整える・美しくする」が統合して初めて、一人の顧客の健康寿命を一生涯背負える！
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {slide.id === 4 && (
-                          <div className="space-y-3">
-                            <h3 className="text-xl sm:text-3xl font-black text-slate-900 tracking-wide drop-shadow-xs">
-                              なぜ、今この船に乗るべきなのか？【3大実利】
-                            </h3>
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-                              <div className="bg-white/80 backdrop-blur-md border border-white/60 rounded-2xl p-3.5 space-y-1.5 shadow-xs">
-                                <h4 className="text-slate-900 font-black text-xs sm:text-sm">① 最高級の下駄を履く</h4>
-                                <p className="text-[11px] text-slate-700 leading-snug font-sans">
-                                  厳格審査を通った証。クーポン荒らしから抜け出し、適正価格で勝負できる最高峰のブランド力を獲得。
-                                </p>
-                              </div>
-                              <div className="bg-white/80 backdrop-blur-md border border-white/60 rounded-2xl p-3.5 space-y-1.5 shadow-xs">
-                                <h4 className="text-slate-900 font-black text-xs sm:text-sm">② 顧客の相互紹介ループ</h4>
-                                <p className="text-[11px] text-slate-700 leading-snug font-sans">
-                                  痛みが引いた患者をエステ・ピラティスへ。重い痛みを抱える客をPTへ。奪い合わず仲間で回し合う。
-                                </p>
-                              </div>
-                              <div className="bg-white/80 backdrop-blur-md border border-white/60 rounded-2xl p-3.5 space-y-1.5 shadow-xs">
-                                <h4 className="text-slate-900 font-black text-xs sm:text-sm">③ 初期・月額0円高還元</h4>
-                                <p className="text-[11px] text-slate-700 leading-snug font-sans">
-                                  店舗・固定費リスクゼロ。事前カード決済で未回収・ドタキャンリスクも完全ゼロ。
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {slide.id === 5 && (
-                          <div className="space-y-3">
-                            <h3 className="text-xl sm:text-3xl font-black text-slate-900 tracking-wide drop-shadow-xs">
-                              会長と400人の仲間だから起こせる業界革命
-                            </h3>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-                              <div className="bg-white/80 backdrop-blur-md border border-white/60 rounded-2xl p-4 space-y-2 shadow-xs">
-                                <div className="text-slate-900 font-black text-xs sm:text-sm">
-                                  【施術ができるプロへ】
-                                </div>
-                                <p className="text-[11px] sm:text-xs text-slate-700 leading-relaxed font-sans">
-                                  自分の腕一本で新しい収入の柱を作ってください。安売りはもう終わりです。誇りと正当な報酬をその手に。
-                                </p>
-                              </div>
-                              <div className="bg-white/80 backdrop-blur-md border border-white/60 rounded-2xl p-4 space-y-2 shadow-xs">
-                                <div className="text-slate-900 font-black text-xs sm:text-sm">
-                                  【経営者・リーダーへ】
-                                </div>
-                                <p className="text-[11px] sm:text-xs text-slate-700 leading-relaxed font-sans">
-                                  ご自身・ご家族、そして大切な社員の健康と美を守る福利厚生インフラとして使い倒してください！
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {slide.id === 6 && (
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
-                            <div className="sm:col-span-2 space-y-2 bg-white/80 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-white/60 shadow-xs">
-                              <h3 className="text-base sm:text-2xl font-black text-slate-900 leading-tight">
-                                最初の乗組員として、業界の常識をひっくり返そう！
-                              </h3>
-                              <p className="text-xs text-emerald-900 font-bold font-sans">
-                                健康的に長生きし、美しくあり続ける。みんなが望む未来を、ここから創る。
-                              </p>
-                              <div className="text-[11px] text-slate-700 space-y-1 font-sans">
-                                <div>• スマホで今すぐ先行登録（所要3分 ｜ 初期費用・掲載料 完全 0 円）</div>
-                                <div>• <strong>★エリア管理や運営側に興味がある方は終了後に「創業パートナー相談デスク」へ！</strong></div>
-                              </div>
-                            </div>
-
-                            <div className="bg-white/85 backdrop-blur-md border border-white/60 rounded-2xl p-3.5 text-center space-y-1.5 shadow-xs">
-                              <a
-                                href="#partner-registration"
-                                className="block group cursor-pointer"
-                                title="クリックしてページ下部の登録フォームへ移動"
-                              >
-                                <img
-                                  src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=https%3A%2F%2Ftherapist.kotsuka-folio.workers.dev%2Fguide%2Fadmin%23partner-registration"
-                                  alt="創業パートナー先行登録QRコード"
-                                  className="w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-xl p-1 bg-white border border-slate-300 shadow-sm transition group-hover:scale-105"
-                                />
-                              </a>
-                              <div className="text-xs font-black text-slate-900">創業パートナー先行登録</div>
-                              <div className="text-[9px] text-emerald-800 font-bold font-sans">★各地域・ジャンル限定枠</div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* スライド内フッター */}
-                      <div className="relative z-10 flex items-center justify-between border-t border-slate-700/20 pt-2 text-[10px] text-slate-800 font-serif">
-                        <span>大塚 和宏 / yaShine ｜ {slide.punchlines.slice(0, 3).join(' ')}</span>
-                        <span className="font-mono font-sans">{slide.timeRange}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* スライド投影テキスト ＆ 登壇メモ（最小限・スッキリ） */}
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-                    {/* 左側: スライド投影箇条書き（7カラム） */}
-                    <div className="lg:col-span-7 bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2.5">
-                      <div className="flex flex-wrap items-center justify-between gap-1">
-                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-1.5 font-serif">
-                          <FileText className="w-4 h-4 text-emerald-600" />
-                          <span>スライド投影内容（最小限の要点）</span>
-                        </h4>
-                        <div className="flex flex-wrap gap-1">
-                          {slide.punchlines.map((kw, kwIdx) => (
-                            <span key={kwIdx} className="text-[10px] bg-white border border-slate-200 text-slate-700 font-bold px-1.5 py-0.5 rounded font-mono">
-                              {kw}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="p-2.5 bg-emerald-50/80 rounded-xl border border-emerald-200/60 text-xs text-emerald-900 font-medium font-sans">
-                        💡 <strong>コアメッセージ:</strong> {slide.coreMessage}
-                      </div>
-
-                      <ul className="space-y-1.5 text-xs sm:text-sm text-slate-700 font-sans">
-                        {slide.slideBulleted.map((point, pIdx) => (
-                          <li key={pIdx} className="flex items-start gap-2">
-                            <span className="text-emerald-600 font-bold shrink-0">•</span>
-                            <span>{point}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    {/* 右側: 登壇メモ・語るポイント（5カラム） */}
-                    <div className="lg:col-span-5 bg-slate-900 text-white p-4 rounded-2xl border border-slate-800 space-y-2.5">
-                      <h4 className="text-xs sm:text-sm font-black text-emerald-300 flex items-center gap-1.5 font-serif">
-                        <Mic className="w-4 h-4 text-emerald-400" />
-                        <span>登壇メモ（語るキーポイント ＆ 熱量）</span>
-                      </h4>
-                      <div className="space-y-2 text-xs text-slate-200 font-sans leading-relaxed">
-                        {slide.speakerPoints.map((note, nIdx) => (
-                          <div key={nIdx} className="flex items-start gap-1.5">
-                            <span className="text-emerald-400 font-bold shrink-0">▶</span>
-                            <span>{note}</span>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="pt-2 border-t border-slate-800 text-[10px] text-slate-400 font-mono">
-                        Keynote推奨: {slide.keynoteFontSizes}
-                      </div>
-                    </div>
+      {/* ============================================================= */}
+      {/* 各スライド詳細カード（超コンパクト表示 ＆ 登壇メモ） */}
+      {/* ============================================================= */}
+      <div className="space-y-10">
+        {presentationSlides.map((slide, index) => (
+          <div
+            key={slide.id}
+            id={`slide-${slide.id}`}
+            className="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden print-avoid-break transition hover:shadow-md"
+          >
+            {/* スライドバー */}
+            <div className="p-4 sm:px-6 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <span className="px-2.5 py-1 rounded-xl bg-slate-900 text-white font-black text-xs font-mono">
+                  {slide.id}/6
+                </span>
+                <div>
+                  <h3 className="font-bold text-sm sm:text-base text-slate-900 font-serif">
+                    {slide.title}
+                  </h3>
+                  <div className="text-xs text-slate-500 flex items-center gap-2 mt-0.5 font-sans">
+                    <span className="text-emerald-700 font-mono flex items-center gap-1 font-bold">
+                      <Clock className="w-3.5 h-3.5" />
+                      {slide.timeRange}
+                    </span>
+                    <span>•</span>
+                    <span>{slide.layoutName}</span>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
 
-            {/* ========================================================
-          パートナー・参画お問い合わせ（LINE連携窓口）
-         ======================================================== */}
-      <div className="bg-gradient-to-br from-emerald-900 via-slate-900 to-teal-950 text-white rounded-3xl p-6 sm:p-10 shadow-xl border border-emerald-800 text-center space-y-4 font-sans">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    setActiveSlideIndex(index);
+                    setIsFullscreenMode(true);
+                  }}
+                  className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  title="このスライドからフルスクリーン投影"
+                >
+                  <Maximize2 className="w-3.5 h-3.5" />
+                  <span>投影モード</span>
+                </button>
+
+                <button
+                  onClick={() => handleCopySingle(slide)}
+                  className="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer border border-slate-300 shadow-xs"
+                  title="このスライドのテキストと登壇メモをコピー"
+                >
+                  {copiedSlide === slide.id ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-600" />
+                      <span className="text-emerald-600">コピー済</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5 text-slate-500" />
+                      <span>原稿コピー</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <div className="p-5 sm:p-8 space-y-6">
+              {/* スライド画面プレビュー（シンプルで心地の良いテイスト・コンパクト内容） */}
+              <div className="space-y-2">
+                <div className="flex flex-wrap items-center justify-between text-xs font-bold text-slate-500 gap-2">
+                  <span className="flex items-center gap-1.5 uppercase tracking-wider text-slate-700">
+                    <Presentation className="w-4 h-4 text-emerald-600" />
+                    【スライド画面プレビュー（画像完全準拠・心地よいペールトーン）】
+                  </span>
+                  <span className="bg-sky-50 text-sky-800 border border-sky-200 px-2.5 py-0.5 rounded-md text-[11px] font-mono">
+                    Keynote推奨: {slide.keynoteFontSizes}
+                  </span>
+                </div>
+
+                {/* プレビューコンポーネント */}
+                <div className="max-w-3xl mx-auto shadow-sm rounded-2xl overflow-hidden">
+                  <PitchSlideCanvas slideId={slide.id} />
+                </div>
+              </div>
+
+              {/* スライド投影要点 ＆ 登壇メモ */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 pt-2">
+                {/* 左側: スライド投影テキスト（7カラム） */}
+                <div className="lg:col-span-7 bg-slate-50/80 p-4 rounded-2xl border border-slate-200/80 space-y-2.5">
+                  <div className="flex flex-wrap items-center justify-between gap-1">
+                    <h4 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                      <FileText className="w-4 h-4 text-emerald-600" />
+                      <span>スライド投影内容（超コンパクト要点）</span>
+                    </h4>
+                    <div className="flex flex-wrap gap-1">
+                      {slide.punchlines.map((kw, kwIdx) => (
+                        <span
+                          key={kwIdx}
+                          className="text-[10px] bg-white border border-slate-200 text-slate-600 font-bold px-1.5 py-0.5 rounded font-mono"
+                        >
+                          {kw}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="p-2.5 bg-sky-50/70 rounded-xl border border-sky-200/60 text-xs text-sky-950 font-medium">
+                    💡 <strong>コアメッセージ:</strong> {slide.coreMessage}
+                  </div>
+
+                  <ul className="space-y-1.5 text-xs sm:text-sm text-slate-700">
+                    {slide.slideBulleted.map((point, pIdx) => (
+                      <li key={pIdx} className="flex items-start gap-2">
+                        <span className="text-emerald-600 font-bold shrink-0">•</span>
+                        <span>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* 右側: 登壇メモ・語るポイント（5カラム） */}
+                <div className="lg:col-span-5 bg-slate-900 text-white p-4 rounded-2xl border border-slate-800 space-y-2.5">
+                  <h4 className="text-xs sm:text-sm font-black text-emerald-300 flex items-center gap-1.5">
+                    <Mic className="w-4 h-4 text-emerald-400" />
+                    <span>登壇メモ（語るキーポイント ＆ 熱量）</span>
+                  </h4>
+                  <div className="space-y-2 text-xs text-slate-200 leading-relaxed">
+                    {slide.speakerPoints.map((note, nIdx) => (
+                      <div key={nIdx} className="flex items-start gap-1.5">
+                        <span className="text-emerald-400 font-bold shrink-0">▶</span>
+                        <span>{note}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="pt-2 border-t border-slate-800 text-[10px] text-slate-400 font-mono">
+                    Keynote推奨: {slide.keynoteFontSizes}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* ============================================================= */}
+      {/* パートナー・参画お問い合わせ（LINE連携窓口） */}
+      {/* ============================================================= */}
+      <div className="bg-gradient-to-br from-emerald-800 via-teal-900 to-slate-900 text-white rounded-3xl p-6 sm:p-10 shadow-lg border border-emerald-700/50 text-center space-y-4">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold border border-emerald-500/30">
-          <span>公式LINE 相談・登録窓口</span>
+          <span>公式LINE 相談・先行登録窓口</span>
         </div>
         <h3 className="text-xl sm:text-2xl font-black font-serif text-white">
           パートナー参画・ご質問は公式LINEより受付中
