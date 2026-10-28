@@ -1,6 +1,6 @@
 /**
  * サーバーサイド用 LINE 環境変数解決ユーティリティ
- * Cloudflare Workers (process.env / globalThis / Request Cookies) の多様な命名揺れに対応
+ * セキュア設計: Cloudflare Workers の環境変数・暗号化シークレット（process.env / globalThis）からのみ解決
  */
 
 export interface ResolvedLineConfig {
@@ -10,11 +10,10 @@ export interface ResolvedLineConfig {
   channelAccessToken: string;
 }
 
-export function getEffectiveLineConfig(req?: Request): ResolvedLineConfig {
+export function getEffectiveLineConfig(): ResolvedLineConfig {
   const g = globalThis as any;
   const p = typeof process !== 'undefined' ? (process.env as Record<string, string | undefined>) : {};
 
-  // 1. process.env / globalThis から探索
   const findInEnv = (...keys: string[]): string => {
     for (const key of keys) {
       if (p[key] && typeof p[key] === 'string' && p[key]!.trim()) {
@@ -27,17 +26,16 @@ export function getEffectiveLineConfig(req?: Request): ResolvedLineConfig {
     return '';
   };
 
-  let liffId = findInEnv(
+  const liffId = findInEnv(
     'NEXT_PUBLIC_LIFF_ID',
     'LIFF_ID',
     'liff_id',
     'LIFE_ID',
     'NEXT_PUBLIC_LIFE_ID',
-    'LINE_LIFF_ID',
-    'LINE_LIFE_ID'
+    'LINE_LIFF_ID'
   );
 
-  let channelId = findInEnv(
+  const channelId = findInEnv(
     'NEXT_PUBLIC_LINE_CHANNEL_ID',
     'LINE_CHANNEL_ID',
     'CHANNEL_ID',
@@ -46,41 +44,20 @@ export function getEffectiveLineConfig(req?: Request): ResolvedLineConfig {
     'LINE_ID'
   );
 
-  let channelSecret = findInEnv(
+  const channelSecret = findInEnv(
     'LINE_CHANNEL_SECRET',
     'CHANNEL_SECRET',
     'channel_secret',
     'LINE_SECRET'
   );
 
-  let channelAccessToken = findInEnv(
+  const channelAccessToken = findInEnv(
     'LINE_CHANNEL_ACCESS_TOKEN',
     'CHANNEL_ACCESS_TOKEN',
     'channel_access_token',
     'LINE_ACCESS_TOKEN',
     'LINE_TOKEN'
   );
-
-  // 2. もし環境変数が空で、リクエストの Cookie にある場合は Cookie をフォールバックとして採用
-  if (req && (!liffId || !channelId || !channelSecret)) {
-    const cookieHeader = req.headers.get('cookie') || '';
-    const cookies = Object.fromEntries(
-      cookieHeader.split(';').map((c) => {
-        const [k, ...v] = c.trim().split('=');
-        return [k, decodeURIComponent(v.join('='))];
-      })
-    );
-
-    if (!liffId && cookies['line_liff_id']) {
-      liffId = cookies['line_liff_id'];
-    }
-    if (!channelId && cookies['line_channel_id']) {
-      channelId = cookies['line_channel_id'];
-    }
-    if (!channelSecret && cookies['line_channel_secret']) {
-      channelSecret = cookies['line_channel_secret'];
-    }
-  }
 
   return {
     liffId,

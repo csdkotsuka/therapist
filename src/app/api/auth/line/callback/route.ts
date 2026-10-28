@@ -25,7 +25,7 @@ export async function GET(req: Request) {
     }
   }
 
-  const { channelId, channelSecret } = getEffectiveLineConfig(req);
+  const { channelId, channelSecret } = getEffectiveLineConfig();
   const callbackUrl = `${url.origin}/api/auth/line/callback`;
 
   try {

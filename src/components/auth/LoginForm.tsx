@@ -21,15 +21,13 @@ import {
   Loader2,
   RefreshCw,
   Zap,
-  Settings,
 } from 'lucide-react';
 import {
   fetchLineConfigFromServer,
   checkLiffLoginStatus,
   LineUserProfile,
   LineConfig,
-  getStoredLineConfig,
-  saveLineConfigToStorage,
+  getLineConfig,
 } from '@/lib/line';
 
 interface LoginFormProps {
@@ -55,20 +53,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   const [statusText, setStatusText] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
 
-  // サーバーサイド・ローカル保存から取得したLINE設定状態
-  const [currentLineConfig, setCurrentLineConfig] = useState<LineConfig>({
-    liffId: '',
-    channelId: '',
-    isConfigured: false,
-    source: 'none',
-  });
-
-  // LINE設定手動入力フォームの表示状態
-  const [showLineConfigModal, setShowLineConfigModal] = useState<boolean>(false);
-  const [inputLiffId, setInputLiffId] = useState<string>('');
-  const [inputChannelId, setInputChannelId] = useState<string>('');
-  const [inputChannelSecret, setInputChannelSecret] = useState<string>('');
-  const [configSuccessMsg, setConfigSuccessMsg] = useState<string>('');
+  // LINE設定状態（サーバーサイド環境変数と同期）
+  const [currentLineConfig, setCurrentLineConfig] = useState<LineConfig>(getLineConfig());
 
   // メール入力用フォーム
   const [emailInput, setEmailInput] = useState<string>('');
@@ -79,22 +65,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   useEffect(() => {
     let isMounted = true;
 
-    // 1. ローカル保存された設定の復元
-    const stored = getStoredLineConfig();
-    if (stored.liffId || stored.channelId) {
-      setInputLiffId(stored.liffId);
-      setInputChannelId(stored.channelId);
-      setInputChannelSecret(stored.channelSecret);
-      setCurrentLineConfig({
-        liffId: stored.liffId,
-        channelId: stored.channelId,
-        channelSecret: stored.channelSecret,
-        isConfigured: true,
-        source: 'storage',
-      });
-    }
-
-    // 2. URLパラメータにLINE認証結果（OAuthコールバック）があるかチェック
+    // 1. URLパラメータにLINE認証結果（OAuthコールバック）があるかチェック
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const isLineSuccess = params.get('line_auth_success') === '1';
@@ -105,7 +76,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       const errorParam = params.get('error');
 
       if (errorParam === 'LINE_NOT_CONFIGURED') {
-        setErrorMessage('LINE設定が未反映です。下の「⚙️ LINEキー直接入力」にキーを貼るか、ダミー体験をご利用ください。');
+        setErrorMessage('Cloudflareの環境変数にLINEキー（LIFF IDまたはChannel ID）がまだ設定されていないか、デプロイ反映待ちです。Cloudflareの設定画面で保存と再デプロイをご確認ください。');
       } else if (isLineSuccess && lineUid && lineName && isMounted) {
         completeLineProfileAuth({
           userId: lineUid,
@@ -116,16 +87,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       }
     }
 
-    // 3. サーバーから最新のLINE設定情報を取得
+    // 2. サーバーから最新のLINE設定情報を取得（Cloudflare環境変数との同期）
     fetchLineConfigFromServer().then((cfg) => {
-      if (isMounted && cfg.isConfigured) {
+      if (isMounted) {
         setCurrentLineConfig(cfg);
-        if (!inputLiffId && cfg.liffId) setInputLiffId(cfg.liffId);
-        if (!inputChannelId && cfg.channelId) setInputChannelId(cfg.channelId);
       }
     });
 
-    // 4. LIFF内ブラウザでのセッションチェック
+    // 3. LIFF内ブラウザでのセッションチェック
     checkLiffLoginStatus().then((lineProfile) => {
       if (lineProfile && isMounted) {
         completeLineProfileAuth(lineProfile);
@@ -136,25 +105,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       isMounted = false;
     };
   }, []);
-
-  // 手動入力LINE設定の保存処理
-  const handleSaveLineConfig = (e: React.FormEvent) => {
-    e.preventDefault();
-    saveLineConfigToStorage(inputLiffId, inputChannelId, inputChannelSecret);
-    setCurrentLineConfig({
-      liffId: inputLiffId.trim(),
-      channelId: inputChannelId.trim(),
-      channelSecret: inputChannelSecret.trim(),
-      isConfigured: Boolean(inputLiffId.trim() || inputChannelId.trim()),
-      source: 'storage',
-    });
-    setConfigSuccessMsg('✓ LINE設定をブラウザに直接保存しました！これで今すぐ「LINEでログイン」をお試しいただけます。');
-    setErrorMessage('');
-    setTimeout(() => {
-      setConfigSuccessMsg('');
-      setShowLineConfigModal(false);
-    }, 1800);
-  };
 
   // 各ロールの代表モックユーザー
   const representativeUsers: Record<UserRole, { id: string; name: string; email: string }> = {
@@ -236,28 +186,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   const handleLineAuthClick = () => {
     setSelectedProvider('line');
     setErrorMessage('');
-
-    // 設定が保存されているか確認
-    const stored = getStoredLineConfig();
-    const liffId = currentLineConfig.liffId || stored.liffId;
-    const channelId = currentLineConfig.channelId || stored.channelId;
-
-    if (!liffId && !channelId) {
-      // 未設定の場合は直接入力モーダルを開く
-      setShowLineConfigModal(true);
-      return;
-    }
-
     setAuthStep('authenticating');
     setStatusText('LINE公式ログイン画面へ接続しています...');
 
-    // サーバーサイドAPI経由で直接LINE認証画面へリダイレクト（パラメータにも付与して確実に接続）
+    // セキュア設計: サーバーサイドAPI経由で直接LINE認証画面へリダイレクト
     const currentOrigin = typeof window !== 'undefined' ? window.location.origin : '';
-    let targetUrl = `${currentOrigin}/api/auth/line/login?role=${activeRole}&redirect=${encodeURIComponent(redirectTo || '/')}`;
-    if (liffId) targetUrl += `&liff_id=${encodeURIComponent(liffId)}`;
-    if (channelId) targetUrl += `&channel_id=${encodeURIComponent(channelId)}`;
-
-    window.location.href = targetUrl;
+    window.location.href = `${currentOrigin}/api/auth/line/login?role=${activeRole}&redirect=${encodeURIComponent(redirectTo || '/')}`;
   };
 
   // Google認証クリック時
@@ -487,109 +421,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             <span>ご案内</span>
           </div>
           <p className="leading-relaxed">{errorMessage}</p>
-          <div className="flex flex-wrap items-center gap-3 pt-1">
-            <button
-              type="button"
-              onClick={() => setShowLineConfigModal(true)}
-              className="text-[11px] font-bold text-indigo-700 underline hover:text-indigo-900 flex items-center gap-1"
-            >
-              <Settings className="w-3.5 h-3.5" />
-              <span>⚙️ 画面上でLINEキーを直接入力する</span>
-            </button>
-            <button
-              type="button"
-              onClick={handleQuickDemoAuth}
-              className="text-[11px] font-bold text-emerald-800 underline hover:text-emerald-950"
-            >
-              → 代わりにダミーアカウントですぐ試す
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* LINEキー直接入力モーダル */}
-      {showLineConfigModal && (
-        <div className="mb-5 p-4 rounded-2xl bg-emerald-50/70 border-2 border-emerald-300 animate-fadeIn space-y-3">
-          <div className="flex items-center justify-between border-b border-emerald-200 pb-2">
-            <div className="flex items-center gap-1.5 font-black text-xs text-emerald-950">
-              <Settings className="w-4 h-4 text-emerald-700" />
-              <span>LINE公式キー直接入力（Cloudflare不要で即反映）</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowLineConfigModal(false)}
-              className="text-xs text-slate-400 hover:text-slate-700"
-            >
-              ✕ 閉じる
-            </button>
-          </div>
-
-          <p className="text-[11px] text-slate-600 leading-relaxed">
-            取得されたキーをここに貼り付けて「保存」を押すと、Cloudflareの反映を待たずに今すぐご自身のLINEで本番ログインをお試しいただけます。
-          </p>
-
-          <form onSubmit={handleSaveLineConfig} className="space-y-2.5">
-            <div>
-              <label className="block text-[11px] font-bold text-slate-700 mb-0.5">
-                LIFF ID（※必須）
-              </label>
-              <input
-                type="text"
-                placeholder="例: 200xxxxxxx-xxxxxxxx"
-                value={inputLiffId}
-                onChange={(e) => setInputLiffId(e.target.value)}
-                className="w-full text-xs px-3 py-2 rounded-xl border border-emerald-300 bg-white text-slate-800 focus:outline-emerald-500 font-mono"
-              />
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-bold text-slate-700 mb-0.5">
-                Channel ID（チャネルID）
-              </label>
-              <input
-                type="text"
-                placeholder="例: 20068xxxxx"
-                value={inputChannelId}
-                onChange={(e) => setInputChannelId(e.target.value)}
-                className="w-full text-xs px-3 py-2 rounded-xl border border-emerald-300 bg-white text-slate-800 focus:outline-emerald-500 font-mono"
-              />
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-bold text-slate-700 mb-0.5">
-                Channel Secret（チャネルシークレット・任意）
-              </label>
-              <input
-                type="password"
-                placeholder="••••••••••••••••••••"
-                value={inputChannelSecret}
-                onChange={(e) => setInputChannelSecret(e.target.value)}
-                className="w-full text-xs px-3 py-2 rounded-xl border border-emerald-300 bg-white text-slate-800 focus:outline-emerald-500 font-mono"
-              />
-            </div>
-
-            {configSuccessMsg && (
-              <div className="p-2 rounded-lg bg-emerald-100 text-emerald-900 text-xs font-bold">
-                {configSuccessMsg}
-              </div>
-            )}
-
-            <div className="pt-1 flex gap-2">
-              <button
-                type="submit"
-                className="flex-1 py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition active:scale-95"
-              >
-                このブラウザに保存して即使う
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowLineConfigModal(false)}
-                className="py-2.5 px-3 bg-white border border-slate-300 text-slate-600 font-bold text-xs rounded-xl hover:bg-slate-50"
-              >
-                キャンセル
-              </button>
-            </div>
-          </form>
         </div>
       )}
 
@@ -677,7 +508,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               メールアドレスで{authMode === 'register' ? 'アカウント登録' : 'ログイン'}
             </h3>
             <p className="text-xs text-slate-500">
-              お使いのメールアドレスを入力してください（即座にお試し可能）
+              お使いのメールアドレスを入力してください
             </p>
           </div>
 
@@ -707,7 +538,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">パスワード（任意・ダミー対応）</label>
+            <label className="block text-xs font-bold text-slate-700 mb-1">パスワード</label>
             <input
               type="password"
               placeholder="••••••••"
@@ -769,19 +600,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                 LINE で{authMode === 'register' ? '登録' : 'ログイン'}
               </span>
               <span className="absolute right-4 text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/20 text-white hidden sm:inline">
-                {currentLineConfig.isConfigured ? '本番連携ON' : '直接設定可'}
+                本番連携
               </span>
             </button>
-            <div className="flex items-center justify-between text-[10px] px-1 text-slate-400">
-              <span>タップするとLINE公式の認証画面（LIFF/OAuth）へ直接接続します</span>
-              <button
-                type="button"
-                onClick={() => setShowLineConfigModal(true)}
-                className="text-emerald-700 font-bold hover:underline flex items-center gap-0.5"
-              >
-                <Settings className="w-3 h-3" />
-                <span>キー直接入力</span>
-              </button>
+            <div className="text-[10px] text-center text-slate-400">
+              タップするとLINE公式の認証画面（LIFF/OAuth）へ直接接続します
             </div>
           </div>
 

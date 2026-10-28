@@ -1,5 +1,6 @@
 /**
  * LINE Official Account & LIFF (LINE Front-end Framework) 設定・認証ユーティリティ
+ * セキュア設計: 機密情報（Channel Secret / Access Token）はクライアントには一切保持しません
  */
 import liff from '@line/liff';
 
@@ -13,112 +14,36 @@ export interface LineUserProfile {
 export interface LineConfig {
   liffId: string;
   channelId: string;
-  channelSecret?: string;
   isConfigured: boolean;
-  source: 'env' | 'storage' | 'none';
-}
-
-const STORAGE_KEY_LIFF_ID = 'carekuru_line_liff_id';
-const STORAGE_KEY_CHANNEL_ID = 'carekuru_line_channel_id';
-const STORAGE_KEY_CHANNEL_SECRET = 'carekuru_line_channel_secret';
-
-/**
- * ローカルストレージおよびCookieからLINE設定を取得
- */
-export function getStoredLineConfig(): { liffId: string; channelId: string; channelSecret: string } {
-  if (typeof window === 'undefined') {
-    return { liffId: '', channelId: '', channelSecret: '' };
-  }
-
-  const liffId = localStorage.getItem(STORAGE_KEY_LIFF_ID) || '';
-  const channelId = localStorage.getItem(STORAGE_KEY_CHANNEL_ID) || '';
-  const channelSecret = localStorage.getItem(STORAGE_KEY_CHANNEL_SECRET) || '';
-
-  return { liffId, channelId, channelSecret };
 }
 
 /**
- * ローカルストレージおよびCookieにLINE設定を保存（Cloudflare環境変数に依存しない確実な動作）
- */
-export function saveLineConfigToStorage(liffId: string, channelId: string, channelSecret: string = '') {
-  if (typeof window === 'undefined') return;
-
-  if (liffId) {
-    localStorage.setItem(STORAGE_KEY_LIFF_ID, liffId.trim());
-    document.cookie = `line_liff_id=${encodeURIComponent(liffId.trim())}; path=/; max-age=31536000; SameSite=Lax`;
-  } else {
-    localStorage.removeItem(STORAGE_KEY_LIFF_ID);
-    document.cookie = 'line_liff_id=; path=/; max-age=0';
-  }
-
-  if (channelId) {
-    localStorage.setItem(STORAGE_KEY_CHANNEL_ID, channelId.trim());
-    document.cookie = `line_channel_id=${encodeURIComponent(channelId.trim())}; path=/; max-age=31536000; SameSite=Lax`;
-  } else {
-    localStorage.removeItem(STORAGE_KEY_CHANNEL_ID);
-    document.cookie = 'line_channel_id=; path=/; max-age=0';
-  }
-
-  if (channelSecret) {
-    localStorage.setItem(STORAGE_KEY_CHANNEL_SECRET, channelSecret.trim());
-    document.cookie = `line_channel_secret=${encodeURIComponent(channelSecret.trim())}; path=/; max-age=31536000; SameSite=Lax`;
-  } else {
-    localStorage.removeItem(STORAGE_KEY_CHANNEL_SECRET);
-    document.cookie = 'line_channel_secret=; path=/; max-age=0';
-  }
-}
-
-/**
- * LINE設定情報を取得する（環境変数 または ローカル保存）
+ * LINE設定情報を取得する（クライアントサイド静的判定）
  */
 export function getLineConfig(): LineConfig {
-  const envLiffId = process.env.NEXT_PUBLIC_LIFF_ID || '';
-  const envChannelId = process.env.NEXT_PUBLIC_LINE_CHANNEL_ID || '';
-
-  if (envLiffId || envChannelId) {
-    return {
-      liffId: envLiffId,
-      channelId: envChannelId,
-      isConfigured: true,
-      source: 'env',
-    };
-  }
-
-  const stored = getStoredLineConfig();
-  if (stored.liffId || stored.channelId) {
-    return {
-      liffId: stored.liffId,
-      channelId: stored.channelId,
-      channelSecret: stored.channelSecret,
-      isConfigured: true,
-      source: 'storage',
-    };
-  }
+  const liffId = process.env.NEXT_PUBLIC_LIFF_ID || '';
+  const channelId = process.env.NEXT_PUBLIC_LINE_CHANNEL_ID || '';
 
   return {
-    liffId: '',
-    channelId: '',
-    isConfigured: false,
-    source: 'none',
+    liffId,
+    channelId,
+    isConfigured: Boolean(liffId || channelId),
   };
 }
 
 /**
- * サーバーAPIから最新のLINE設定情報を取得する
+ * サーバーAPIから最新のLINE設定情報を取得する（Cloudflare Workers 環境変数と同期）
  */
 export async function fetchLineConfigFromServer(): Promise<LineConfig> {
   try {
     const res = await fetch('/api/auth/line/config', { cache: 'no-store' });
     if (res.ok) {
       const data = await res.json();
-      if (data.liffId || data.channelId) {
-        return {
-          liffId: data.liffId || '',
-          channelId: data.channelId || '',
-          isConfigured: Boolean(data.isConfigured),
-          source: 'env',
-        };
-      }
+      return {
+        liffId: data.liffId || '',
+        channelId: data.channelId || '',
+        isConfigured: Boolean(data.isConfigured),
+      };
     }
   } catch (e) {
     console.warn('[LINE] Could not fetch server config:', e);
