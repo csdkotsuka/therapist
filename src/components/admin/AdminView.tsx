@@ -344,7 +344,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
               Admin Console
             </span>
           </div>
-          <h2 className="text-xl font-bold mt-1">{currentBrand.japaneseName} ({currentBrand.name}) 管理ポータル</h2>
+          <h2 className="text-xl font-bold mt-1">{currentBrand.name} 管理ポータル</h2>
         </div>
 
         <div className="flex items-center gap-2 bg-slate-800/80 px-4 py-2 rounded-2xl border border-slate-700">

@@ -41,7 +41,7 @@ export default function TherapistGuidePage() {
           セラピスト・専門職向け 実務運用マニュアル
         </h1>
         <p className="text-sm sm:text-base text-emerald-100 mt-3 max-w-3xl leading-relaxed">
-          {currentBrand.japaneseName} ({currentBrand.name}) の提携セラピスト・医療専門職として、新規登録審査から予約受付、出張GPS送信、施術完了、そしてStripe報酬受取までの全実務フローを網羅した公式ガイドです。
+          {currentBrand.name} の提携セラピスト・医療専門職として、新規登録審査から予約受付、出張GPS送信、施術完了、そしてStripe報酬受取までの全実務フローを網羅した公式ガイドです。
         </p>
 
         {/* 顧客向けページへ行くだけのリンク */}

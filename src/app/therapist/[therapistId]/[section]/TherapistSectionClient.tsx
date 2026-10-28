@@ -103,7 +103,7 @@ export function TherapistSectionClient({
               className="w-5 h-5 rounded-md overflow-hidden shrink-0"
               dangerouslySetInnerHTML={{ __html: currentBrand.iconSvg }}
             />
-            <span className="font-bold text-slate-800">{currentBrand.japaneseName} ({currentBrand.name})</span>
+            <span className="font-bold text-slate-800">{currentBrand.name}</span>
             <span className="text-[11px] text-slate-400">- セラピスト業務管理ポータル</span>
           </div>
 

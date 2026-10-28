@@ -339,7 +339,7 @@ export function updateDocumentBranding(brand: AppBrandConfig) {
   if (typeof window === 'undefined') return;
 
   // 1. タイトル更新
-  document.title = `${brand.japaneseName} (${brand.name}) - ${brand.catchphrase}`;
+  document.title = `${brand.name} - ${brand.catchphrase}`;
 
   // 2. ファビコン更新
   const faviconHref = brand.iconUrl || `data:image/svg+xml;utf8,${encodeURIComponent(brand.iconSvg)}`;

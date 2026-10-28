@@ -62,7 +62,7 @@ export default function GuideLayout({
 
       {/* Guide Footer */}
       <footer className="border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-400 print:hidden">
-        <p>{currentBrand.japaneseName} ({currentBrand.name}) Platform Operations & Architecture Manuals</p>
+        <p>{currentBrand.name} Platform Operations & Architecture Manuals</p>
       </footer>
     </div>
   );

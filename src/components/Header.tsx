@@ -185,7 +185,7 @@ export const Header: React.FC = () => {
               <Link
                 href="/"
                 className="flex items-center gap-2 group py-1 min-w-0 active:scale-95 transition-transform"
-                title={`${currentBrand.japaneseName} (${currentBrand.name})`}
+                title={currentBrand.name}
               >
                 <div className="w-8 h-8 rounded-xl overflow-hidden shadow-xs border border-slate-200/80 dark:border-white/15 bg-white dark:bg-slate-900 flex items-center justify-center shrink-0">
                   {currentBrand.iconUrl ? (

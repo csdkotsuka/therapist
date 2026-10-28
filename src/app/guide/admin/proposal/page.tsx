@@ -253,7 +253,7 @@ export default function ProposalGuidePage() {
               </div>
 
               <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight leading-snug">
-                {currentBrand.japaneseName} ({currentBrand.name})<br />
+                {currentBrand.name}<br />
                 ヘルスケア＆ウェルネス専門職パートナー拡大構想
               </h1>
 

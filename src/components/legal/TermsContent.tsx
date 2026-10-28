@@ -6,15 +6,14 @@ import { Shield, FileText, CheckCircle2, AlertTriangle, Scale, Lock, DollarSign,
 
 export const TermsContent: React.FC = () => {
   const { currentBrand } = useApp();
-  const brandName = currentBrand.japaneseName || 'CareKuru';
-  const brandEng = currentBrand.name || 'CareKuru';
+  const brandName = currentBrand.name || 'CareKuru';
 
   return (
     <div className="space-y-8 text-slate-800 dark:text-slate-200 text-sm sm:text-base leading-relaxed">
       {/* 規約前文 */}
       <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 text-xs sm:text-sm text-slate-600 dark:text-slate-300 space-y-3">
         <p>
-          本利用規約（以下「本規約」といいます。）は、{brandName}（英語表記：{brandEng}、以下「本サービス」といいます。）の利用条件および本サービスの運営者（以下「当社」といいます。）と本サービスを利用するすべてのお客様（顧客会員および登録セラピストを含み、以下総称して「ユーザー」といいます。）との間の権利義務関係を定めるものです。
+          本利用規約（以下「本規約」といいます。）は、{brandName}（以下「本サービス」といいます。）の利用条件および本サービスの運営者（以下「当社」といいます。）と本サービスを利用するすべてのお客様（顧客会員および登録セラピストを含み、以下総称して「ユーザー」といいます。）との間の権利義務関係を定めるものです。
         </p>
         <p>
           本サービスをご利用になる方（LINE公式アカウントの友だち追加、LINEログイン、会員登録、予約申込、または施術提供を行う方を含みます。）は、本規約の全文をお読みいただき、これに同意した上でご利用ください。

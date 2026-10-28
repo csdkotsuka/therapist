@@ -6,15 +6,14 @@ import { ShieldCheck, Lock, Eye, Server, MessageSquare, Smartphone, Bell, FileCh
 
 export const PrivacyContent: React.FC = () => {
   const { currentBrand } = useApp();
-  const brandName = currentBrand.japaneseName || 'CareKuru';
-  const brandEng = currentBrand.name || 'CareKuru';
+  const brandName = currentBrand.name || 'CareKuru';
 
   return (
     <div className="space-y-8 text-slate-800 dark:text-slate-200 text-sm sm:text-base leading-relaxed">
       {/* ポリシー前文 */}
       <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 text-xs sm:text-sm text-slate-600 dark:text-slate-300 space-y-3">
         <p>
-          {brandName}（英語表記：{brandEng}、以下「当社」または「本サービス」といいます。）は、お客様（顧客会員および登録セラピストを含み、以下「ユーザー」といいます。）のプライバシーを尊重し、個人情報の保護に関する法律（以下「個人情報保護法」といいます。）および関連法令を遵守して、ユーザーの個人情報を適正に取り扱います。
+          {brandName}（以下「当社」または「本サービス」といいます。）は、お客様（顧客会員および登録セラピストを含み、以下「ユーザー」といいます。）のプライバシーを尊重し、個人情報の保護に関する法律（以下「個人情報保護法」といいます。）および関連法令を遵守して、ユーザーの個人情報を適正に取り扱います。
         </p>
         <p>
           本プライバシーポリシー（以下「本ポリシー」といいます。）は、ウェブサイト、スマートフォン向けウェブアプリ、およびLINE公式アカウント（Messaging API・LINEログイン等の連携機能を含む）における個人情報の収集、利用、管理、および保護の方針を定めたものです。

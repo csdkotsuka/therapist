@@ -51,7 +51,7 @@ export default function GuideHubPage() {
           </h1>
 
           <p className="text-sm sm:text-base text-emerald-100 max-w-2xl leading-relaxed">
-            {currentBrand.japaneseName}（{currentBrand.name}）をご利用いただく皆様へ。
+            {currentBrand.name} をご利用いただく皆様へ。
             お客様とセラピスト双方が安心してご利用いただけるよう、ご利用ガイド、プラットフォーム利用規約、およびプライバシーポリシーを掲載しています。
           </p>
 

@@ -118,7 +118,7 @@ export default function AdminGuidePortalPage() {
           </span>
 
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-snug font-serif">
-            {currentBrand.japaneseName} ({currentBrand.name})<br />
+            {currentBrand.name}<br />
             役員・経営陣向け ドキュメントハブ
           </h1>
           <p className="text-xs sm:text-sm text-emerald-100/90 max-w-3xl leading-relaxed">

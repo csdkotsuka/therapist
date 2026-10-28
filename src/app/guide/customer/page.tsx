@@ -35,7 +35,7 @@ export default function CustomerGuidePage() {
           </span>
         </div>
         <h1 className="text-2xl sm:text-4xl font-black mt-2 text-white">
-          {currentBrand.japaneseName} ({currentBrand.name}) ご利用ガイド
+          {currentBrand.name} ご利用ガイド
         </h1>
         <p className="text-sm sm:text-base text-blue-100 mt-3 max-w-3xl leading-relaxed">
           理学療法士、助産師、鍼灸師、エステティシャンなど、厳格な審査を通過した国家資格者・専門認定セラピストによる「出張施術」と「店舗訪問」の安心ご利用マニュアルです。
