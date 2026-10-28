@@ -156,7 +156,7 @@ export const ICON_THERA_GO_CLASSIC = `<svg xmlns="http://www.w3.org/2000/svg" vi
 // ========================================================
 
 export const APP_BRANDS: Record<AppBrandId, AppBrandConfig> = {
-  // ★ 公式決定ブランド: CareKuru
+  // ★ 現在採用中ブランド: CareKuru
   care_kuru: {
     id: 'care_kuru',
     name: 'CareKuru',
@@ -273,32 +273,93 @@ export const APP_BRANDS: Record<AppBrandId, AppBrandConfig> = {
 
 export const DEFAULT_BRAND_ID: AppBrandId = 'care_kuru';
 
+// ========================================================
+// アプリ名称の候補一覧（複数パターンから選択可能）
+// ========================================================
+export interface AppNameCandidate {
+  id: string;
+  name: string;
+  japaneseName: string;
+  tagline: string;
+  catchphrase: string;
+  description: string;
+  badge: string;
+}
+
+export const AVAILABLE_NAME_CANDIDATES: AppNameCandidate[] = [
+  {
+    id: 'care_kuru',
+    name: 'CareKuru',
+    japaneseName: 'CareKuru',
+    tagline: 'CareKuru',
+    catchphrase: 'プロがあなたの元へ届く。出張・店舗ヘルスケア＆ボディケア',
+    description: '理学療法士・セラピスト・トレーナーがあなたの元へ届くオンデマンドマッチングプラットフォーム（現状採用中）',
+    badge: '現在採用中',
+  },
+  {
+    id: 'carearia_go',
+    name: 'Carearia Go',
+    japaneseName: 'ケアリアゴー',
+    tagline: 'CAREARIA GO',
+    catchphrase: 'あなたの「したい」叶える場所。',
+    description: 'ケア（支援）とエリア（地域）を繋ぐ、自立支援と優しさを体現した候補名称',
+    badge: '候補名称',
+  },
+  {
+    id: 'theralink',
+    name: 'Theralink',
+    japaneseName: 'セラリンク',
+    tagline: 'THERALINK',
+    catchphrase: '内側から輝く、本当の美しさを。',
+    description: 'セラピストと顧客の絆をリンク（繋ぐ）するオーガニック＆信頼感のある候補名称',
+    badge: '候補名称',
+  },
+  {
+    id: 'care_go',
+    name: 'Care Go',
+    japaneseName: 'ケアゴー',
+    tagline: 'CARE GO',
+    catchphrase: 'その一歩が、もっとキレイな未来をつくる。',
+    description: 'シンプルで前向きなアクション（Go）を想起させるアクティブな候補名称',
+    badge: '候補名称',
+  },
+  {
+    id: 'careia_go',
+    name: 'Careia Go',
+    japaneseName: 'ケアリア',
+    tagline: 'CAREIA GO',
+    catchphrase: 'あなたのキレイと健康をプロの手で。',
+    description: '親しみやすさと上質なホスピタリティを感じさせるフェミニン＆ウェルネス候補名称',
+    badge: '候補名称',
+  },
+];
+
 // 独立選択用: アプリアイコン（＝ファビコン・ヘッダー共通シンボルアイコン）一覧（URL完全重複なし）
 export const AVAILABLE_ICONS = [
   {
     id: 'icon_care_kuru_symbol',
-    label: '公式決定: CareKuru シンボル',
+    label: 'CareKuru シンボル',
     url: '/branding/icon_carearia_symbol.png',
-    badge: '公式決定 (CareKuru)',
+    badge: '現在採用中',
     themeColor: '#059669',
   },
   {
     id: 'icon_theralink_symbol',
-    label: '候補: セラリンク リースシンボル',
+    label: 'セラリンク リースシンボル',
     url: '/branding/icon_theralink_symbol.png',
     badge: '候補デザイン',
     themeColor: '#059669',
   },
   {
     id: 'icon_care_go_blue',
-    label: '候補: ケアゴー ブルーC × 若葉',
+    label: 'ケアゴー ブルーC × 若葉',
     url: '/branding/icon_care_go_symbol.png',
     badge: '候補デザイン',
     themeColor: '#0284c7',
   },
   {
     id: 'icon_careia_pink',
-    label: '候補: ケアリア ピンクハート × ゴールド',
+    label: 'ケアリア ピンクハート × ゴールド',
     url: '/branding/icon_careia_pink_symbol.png',
     badge: '候補デザイン',
     themeColor: '#e11d48',

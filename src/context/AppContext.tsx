@@ -191,11 +191,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             changed = true;
           }
 
-          // 以前の仮名称が残っている場合は新決定名称 'CareKuru' に更新
-          if (parsed.appName !== 'CareKuru' || parsed.appJapaneseName !== 'CareKuru') {
-            parsed.appName = 'CareKuru';
-            parsed.appJapaneseName = 'CareKuru';
-            parsed.appTagline = 'CareKuru';
+          // 名称が未設定の場合はデフォルト名称 'CareKuru' を設定
+          if (!parsed.appName) {
+            parsed.appName = defaultBranding.appName;
+            parsed.appJapaneseName = defaultBranding.appJapaneseName;
+            parsed.appTagline = defaultBranding.appTagline;
+            parsed.appCatchphrase = defaultBranding.appCatchphrase;
             changed = true;
           }
 
@@ -216,8 +217,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const activeIcon = customBranding.selectedIcon || baseBrand.iconUrl;
   const currentBrand: AppBrandConfig = {
     ...baseBrand,
-    name: 'CareKuru',
-    japaneseName: 'CareKuru',
+    name: customBranding.appName || baseBrand.name,
+    japaneseName: customBranding.appJapaneseName || baseBrand.japaneseName,
     catchphrase: customBranding.appCatchphrase || baseBrand.catchphrase,
     tagline: customBranding.appTagline || baseBrand.tagline,
     iconUrl: activeIcon,
@@ -378,8 +379,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ) {
           val.selectedLogo = val.selectedIcon || '/branding/icon_carearia_symbol.png';
         }
-        val.appName = 'CareKuru';
-        val.appJapaneseName = 'CareKuru';
         setCustomBrandingState((prev) => ({ ...prev, ...val }));
       }
 
