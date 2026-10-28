@@ -8,7 +8,13 @@ export async function GET(req: Request) {
   const role = url.searchParams.get('role') || 'customer';
   const redirect = url.searchParams.get('redirect') || '/';
 
-  const { liffId, channelId } = getEffectiveLineConfig();
+  // URLパラメータ（直渡しフォールバック）も受け付ける
+  const queryLiffId = url.searchParams.get('liff_id');
+  const queryChannelId = url.searchParams.get('channel_id');
+
+  const resolved = getEffectiveLineConfig(req);
+  const liffId = queryLiffId || resolved.liffId;
+  const channelId = queryChannelId || resolved.channelId;
 
   // 1. LIFF ID がある場合: LIFF URL へリダイレクト
   if (liffId) {
