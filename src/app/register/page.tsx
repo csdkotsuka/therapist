@@ -122,6 +122,38 @@ export default function CustomerRegisterPage() {
     }
   };
 
+  // ソーシャル / ワンクリック登録（LINE / Google）
+  const handleQuickRegister = (provider: 'line' | 'google') => {
+    const dummyName = provider === 'line' ? 'LINE登録ユーザー' : 'Google登録ユーザー';
+    const dummyEmail = `${provider}.user.${Date.now()}@example.com`;
+    const newCustomerProfile = {
+      id: `customer-${provider}-${Date.now()}`,
+      name: dummyName,
+      email: dummyEmail,
+      phone: '090-1234-5678',
+      role: 'customer' as const,
+      avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(dummyName)}`,
+      address: '愛媛県松山市一番町',
+      lat: 33.8416,
+      lng: 132.7657,
+    };
+    addCustomerUser(newCustomerProfile);
+    setUserLocation({
+      name: '愛媛県松山市一番町',
+      lat: 33.8416,
+      lng: 132.7657,
+    });
+    setName(dummyName);
+    setEmail(dummyEmail);
+    setPhone('090-1234-5678');
+    setIsSuccess(true);
+    confetti({
+      particleCount: 80,
+      spread: 70,
+      origin: { y: 0.6 },
+    });
+  };
+
   // アカウント作成送信
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -295,6 +327,63 @@ export default function CustomerRegisterPage() {
               <h1 className="text-2xl font-black text-slate-900 tracking-tight">
                 顧客アカウントを作成
               </h1>
+              <p className="text-xs text-slate-500">
+                LINE・Google・メールアドレスのいずれかで登録できます（ダミー即時体験可能）
+              </p>
+            </div>
+
+            {/* ソーシャル・ワンクリック登録ボタン（LINE / Google） */}
+            <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-3">
+              <button
+                type="button"
+                onClick={() => handleQuickRegister('line')}
+                className="w-full py-3 px-4 rounded-2xl font-bold text-xs sm:text-sm text-white shadow-xs transition-all active:scale-[0.98] flex items-center justify-center gap-2.5 hover:brightness-105"
+                style={{ backgroundColor: '#06C755' }}
+              >
+                <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
+                  <path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 4.269 8.846 10.019 9.572.391.082.923.254 1.058.583.12.295.079.757.038 1.053l-.161 1.059c-.048.318-.237 1.243 1.09.678 1.327-.565 7.165-4.223 9.774-7.227 1.48-1.637 2.182-3.344 2.182-5.718z" />
+                </svg>
+                <span>LINE でかんたん登録（ダミー即時体験）</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleQuickRegister('google')}
+                className="w-full py-3 px-4 rounded-2xl font-bold text-xs sm:text-sm text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 shadow-2xs transition-all active:scale-[0.98] flex items-center justify-center gap-2.5"
+              >
+                <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                  <path
+                    fill="#4285F4"
+                    d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.05h3.87c2.26-2.09 3.675-5.17 3.675-9.15z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.87-3.05c-1.08.72-2.45 1.16-4.06 1.16-3.13 0-5.78-2.11-6.73-4.96H1.28v3.15C3.26 21.36 7.34 24 12 24z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.27 14.24c-.25-.72-.38-1.49-.38-2.24s.13-1.52.38-2.24V6.61H1.28C.46 8.23 0 10.06 0 12s.46 3.77 1.28 5.39l3.99-3.15z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.28 6.61l3.99 3.15c.95-2.85 3.6-4.96 6.73-4.96z"
+                  />
+                </svg>
+                <span>Google でかんたん登録（ダミー即時体験）</span>
+              </button>
+
+              <div className="pt-1 flex items-center justify-between text-xs text-slate-500">
+                <span>すでに登録済みですか？</span>
+                <Link href="/login" className="text-emerald-700 font-bold hover:underline">
+                  ログインはこちら →
+                </Link>
+              </div>
+            </div>
+
+            <div className="relative flex py-1 items-center">
+              <div className="flex-grow border-t border-slate-200"></div>
+              <span className="flex-shrink mx-3 text-xs text-slate-400 font-medium">または メールアドレス・住所を入力</span>
+              <div className="flex-grow border-t border-slate-200"></div>
             </div>
 
             {/* エラーメッセージ */}

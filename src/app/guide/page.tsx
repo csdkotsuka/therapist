@@ -312,16 +312,6 @@ export default function GuideHubPage() {
           </div>
         </div>
       </section>
-
-      {/* プラットフォーム運営ドキュメント（管理者用） */}
-      <div className="pt-2 text-center">
-        <Link
-          href="/guide/admin"
-          className="text-xs text-slate-400 hover:text-slate-600 underline font-medium"
-        >
-          管理者・事業計画ドキュメントはこちら（役員専用）
-        </Link>
-      </div>
     </div>
   );
 }
