@@ -17,7 +17,7 @@ export interface LineConfig {
 }
 
 /**
- * LINE設定情報を取得する（クライアントサイドでアクセス可能）
+ * LINE設定情報を取得する（クライアントサイド静的判定）
  */
 export function getLineConfig(): LineConfig {
   const liffId = process.env.NEXT_PUBLIC_LIFF_ID || '';
@@ -30,18 +30,37 @@ export function getLineConfig(): LineConfig {
   };
 }
 
+/**
+ * サーバーAPIから最新のLINE設定情報を取得する（Cloudflare Workers の実行時変数を反映）
+ */
+export async function fetchLineConfigFromServer(): Promise<LineConfig> {
+  try {
+    const res = await fetch('/api/auth/line/config', { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      return {
+        liffId: data.liffId || '',
+        channelId: data.channelId || '',
+        isConfigured: Boolean(data.isConfigured),
+      };
+    }
+  } catch (e) {
+    console.warn('[LINE] Could not fetch server config:', e);
+  }
+  return getLineConfig();
+}
+
 let isLiffInitialized = false;
 
 /**
  * LIFF SDKを初期化する
  */
-export async function initializeLiff(): Promise<boolean> {
+export async function initializeLiff(overrideLiffId?: string): Promise<boolean> {
   if (typeof window === 'undefined') return false;
   if (isLiffInitialized) return true;
 
-  const { liffId } = getLineConfig();
+  const liffId = overrideLiffId || process.env.NEXT_PUBLIC_LIFF_ID || '';
   if (!liffId) {
-    console.warn('[LINE] LIFF ID is not configured in environment variables.');
     return false;
   }
 
@@ -53,67 +72,6 @@ export async function initializeLiff(): Promise<boolean> {
     console.error('[LINE] LIFF initialization failed:', error);
     return false;
   }
-}
-
-/**
- * 本物のLINEログインを実行する
- * - LIFF初期化済みなら liff.login() を実行
- * - LIFF ID のみある場合は https://liff.line.me/<LIFF_ID> へ遷移
- * - Channel ID がある場合は LINE Login OAuth へ遷移
- */
-export async function triggerRealLineLogin(redirectUri?: string): Promise<{ success: boolean; profile?: LineUserProfile; error?: string }> {
-  const { liffId, channelId } = getLineConfig();
-
-  // 1. LIFF SDK による初期化＆ログイン試行
-  if (liffId) {
-    try {
-      const initialized = await initializeLiff();
-      if (initialized) {
-        if (!liff.isLoggedIn()) {
-          // LINE認証画面へリダイレクト
-          liff.login({
-            redirectUri: redirectUri || (typeof window !== 'undefined' ? window.location.href : undefined),
-          });
-          return { success: true };
-        } else {
-          // すでにLINEログイン済みの場合、プロファイルを取得
-          const profile = await liff.getProfile();
-          return {
-            success: true,
-            profile: {
-              userId: profile.userId,
-              displayName: profile.displayName,
-              pictureUrl: profile.pictureUrl,
-              statusMessage: profile.statusMessage,
-            },
-          };
-        }
-      } else {
-        // LIFF URL へ直接リダイレクト
-        if (typeof window !== 'undefined') {
-          window.location.href = `https://liff.line.me/${liffId}`;
-          return { success: true };
-        }
-      }
-    } catch (e: any) {
-      console.warn('[LINE] LIFF login failed, falling back:', e);
-    }
-  }
-
-  // 2. LINE Login OAuth へのリダイレクト
-  if (channelId && typeof window !== 'undefined') {
-    const callbackUrl = redirectUri || window.location.origin + '/login';
-    const state = Math.random().toString(36).substring(7);
-    const scope = encodeURIComponent('profile openid');
-    const redirect = encodeURIComponent(callbackUrl);
-    window.location.href = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${channelId}&redirect_uri=${redirect}&state=${state}&scope=${scope}`;
-    return { success: true };
-  }
-
-  return {
-    success: false,
-    error: 'LINE_NOT_CONFIGURED',
-  };
 }
 
 /**

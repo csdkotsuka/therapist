@@ -22,7 +22,7 @@ import {
   RefreshCw,
   Zap,
 } from 'lucide-react';
-import { getLineConfig, triggerRealLineLogin, checkLiffLoginStatus, LineUserProfile } from '@/lib/line';
+import { fetchLineConfigFromServer, checkLiffLoginStatus, LineUserProfile, LineConfig } from '@/lib/line';
 
 interface LoginFormProps {
   initialRole?: UserRole;
@@ -47,27 +47,56 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   const [statusText, setStatusText] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
 
+  // サーバーサイドから取得したLINE設定状態
+  const [serverLineConfig, setServerLineConfig] = useState<LineConfig>({
+    liffId: '',
+    channelId: '',
+    isConfigured: false,
+  });
+
   // メール入力用フォーム
   const [emailInput, setEmailInput] = useState<string>('');
   const [nameInput, setNameInput] = useState<string>('');
   const [passwordInput, setPasswordInput] = useState<string>('');
 
-  const lineConfig = getLineConfig();
-
-  // ページ読み込み時にLINE/LIFFから認証済みで戻ってきたかチェック
+  // ページ読み込み時の処理
   useEffect(() => {
     let isMounted = true;
-    async function checkLineReturn() {
-      try {
-        const lineProfile = await checkLiffLoginStatus();
-        if (lineProfile && isMounted) {
-          completeLineProfileAuth(lineProfile);
-        }
-      } catch (e) {
-        console.error('[LINE] Auth return check failed:', e);
+
+    // 1. URLパラメータにLINE認証結果（OAuthコールバック）があるかチェック
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const isLineSuccess = params.get('line_auth_success') === '1';
+      const lineName = params.get('line_name');
+      const lineUid = params.get('line_uid');
+      const lineAvatar = params.get('line_avatar') || undefined;
+      const roleParam = params.get('role') as UserRole | null;
+      const errorParam = params.get('error');
+
+      if (errorParam === 'LINE_NOT_CONFIGURED') {
+        setErrorMessage('Cloudflareまたは.env.localにLINE設定（LIFF IDまたはChannel ID）がまだ設定されていないか、反映待ちです。下の「ダミー体験」でお試しいただけます。');
+      } else if (isLineSuccess && lineUid && lineName && isMounted) {
+        completeLineProfileAuth({
+          userId: lineUid,
+          displayName: lineName,
+          pictureUrl: lineAvatar,
+        }, roleParam || activeRole);
+        return;
       }
     }
-    checkLineReturn();
+
+    // 2. サーバーから最新のLINE設定情報を取得（Cloudflare環境変数との同期）
+    fetchLineConfigFromServer().then((cfg) => {
+      if (isMounted) setServerLineConfig(cfg);
+    });
+
+    // 3. LIFF内ブラウザでのセッションチェック
+    checkLiffLoginStatus().then((lineProfile) => {
+      if (lineProfile && isMounted) {
+        completeLineProfileAuth(lineProfile);
+      }
+    });
+
     return () => {
       isMounted = false;
     };
@@ -93,15 +122,16 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   };
 
   // 本物のLINE認証から戻ったプロファイルでログイン・登録
-  const completeLineProfileAuth = (profile: LineUserProfile) => {
+  const completeLineProfileAuth = (profile: LineUserProfile, overrideRole?: UserRole) => {
+    const role = overrideRole || activeRole;
     setAuthStep('authenticating');
-    setStatusText(`LINEアカウント（${profile.displayName}）で連携中...`);
+    setStatusText(`LINEアカウント（${profile.displayName}）と連携中...`);
 
     setTimeout(() => {
       const lineUserId = `line-${profile.userId}`;
       let targetUserId = lineUserId;
 
-      if (activeRole === 'customer') {
+      if (role === 'customer') {
         addCustomerUser({
           id: lineUserId,
           name: profile.displayName,
@@ -115,7 +145,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           auth_provider: 'line',
           line_user_id: profile.userId,
         });
-      } else if (activeRole === 'therapist') {
+      } else if (role === 'therapist') {
         const defaultTherapist = representativeUsers.therapist;
         const found = allUsers.find((u) => u.id === defaultTherapist.id);
         targetUserId = found ? found.id : defaultTherapist.id;
@@ -128,64 +158,51 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       setStatusText(`LINE連携完了！ ${profile.displayName} 様としてログインしました`);
 
       try {
-        confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
+        confetti({ particleCount: 65, spread: 75, origin: { y: 0.6 } });
       } catch (e) {
         // fallback
       }
 
       setTimeout(() => {
-        if (onSuccess) onSuccess(activeRole);
+        if (onSuccess) onSuccess(role);
         if (redirectTo) {
           router.push(redirectTo);
-        } else if (activeRole === 'admin') {
+        } else if (role === 'admin') {
           router.push('/admin');
-        } else if (activeRole === 'therapist') {
+        } else if (role === 'therapist') {
           router.push('/therapist');
         } else {
           router.push('/');
         }
       }, 900);
-    }, 600);
+    }, 500);
   };
 
-  // ソーシャル認証（LINE / Google）クリック時
-  const handleSocialAuth = async (provider: 'line' | 'google') => {
-    setSelectedProvider(provider);
+  // LINE登録・ログインボタン クリック時
+  const handleLineAuthClick = () => {
+    setSelectedProvider('line');
     setErrorMessage('');
+    setAuthStep('authenticating');
+    setStatusText('LINE公式ログイン画面へ接続しています...');
 
-    // LINE認証が押された場合
-    if (provider === 'line') {
-      const cfg = getLineConfig();
-      if (cfg.isConfigured) {
-        // 本物のLINE認証へ遷移
-        setStatusText('LINE公式ログイン画面へ接続しています...');
-        setAuthStep('authenticating');
+    // サーバーサイドAPI経由で直接LINE認証画面へリダイレクト
+    // これによりCloudflare Workersのランタイム環境変数が100%確実に適用されます
+    const currentOrigin = typeof window !== 'undefined' ? window.location.origin : '';
+    window.location.href = `${currentOrigin}/api/auth/line/login?role=${activeRole}&redirect=${encodeURIComponent(redirectTo || '/')}`;
+  };
 
-        const result = await triggerRealLineLogin();
-        if (result.success && result.profile) {
-          // すでにログイン済みで情報取得できた場合
-          completeLineProfileAuth(result.profile);
-          return;
-        }
-        // リダイレクトされるので画面はこのまま維持
-        return;
-      } else {
-        // 本番LINEキーがまだない場合の案内＆ダミーフォールバック
-        setErrorMessage(
-          '本番のLINEキー（NEXT_PUBLIC_LIFF_ID または NEXT_PUBLIC_LINE_CHANNEL_ID）がまだ読み込まれていません。本番のLINE画面を開くにはCloudflareの環境変数または.env.localを設定してください。'
-        );
-        return;
-      }
-    }
-
+  // Google認証クリック時
+  const handleGoogleAuthClick = () => {
+    setSelectedProvider('google');
+    setErrorMessage('');
     if (activeRole === 'admin') {
-      setStatusText(`${provider === 'google' ? 'Google' : 'LINE'} 認証成功。Passkey生体認証へ進みます...`);
+      setStatusText('Google 認証成功。Passkey生体認証へ進みます...');
       setAuthStep('authenticating');
       setTimeout(() => {
         setAuthStep('passkey_required');
       }, 700);
     } else {
-      completeAuth(provider);
+      completeAuth('google');
     }
   };
 
@@ -575,7 +592,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           <div className="space-y-1">
             <button
               type="button"
-              onClick={() => handleSocialAuth('line')}
+              onClick={handleLineAuthClick}
               className="w-full py-3.5 px-4 rounded-2xl font-bold text-sm text-white shadow-sm transition-all active:scale-[0.98] flex items-center justify-center gap-3 relative overflow-hidden group hover:brightness-105"
               style={{ backgroundColor: '#06C755' }}
             >
@@ -587,24 +604,18 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                 LINE で{authMode === 'register' ? '登録' : 'ログイン'}
               </span>
               <span className="absolute right-4 text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/20 text-white hidden sm:inline">
-                {lineConfig.isConfigured ? '本番連携' : 'キー設定必要'}
+                本番連携
               </span>
             </button>
-
-            {/* LINEキー設定状態のヒント */}
             <div className="text-[10px] text-center text-slate-400">
-              {lineConfig.isConfigured ? (
-                <span className="text-emerald-700 font-semibold">✓ LINE認証（LIFF / OAuth）が設定されています</span>
-              ) : (
-                <span>※LINEキー（LIFF ID等）がブラウザに未配信の場合は下のダミー体験をご利用ください</span>
-              )}
+              タップするとLINE公式の認証画面（LIFF/OAuth）へ直接接続します
             </div>
           </div>
 
           {/* ② Google 登録 / ログインボタン (公式ホワイト & Gロゴ) */}
           <button
             type="button"
-            onClick={() => handleSocialAuth('google')}
+            onClick={handleGoogleAuthClick}
             className="w-full py-3.5 px-4 rounded-2xl font-bold text-sm text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 shadow-xs transition-all active:scale-[0.98] flex items-center justify-center gap-3 relative overflow-hidden group"
           >
             {/* Google 公式 4色 Gロゴ */}
