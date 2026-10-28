@@ -159,7 +159,7 @@ const presentationSlides: PitchSlideData[] = [
 ];
 
 // =====================================================================
-// スライド画面コンポーネント（余白最小・文字特大・心地よいペールトーン）
+// スライド画面コンポーネント（16:9比率・余白最適化・文字特大）
 // =====================================================================
 function PitchSlideCanvas({
   slideId,
@@ -170,8 +170,8 @@ function PitchSlideCanvas({
 }) {
   return (
     <div
-      className={`w-full aspect-[4/3] rounded-2xl relative overflow-hidden select-none flex flex-col justify-between transition-all duration-300 font-sans shadow-sm border border-sky-100 ${
-        isMini ? 'p-2 sm:p-4' : 'p-3 sm:p-6 md:p-7'
+      className={`w-full aspect-[16/9] rounded-2xl relative overflow-hidden select-none flex flex-col justify-between transition-all duration-300 font-sans shadow-sm border border-sky-100 ${
+        isMini ? 'p-2 sm:p-3' : 'p-3 sm:p-5 md:p-6'
       }`}
       style={{
         background:
@@ -184,48 +184,48 @@ function PitchSlideCanvas({
       <div className="absolute -bottom-10 left-1/4 w-96 h-48 bg-amber-100/25 rounded-full blur-3xl pointer-events-none" />
 
       {/* ------------------------------------------------------------- */}
-      {/* スライド共通ヘッダー（余白圧縮・文字くっきり） */}
+      {/* スライド共通ヘッダー */}
       {/* ------------------------------------------------------------- */}
-      <div className="relative z-10 flex items-center justify-between border-b border-slate-200/70 pb-1.5 sm:pb-2">
+      <div className="relative z-10 flex items-center justify-between border-b border-slate-200/70 pb-1 sm:pb-2">
         <div className="flex items-center gap-2">
           {/* CareKuru アイコン */}
-          <div className="w-5 h-5 sm:w-7 sm:h-7 rounded-xl bg-gradient-to-br from-emerald-500 to-sky-500 text-white flex items-center justify-center shrink-0 shadow-xs p-1">
+          <div className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 rounded-xl bg-gradient-to-br from-emerald-500 to-sky-500 text-white flex items-center justify-center shrink-0 shadow-xs p-1">
             <svg viewBox="0 0 100 100" className="w-full h-full fill-none stroke-current" strokeWidth="12" strokeLinecap="round">
               <path d="M 70 24 A 32 32 0 1 0 70 76" />
               <path d="M 44 48 L 70 28" />
               <path d="M 48 46 L 72 72" />
             </svg>
           </div>
-          <span className="text-sm sm:text-lg md:text-xl font-black tracking-wide text-slate-900 font-sans">
+          <span className="text-sm sm:text-base md:text-xl font-black tracking-wide text-slate-900 font-sans">
             CareKuru
           </span>
         </div>
-        <div className="text-xs sm:text-base md:text-lg font-mono font-bold text-slate-500 tracking-wider">
+        <div className="text-xs sm:text-sm md:text-base font-mono font-bold text-slate-500 tracking-wider">
           {slideId}/6
         </div>
       </div>
 
       {/* ------------------------------------------------------------- */}
-      {/* スライド個別メインコンテンツ（余白削減・文字サイズ最大化） */}
+      {/* スライド個別メインコンテンツ（16:9 ワイド設計） */}
       {/* ------------------------------------------------------------- */}
-      <div className="relative z-10 my-auto py-1 sm:py-2 flex flex-col justify-center">
+      <div className="relative z-10 my-auto py-1 flex flex-col justify-center">
         {/* ======================= スライド 1/6 ======================= */}
         {slideId === 1 && (
-          <div className="space-y-3 sm:space-y-6">
-            <div className="flex items-center justify-between gap-2 sm:gap-4">
-              <div className="space-y-1.5 sm:space-y-3">
-                <h2 className="text-2xl sm:text-5xl md:text-6xl font-black text-slate-900 font-serif leading-[1.15] tracking-tight">
+          <div className="space-y-2 sm:space-y-4 md:space-y-5">
+            <div className="flex items-center justify-between gap-4">
+              <div className="space-y-1 sm:space-y-2.5">
+                <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 font-serif leading-[1.15] tracking-tight">
                   プロフェッショナルの<br />
                   <span className="text-slate-950 font-black">解放。</span>
                 </h2>
-                <div className="text-sm sm:text-2xl md:text-3xl font-bold text-slate-800 font-serif tracking-wide pt-1">
+                <div className="text-sm sm:text-xl md:text-2xl font-bold text-slate-800 font-serif tracking-wide pt-0.5">
                   大塚 和宏 <span className="text-slate-400 font-sans font-normal">/</span> yaShine
                 </div>
               </div>
 
               {/* 美しく輝くダイヤモンド・クリスタル */}
               <div className="shrink-0 relative">
-                <div className="w-24 h-24 sm:w-44 sm:h-44 md:w-52 md:h-52 relative flex items-center justify-center">
+                <div className="w-20 h-20 sm:w-36 sm:h-36 md:w-44 md:h-44 relative flex items-center justify-center">
                   <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
                     <defs>
                       <linearGradient id="diaGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -254,16 +254,16 @@ function PitchSlideCanvas({
                     <polygon points="5,50 30,50 50,95" fill="#0284c7" opacity="0.8" />
                     <polygon points="95,50 70,50 50,95" fill="#be185d" opacity="0.8" />
                   </svg>
-                  <Sparkles className="w-5 h-5 sm:w-8 sm:h-8 text-amber-400 absolute -top-1 -right-1 animate-pulse" />
+                  <Sparkles className="w-5 h-5 sm:w-7 sm:h-7 text-amber-400 absolute -top-1 -right-1 animate-pulse" />
                 </div>
               </div>
             </div>
 
-            {/* 下部リボン・バナー（文字特大化） */}
-            <div className="pt-1 sm:pt-2">
-              <div className="inline-block w-full px-4 sm:px-8 py-2.5 sm:py-4 rounded-2xl bg-white/95 border-2 border-amber-200/90 shadow-xs backdrop-blur-xs relative overflow-hidden">
+            {/* 下部リボン・バナー */}
+            <div className="pt-0.5">
+              <div className="inline-block w-full px-3 sm:px-6 md:px-8 py-2 sm:py-3 rounded-2xl bg-white/95 border-2 border-amber-200/90 shadow-xs backdrop-blur-xs relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-amber-100/50 via-sky-100/40 to-rose-100/50 pointer-events-none" />
-                <div className="relative text-xs sm:text-xl md:text-2xl font-black text-slate-900 text-center font-serif tracking-wide leading-relaxed">
+                <div className="relative text-xs sm:text-lg md:text-xl font-black text-slate-900 text-center font-serif tracking-wide leading-relaxed">
                   医療・美・健康の常識を覆す<br className="sm:hidden" />
                   <span className="text-slate-950 font-black">「プロフェッショナル連合軍」</span>構想
                 </div>
@@ -274,25 +274,24 @@ function PitchSlideCanvas({
 
         {/* ======================= スライド 2/6 ======================= */}
         {slideId === 2 && (
-          <div className="space-y-2 sm:space-y-4">
-            <h2 className="text-xl sm:text-4xl md:text-5xl font-black text-slate-900 font-serif leading-tight">
-              本物の技術を持つプロが<br />
-              <span className="text-rose-600">報われないのか？</span>
+          <div className="space-y-2 sm:space-y-3 md:space-y-4">
+            <h2 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-slate-900 font-serif leading-tight">
+              本物の技術を持つプロが <span className="text-rose-600">報われないのか？</span>
             </h2>
 
-            {/* 左右カード（文字特大・余白圧縮） */}
-            <div className="grid grid-cols-2 gap-2 sm:gap-4 pt-1">
+            {/* 左右カード */}
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-4 md:gap-5 pt-0.5">
               {/* 左: 医療職の現実 */}
-              <div className="bg-white/95 rounded-2xl p-2.5 sm:p-5 border-2 border-rose-200 shadow-xs space-y-2 sm:space-y-3">
-                <div className="flex items-center gap-2 border-b border-rose-100 pb-1.5 sm:pb-2">
-                  <div className="w-6 h-6 sm:w-10 sm:h-10 rounded-full bg-rose-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <div className="bg-white/95 rounded-2xl p-2.5 sm:p-4 md:p-5 border-2 border-rose-200 shadow-xs space-y-1.5 sm:space-y-2.5">
+                <div className="flex items-center gap-2 border-b border-rose-100 pb-1 sm:pb-2">
+                  <div className="w-6 h-6 sm:w-9 sm:h-9 rounded-full bg-rose-500 text-white flex items-center justify-center shrink-0 shadow-xs">
                     <Stethoscope className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
                   </div>
-                  <div className="font-black text-xs sm:text-xl md:text-2xl text-rose-600">
+                  <div className="font-black text-xs sm:text-lg md:text-xl text-rose-600">
                     医療職の現実
                   </div>
                 </div>
-                <ul className="space-y-1 sm:space-y-2.5 text-[11px] sm:text-base md:text-lg text-slate-900 font-bold leading-snug">
+                <ul className="space-y-1 sm:space-y-1.5 text-[11px] sm:text-sm md:text-base text-slate-900 font-bold leading-snug">
                   <li className="flex items-start gap-1 sm:gap-2">
                     <span className="text-rose-500 font-black shrink-0">✔</span>
                     <span>国家資格で超・安定</span>
@@ -309,16 +308,16 @@ function PitchSlideCanvas({
               </div>
 
               {/* 右: サロン・整体の現実 */}
-              <div className="bg-white/95 rounded-2xl p-2.5 sm:p-5 border-2 border-sky-200 shadow-xs space-y-2 sm:space-y-3">
-                <div className="flex items-center gap-2 border-b border-sky-100 pb-1.5 sm:pb-2">
-                  <div className="w-6 h-6 sm:w-10 sm:h-10 rounded-full bg-sky-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <div className="bg-white/95 rounded-2xl p-2.5 sm:p-4 md:p-5 border-2 border-sky-200 shadow-xs space-y-1.5 sm:space-y-2.5">
+                <div className="flex items-center gap-2 border-b border-sky-100 pb-1 sm:pb-2">
+                  <div className="w-6 h-6 sm:w-9 sm:h-9 rounded-full bg-sky-500 text-white flex items-center justify-center shrink-0 shadow-xs">
                     <Scissors className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
                   </div>
-                  <div className="font-black text-xs sm:text-xl md:text-2xl text-sky-600">
+                  <div className="font-black text-xs sm:text-lg md:text-xl text-sky-600">
                     サロン・整体の現実
                   </div>
                 </div>
-                <ul className="space-y-1 sm:space-y-2.5 text-[11px] sm:text-base md:text-lg text-slate-900 font-bold leading-snug">
+                <ul className="space-y-1 sm:space-y-1.5 text-[11px] sm:text-sm md:text-base text-slate-900 font-bold leading-snug">
                   <li className="flex items-start gap-1 sm:gap-2">
                     <span className="text-sky-500 font-black shrink-0">✔</span>
                     <span>技術があっても集客が難しい</span>
@@ -336,8 +335,8 @@ function PitchSlideCanvas({
             </div>
 
             {/* 下部ピル */}
-            <div className="text-center pt-1">
-              <div className="inline-flex items-center justify-center px-4 sm:px-8 py-1.5 sm:py-2.5 rounded-full bg-rose-50/95 border-2 border-rose-200 text-rose-600 font-black text-xs sm:text-lg md:text-xl shadow-xs">
+            <div className="text-center pt-0.5">
+              <div className="inline-flex items-center justify-center px-4 sm:px-8 py-1.5 sm:py-2 rounded-full bg-rose-50/95 border-2 border-rose-200 text-rose-600 font-black text-xs sm:text-base md:text-lg shadow-xs">
                 <span>技術があっても、選ばれにくい</span>
               </div>
             </div>
@@ -346,67 +345,67 @@ function PitchSlideCanvas({
 
         {/* ======================= スライド 3/6 ======================= */}
         {slideId === 3 && (
-          <div className="space-y-2 sm:space-y-4">
-            <h2 className="text-xl sm:text-4xl md:text-5xl font-black text-slate-900 font-serif leading-tight">
-              <span className="text-sky-600">「治す」</span>医療 × <span className="text-rose-500">「癒やし・美」</span>サロンが<br />
-              手を組む必然性
+          <div className="space-y-2 sm:space-y-3 md:space-y-4">
+            {/* 16:9に最適化された1行タイトル（改行不自然さを解消） */}
+            <h2 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 font-serif leading-tight">
+              <span className="text-sky-600">「治す」</span>医療 × <span className="text-rose-500">「癒やし・美」</span>サロンが手を組む必然性
             </h2>
 
-            {/* 3ブロック連携（カード拡大・文字特大） */}
-            <div className="grid grid-cols-5 items-center gap-1 sm:gap-3 pt-1 text-center">
+            {/* 3ブロック連携（flexで横幅を最大限に拡張） */}
+            <div className="flex items-center justify-between gap-1 sm:gap-2.5 pt-0.5 text-center w-full">
               {/* 1: 医療職の力 */}
-              <div className="col-span-1 bg-white/95 rounded-2xl p-2 sm:p-4 md:p-5 border-2 border-rose-200 shadow-xs space-y-1 sm:space-y-2">
-                <div className="w-8 h-8 sm:w-14 sm:h-14 md:w-16 md:h-16 mx-auto rounded-full bg-rose-100 text-rose-600 flex items-center justify-center shadow-xs">
-                  <Building2 className="w-4 h-4 sm:w-8 sm:h-8" />
+              <div className="flex-1 bg-white/95 rounded-2xl p-2 sm:p-3.5 md:p-4 border-2 border-rose-200 shadow-xs space-y-1 sm:space-y-1.5">
+                <div className="w-8 h-8 sm:w-11 sm:h-11 md:w-14 md:h-14 mx-auto rounded-full bg-rose-100 text-rose-600 flex items-center justify-center shadow-xs">
+                  <Building2 className="w-4 h-4 sm:w-6 sm:h-6 md:w-7 md:h-7" />
                 </div>
-                <div className="font-black text-xs sm:text-lg md:text-xl text-rose-600 leading-tight">
+                <div className="font-black text-xs sm:text-base md:text-xl text-rose-600 leading-tight">
                   医療職の力
                 </div>
-                <div className="text-[10px] sm:text-sm md:text-base text-slate-700 font-bold">
+                <div className="text-[10px] sm:text-xs md:text-sm text-slate-700 font-bold">
                   安心・安全
                 </div>
               </div>
 
               {/* × */}
-              <div className="col-span-1 text-center font-black text-slate-400 text-base sm:text-3xl md:text-4xl">
+              <div className="shrink-0 px-1 font-black text-slate-400 text-sm sm:text-xl md:text-2xl">
                 ✕
               </div>
 
               {/* 2: サロンの魅力 */}
-              <div className="col-span-1 bg-white/95 rounded-2xl p-2 sm:p-4 md:p-5 border-2 border-sky-200 shadow-xs space-y-1 sm:space-y-2">
-                <div className="w-8 h-8 sm:w-14 sm:h-14 md:w-16 md:h-16 mx-auto rounded-full bg-sky-100 text-sky-600 flex items-center justify-center shadow-xs">
-                  <Users className="w-4 h-4 sm:w-8 sm:h-8" />
+              <div className="flex-1 bg-white/95 rounded-2xl p-2 sm:p-3.5 md:p-4 border-2 border-sky-200 shadow-xs space-y-1 sm:space-y-1.5">
+                <div className="w-8 h-8 sm:w-11 sm:h-11 md:w-14 md:h-14 mx-auto rounded-full bg-sky-100 text-sky-600 flex items-center justify-center shadow-xs">
+                  <Users className="w-4 h-4 sm:w-6 sm:h-6 md:w-7 md:h-7" />
                 </div>
-                <div className="font-black text-xs sm:text-lg md:text-xl text-sky-600 leading-tight">
+                <div className="font-black text-xs sm:text-base md:text-xl text-sky-600 leading-tight">
                   サロンの魅力
                 </div>
-                <div className="text-[10px] sm:text-sm md:text-base text-slate-700 font-bold">
+                <div className="text-[10px] sm:text-xs md:text-sm text-slate-700 font-bold">
                   癒やし・美・健康
                 </div>
               </div>
 
               {/* × */}
-              <div className="col-span-1 text-center font-black text-slate-400 text-base sm:text-3xl md:text-4xl">
+              <div className="shrink-0 px-1 font-black text-slate-400 text-sm sm:text-xl md:text-2xl">
                 ✕
               </div>
 
               {/* 3: プロの連合軍 */}
-              <div className="col-span-1 bg-white/95 rounded-2xl p-2 sm:p-4 md:p-5 border-2 border-emerald-400 shadow-xs space-y-1 sm:space-y-2 ring-2 ring-emerald-400/30">
-                <div className="w-8 h-8 sm:w-14 sm:h-14 md:w-16 md:h-16 mx-auto rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-xs">
-                  <HeartHandshake className="w-4 h-4 sm:w-8 sm:h-8" />
+              <div className="flex-1 bg-white/95 rounded-2xl p-2 sm:p-3.5 md:p-4 border-2 border-emerald-400 shadow-xs space-y-1 sm:space-y-1.5 ring-2 ring-emerald-400/30">
+                <div className="w-8 h-8 sm:w-11 sm:h-11 md:w-14 md:h-14 mx-auto rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-xs">
+                  <HeartHandshake className="w-4 h-4 sm:w-6 sm:h-6 md:w-7 md:h-7" />
                 </div>
-                <div className="font-black text-xs sm:text-lg md:text-xl text-emerald-700 leading-tight">
+                <div className="font-black text-xs sm:text-base md:text-xl text-emerald-700 leading-tight">
                   プロの連合軍
                 </div>
-                <div className="text-[10px] sm:text-sm md:text-base text-emerald-800 font-black">
+                <div className="text-[10px] sm:text-xs md:text-sm text-emerald-800 font-black">
                   最強のチーム
                 </div>
               </div>
             </div>
 
             {/* 下部バナー */}
-            <div className="text-center pt-1">
-              <div className="inline-flex items-center justify-center px-4 sm:px-8 py-2 sm:py-3 rounded-2xl bg-gradient-to-r from-amber-50 via-rose-50 to-amber-50 border-2 border-rose-200/90 text-rose-600 font-black text-xs sm:text-lg md:text-2xl shadow-xs">
+            <div className="text-center pt-0.5">
+              <div className="inline-flex items-center justify-center px-4 sm:px-8 py-1.5 sm:py-2.5 rounded-2xl bg-gradient-to-r from-amber-50 via-rose-50 to-amber-50 border-2 border-rose-200/90 text-rose-600 font-black text-xs sm:text-base md:text-xl shadow-xs">
                 <span>今、動くことで、未来の安定と自由が手に入る！</span>
               </div>
             </div>
@@ -415,62 +414,61 @@ function PitchSlideCanvas({
 
         {/* ======================= スライド 4/6 ======================= */}
         {slideId === 4 && (
-          <div className="space-y-2 sm:space-y-4">
-            <h2 className="text-xl sm:text-4xl md:text-5xl font-black text-slate-900 font-serif leading-tight">
-              今こそ、船に乗るべきなのか？<br />
-              <span className="text-slate-950">【 3大実利 】</span>
+          <div className="space-y-2 sm:space-y-3 md:space-y-4">
+            <h2 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-slate-900 font-serif leading-tight">
+              今こそ、船に乗るべきなのか？ <span className="text-slate-950">【 3大実利 】</span>
             </h2>
 
-            {/* 3枚のカード（文字特大） */}
-            <div className="grid grid-cols-3 gap-2 sm:gap-4 pt-1 text-center">
+            {/* 3枚のカード */}
+            <div className="grid grid-cols-3 gap-2 sm:gap-3.5 md:gap-4 pt-0.5 text-center">
               {/* ① */}
-              <div className="bg-white/95 rounded-2xl p-2.5 sm:p-5 border-2 border-rose-200 shadow-xs space-y-1 sm:space-y-2.5 relative">
-                <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-rose-500 text-white font-mono font-bold text-xs sm:text-base flex items-center justify-center mx-auto">
+              <div className="bg-white/95 rounded-2xl p-2 sm:p-3.5 md:p-4 border-2 border-rose-200 shadow-xs space-y-1 sm:space-y-2 relative">
+                <div className="w-5 h-5 sm:w-7 sm:h-7 rounded-full bg-rose-500 text-white font-mono font-bold text-xs sm:text-sm flex items-center justify-center mx-auto">
                   1
                 </div>
-                <div className="w-8 h-8 sm:w-12 sm:h-12 mx-auto text-rose-500 flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 sm:w-10 sm:h-10" />
+                <div className="w-7 h-7 sm:w-10 sm:h-10 mx-auto text-rose-500 flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5 sm:w-8 sm:h-8" />
                 </div>
-                <div className="font-black text-xs sm:text-lg md:text-2xl text-rose-600 leading-tight">
+                <div className="font-black text-xs sm:text-base md:text-xl text-rose-600 leading-tight">
                   最高級の<br />下駄を履く
                 </div>
               </div>
 
               {/* ② */}
-              <div className="bg-white/95 rounded-2xl p-2.5 sm:p-5 border-2 border-sky-200 shadow-xs space-y-1 sm:space-y-2.5 relative">
-                <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-sky-500 text-white font-mono font-bold text-xs sm:text-base flex items-center justify-center mx-auto">
+              <div className="bg-white/95 rounded-2xl p-2 sm:p-3.5 md:p-4 border-2 border-sky-200 shadow-xs space-y-1 sm:space-y-2 relative">
+                <div className="w-5 h-5 sm:w-7 sm:h-7 rounded-full bg-sky-500 text-white font-mono font-bold text-xs sm:text-sm flex items-center justify-center mx-auto">
                   2
                 </div>
-                <div className="w-8 h-8 sm:w-12 sm:h-12 mx-auto text-sky-500 flex items-center justify-center">
-                  <Users className="w-6 h-6 sm:w-10 sm:h-10" />
+                <div className="w-7 h-7 sm:w-10 sm:h-10 mx-auto text-sky-500 flex items-center justify-center">
+                  <Users className="w-5 h-5 sm:w-8 sm:h-8" />
                 </div>
-                <div className="font-black text-xs sm:text-lg md:text-2xl text-sky-600 leading-tight">
+                <div className="font-black text-xs sm:text-base md:text-xl text-sky-600 leading-tight">
                   顧客の<br />相互紹介ループ
                 </div>
               </div>
 
               {/* ③ */}
-              <div className="bg-white/95 rounded-2xl p-2.5 sm:p-5 border-2 border-emerald-300 shadow-xs space-y-1 sm:space-y-2.5 relative">
-                <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-emerald-500 text-white font-mono font-bold text-xs sm:text-base flex items-center justify-center mx-auto">
+              <div className="bg-white/95 rounded-2xl p-2 sm:p-3.5 md:p-4 border-2 border-emerald-300 shadow-xs space-y-1 sm:space-y-2 relative">
+                <div className="w-5 h-5 sm:w-7 sm:h-7 rounded-full bg-emerald-500 text-white font-mono font-bold text-xs sm:text-sm flex items-center justify-center mx-auto">
                   3
                 </div>
-                <div className="w-8 h-8 sm:w-12 sm:h-12 mx-auto text-emerald-600 flex items-center justify-center">
-                  <span className="text-2xl sm:text-4xl md:text-5xl font-black font-sans">¥</span>
+                <div className="w-7 h-7 sm:w-10 sm:h-10 mx-auto text-emerald-600 flex items-center justify-center">
+                  <span className="text-xl sm:text-3xl md:text-4xl font-black font-sans">¥</span>
                 </div>
-                <div className="font-black text-xs sm:text-lg md:text-2xl text-emerald-700 leading-tight">
+                <div className="font-black text-xs sm:text-base md:text-xl text-emerald-700 leading-tight">
                   初期・月額0円<br />高還元
                 </div>
               </div>
             </div>
 
             {/* 下部リボン Next Step */}
-            <div className="text-center pt-1">
-              <div className="inline-flex items-center justify-center gap-2 sm:gap-4 px-6 sm:px-10 py-2 sm:py-3 rounded-full bg-gradient-to-r from-amber-50 via-white to-amber-50 border-2 border-amber-300 text-slate-900 shadow-xs">
-                <span className="font-serif italic font-bold text-amber-700 text-sm sm:text-xl md:text-2xl">
+            <div className="text-center pt-0.5">
+              <div className="inline-flex items-center justify-center gap-2 sm:gap-3 px-5 sm:px-8 py-1.5 sm:py-2.5 rounded-full bg-gradient-to-r from-amber-50 via-white to-amber-50 border-2 border-amber-300 text-slate-900 shadow-xs">
+                <span className="font-serif italic font-bold text-amber-700 text-sm sm:text-lg md:text-xl">
                   Next Step
                 </span>
-                <ArrowRight className="w-4 h-4 sm:w-6 sm:h-6 text-amber-600" />
-                <span className="font-black text-xs sm:text-lg md:text-2xl text-slate-950">
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600" />
+                <span className="font-black text-xs sm:text-base md:text-xl text-slate-950">
                   動く人が未来を創る
                 </span>
               </div>
@@ -480,51 +478,49 @@ function PitchSlideCanvas({
 
         {/* ======================= スライド 5/6 ======================= */}
         {slideId === 5 && (
-          <div className="space-y-2 sm:space-y-4">
-            <h2 className="text-xl sm:text-4xl md:text-5xl font-black text-slate-900 font-serif leading-tight">
-              会長と400人の仲間だから<br />
-              起こせる<span className="text-slate-950">業界革命</span>
+          <div className="space-y-2 sm:space-y-3 md:space-y-4">
+            <h2 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-slate-900 font-serif leading-tight">
+              会長と400人の仲間だから 起こせる<span className="text-slate-950">業界革命</span>
             </h2>
 
-            {/* 左右2枚のカード（文字特大） */}
-            <div className="grid grid-cols-2 gap-2 sm:gap-4 pt-1">
+            {/* 左右2枚のカード */}
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-4 md:gap-5 pt-0.5">
               {/* 左: 施術ができるプロ */}
-              <div className="bg-white/95 rounded-2xl p-3 sm:p-6 border-2 border-rose-200 shadow-xs space-y-2 sm:space-y-3">
+              <div className="bg-white/95 rounded-2xl p-2.5 sm:p-4 md:p-5 border-2 border-rose-200 shadow-xs space-y-1.5 sm:space-y-2.5">
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 sm:w-10 sm:h-10 rounded-full bg-rose-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                  <div className="w-6 h-6 sm:w-9 sm:h-9 rounded-full bg-rose-500 text-white flex items-center justify-center shrink-0 shadow-xs">
                     <Sparkles className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
                   </div>
-                  <div className="font-black text-xs sm:text-xl md:text-2xl text-rose-600">
+                  <div className="font-black text-xs sm:text-lg md:text-xl text-rose-600">
                     施術ができるプロ
                   </div>
                 </div>
-                <div className="text-xs sm:text-lg md:text-xl font-bold text-slate-900 leading-relaxed pt-1">
+                <div className="text-xs sm:text-base md:text-lg font-bold text-slate-900 leading-relaxed pt-0.5">
                   健康的に長生き<br />
                   美しくあり続ける
                 </div>
               </div>
 
               {/* 右: 経営者・リーダーへ */}
-              <div className="bg-white/95 rounded-2xl p-3 sm:p-6 border-2 border-sky-200 shadow-xs space-y-2 sm:space-y-3">
+              <div className="bg-white/95 rounded-2xl p-2.5 sm:p-4 md:p-5 border-2 border-sky-200 shadow-xs space-y-1.5 sm:space-y-2.5">
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 sm:w-10 sm:h-10 rounded-full bg-sky-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                  <div className="w-6 h-6 sm:w-9 sm:h-9 rounded-full bg-sky-500 text-white flex items-center justify-center shrink-0 shadow-xs">
                     <Users className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
                   </div>
-                  <div className="font-black text-xs sm:text-xl md:text-2xl text-sky-600">
+                  <div className="font-black text-xs sm:text-lg md:text-xl text-sky-600">
                     経営者・リーダーへ
                   </div>
                 </div>
-                <div className="text-xs sm:text-lg md:text-xl font-bold text-slate-900 leading-relaxed pt-1">
+                <div className="text-xs sm:text-base md:text-lg font-bold text-slate-900 leading-relaxed pt-0.5">
                   ご自身・ご家族、<br />
-                  そして大切な社員の<br />
-                  健康と美を守る
+                  そして大切な社員の健康と美を守る
                 </div>
               </div>
             </div>
 
             {/* 下部ピル: 創業パートナー相談デスク */}
-            <div className="text-center pt-1">
-              <div className="inline-flex items-center gap-2 px-4 sm:px-8 py-2 sm:py-3 rounded-full bg-rose-50/95 border-2 border-rose-200 text-rose-600 font-bold text-xs sm:text-base md:text-lg shadow-xs">
+            <div className="text-center pt-0.5">
+              <div className="inline-flex items-center gap-2 px-4 sm:px-8 py-1.5 sm:py-2 rounded-full bg-rose-50/95 border-2 border-rose-200 text-rose-600 font-bold text-xs sm:text-sm md:text-base shadow-xs">
                 {/* ヨットアイコン */}
                 <svg className="w-4 h-4 sm:w-5 sm:h-5 text-rose-500 fill-current shrink-0" viewBox="0 0 24 24">
                   <path d="M12 2L4 14h8V2zM14 6l6 8h-6V6zM3 16h18l-2 4H5l-2-4z" />
@@ -537,48 +533,46 @@ function PitchSlideCanvas({
 
         {/* ======================= スライド 6/6 ======================= */}
         {slideId === 6 && (
-          <div className="space-y-2 sm:space-y-4">
-            <h2 className="text-xl sm:text-4xl md:text-5xl font-black text-slate-900 font-serif leading-tight">
-              最初の乗組員として、<br />
-              業界の常識を<span className="text-rose-600">ひっくり返そう！</span>
+          <div className="space-y-2 sm:space-y-3 md:space-y-4">
+            <h2 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-slate-900 font-serif leading-tight">
+              最初の乗組員として、 業界の常識を<span className="text-rose-600">ひっくり返そう！</span>
             </h2>
 
-            {/* 2つのピル（文字拡大） */}
-            <div className="grid grid-cols-2 gap-2 sm:gap-4">
-              <div className="bg-white/95 rounded-2xl p-2.5 sm:p-4 border-2 border-rose-200 shadow-xs flex items-center gap-2 sm:gap-3">
-                <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-full bg-rose-500 text-white flex items-center justify-center shrink-0">
-                  <Footprints className="w-4 h-4 sm:w-6 sm:h-6" />
+            {/* 2つのピル */}
+            <div className="grid grid-cols-2 gap-2 sm:gap-3.5">
+              <div className="bg-white/95 rounded-2xl p-2 sm:p-3 md:p-3.5 border-2 border-rose-200 shadow-xs flex items-center gap-2 sm:gap-3">
+                <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-rose-500 text-white flex items-center justify-center shrink-0">
+                  <Footprints className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
                 </div>
-                <div className="font-black text-xs sm:text-xl md:text-2xl text-slate-900 leading-tight">
-                  健康的に<br />長生き
+                <div className="font-black text-xs sm:text-lg md:text-xl text-slate-900 leading-tight">
+                  健康的に長生き
                 </div>
               </div>
 
-              <div className="bg-white/95 rounded-2xl p-2.5 sm:p-4 border-2 border-sky-200 shadow-xs flex items-center gap-2 sm:gap-3">
-                <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-full bg-sky-500 text-white flex items-center justify-center shrink-0">
-                  <Users className="w-4 h-4 sm:w-6 sm:h-6" />
+              <div className="bg-white/95 rounded-2xl p-2 sm:p-3 md:p-3.5 border-2 border-sky-200 shadow-xs flex items-center gap-2 sm:gap-3">
+                <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-sky-500 text-white flex items-center justify-center shrink-0">
+                  <Users className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
                 </div>
-                <div className="font-black text-xs sm:text-xl md:text-2xl text-slate-900 leading-tight">
-                  仲間と共に<br />成長
+                <div className="font-black text-xs sm:text-lg md:text-xl text-slate-900 leading-tight">
+                  仲間と共に成長
                 </div>
               </div>
             </div>
 
             {/* 下部エリア: 船と海 ＋ 先行登録QR */}
-            <div className="bg-white/95 rounded-2xl p-3 sm:p-5 md:p-6 border-2 border-sky-100 shadow-xs relative overflow-hidden flex items-center justify-between gap-4">
+            <div className="bg-white/95 rounded-2xl p-2.5 sm:p-4 md:p-5 border-2 border-sky-100 shadow-xs relative overflow-hidden flex items-center justify-between gap-3">
               {/* 背景の爽やかな海とヨットのイラスト */}
-              <div className="space-y-1 relative z-10">
-                <div className="text-sm sm:text-2xl md:text-3xl font-black text-sky-950 font-serif leading-tight">
-                  一緒に<br />
-                  未来を創りましょう！
+              <div className="space-y-0.5 relative z-10">
+                <div className="text-sm sm:text-xl md:text-2xl font-black text-sky-950 font-serif leading-tight">
+                  一緒に 未来を創りましょう！
                 </div>
-                <div className="text-[10px] sm:text-sm md:text-base text-sky-800 font-bold">
+                <div className="text-[10px] sm:text-xs md:text-sm text-sky-800 font-bold">
                   CareKuru プロフェッショナル解放プロジェクト
                 </div>
               </div>
 
               {/* 中央ヨットシルエット */}
-              <div className="hidden sm:block absolute left-1/2 -translate-x-1/2 bottom-0 w-32 h-24 opacity-80 pointer-events-none">
+              <div className="hidden sm:block absolute left-1/2 -translate-x-1/2 bottom-0 w-28 h-20 opacity-80 pointer-events-none">
                 <svg viewBox="0 0 100 80" className="w-full h-full">
                   <path d="M45 10 L45 55 L20 55 Z" fill="#38bdf8" opacity="0.7" />
                   <path d="M48 20 L48 55 L75 55 Z" fill="#0284c7" opacity="0.6" />
@@ -588,12 +582,12 @@ function PitchSlideCanvas({
               </div>
 
               {/* QRコード案内 */}
-              <div className="relative z-10 flex items-center gap-2 sm:gap-4 shrink-0">
+              <div className="relative z-10 flex items-center gap-2 sm:gap-3 shrink-0">
                 <div className="text-right space-y-0.5">
-                  <div className="font-black text-xs sm:text-base md:text-lg text-slate-950 leading-tight">
+                  <div className="font-black text-xs sm:text-sm md:text-base text-slate-950 leading-tight">
                     創業パートナー<br />先行登録
                   </div>
-                  <div className="text-[9px] sm:text-xs md:text-sm text-emerald-800 font-black">
+                  <div className="text-[9px] sm:text-[10px] md:text-xs text-emerald-800 font-black">
                     ★各地域・ジャンル限定枠
                   </div>
                 </div>
@@ -606,7 +600,7 @@ function PitchSlideCanvas({
                   <img
                     src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=https%3A%2F%2Ftherapist.kotsuka-folio.workers.dev%2Fguide%2Fadmin%23partner-registration"
                     alt="創業パートナー先行登録QRコード"
-                    className="w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-xl p-1 bg-white border border-slate-300 shadow-xs transition group-hover:scale-105"
+                    className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-xl p-1 bg-white border border-slate-300 shadow-xs transition group-hover:scale-105"
                   />
                 </a>
               </div>
@@ -618,7 +612,7 @@ function PitchSlideCanvas({
       {/* ------------------------------------------------------------- */}
       {/* スライド共通フッター */}
       {/* ------------------------------------------------------------- */}
-      <div className="relative z-10 flex items-center justify-between border-t border-slate-200/70 pt-1.5 sm:pt-2 text-[10px] sm:text-sm text-slate-600 font-sans font-medium">
+      <div className="relative z-10 flex items-center justify-between border-t border-slate-200/70 pt-1 sm:pt-1.5 text-[10px] sm:text-xs md:text-sm text-slate-600 font-sans font-medium">
         <span className="truncate max-w-[70%]">
           CareKuru ｜ 大塚 和宏 / yaShine ｜ プロフェッショナル連合軍構想
         </span>
@@ -707,7 +701,7 @@ export default function PitchGuidePage() {
   return (
     <div className="space-y-8 pb-16 text-slate-800">
       {/* ============================================================= */}
-      {/* フルスクリーン・大画面スライドショーモーダル（心地よいテイスト） */}
+      {/* フルスクリーン・大画面スライドショーモーダル（16:9 ワイド） */}
       {/* ============================================================= */}
       {isFullscreenMode && (
         <div className="fixed inset-0 z-50 bg-slate-900/95 backdrop-blur-md text-slate-800 flex flex-col justify-between p-3 sm:p-6 animate-fadeIn select-none print:hidden">
@@ -744,8 +738,8 @@ export default function PitchGuidePage() {
             </div>
           </div>
 
-          {/* 中央スライド表示（余白圧縮・大迫力） */}
-          <div className="flex-1 flex items-center justify-center max-w-5xl mx-auto w-full my-2">
+          {/* 中央スライド表示（16:9 ワイド表示） */}
+          <div className="flex-1 flex items-center justify-center max-w-6xl mx-auto w-full my-2">
             <div className="w-full shadow-2xl rounded-2xl overflow-hidden ring-1 ring-white/10">
               <PitchSlideCanvas slideId={currentSlide.id} />
             </div>
@@ -787,7 +781,7 @@ export default function PitchGuidePage() {
       )}
 
       {/* ============================================================= */}
-      {/* ページヘッダー・サマリーカード（シンプルで心地よいトーン） */}
+      {/* ページヘッダー・サマリーカード（16:9 ＆ 心地よいトーン） */}
       {/* ============================================================= */}
       <div className="bg-gradient-to-br from-sky-50 via-white to-amber-50/50 rounded-3xl p-6 sm:p-10 shadow-xs border border-sky-100 relative overflow-hidden print-avoid-break">
         <div className="absolute right-0 top-0 w-80 h-80 bg-teal-100/30 rounded-full blur-3xl pointer-events-none" />
@@ -797,7 +791,7 @@ export default function PitchGuidePage() {
             <div className="flex flex-wrap items-center gap-2.5">
               <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black uppercase tracking-wider border border-emerald-200 flex items-center gap-1.5 font-mono">
                 <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                CareKuru 5分ピッチデック
+                CareKuru 16:9 ワイド版 5分ピッチデック
               </span>
               <span className="text-xs sm:text-sm text-slate-600 font-bold">
                 登壇者: 大塚 和宏 / yaShine ｜ 全6スライド
@@ -823,7 +817,7 @@ export default function PitchGuidePage() {
               </span>
             </h1>
             <p className="text-xs sm:text-sm text-slate-600 max-w-3xl leading-relaxed">
-              Instagramカルーセル投稿・Keynote発表に直結する、余白を削ぎ落として文字を最大限に大きくした超コンパクト版スライドです。
+              プロジェクター・大画面モニター・Keynote投影に完全準拠した 16:9 ワイド比率スライドです。
             </p>
           </div>
 
@@ -838,8 +832,8 @@ export default function PitchGuidePage() {
                 </strong>
               </div>
               <div>
-                <span className="text-slate-400 block text-xs">スライド構成</span>
-                <strong className="text-emerald-700 font-bold">全6スライド（大文字・高視認性）</strong>
+                <span className="text-slate-400 block text-xs">スライド比率</span>
+                <strong className="text-emerald-700 font-bold">16:9 ワイド画面</strong>
               </div>
               <div>
                 <span className="text-slate-400 block text-xs">アプリ名称</span>
@@ -929,7 +923,7 @@ export default function PitchGuidePage() {
       </div>
 
       {/* ============================================================= */}
-      {/* 各スライド詳細カード（迫力の大サイズ ＆ 登壇メモ） */}
+      {/* 各スライド詳細カード（16:9 ワイド表示 ＆ 登壇メモ） */}
       {/* ============================================================= */}
       <div className="space-y-10">
         {presentationSlides.map((slide, index) => (
@@ -992,20 +986,20 @@ export default function PitchGuidePage() {
               </div>
             </div>
 
-            <div className="p-4 sm:p-7 space-y-6">
-              {/* スライド画面プレビュー（余白削減・大迫力） */}
+            <div className="p-4 sm:p-6 md:p-7 space-y-6">
+              {/* スライド画面プレビュー（16:9 ワイド） */}
               <div className="space-y-2">
                 <div className="flex flex-wrap items-center justify-between text-xs font-bold text-slate-500 gap-2">
                   <span className="flex items-center gap-1.5 uppercase tracking-wider text-slate-700">
                     <Presentation className="w-4 h-4 text-emerald-600" />
-                    【スライド画面プレビュー（余白圧縮・文字特大版）】
+                    【16:9 ワイド スライド画面プレビュー】
                   </span>
                   <span className="bg-sky-50 text-sky-800 border border-sky-200 px-2.5 py-0.5 rounded-md text-[11px] font-mono">
                     Keynote推奨: {slide.keynoteFontSizes}
                   </span>
                 </div>
 
-                {/* プレビューコンポーネント（幅拡大） */}
+                {/* プレビューコンポーネント */}
                 <div className="max-w-4xl mx-auto shadow-sm rounded-2xl overflow-hidden">
                   <PitchSlideCanvas slideId={slide.id} />
                 </div>
