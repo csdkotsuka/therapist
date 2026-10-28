@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { UserRole } from '@/types';
@@ -22,7 +22,7 @@ import {
   RefreshCw,
   Zap,
 } from 'lucide-react';
-import { getLineConfig } from '@/lib/line';
+import { getLineConfig, triggerRealLineLogin, checkLiffLoginStatus, LineUserProfile } from '@/lib/line';
 
 interface LoginFormProps {
   initialRole?: UserRole;
@@ -54,6 +54,25 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
   const lineConfig = getLineConfig();
 
+  // ページ読み込み時にLINE/LIFFから認証済みで戻ってきたかチェック
+  useEffect(() => {
+    let isMounted = true;
+    async function checkLineReturn() {
+      try {
+        const lineProfile = await checkLiffLoginStatus();
+        if (lineProfile && isMounted) {
+          completeLineProfileAuth(lineProfile);
+        }
+      } catch (e) {
+        console.error('[LINE] Auth return check failed:', e);
+      }
+    }
+    checkLineReturn();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   // 各ロールの代表モックユーザー
   const representativeUsers: Record<UserRole, { id: string; name: string; email: string }> = {
     customer: {
@@ -73,13 +92,94 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     },
   };
 
+  // 本物のLINE認証から戻ったプロファイルでログイン・登録
+  const completeLineProfileAuth = (profile: LineUserProfile) => {
+    setAuthStep('authenticating');
+    setStatusText(`LINEアカウント（${profile.displayName}）で連携中...`);
+
+    setTimeout(() => {
+      const lineUserId = `line-${profile.userId}`;
+      let targetUserId = lineUserId;
+
+      if (activeRole === 'customer') {
+        addCustomerUser({
+          id: lineUserId,
+          name: profile.displayName,
+          email: `${profile.userId.substring(0, 8)}@line.user`,
+          role: 'customer',
+          avatar_url: profile.pictureUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(profile.displayName)}`,
+          address: '愛媛県松山市一番町',
+          lat: 33.8416,
+          lng: 132.7657,
+          phone: '090-0000-0000',
+          auth_provider: 'line',
+          line_user_id: profile.userId,
+        });
+      } else if (activeRole === 'therapist') {
+        const defaultTherapist = representativeUsers.therapist;
+        const found = allUsers.find((u) => u.id === defaultTherapist.id);
+        targetUserId = found ? found.id : defaultTherapist.id;
+        switchUser(targetUserId);
+      } else {
+        switchUser(representativeUsers.admin.id);
+      }
+
+      setAuthStep('success');
+      setStatusText(`LINE連携完了！ ${profile.displayName} 様としてログインしました`);
+
+      try {
+        confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
+      } catch (e) {
+        // fallback
+      }
+
+      setTimeout(() => {
+        if (onSuccess) onSuccess(activeRole);
+        if (redirectTo) {
+          router.push(redirectTo);
+        } else if (activeRole === 'admin') {
+          router.push('/admin');
+        } else if (activeRole === 'therapist') {
+          router.push('/therapist');
+        } else {
+          router.push('/');
+        }
+      }, 900);
+    }, 600);
+  };
+
   // ソーシャル認証（LINE / Google）クリック時
-  const handleSocialAuth = (provider: 'line' | 'google') => {
+  const handleSocialAuth = async (provider: 'line' | 'google') => {
     setSelectedProvider(provider);
     setErrorMessage('');
 
+    // LINE認証が押された場合
+    if (provider === 'line') {
+      const cfg = getLineConfig();
+      if (cfg.isConfigured) {
+        // 本物のLINE認証へ遷移
+        setStatusText('LINE公式ログイン画面へ接続しています...');
+        setAuthStep('authenticating');
+
+        const result = await triggerRealLineLogin();
+        if (result.success && result.profile) {
+          // すでにログイン済みで情報取得できた場合
+          completeLineProfileAuth(result.profile);
+          return;
+        }
+        // リダイレクトされるので画面はこのまま維持
+        return;
+      } else {
+        // 本番LINEキーがまだない場合の案内＆ダミーフォールバック
+        setErrorMessage(
+          '本番のLINEキー（NEXT_PUBLIC_LIFF_ID または NEXT_PUBLIC_LINE_CHANNEL_ID）がまだ読み込まれていません。本番のLINE画面を開くにはCloudflareの環境変数または.env.localを設定してください。'
+        );
+        return;
+      }
+    }
+
     if (activeRole === 'admin') {
-      setStatusText(`${provider === 'line' ? 'LINE' : 'Google'} 認証成功。Passkey生体認証へ進みます...`);
+      setStatusText(`${provider === 'google' ? 'Google' : 'LINE'} 認証成功。Passkey生体認証へ進みます...`);
       setAuthStep('authenticating');
       setTimeout(() => {
         setAuthStep('passkey_required');
@@ -138,7 +238,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       let targetUserName = '';
 
       if (customEmail && isReg && activeRole === 'customer') {
-        // 新規メール登録の場合、顧客を新規追加
         const newId = `customer-new-${Date.now()}`;
         const finalName = customName || '新規ご登録会員';
         addCustomerUser({
@@ -296,9 +395,19 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
       {/* エラーメッセージ */}
       {errorMessage && (
-        <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2 animate-fadeIn">
-          <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
-          <span>{errorMessage}</span>
+        <div className="mb-4 p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex flex-col gap-2 animate-fadeIn">
+          <div className="flex items-center gap-2 font-bold text-amber-800">
+            <AlertCircle className="w-4 h-4 shrink-0 text-amber-600" />
+            <span>ご案内</span>
+          </div>
+          <p className="leading-relaxed">{errorMessage}</p>
+          <button
+            type="button"
+            onClick={handleQuickDemoAuth}
+            className="self-start text-[11px] font-bold text-emerald-800 underline hover:text-emerald-950"
+          >
+            → 代わりにダミーアカウントですぐ試す
+          </button>
         </div>
       )}
 
@@ -386,7 +495,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               メールアドレスで{authMode === 'register' ? 'アカウント登録' : 'ログイン'}
             </h3>
             <p className="text-xs text-slate-500">
-              お使いのメールアドレスを入力してください（ダミー認証で即座にお試し可能）
+              お使いのメールアドレスを入力してください（即座にお試し可能）
             </p>
           </div>
 
@@ -456,28 +565,41 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               {activeRole === 'admin' && '運営本部・管理者ログイン'}
             </h3>
             <p className="text-xs text-slate-500">
-              {activeRole === 'customer' && 'LINE・Google・メールアドレスのいずれかで即座にお試しいただけます。'}
+              {activeRole === 'customer' && 'LINE・Google・メールアドレスのいずれかでログイン・登録できます。'}
               {activeRole === 'therapist' && 'LINE連携で予約承認・出張リクエストのリアルタイム通知を受け取れます。'}
               {activeRole === 'admin' && '※認証後、Passkey（生体認証）による承認が必要です。'}
             </p>
           </div>
 
           {/* ① LINE 登録 / ログインボタン (公式カラー #06C755) */}
-          <button
-            type="button"
-            onClick={() => handleSocialAuth('line')}
-            className="w-full py-3.5 px-4 rounded-2xl font-bold text-sm text-white shadow-sm transition-all active:scale-[0.98] flex items-center justify-center gap-3 relative overflow-hidden group hover:brightness-105"
-            style={{ backgroundColor: '#06C755' }}
-          >
-            {/* LINE 公式フキダシ風アイコン */}
-            <svg className="w-5 h-5 fill-current shrink-0" viewBox="0 0 24 24">
-              <path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 4.269 8.846 10.019 9.572.391.082.923.254 1.058.583.12.295.079.757.038 1.053l-.161 1.059c-.048.318-.237 1.243 1.09.678 1.327-.565 7.165-4.223 9.774-7.227 1.48-1.637 2.182-3.344 2.182-5.718z" />
-            </svg>
-            <span className="tracking-wide">
-              LINE で{authMode === 'register' ? '登録' : 'ログイン'}
-            </span>
-            <span className="absolute right-4 text-[11px] opacity-80 hidden sm:inline">おすすめ</span>
-          </button>
+          <div className="space-y-1">
+            <button
+              type="button"
+              onClick={() => handleSocialAuth('line')}
+              className="w-full py-3.5 px-4 rounded-2xl font-bold text-sm text-white shadow-sm transition-all active:scale-[0.98] flex items-center justify-center gap-3 relative overflow-hidden group hover:brightness-105"
+              style={{ backgroundColor: '#06C755' }}
+            >
+              {/* LINE 公式フキダシ風アイコン */}
+              <svg className="w-5 h-5 fill-current shrink-0" viewBox="0 0 24 24">
+                <path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 4.269 8.846 10.019 9.572.391.082.923.254 1.058.583.12.295.079.757.038 1.053l-.161 1.059c-.048.318-.237 1.243 1.09.678 1.327-.565 7.165-4.223 9.774-7.227 1.48-1.637 2.182-3.344 2.182-5.718z" />
+              </svg>
+              <span className="tracking-wide">
+                LINE で{authMode === 'register' ? '登録' : 'ログイン'}
+              </span>
+              <span className="absolute right-4 text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/20 text-white hidden sm:inline">
+                {lineConfig.isConfigured ? '本番連携' : 'キー設定必要'}
+              </span>
+            </button>
+
+            {/* LINEキー設定状態のヒント */}
+            <div className="text-[10px] text-center text-slate-400">
+              {lineConfig.isConfigured ? (
+                <span className="text-emerald-700 font-semibold">✓ LINE認証（LIFF / OAuth）が設定されています</span>
+              ) : (
+                <span>※LINEキー（LIFF ID等）がブラウザに未配信の場合は下のダミー体験をご利用ください</span>
+              )}
+            </div>
+          </div>
 
           {/* ② Google 登録 / ログインボタン (公式ホワイト & Gロゴ) */}
           <button
