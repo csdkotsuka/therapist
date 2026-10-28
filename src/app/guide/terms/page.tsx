@@ -20,7 +20,7 @@ export default function GuideTermsPage() {
           </span>
         </div>
         <h1 className="text-2xl sm:text-4xl font-black mt-2 text-white">
-          {currentBrand.japaneseName} プラットフォーム利用規約
+          {currentBrand.name} プラットフォーム利用規約
         </h1>
         <p className="text-sm sm:text-base text-emerald-100 mt-3 max-w-3xl leading-relaxed">
           LINE公式アカウント連携者、出張・店舗ご利用のすべてのお客様、および提携セラピストの皆様に共通して適用される公式利用規約です。

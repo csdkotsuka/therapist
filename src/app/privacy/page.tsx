@@ -21,7 +21,7 @@ export default function PrivacyPage() {
             />
             <div>
               <span className="text-lg font-black bg-gradient-to-r from-emerald-800 to-teal-700 dark:from-emerald-400 dark:to-teal-300 bg-clip-text text-transparent">
-                {currentBrand.japaneseName}
+                {currentBrand.name}
               </span>
               <span className="text-xs text-slate-400 dark:text-slate-500 ml-2 font-medium">プライバシーポリシー</span>
             </div>
@@ -55,7 +55,7 @@ export default function PrivacyPage() {
               <span>Privacy Policy</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1">
-              {currentBrand.japaneseName} プライバシーポリシー
+              {currentBrand.name} プライバシーポリシー
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">
               LINE公式アカウント連携、出張訪問・GPS、問診情報、および決済情報の取り扱いと保護方針について定めています。

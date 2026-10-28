@@ -20,7 +20,7 @@ export default function GuidePrivacyPage() {
           </span>
         </div>
         <h1 className="text-2xl sm:text-4xl font-black mt-2 text-white">
-          {currentBrand.japaneseName} プライバシーポリシー
+          {currentBrand.name} プライバシーポリシー
         </h1>
         <p className="text-sm sm:text-base text-blue-100 mt-3 max-w-3xl leading-relaxed">
           LINE公式アカウント連携（友だち登録・メッセージ送信・ユーザーID連携）、出張訪問・GPS、問診情報、および決済情報の取り扱いと保護方針について定めています。
