@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { formatPrice, formatDate } from '@/lib/geo';
-import { APP_BRANDS, AVAILABLE_ICONS, AVAILABLE_LOGOS } from '@/lib/branding';
+import { APP_BRANDS, AVAILABLE_ICONS } from '@/lib/branding';
 import { AppBrandId, BookingStatus } from '@/types';
 import {
   getChecklist,
@@ -114,34 +114,12 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
   const [isProcessingDecision, setIsProcessingDecision] = useState<boolean>(false);
   const [showAuditLogsPanel, setShowAuditLogsPanel] = useState<boolean>(false);
 
-  const handleSwitchBrand = async (brandId: AppBrandId) => {
-    const target = APP_BRANDS[brandId];
-    if (target) {
-      await updateCustomBranding({
-        appName: target.name,
-        appJapaneseName: target.japaneseName,
-        appCatchphrase: target.catchphrase,
-        appTagline: target.tagline,
-        selectedIcon: target.iconUrl,
-        selectedLogo: target.logoUrl,
-      });
-    }
-    await setAppBrand(brandId);
-    setBrandSaveMessage(`「${target.japaneseName}」のプリセット設定を一括適用しました。ここから個別に変更可能です。`);
-    setTimeout(() => {
-      setBrandSaveMessage(null);
-    }, 4500);
-  };
-
   const handleSelectIcon = async (iconUrl?: string) => {
-    await updateCustomBranding({ selectedIcon: iconUrl });
-    setBrandSaveMessage('アプリアイコン・ファビコンを更新しました。');
-    setTimeout(() => setBrandSaveMessage(null), 4000);
-  };
-
-  const handleSelectLogo = async (logoUrl?: string) => {
-    await updateCustomBranding({ selectedLogo: logoUrl });
-    setBrandSaveMessage('ヘッダー用ブランドロゴを更新しました。');
+    await updateCustomBranding({
+      selectedIcon: iconUrl,
+      selectedLogo: iconUrl,
+    });
+    setBrandSaveMessage('ブランドアイコン（アプリアイコン・ファビコン・ヘッダー共通）を更新しました。');
     setTimeout(() => setBrandSaveMessage(null), 4000);
   };
 
@@ -1972,7 +1950,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
         );
       })()}
 
-      {/* タブ: アプリ名・ロゴ・ブランド設定 (独立設定対応) */}
+      {/* タブ: アプリ名・ロゴ・ブランド設定 (アプリアイコン・ファビコン・ヘッダー共通) */}
       {activeTab === 'branding' && (
         <div className="space-y-8">
           {/* 上部ステータスカード: 採用中の組み合わせプレビュー */}
@@ -1981,10 +1959,10 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
               <div>
                 <h4 className="font-black text-slate-900 text-lg flex items-center gap-2">
                   <Palette className="w-5 h-5 text-emerald-600" />
-                  <span>ブランド・ロゴ・アイコン設定</span>
+                  <span>ブランドアイコン設定</span>
                 </h4>
                 <p className="text-xs text-slate-500 mt-1 max-w-2xl leading-relaxed">
-                  「アプリアイコン（＝ファビコン）」および「ブランドロゴ」を選択できます。選んだデザインが即座にアプリ全体（ヘッダー、ブラウザタブ、トップ画面）へ採用されます。公式アプリ名は<strong>「CareKuru」</strong>で確定・固定されています。
+                  アプリアイコン、ブラウザのファビコン、ヘッダーに配置されるブランドロゴはすべて共通のアイコンが適用されます。文字を含まない純粋なシンボルアイコンから選択できます。アプリ名は<strong>「CareKuru」</strong>で確定・固定されています。
                 </p>
               </div>
 
@@ -1999,13 +1977,13 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
 
             {/* 現在採用されている組み合わせプレビュー（3要素を横並び表示） */}
             <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {/* 1. 採用中アイコン（＝ファビコン） */}
+              {/* 1. 採用中アイコン（＝ファビコン・ヘッダー共通） */}
               <div className="bg-white p-3 rounded-xl border border-slate-200 flex items-center gap-3 shadow-2xs">
                 <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0 bg-slate-50 border border-slate-200 flex items-center justify-center p-1">
                   {currentBrand.iconUrl ? (
                     <img
                       src={currentBrand.iconUrl}
-                      alt={currentBrand.japaneseName}
+                      alt="採用中アイコン"
                       className="w-full h-full object-contain"
                     />
                   ) : (
@@ -2016,35 +1994,14 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                   )}
                 </div>
                 <div className="min-w-0">
-                  <span className="text-[10px] text-slate-400 font-bold block">採用中のアイコン (＝ファビコン)</span>
+                  <span className="text-[10px] text-slate-400 font-bold block">採用中アイコン（共通）</span>
                   <span className="text-xs font-black text-slate-900 truncate block">
-                    {AVAILABLE_ICONS.find((i) => i.url === currentBrand.iconUrl)?.label || 'カスタムアイコン'}
+                    {AVAILABLE_ICONS.find((i) => i.url === currentBrand.iconUrl)?.label || '公式シンボル'}
                   </span>
                 </div>
               </div>
 
-              {/* 2. 採用中ブランドロゴ */}
-              <div className="bg-white p-3 rounded-xl border border-slate-200 flex items-center gap-3 shadow-2xs">
-                <div className="h-10 px-2 rounded-xl overflow-hidden shrink-0 bg-slate-50 border border-slate-200 flex items-center justify-center max-w-[120px]">
-                  {currentBrand.logoUrl ? (
-                    <img
-                      src={currentBrand.logoUrl}
-                      alt="採用中ロゴ"
-                      className="max-h-full max-w-full object-contain"
-                    />
-                  ) : (
-                    <span className="text-[10px] text-slate-400 font-bold">テキスト表示</span>
-                  )}
-                </div>
-                <div className="min-w-0">
-                  <span className="text-[10px] text-slate-400 font-bold block">採用中のロゴ</span>
-                  <span className="text-xs font-black text-slate-900 truncate block">
-                    {AVAILABLE_LOGOS.find((l) => l.url === currentBrand.logoUrl)?.label || 'デフォルトロゴ'}
-                  </span>
-                </div>
-              </div>
-
-              {/* 3. 公式確定アプリ名 */}
+              {/* 2. 公式確定アプリ名 */}
               <div className="bg-white p-3 rounded-xl border border-slate-200 flex items-center gap-3 shadow-2xs">
                 <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center justify-center shrink-0 font-black text-sm">
                   Aa
@@ -2056,18 +2013,42 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                   </strong>
                 </div>
               </div>
+
+              {/* 3. ヘッダー実表示イメージ */}
+              <div className="bg-white p-3 rounded-xl border border-slate-200 flex items-center gap-3 shadow-2xs">
+                <div className="w-9 h-9 rounded-xl overflow-hidden shadow-xs border border-slate-200 bg-white flex items-center justify-center shrink-0 p-0.5">
+                  {currentBrand.iconUrl ? (
+                    <img
+                      src={currentBrand.iconUrl}
+                      alt="CareKuru"
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <div
+                      className="w-full h-full"
+                      dangerouslySetInnerHTML={{ __html: currentBrand.iconSvg }}
+                    />
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <span className="text-[10px] text-slate-400 font-bold block">ヘッダー表示イメージ</span>
+                  <span className="text-xs font-black text-slate-900 truncate block">
+                    CareKuru
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* 独立設定 1: アプリアイコン / ファビコン設定 */}
+          {/* ブランドアイコン選択設定（アプリアイコン・ファビコン・ヘッダー共通） */}
           <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 space-y-4">
             <div className="border-b border-slate-100 pb-3">
               <h5 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-                <span className="w-6 h-6 rounded-lg bg-teal-100 text-teal-800 flex items-center justify-center text-xs font-black">1</span>
-                <span>アプリアイコン ＆ ファビコン設定</span>
+                <Palette className="w-4 h-4 text-emerald-600" />
+                <span>ブランドアイコン設定（アプリアイコン・ファビコン・ヘッダー用ロゴ共通）</span>
               </h5>
               <p className="text-xs text-slate-500 mt-0.5">
-                ブラウザタブやホーム画面、ヘッダーに表示されるシンボルアイコンを選択します。
+                アプリアイコン、ブラウザのファビコン、ヘッダーに配置されるアイコンはすべて共通です。文字を含まない純粋なシンボルアイコンから選択できます。
               </p>
             </div>
 
@@ -2140,196 +2121,6 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                         <span>このアイコンを適用する →</span>
                       )}
                     </button>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* 独立設定 2: ブランドロゴ設定 */}
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 space-y-4">
-            <div className="border-b border-slate-100 pb-3">
-              <h5 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-                <span className="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-800 flex items-center justify-center text-xs font-black">2</span>
-                <span>ヘッダー用ブランドロゴ設定</span>
-              </h5>
-              <p className="text-xs text-slate-500 mt-0.5">ヘッダーや資料ページに掲載するロゴ画像のタイプを選択できます。</p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {AVAILABLE_LOGOS.map((logoItem) => {
-                const isSelected = currentBrand.logoUrl === logoItem.url;
-
-                return (
-                  <div
-                    key={logoItem.id}
-                    onClick={() => handleSelectLogo(logoItem.url)}
-                    className={`p-4 rounded-2xl transition-all cursor-pointer flex flex-col items-center justify-between text-center relative ${
-                      isSelected
-                        ? 'border-2 border-indigo-500 bg-indigo-50/70 ring-4 ring-indigo-500/20 shadow-md'
-                        : 'border border-slate-200 bg-white hover:border-indigo-400 hover:bg-slate-50/60 hover:shadow-md'
-                    }`}
-                  >
-                    {/* 上部状態バッジ */}
-                    <div className="w-full mb-3">
-                      {isSelected ? (
-                        <div className="w-full py-1 px-2 rounded-lg bg-indigo-600 text-white text-[11px] font-black flex items-center justify-center gap-1 shadow-xs">
-                          <Check className="w-3.5 h-3.5 stroke-[3]" />
-                          <span>現在適用中</span>
-                        </div>
-                      ) : (
-                        <div className="w-full py-1 px-2 rounded-lg bg-slate-100 text-slate-500 text-[11px] font-bold">
-                          未選択（選べます）
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="w-full h-24 rounded-2xl bg-white border border-slate-200 flex items-center justify-center p-2 shadow-xs overflow-hidden mb-3">
-                      <img
-                        src={logoItem.url}
-                        alt={logoItem.label}
-                        className="max-h-full max-w-full object-contain"
-                      />
-                    </div>
-
-                    <div className="space-y-1 mb-3">
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 block">
-                        {logoItem.badge}
-                      </span>
-                      <h6 className="font-bold text-xs text-slate-900 leading-tight">
-                        {logoItem.label}
-                      </h6>
-                    </div>
-
-                    <button
-                      type="button"
-                      className={`w-full py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 ${
-                        isSelected
-                          ? 'bg-indigo-600 text-white font-black shadow-xs cursor-default'
-                          : 'bg-slate-100 hover:bg-indigo-600 hover:text-white text-slate-700'
-                      }`}
-                    >
-                      {isSelected ? (
-                        <>
-                          <Check className="w-3.5 h-3.5 stroke-[3]" />
-                          <span>適用されています</span>
-                        </>
-                      ) : (
-                        <span>このロゴを適用する →</span>
-                      )}
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* ブランドプリセット一括切り替えカード */}
-          <div className="space-y-4">
-            <div className="border-b border-slate-200 pb-2">
-              <h5 className="font-bold text-slate-900 text-sm">プリセットブランド一括切り替え</h5>
-              <p className="text-xs text-slate-500">名称・カラー・ロゴ・アイコンをパッケージとして一括適用できます。</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {(['care_kuru', 'carearia_go_green', 'theralink', 'care_go_blue', 'careia_go_pink'] as AppBrandId[]).map((brandKey) => {
-                const brand = APP_BRANDS[brandKey];
-                if (!brand) return null;
-                const isSelected = appBrand === brandKey;
-
-                return (
-                  <div
-                    key={brandKey}
-                    className={`bg-white rounded-3xl border-2 transition-all duration-200 overflow-hidden flex flex-col justify-between ${
-                      isSelected
-                        ? 'border-emerald-500 ring-4 ring-emerald-500/20 shadow-xl bg-emerald-50/20 -translate-y-0.5'
-                        : 'border-slate-200 hover:border-slate-300 hover:shadow-md'
-                    }`}
-                  >
-                    <div>
-                      {/* 上部ステータスバッジ */}
-                      <div className="px-4 pt-3 pb-1 flex items-center justify-between">
-                        {isSelected ? (
-                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-600 text-white text-xs font-black shadow-xs">
-                            <Check className="w-3.5 h-3.5 stroke-[3]" />
-                            <span>現在適用中</span>
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[11px] font-bold">
-                            未選択
-                          </span>
-                        )}
-                        {brandKey === 'care_kuru' && (
-                          <span className="text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md">
-                            ★ 公式確定ブランド
-                          </span>
-                        )}
-                      </div>
-
-                      {/* 上部: アイコン単体プレビュー */}
-                      <div className="relative h-32 bg-gradient-to-b from-slate-50 to-slate-100/60 border-y border-slate-100 flex flex-col items-center justify-center p-3">
-                        <div className="w-16 h-16 rounded-2xl shadow-md overflow-hidden bg-white p-1 border border-slate-200 flex items-center justify-center">
-                          {brand.iconUrl ? (
-                            <img
-                              src={brand.iconUrl}
-                              alt={brand.japaneseName}
-                              className="w-full h-full object-contain"
-                            />
-                          ) : (
-                            <div
-                              className="w-full h-full"
-                              dangerouslySetInnerHTML={{ __html: brand.iconSvg }}
-                            />
-                          )}
-                        </div>
-                      </div>
-
-                      {/* ブランド情報 */}
-                      <div className="p-4 space-y-2">
-                        <div className="flex items-baseline justify-between gap-2">
-                          <h3 className="font-black text-lg text-slate-900 tracking-tight">
-                            {brand.japaneseName}
-                          </h3>
-                          <span
-                            className="text-[10px] font-black px-2 py-0.5 rounded-md uppercase"
-                            style={{ backgroundColor: `${brand.themeColor}15`, color: brand.themeColor }}
-                          >
-                            {brand.tagline}
-                          </span>
-                        </div>
-                        <p className="text-xs font-bold text-emerald-700">
-                          「{brand.catchphrase}」
-                        </p>
-                        <p className="text-[11px] text-slate-500 leading-relaxed">
-                          {brand.description}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* 下部: 適用切り替えボタン */}
-                    <div className="p-4 pt-0">
-                      <button
-                        onClick={() => handleSwitchBrand(brandKey)}
-                        disabled={isSelected}
-                        className={`w-full py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 ${
-                          isSelected
-                            ? 'bg-emerald-50 text-emerald-800 border border-emerald-500/50 cursor-default font-black'
-                            : 'bg-slate-900 hover:bg-slate-800 text-white shadow-xs hover:shadow-md active:scale-98 cursor-pointer'
-                        }`}
-                      >
-                        {isSelected ? (
-                          <>
-                            <Check className="w-3.5 h-3.5 text-emerald-600" />
-                            <span>適用中</span>
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                            <span>「{brand.japaneseName}」を一括適用</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
                   </div>
                 );
               })}

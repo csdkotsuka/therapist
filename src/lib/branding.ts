@@ -167,7 +167,7 @@ export const APP_BRANDS: Record<AppBrandId, AppBrandConfig> = {
     themeColor: '#059669',
     accentColor: '#0284c7',
     iconUrl: '/branding/icon_carearia_symbol.png',
-    logoUrl: '/branding/logo_carearia_text.png',
+    logoUrl: '/branding/icon_carearia_symbol.png',
     iconSvg: ICON_CARE_KURU,
   },
 
@@ -182,7 +182,7 @@ export const APP_BRANDS: Record<AppBrandId, AppBrandConfig> = {
     themeColor: '#0284c7',
     accentColor: '#16a34a',
     iconUrl: '/branding/icon_care_go_symbol.png',
-    logoUrl: '/branding/logo-care-go.png',
+    logoUrl: '/branding/icon_care_go_symbol.png',
     iconSvg: ICON_CARE_GO_BLUE,
   },
 
@@ -197,7 +197,7 @@ export const APP_BRANDS: Record<AppBrandId, AppBrandConfig> = {
     themeColor: '#059669',
     accentColor: '#10b981',
     iconUrl: '/branding/icon_carearia_symbol.png',
-    logoUrl: '/branding/logo_carearia_text.png',
+    logoUrl: '/branding/icon_carearia_symbol.png',
     iconSvg: ICON_CAREARIA_GO_GREEN,
   },
 
@@ -212,6 +212,7 @@ export const APP_BRANDS: Record<AppBrandId, AppBrandConfig> = {
     themeColor: '#e11d48',
     accentColor: '#f59e0b',
     iconUrl: '/branding/icon_careia_pink_symbol.png',
+    logoUrl: '/branding/icon_careia_pink_symbol.png',
     iconSvg: ICON_CAREIA_GO_PINK,
   },
 
@@ -226,7 +227,7 @@ export const APP_BRANDS: Record<AppBrandId, AppBrandConfig> = {
     themeColor: '#059669',
     accentColor: '#db2777',
     iconUrl: '/branding/icon_theralink_symbol.png',
-    logoUrl: '/branding/logo_theralink_text.png',
+    logoUrl: '/branding/icon_theralink_symbol.png',
     iconSvg: ICON_THERALINK,
   },
 
@@ -272,7 +273,7 @@ export const APP_BRANDS: Record<AppBrandId, AppBrandConfig> = {
 
 export const DEFAULT_BRAND_ID: AppBrandId = 'care_kuru';
 
-// 独立選択用: アプリアイコン（＝ファビコン）一覧（URL完全重複なし）
+// 独立選択用: アプリアイコン（＝ファビコン・ヘッダー共通シンボルアイコン）一覧（URL完全重複なし）
 export const AVAILABLE_ICONS = [
   {
     id: 'icon_care_kuru_symbol',
@@ -304,33 +305,8 @@ export const AVAILABLE_ICONS = [
   },
 ];
 
-// 独立選択用: ブランドロゴ画像一覧（URL完全重複なし）
-export const AVAILABLE_LOGOS = [
-  {
-    id: 'logo_care_kuru_full',
-    label: 'CareKuru フルロゴ (シンボル＋テキスト)',
-    url: '/branding/logo_carearia_text.png',
-    badge: '公式決定',
-  },
-  {
-    id: 'logo_theralink_full',
-    label: 'セラリンク フルロゴ',
-    url: '/branding/logo_theralink_text.png',
-    badge: '候補デザイン',
-  },
-  {
-    id: 'logo_care_go_full',
-    label: 'ケアゴー フルロゴ',
-    url: '/branding/logo-care-go.png',
-    badge: '候補デザイン',
-  },
-  {
-    id: 'logo_symbol_only',
-    label: 'シンボルマーク単体表示 (テキストなし)',
-    url: '/branding/icon_carearia_symbol.png',
-    badge: 'シンプル表示',
-  },
-];
+// アプリアイコンとヘッダー用ブランドロゴは同一アイコンを使用
+export const AVAILABLE_LOGOS = AVAILABLE_ICONS;
 
 /**
  * ブラウザのタイトルおよびファビコンを現在のブランド設定に合わせて動的に更新する

@@ -170,7 +170,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       appTagline: 'CareKuru',
       appCatchphrase: 'プロがあなたの元へ届く。出張・店舗ヘルスケア＆ボディケア',
       selectedIcon: '/branding/icon_carearia_symbol.png',
-      selectedLogo: '/branding/logo_carearia_text.png',
+      selectedLogo: '/branding/icon_carearia_symbol.png',
     };
 
     if (typeof window !== 'undefined') {
@@ -178,27 +178,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const saved = localStorage.getItem('carehub_custom_branding');
         if (saved) {
           const parsed = JSON.parse(saved);
-          // 以前の仮名称（CareKURU. / Care KURU / ケアクル / Carearia Go 等）が残っている場合は新決定名称 'CareKuru' に更新
-          const isLegacy =
-            !parsed.appName ||
-            parsed.appName === 'CareKURU.' ||
-            parsed.appJapaneseName === 'CareKURU.' ||
-            parsed.appName === 'Care KURU' ||
-            parsed.appJapaneseName === 'ケアクル' ||
-            parsed.appJapaneseName === 'Care KURU（ケア・クル）' ||
-            parsed.appName === 'Carearia Go' ||
-            parsed.appName === 'Carea Go' ||
-            parsed.appTagline === 'CareKURU.' ||
-            parsed.appTagline === 'CARE KURU' ||
-            parsed.appTagline === 'CAREARIA GO' ||
-            parsed.appTagline === 'CAREA GO' ||
-            parsed.appTagline === 'CARE GO';
+          let changed = false;
 
-          if (isLegacy) {
-            parsed.appName = defaultBranding.appName;
-            parsed.appJapaneseName = defaultBranding.appJapaneseName;
-            parsed.appTagline = defaultBranding.appTagline;
-            parsed.appCatchphrase = defaultBranding.appCatchphrase;
+          // 旧テキスト入りロゴ設定が残っている場合はアイコンシンボルに統一
+          if (
+            parsed.selectedLogo &&
+            (parsed.selectedLogo.includes('logo_') ||
+              parsed.selectedLogo.includes('logo-') ||
+              parsed.selectedLogo !== parsed.selectedIcon)
+          ) {
+            parsed.selectedLogo = parsed.selectedIcon || defaultBranding.selectedIcon;
+            changed = true;
+          }
+
+          // 以前の仮名称が残っている場合は新決定名称 'CareKuru' に更新
+          if (parsed.appName !== 'CareKuru' || parsed.appJapaneseName !== 'CareKuru') {
+            parsed.appName = 'CareKuru';
+            parsed.appJapaneseName = 'CareKuru';
+            parsed.appTagline = 'CareKuru';
+            changed = true;
+          }
+
+          if (changed) {
             localStorage.setItem('carehub_custom_branding', JSON.stringify(parsed));
           }
           return parsed;
@@ -212,14 +213,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // ベースブランドと独立カスタム設定を合成したアクティブブランド
   const baseBrand = APP_BRANDS[appBrand] || APP_BRANDS[DEFAULT_BRAND_ID];
+  const activeIcon = customBranding.selectedIcon || baseBrand.iconUrl;
   const currentBrand: AppBrandConfig = {
     ...baseBrand,
-    name: customBranding.appName || baseBrand.name,
-    japaneseName: customBranding.appJapaneseName || baseBrand.japaneseName,
+    name: 'CareKuru',
+    japaneseName: 'CareKuru',
     catchphrase: customBranding.appCatchphrase || baseBrand.catchphrase,
     tagline: customBranding.appTagline || baseBrand.tagline,
-    iconUrl: customBranding.selectedIcon !== undefined ? customBranding.selectedIcon : baseBrand.iconUrl,
-    logoUrl: customBranding.selectedLogo !== undefined ? customBranding.selectedLogo : baseBrand.logoUrl,
+    iconUrl: activeIcon,
+    logoUrl: activeIcon, // アプリアイコンとヘッダー用ブランドロゴは同一アイコンを使用
   };
 
   // ブランド変更時にブラウザタイトルとファビコンを即時更新
@@ -369,7 +371,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         .maybeSingle();
 
       if (!cbErr && dbCustomBrand?.value) {
-        setCustomBrandingState((prev) => ({ ...prev, ...dbCustomBrand.value }));
+        const val = { ...dbCustomBrand.value };
+        if (
+          val.selectedLogo &&
+          (val.selectedLogo.includes('logo_') || val.selectedLogo.includes('logo-'))
+        ) {
+          val.selectedLogo = val.selectedIcon || '/branding/icon_carearia_symbol.png';
+        }
+        val.appName = 'CareKuru';
+        val.appJapaneseName = 'CareKuru';
+        setCustomBrandingState((prev) => ({ ...prev, ...val }));
       }
 
       // 7. chat_messages (独立テーブルからチャット履歴を取得)
