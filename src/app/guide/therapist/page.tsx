@@ -217,6 +217,29 @@ export default function TherapistGuidePage() {
                 <strong>プライバシーの遵守:</strong> 訪問先で知り得た顧客の個人情報・住居環境・健康情報は厳格な守秘義務が課されます。
               </li>
             </ul>
+
+            <div className="pt-3 border-t border-rose-100 flex flex-wrap items-center gap-3">
+              <Link
+                href="/terms"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition"
+              >
+                <FileText className="w-3.5 h-3.5" />
+                <span>利用規約（全文）を確認する</span>
+              </Link>
+              <Link
+                href="/privacy"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-slate-300 bg-white text-slate-700 text-xs font-bold hover:bg-slate-50 transition"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
+                <span>プライバシーポリシーを確認する</span>
+              </Link>
+              <Link
+                href="/guide"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-800 text-xs font-bold hover:bg-emerald-100 transition ml-auto"
+              >
+                <span>← 総合案内ポータルへ戻る</span>
+              </Link>
+            </div>
           </div>
         </div>
       </div>

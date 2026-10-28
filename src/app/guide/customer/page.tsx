@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { useApp } from '@/context/AppContext';
 import {
   Search,
@@ -17,6 +18,7 @@ import {
   HeartPulse,
   Clock,
   HelpCircle,
+  FileText,
 } from 'lucide-react';
 
 export default function CustomerGuidePage() {
@@ -159,6 +161,29 @@ export default function CustomerGuidePage() {
                 <strong>チャット＆サポート体制:</strong> プラットフォーム管理本部がメッセージを24時間体制で監査・サポートしています。
               </li>
             </ul>
+
+            <div className="pt-3 border-t border-emerald-100 flex flex-wrap items-center gap-3">
+              <Link
+                href="/terms"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition"
+              >
+                <FileText className="w-3.5 h-3.5" />
+                <span>利用規約（全文）を確認する</span>
+              </Link>
+              <Link
+                href="/privacy"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-slate-300 bg-white text-slate-700 text-xs font-bold hover:bg-slate-50 transition"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
+                <span>プライバシーポリシーを確認する</span>
+              </Link>
+              <Link
+                href="/guide"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-blue-300 bg-blue-50 text-blue-800 text-xs font-bold hover:bg-blue-100 transition ml-auto"
+              >
+                <span>← 総合案内ポータルへ戻る</span>
+              </Link>
+            </div>
           </div>
         </div>
       </div>

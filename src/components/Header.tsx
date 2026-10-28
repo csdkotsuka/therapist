@@ -782,6 +782,33 @@ export const Header: React.FC = () => {
               )}
             </div>
 
+            {/* 規約・プライバシー・総合ガイドリンク */}
+            <div className="flex items-center justify-center gap-2.5 text-[11px] text-slate-500 dark:text-slate-400">
+              <Link
+                href="/guide"
+                onClick={() => setIsDrawerOpen(false)}
+                className="hover:underline hover:text-emerald-700 dark:hover:text-emerald-400"
+              >
+                総合ご利用ガイド
+              </Link>
+              <span>•</span>
+              <Link
+                href="/terms"
+                onClick={() => setIsDrawerOpen(false)}
+                className="hover:underline hover:text-emerald-700 dark:hover:text-emerald-400"
+              >
+                利用規約
+              </Link>
+              <span>•</span>
+              <Link
+                href="/privacy"
+                onClick={() => setIsDrawerOpen(false)}
+                className="hover:underline hover:text-emerald-700 dark:hover:text-emerald-400"
+              >
+                プライバシー
+              </Link>
+            </div>
+
             {/* コピーライトクレジット (顧客画面のWebフッターをメニュー内に集約) */}
             <div className="pt-2 text-center text-[10px] text-slate-400 dark:text-slate-600 border-t border-slate-200/60 dark:border-white/5">
               <span>© {currentBrand.name}. All rights reserved.</span>

@@ -9,6 +9,9 @@ Care KURU では、ロールごとに適切な権限と閲覧範囲を定めた�
 | [③ 顧客向け ご利用ガイド](./03_customer_guide.md) | 一般顧客・利用者 | **他のマニュアルへのリンクなし**（安心の顧客専用設計） |
 
 Webブラウザ上で閲覧する場合は、アプリ内の以下のURLからもアクセスできます：
-- 管理者向けページ: `/guide/admin`
-- セラピスト向けページ: `/guide/therapist`
-- 顧客向けページ: `/guide/customer`
+- 総合案内ポータル（LINE公式アカウント紐付け・案内ハブ）: `/guide`
+- 利用規約（LINE連携・公式利用規約）: `/terms`（または `/guide/terms`）
+- プライバシーポリシー（個人情報・LINE連携保護方針）: `/privacy`（または `/guide/privacy`）
+- セラピスト向け実務マニュアル: `/guide/therapist`
+- 顧客向けご利用ガイド: `/guide/customer`
+- 管理者向け役員ポータル: `/guide/admin`
