@@ -1,85 +1,80 @@
-import { NextResponse } from 'next/server';
-import { getEffectiveLineConfig } from '@/lib/server/lineServer';
+import { NextResponse, type NextRequest } from 'next/server';
+import {
+  getEffectiveLineConfig,
+  issueLineLoginToken,
+  LINE_OAUTH_COOKIE,
+  toSignupRole,
+  verifyLineIdToken,
+} from '@/lib/server/lineServer';
+import { ConfigError } from '@/lib/server/supabaseAdmin';
+import { safeRedirectPath } from '@/lib/redirect';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: Request) {
+interface OAuthCookie {
+  state?: string;
+  nonce?: string;
+  role?: string;
+  redirect?: string;
+}
+
+function fail(origin: string, code: string) {
+  const res = NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(code)}`, origin));
+  res.cookies.delete({ name: LINE_OAUTH_COOKIE, path: '/api/auth/line' });
+  return res;
+}
+
+// LINE ログインの戻り先: state 照合 → コード交換 → ID トークン検証（nonce 照合）→ Supabase セッション発行
+export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const code = url.searchParams.get('code');
-  const stateStr = url.searchParams.get('state');
-  const error = url.searchParams.get('error');
+  const state = url.searchParams.get('state');
 
-  if (error || !code) {
-    return NextResponse.redirect(`${url.origin}/login?error=${encodeURIComponent(error || 'AUTH_CANCELLED')}`);
-  }
+  if (url.searchParams.get('error') || !code || !state) return fail(url.origin, 'AUTH_CANCELLED');
 
-  let role = 'customer';
-  let redirectTarget = '/';
-  if (stateStr) {
-    try {
-      const stateObj = JSON.parse(Buffer.from(stateStr, 'base64').toString('utf-8'));
-      if (stateObj.role) role = stateObj.role;
-      if (stateObj.redirect) redirectTarget = stateObj.redirect;
-    } catch (e) {
-      // ignore
-    }
+  let saved: OAuthCookie = {};
+  try {
+    const raw = req.cookies.get(LINE_OAUTH_COOKIE)?.value;
+    saved = raw ? (JSON.parse(raw) as OAuthCookie) : {};
+  } catch {
+    saved = {};
   }
+  if (!saved.state || saved.state !== state || !saved.nonce) return fail(url.origin, 'INVALID_STATE');
 
   const { channelId, channelSecret } = getEffectiveLineConfig();
-  const callbackUrl = `${url.origin}/api/auth/line/callback`;
+  if (!channelId || !channelSecret) return fail(url.origin, 'LINE_NOT_CONFIGURED');
 
   try {
-    // 1. アクセストークンを取得
     const tokenRes = await fetch('https://api.line.me/oauth2/v2.1/token', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
         grant_type: 'authorization_code',
         code,
-        redirect_uri: callbackUrl,
+        redirect_uri: `${url.origin}/api/auth/line/callback`,
         client_id: channelId,
         client_secret: channelSecret,
       }),
     });
+    if (!tokenRes.ok) return fail(url.origin, 'TOKEN_EXCHANGE_FAILED');
+    const { id_token: idToken } = (await tokenRes.json()) as { id_token?: string };
 
-    if (!tokenRes.ok) {
-      const errBody = await tokenRes.text();
-      console.error('[LINE Token Error]', errBody);
-      return NextResponse.redirect(`${url.origin}/login?error=TOKEN_EXCHANGE_FAILED`);
-    }
+    const line = idToken ? await verifyLineIdToken(idToken, saved.nonce) : null;
+    if (!line) return fail(url.origin, 'ID_TOKEN_INVALID');
 
-    const tokenData = await tokenRes.json();
-    const accessToken = tokenData.access_token;
+    const tokenHash = await issueLineLoginToken(line, toSignupRole(saved.role));
+    const next = safeRedirectPath(saved.redirect);
+    const target = new URL('/auth/callback', url.origin);
+    target.searchParams.set('token_hash', tokenHash);
+    target.searchParams.set('type', 'magiclink');
+    target.searchParams.set('next', next);
 
-    // 2. プロフィール情報を取得
-    const profileRes = await fetch('https://api.line.me/v2/profile', {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-
-    if (!profileRes.ok) {
-      return NextResponse.redirect(`${url.origin}/login?error=PROFILE_FETCH_FAILED`);
-    }
-
-    const profile = await profileRes.json();
-
-    // 3. ログイン画面へリダイレクトし、クライアント側でアカウント作成・ログイン完了させる
-    const returnUrl = new URL(`${url.origin}/login`);
-    returnUrl.searchParams.set('line_auth_success', '1');
-    returnUrl.searchParams.set('line_uid', profile.userId);
-    returnUrl.searchParams.set('line_name', profile.displayName);
-    if (profile.pictureUrl) {
-      returnUrl.searchParams.set('line_avatar', profile.pictureUrl);
-    }
-    returnUrl.searchParams.set('role', role);
-    returnUrl.searchParams.set('redirect', redirectTarget);
-
-    return NextResponse.redirect(returnUrl.toString());
-  } catch (err: any) {
-    console.error('[LINE Callback Error]', err);
-    return NextResponse.redirect(`${url.origin}/login?error=SERVER_ERROR`);
+    const res = NextResponse.redirect(target);
+    res.cookies.delete({ name: LINE_OAUTH_COOKIE, path: '/api/auth/line' });
+    return res;
+  } catch (err) {
+    if (err instanceof ConfigError) return fail(url.origin, 'SERVER_NOT_CONFIGURED');
+    console.error('[LINE callback] failed', err instanceof Error ? err.message : err);
+    return fail(url.origin, 'SERVER_ERROR');
   }
 }

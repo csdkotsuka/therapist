@@ -33,8 +33,8 @@ export function TherapistSectionClient({
     : 'requests';
 
   const therapists = allUsers.filter((u) => u.role === 'therapist');
-  const targetUser = allUsers.find((u) => u.id === therapistId) || therapists[0];
-  const isAdminViewer = currentUser.role === 'admin';
+  const targetUser = allUsers.find((u) => u.id === therapistId);
+  const isAdminViewer = currentUser?.role === 'admin';
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50/50">
@@ -61,7 +61,8 @@ export function TherapistSectionClient({
             </div>
           </div>
 
-          {/* 右側: セラピスト切替セレクター (幅を制御して左側を圧迫しない) */}
+          {/* 右側: セラピスト切替セレクター（管理者のみ。アクセス権はサーバー側 layout で確認済み） */}
+          {isAdminViewer && (
           <div className="flex items-center gap-1.5 shrink-0">
             <label htmlFor="therapist-switch-select" className="text-emerald-300 text-[11px] hidden sm:inline shrink-0">
               切替:
@@ -87,12 +88,13 @@ export function TherapistSectionClient({
               })}
             </select>
           </div>
+          )}
         </div>
       </div>
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        <TherapistView therapistId={targetUser?.id} activeSection={activeSection} />
+        <TherapistView therapistId={therapistId} activeSection={activeSection} />
       </main>
 
       {/* Footer */}

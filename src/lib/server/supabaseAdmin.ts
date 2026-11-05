@@ -2,6 +2,7 @@
 // サーバー専用: service_role クライアントと呼び出しユーザーの認証
 // ※ Route Handler からのみ import すること（クライアントコンポーネントから import 禁止）
 // ========================================================
+import 'server-only';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 export class ConfigError extends Error {}

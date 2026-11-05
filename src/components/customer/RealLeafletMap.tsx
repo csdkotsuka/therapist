@@ -5,6 +5,7 @@ import { useApp } from '@/context/AppContext';
 import { calculateDistanceKm, estimateTravelTimeMinutes, formatPrice } from '@/lib/geo';
 import { MapPin, Navigation, Compass, Star, Clock, Home, Building, Sparkles } from 'lucide-react';
 import L from 'leaflet';
+import { escapeHtml, safeUrlAttr } from '@/lib/escapeHtml';
 
 import { TherapistProfile } from '@/types';
 
@@ -93,7 +94,7 @@ export const RealLeafletMap: React.FC<RealLeafletMapProps> = ({
     });
 
     L.marker([userLocation.lat, userLocation.lng], { icon: userIcon })
-      .bindTooltip(`📍 あなたの現在地 (${userLocation.name})`, {
+      .bindTooltip(`📍 あなたの現在地 (${escapeHtml(userLocation.name)})`, {
         permanent: false,
         direction: 'top',
         className: 'font-sans text-xs font-bold rounded-lg px-2 py-1',
@@ -121,7 +122,7 @@ export const RealLeafletMap: React.FC<RealLeafletMapProps> = ({
             border: 2px solid ${tp.is_visit_based ? '#059669' : '#0d9488'};
             overflow: hidden;
           ">
-            <img src="${user?.avatar_url}" style="width: 100%; height: 100%; border-radius: 10px; object-fit: cover;" />
+            <img src="${safeUrlAttr(user?.avatar_url)}" alt="" style="width: 100%; height: 100%; border-radius: 10px; object-fit: cover;" />
           </div>
           <div style="
             position: absolute; 

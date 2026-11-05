@@ -7,16 +7,18 @@ import { isTherapistCertified } from '@/lib/verification';
 
 export function TherapistIdRedirectClient({ therapistId }: { therapistId: string }) {
   const router = useRouter();
-  const { therapistProfiles } = useApp();
+  const { therapistProfiles, authReady, isLoadingDb } = useApp();
+  const loaded = authReady && !isLoadingDb && Boolean(therapistProfiles[therapistId]);
 
   useEffect(() => {
-    if (therapistId) {
+    // 審査状況（認定済みか）を読み込んでから遷移先タブを決める
+    if (therapistId && loaded) {
       const tp = therapistProfiles[therapistId];
       const certified = isTherapistCertified(tp);
       const targetSection = certified ? 'requests' : 'verification';
       router.replace(`/therapist/${therapistId}/${targetSection}`);
     }
-  }, [therapistId, therapistProfiles, router]);
+  }, [therapistId, therapistProfiles, router, loaded]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white">

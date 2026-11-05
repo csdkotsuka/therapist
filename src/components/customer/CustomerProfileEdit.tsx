@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
+import type { Profile } from '@/types';
 import {
   geocodeAddress,
   getCurrentGpsPosition,
@@ -22,7 +23,13 @@ import {
 } from 'lucide-react';
 
 export const CustomerProfileEdit: React.FC = () => {
-  const { currentUser, updateUserProfile } = useApp();
+  const { currentUser } = useApp();
+  if (!currentUser) return null;
+  return <CustomerProfileEditInner key={currentUser.id} currentUser={currentUser} />;
+};
+
+const CustomerProfileEditInner: React.FC<{ currentUser: Profile }> = ({ currentUser }) => {
+  const { updateUserProfile } = useApp();
 
   const [name, setName] = useState(currentUser.name || '');
   const [phone, setPhone] = useState(currentUser.phone || '');

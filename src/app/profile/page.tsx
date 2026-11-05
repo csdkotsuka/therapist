@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { Header } from '@/components/Header';
 import { CustomerProfileEdit } from '@/components/customer/CustomerProfileEdit';
@@ -17,13 +16,12 @@ import {
 } from 'lucide-react';
 
 export default function ProfilePage() {
-  const router = useRouter();
   const { currentUser, isLoggedIn, logout, currentBrand } = useApp();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     if (confirm('ログアウトしますか？')) {
-      logout();
-      router.push('/');
+      await logout();
+      window.location.assign('/');
     }
   };
 

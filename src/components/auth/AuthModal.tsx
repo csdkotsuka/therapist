@@ -10,7 +10,7 @@ interface AuthModalProps {
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
-  const { currentBrand, currentUser } = useApp();
+  const { currentBrand } = useApp();
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-fadeIn">
@@ -48,13 +48,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
             <h2 className="text-base font-black text-slate-900 dark:text-white tracking-tight leading-tight">
               {currentBrand.japaneseName} ログイン
             </h2>
-            <p className="text-[10px] text-slate-400">スムーズ認証（LINE / Google / Passkey）</p>
+            <p className="text-[10px] text-slate-400">LINE / Google / メールアドレス</p>
           </div>
         </div>
 
         {/* ログインフォームコンポーネント */}
         <LoginForm
-          initialRole={currentUser.role === 'admin' ? 'admin' : currentUser.role === 'therapist' ? 'therapist' : 'customer'}
+          initialRole="customer"
           onSuccess={() => {
             setTimeout(() => {
               onClose();

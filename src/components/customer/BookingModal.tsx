@@ -101,7 +101,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   };
 
   const [visitAddress, setVisitAddress] = useState<string>(
-    currentUser.address || '愛媛県松山市一番町1-1-1'
+    currentUser?.address || ''
   );
   const [notes, setNotes] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -164,18 +164,20 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   };
 
   const handleSubmitBooking = async () => {
+    if (!currentUser) {
+      window.location.assign(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+      return;
+    }
     setIsSubmitting(true);
     try {
       const scheduledAt = getCalculatedDate().toISOString();
       const newBooking = await createBooking({
-        customer_id: currentUser.id,
         therapist_id: therapistId,
         service_id: currentService.id,
         scheduled_at: scheduledAt,
         booking_type: bookingType,
         visit_address: bookingType === 'visit' ? visitAddress : therapist.store_address || therapist.address,
         customer_notes: notes,
-        total_amount: currentService.price,
       });
 
       setCreatedBookingId(newBooking.id);
@@ -191,8 +193,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
         console.error(err);
       }
     } catch (e) {
-      console.error(e);
-      alert('予約リクエストの送信に失敗しました。');
+      alert(e instanceof Error ? e.message : '予約リクエストの送信に失敗しました。');
     } finally {
       setIsSubmitting(false);
     }

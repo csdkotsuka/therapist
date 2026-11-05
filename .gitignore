@@ -40,3 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Supabase CLI（リンク情報などローカル専用）
+supabase/.temp/

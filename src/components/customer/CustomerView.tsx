@@ -1267,11 +1267,17 @@ export const CustomerView: React.FC = () => {
 
                         {/* 評価 & レビュー件数 */}
                         <div className="flex items-center gap-1.5 mt-0.5 text-xs">
-                          <div className="flex items-center text-amber-500 font-bold">
-                            <Star className="w-3.5 h-3.5 fill-amber-400" />
-                            <span className="ml-1 text-slate-900 font-black">{tp.rating_avg}</span>
-                          </div>
-                          <span className="text-slate-400 text-[11px]">({tp.reviews_count}件)</span>
+                          {tp.reviews_count > 0 ? (
+                            <>
+                              <div className="flex items-center text-amber-500 font-bold">
+                                <Star className="w-3.5 h-3.5 fill-amber-400" />
+                                <span className="ml-1 text-slate-900 font-black">{tp.rating_avg.toFixed(1)}</span>
+                              </div>
+                              <span className="text-slate-400 text-[11px]">({tp.reviews_count}件)</span>
+                            </>
+                          ) : (
+                            <span className="text-slate-400 text-[11px]">口コミはまだありません</span>
+                          )}
                         </div>
 
                         {/* 距離 & 移動時間 */}
@@ -1409,11 +1415,15 @@ export const CustomerView: React.FC = () => {
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2.5 text-xs">
-                        <div className="flex items-center text-amber-500 font-bold">
-                          <Star className="w-3.5 h-3.5 fill-amber-400" />
-                          <span className="ml-1 text-slate-900 font-black">{tp.rating_avg}</span>
-                          <span className="text-slate-400 font-normal ml-0.5">({tp.reviews_count}件)</span>
-                        </div>
+                        {tp.reviews_count > 0 ? (
+                          <div className="flex items-center text-amber-500 font-bold">
+                            <Star className="w-3.5 h-3.5 fill-amber-400" />
+                            <span className="ml-1 text-slate-900 font-black">{tp.rating_avg.toFixed(1)}</span>
+                            <span className="text-slate-400 font-normal ml-0.5">({tp.reviews_count}件)</span>
+                          </div>
+                        ) : (
+                          <span className="text-slate-400 text-[11px]">口コミはまだありません</span>
+                        )}
 
                         <div className="flex items-center gap-1.5">
                           {tp.is_visit_based && (
@@ -1514,7 +1524,7 @@ export const CustomerView: React.FC = () => {
         <BookingChatModal
           booking={chatBooking}
           onClose={() => setChatBooking(null)}
-          activeUserId={currentUser.id}
+          activeUserId={currentUser?.id}
           viewerRole="customer"
         />
       )}

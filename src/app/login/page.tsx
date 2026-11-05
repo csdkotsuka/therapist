@@ -61,20 +61,20 @@ function LoginContent() {
             スムーズ認証ログイン
           </h2>
           <p className="text-xs text-slate-500 mt-1">
-            LINE / Google / Passkey で素早く安全にアクセス
+            LINE / Google / メールアドレスで安全にアクセス
           </p>
         </div>
 
         {/* ログインカード */}
         <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/60 border border-slate-200/80 p-6 sm:p-8 backdrop-blur-md">
-          <LoginForm initialRole={validRole} redirectTo={redirectParam} />
+          <LoginForm initialRole={validRole} redirectTo={redirectParam} errorCode={searchParams.get('error') ?? undefined} />
         </div>
 
         {/* フッターセキュリティ注記 */}
         <div className="mt-6 text-center">
           <div className="inline-flex items-center gap-1.5 text-[11px] font-medium text-slate-400">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-            <span>FIDO2 / WebAuthn 対応・暗号化セキュア接続</span>
+            <span>暗号化通信（HTTPS）で保護されています</span>
           </div>
         </div>
       </div>

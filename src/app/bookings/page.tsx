@@ -66,7 +66,7 @@ export default function BookingsPage() {
   }, [showPolicyModal, cancellingBooking]);
 
   // ログインユーザーの予約一覧
-  const myBookings = bookings.filter((b) => b.customer_id === currentUser.id);
+  const myBookings = bookings.filter((b) => b.customer_id === currentUser?.id);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -179,7 +179,7 @@ export default function BookingsPage() {
               const service = services.find((s) => s.id === b.service_id);
               const hasReviewed = reviews.some((r) => r.booking_id === b.id);
               const unreadCount = messages.filter(
-                (m) => m.booking_id === b.id && m.receiver_id === currentUser.id && !m.is_read
+                (m) => m.booking_id === b.id && m.receiver_id === currentUser?.id && !m.is_read
               ).length;
 
               return (
@@ -441,7 +441,7 @@ export default function BookingsPage() {
         <BookingChatModal
           booking={chatBooking}
           onClose={() => setChatBooking(null)}
-          activeUserId={currentUser.id}
+          activeUserId={currentUser?.id}
           viewerRole="customer"
         />
       )}

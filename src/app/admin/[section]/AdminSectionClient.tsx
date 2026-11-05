@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import Link from 'next/link';
+import React from 'react';
 import { useApp } from '@/context/AppContext';
 import { Header } from '@/components/Header';
 import { AdminView, AdminSection } from '@/components/admin/AdminView';
@@ -18,22 +17,13 @@ const VALID_SECTIONS: AdminSection[] = [
 ];
 
 export function AdminSectionClient({ rawSection }: { rawSection: string }) {
-  const { currentUser, switchUser, allUsers, currentBrand } = useApp();
+  const { currentBrand } = useApp();
 
   const activeSection: AdminSection = VALID_SECTIONS.includes(rawSection as AdminSection)
     ? (rawSection as AdminSection)
     : 'therapists';
 
-  // もし現在のユーザーが管理者でない場合、管理者アカウントに切り替え
-  useEffect(() => {
-    if (currentUser.role !== 'admin') {
-      const admin = allUsers.find((u) => u.role === 'admin');
-      if (admin) {
-        switchUser(admin.id);
-      }
-    }
-  }, [currentUser.role, allUsers, switchUser]);
-
+  // 管理者かどうかはサーバー側（src/app/admin/layout.tsx）で確認済み
   return (
     <div className="min-h-screen flex flex-col bg-slate-50/50">
       <Header />

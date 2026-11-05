@@ -76,7 +76,6 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
     updateBookingStatus,
     refreshFromSupabase,
     isLoadingDb,
-    switchUser,
     appBrand,
     currentBrand,
     customBranding,
@@ -86,8 +85,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
     verificationLogs,
     completeReviewFeePayment,
     completeStripeEkyc,
-    submitTermsAgreement,
-    uploadVerificationDoc,
+    paymentMode,
     getVerificationDocPreviewUrl,
     approveTherapistVerification,
     rejectTherapistVerification,
@@ -1017,31 +1015,6 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
               }
             };
 
-            // デモ・検証用: 未完了のStep3書類をワンクリックでサンプル提出するヘルパー
-            const handleSimulateStep3All = async () => {
-              const cleanName = selUser.name.replace(/\s*\(.*?\)\s*$/, '').trim();
-              await submitTermsAgreement(selectedTherapistId, cleanName, approvalQualificationType);
-              // サンプルSVGからFileオブジェクトを生成して uploadVerificationDoc を呼ぶ
-              const qSvgUrl = sampleDocumentDataUrl('qualification', cleanName);
-              const iSvgUrl = sampleDocumentDataUrl('insurance', cleanName);
-              const qRes = await fetch(qSvgUrl);
-              const qBlob = await qRes.blob();
-              const qFile = new File([qBlob], `${cleanName}_国家資格免許証.png`, { type: 'image/png' });
-              await uploadVerificationDoc(selectedTherapistId, 'qualification', qFile);
-
-              const iRes = await fetch(iSvgUrl);
-              const iBlob = await iRes.blob();
-              const iFile = new File([iBlob], `${cleanName}_賠償責任保険加入証明.pdf`, { type: 'application/pdf' });
-              await uploadVerificationDoc(selectedTherapistId, 'insurance', iFile);
-
-              setNameMatchConfirmed(true);
-              setInsuranceConfirmed(true);
-              setVerificationFeedback({
-                type: 'success',
-                text: 'Step 3（電子誓約書署名 ＋ 保有資格証 ＋ 損害賠償責任保険証票）の提出をシミュレートしました。このまま Step 4 の承認＆自動削除を実行できます。',
-              });
-            };
-
             return (
               <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
                 <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200">
@@ -1123,8 +1096,8 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                       </div>
                     </div>
 
-                    {/* 未完了ステップがある場合のクイックシミュレーションバー（動作確認用） */}
-                    {!selCertified && selStage !== 'ready' && (
+                    {/* 決済がダミーモードの間だけ: Step1・2（決済・本人確認）の完了を反映する操作 */}
+                    {paymentMode === 'dummy' && !selCertified && (selTp?.payment_status !== 'completed' || !selTp?.is_identity_verified) && (
                       <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 space-y-3">
                         <div className="flex items-center justify-between">
                           <div>
@@ -1132,7 +1105,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                               ⚡ 検証・シミュレーション操作（未完了ステップを即時進める）
                             </span>
                             <span className="text-[11px] text-amber-700">
-                              セラピスト本人の画面（またはStripe Webhook）で行われる Step 1〜Step 3 の手続きをこの画面からワンクリックで再現できます。
+                              決済がダミーモードの間は、Step 1（審査手数料）と Step 2（本人確認）の完了をこの画面から反映できます。書類提出（Step 3）はセラピスト本人が行います。
                             </span>
                           </div>
                         </div>
@@ -1159,15 +1132,6 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                             >
                               <ShieldCheck className="w-3.5 h-3.5" />
                               <span>【Step 2】Stripe Webhook (payouts_enabled: true) 完了を反映</span>
-                            </button>
-                          )}
-                          {(!selOb?.terms_agreed_at || !selOb?.qualification_file_path || !selOb?.insurance_file_path) && (
-                            <button
-                              onClick={handleSimulateStep3All}
-                              className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition flex items-center gap-1.5"
-                            >
-                              <Upload className="w-3.5 h-3.5" />
-                              <span>【Step 3】電子誓約書同意＋資格証・保険証アップロードを反映</span>
                             </button>
                           )}
                         </div>
@@ -1614,20 +1578,6 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                       </div>
                     </div>
 
-                    {/* この顧客として表示（右端ボタン） */}
-                    <div className="shrink-0">
-                      <button
-                        onClick={() => {
-                          switchUser(c.id);
-                          router.push('/');
-                        }}
-                        className="px-3 py-1.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs whitespace-nowrap cursor-pointer"
-                        title="この顧客の視点に切り替えて操作する"
-                      >
-                        <Users className="w-3.5 h-3.5" />
-                        <span>この顧客として表示</span>
-                      </button>
-                    </div>
                   </div>
                 );
               })
@@ -1757,14 +1707,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
 
                     if (isCustomer) {
                       return (
-                        <button
-                          onClick={() => {
-                            switchUser(user.id);
-                            router.push('/');
-                          }}
-                          className="inline-flex items-center gap-1.5 p-1 -m-1 rounded-lg hover:bg-emerald-50 group transition text-left cursor-pointer"
-                          title="この顧客として代理ログイン表示する"
-                        >
+                        <span className="inline-flex items-center gap-1.5 p-1 -m-1 rounded-lg group text-left">
                           <img
                             src={user.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'}
                             alt=""
@@ -1777,7 +1720,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                             顧客
                           </span>
                           <Users className="w-3 h-3 text-slate-400 group-hover:text-emerald-600" />
-                        </button>
+                        </span>
                       );
                     }
 
@@ -1922,17 +1865,10 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                       <div className="space-y-1">
                         <div className="flex flex-wrap items-center gap-2">
                           {customer ? (
-                            <button
-                              onClick={() => {
-                                switchUser(customer.id);
-                                router.push('/');
-                              }}
-                              className="inline-flex items-center gap-1 font-bold text-slate-900 hover:text-emerald-700 hover:underline cursor-pointer bg-white px-2 py-0.5 rounded-lg border border-slate-200 shadow-2xs"
-                              title="この顧客としてアプリを表示（視点切替）"
-                            >
+                            <span className="inline-flex items-center gap-1 font-bold text-slate-900 bg-white px-2 py-0.5 rounded-lg border border-slate-200 shadow-2xs">
                               <Users className="w-3 h-3 text-emerald-600" />
                               <span>{customer.name} 様</span>
-                            </button>
+                            </span>
                           ) : (
                             <span className="font-bold text-slate-900">匿名顧客 様</span>
                           )}

@@ -1,15 +1,8 @@
 /**
- * LINE Official Account & LIFF (LINE Front-end Framework) 設定・認証ユーティリティ
- * セキュア設計: 機密情報（Channel Secret / Access Token）はクライアントには一切保持しません
+ * LINE（LIFF）クライアント側ユーティリティ
+ * 身元の確認はすべてサーバーで行う。クライアントは LIFF の ID トークンをサーバーへ渡すだけ。
  */
-import liff from '@line/liff';
-
-export interface LineUserProfile {
-  userId: string;
-  displayName: string;
-  pictureUrl?: string;
-  statusMessage?: string;
-}
+import type { UserRole } from '@/types';
 
 export interface LineConfig {
   liffId: string;
@@ -17,86 +10,44 @@ export interface LineConfig {
   isConfigured: boolean;
 }
 
-/**
- * LINE設定情報を取得する（クライアントサイド静的判定）
- */
 export function getLineConfig(): LineConfig {
   const liffId = process.env.NEXT_PUBLIC_LIFF_ID || '';
   const channelId = process.env.NEXT_PUBLIC_LINE_CHANNEL_ID || '';
+  return { liffId, channelId, isConfigured: Boolean(channelId) };
+}
 
-  return {
-    liffId,
-    channelId,
-    isConfigured: Boolean(liffId || channelId),
-  };
+/** LINE ログイン（Web）の開始 URL */
+export function lineLoginUrl(role: UserRole, redirect: string): string {
+  const params = new URLSearchParams({ role: role === 'therapist' ? 'therapist' : 'customer', redirect });
+  return `/api/auth/line/login?${params.toString()}`;
 }
 
 /**
- * サーバーAPIから最新のLINE設定情報を取得する（Cloudflare Workers 環境変数と同期）
+ * LINE アプリ内（LIFF）で開かれ、すでに LINE ログイン済みなら ID トークンを返す。
+ * それ以外（通常のブラウザ・LIFF 未設定）は null。
  */
-export async function fetchLineConfigFromServer(): Promise<LineConfig> {
+export async function getLiffIdToken(): Promise<string | null> {
+  const { liffId } = getLineConfig();
+  if (typeof window === 'undefined' || !liffId) return null;
   try {
-    const res = await fetch('/api/auth/line/config', { cache: 'no-store' });
-    if (res.ok) {
-      const data = await res.json();
-      return {
-        liffId: data.liffId || '',
-        channelId: data.channelId || '',
-        isConfigured: Boolean(data.isConfigured),
-      };
-    }
-  } catch (e) {
-    console.warn('[LINE] Could not fetch server config:', e);
-  }
-  return getLineConfig();
-}
-
-let isLiffInitialized = false;
-
-/**
- * LIFF SDKを初期化する
- */
-export async function initializeLiff(overrideLiffId?: string): Promise<boolean> {
-  if (typeof window === 'undefined') return false;
-  if (isLiffInitialized) return true;
-
-  const cfg = getLineConfig();
-  const liffId = overrideLiffId || cfg.liffId;
-  if (!liffId) {
-    return false;
-  }
-
-  try {
+    const { default: liff } = await import('@line/liff');
     await liff.init({ liffId });
-    isLiffInitialized = true;
-    return true;
-  } catch (error) {
-    console.error('[LINE] LIFF initialization failed:', error);
-    return false;
+    if (!liff.isInClient() || !liff.isLoggedIn()) return null;
+    return liff.getIDToken();
+  } catch {
+    console.warn('[LINE] LIFF initialization failed');
+    return null;
   }
 }
 
-/**
- * ページロード時にすでにLIFFでログイン中かチェックし、プロファイルを取得する
- */
-export async function checkLiffLoginStatus(): Promise<LineUserProfile | null> {
-  if (typeof window === 'undefined') return null;
-  const cfg = getLineConfig();
-  if (!cfg.liffId) return null;
-
-  try {
-    const initialized = await initializeLiff();
-    if (initialized && liff.isLoggedIn()) {
-      const profile = await liff.getProfile();
-      return {
-        userId: profile.userId,
-        displayName: profile.displayName,
-        pictureUrl: profile.pictureUrl,
-        statusMessage: profile.statusMessage,
-      };
-    }
-  } catch (e) {
-    console.error('[LINE] Error checking LIFF status:', e);
-  }
-  return null;
+/** LIFF の ID トークンでサーバーにログインし、セッション確立用の遷移先 URL を受け取る */
+export async function signInWithLiffToken(idToken: string, role: UserRole, redirect: string): Promise<string> {
+  const res = await fetch('/api/auth/line/liff', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ idToken, role, redirect }),
+  });
+  const json = (await res.json().catch(() => ({}))) as { redirect?: string; message?: string };
+  if (!res.ok || !json.redirect) throw new Error(json.message || 'LINE ログインに失敗しました。');
+  return json.redirect;
 }

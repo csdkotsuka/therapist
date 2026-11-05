@@ -43,14 +43,10 @@ export const LiveTrackingModal: React.FC<LiveTrackingModalProps> = ({
   onClose,
   onOpenChat,
 }) => {
-  const { allUsers, therapistProfiles, updateTherapistLocation } = useApp();
+  const { allUsers, therapistProfiles, bookings } = useApp();
 
   const therapist = therapistProfiles[booking.therapist_id];
   const therapistUser = allUsers.find((u) => u.id === booking.therapist_id);
-
-  // リアルタイムシミュレーションのプログレス (0%〜100%)
-  const [progress, setProgress] = useState(45);
-  const [isSimulatingMove, setIsSimulatingMove] = useState(false);
 
   // 出発地（セラピスト拠点）と目的地（顧客先）
   const originLat = therapist?.lat || 35.6666;
@@ -94,45 +90,18 @@ export const LiveTrackingModal: React.FC<LiveTrackingModalProps> = ({
     });
   }, [originLat, originLng, destLat, destLng]);
 
-  // 車両の現在地座標の算出 (道路ポリラインがあればその上を走行、なければ直線補間)
-  const getInterpolatedCoord = (p: number) => {
-    if (routeInfo.polylinePoints && routeInfo.polylinePoints.length > 1) {
-      const idx = Math.min(
-        routeInfo.polylinePoints.length - 1,
-        Math.floor((p / 100) * (routeInfo.polylinePoints.length - 1))
-      );
-      return {
-        lat: routeInfo.polylinePoints[idx][0],
-        lng: routeInfo.polylinePoints[idx][1],
-      };
-    }
-    return {
-      lat: originLat + (destLat - originLat) * (p / 100),
-      lng: originLng + (destLng - originLng) * (p / 100),
-    };
-  };
+  // セラピストの現在地（担当セラピストの端末から送信され、Realtime で更新される）
+  const live = bookings.find((b) => b.id === booking.id) ?? booking;
+  const currentCoord =
+    live.therapist_current_lat != null && live.therapist_current_lng != null
+      ? { lat: live.therapist_current_lat, lng: live.therapist_current_lng }
+      : { lat: originLat, lng: originLng };
+  const hasLivePosition = live.therapist_current_lat != null;
 
-  const currentCoord = getInterpolatedCoord(progress);
-
-  // 移動シミュレーション
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isSimulatingMove) {
-      interval = setInterval(() => {
-        setProgress((prev) => {
-          if (prev >= 100) {
-            setIsSimulatingMove(false);
-            return 100;
-          }
-          const next = prev + 5;
-          const coord = getInterpolatedCoord(next);
-          updateTherapistLocation(booking.id, coord.lat, coord.lng);
-          return next;
-        });
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [isSimulatingMove, originLat, originLng, destLat, destLng, booking.id, updateTherapistLocation, routeInfo.polylinePoints]);
+  // 進捗 = 出発地→目的地の直線距離に対して、どれだけ近づいたか
+  const totalKm = calculateDistanceKm(originLat, originLng, destLat, destLng);
+  const remainingKm = calculateDistanceKm(currentCoord.lat, currentCoord.lng, destLat, destLng);
+  const progress = totalKm > 0 ? Math.min(100, Math.max(0, Math.round((1 - remainingKm / totalKm) * 100))) : 100;
 
   const etaMinutes = Math.max(1, Math.round(routeInfo.durationMinutes * (1 - progress / 100)));
 
@@ -199,16 +168,12 @@ export const LiveTrackingModal: React.FC<LiveTrackingModalProps> = ({
             </span>
           </div>
 
-          {/* シミュレーション進行ボタン */}
-          <div className="absolute bottom-3 left-3 z-[500] pointer-events-auto">
-            <button
-              onClick={() => setIsSimulatingMove(!isSimulatingMove)}
-              className="px-3 py-1.5 bg-slate-900/90 backdrop-blur-md hover:bg-slate-800 border border-slate-600 rounded-xl text-[11px] font-bold text-slate-200 transition flex items-center gap-1.5 shadow-lg active:scale-95"
-            >
+          {!hasLivePosition && (
+            <div className="absolute bottom-3 left-3 z-[500] px-3 py-1.5 bg-slate-900/90 border border-slate-600 rounded-xl text-[11px] font-bold text-slate-200 flex items-center gap-1.5 shadow-lg">
               <Navigation className="w-3.5 h-3.5 text-emerald-400" />
-              {isSimulatingMove ? 'シミュレーション一時停止' : 'GPS移動をシミュレート'}
-            </button>
-          </div>
+              セラピストの位置情報を待っています
+            </div>
+          )}
         </div>
 
         {/* Therapist & Booking Details */}
@@ -235,13 +200,15 @@ export const LiveTrackingModal: React.FC<LiveTrackingModalProps> = ({
             </div>
 
             <div className="flex items-center gap-2">
+              {therapistUser?.phone && (
               <a
-                href={`tel:${therapistUser?.phone || '09011112222'}`}
+                href={`tel:${therapistUser.phone}`}
                 className="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 flex items-center justify-center border border-slate-700 transition"
                 title="電話をかける"
               >
                 <Phone className="w-4 h-4" />
               </a>
+              )}
               <button
                 type="button"
                 onClick={() => {

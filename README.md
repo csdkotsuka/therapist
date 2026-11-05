@@ -9,10 +9,10 @@
 ### 1. マルチテナント・ロール設計
 - **顧客 (Customer)**:
   - 出張 (訪問) / 店舗訪問の柔軟な切り替え
-  - 現在地シミュレーション（渋谷、新宿、六本木、銀座など）とPostGIS空間クエリによる近隣セラピスト検索
+  - 現在地（GPS・登録住所・主要駅プリセット）からの近隣セラピスト検索
   - 施術メニュー・希望日時スロットの選択
   - Stripe Connect による事前承認（仮売上オーソリ）決済UI
-  - **出張時のリアルタイムGPS追跡シミュレーター** (Uber風マップ＆到着予定時間カウントダウン)
+  - **出張時のリアルタイム位置追跡**（担当セラピストの端末の GPS を Supabase Realtime で配信）
   - 施術完了後の星評価（★1〜5）＆レビュー投稿
 - **セラピスト (Therapist)**:
   - 新規予約リクエストのリアルタイム受信と「承認」または「辞退」
@@ -45,55 +45,81 @@
 ```
 therapist/
 ├── supabase/
-│   ├── schema.sql      # Supabase用 テーブル定義, PostGIS拡張, RLSポリシー, RPC関数
-│   └── seed.sql        # 初期テスト用ダミーデータ (管理者, セラピスト, 顧客, メニュー, 予約, レビュー)
+│   ├── schema.sql                  # テーブル定義・PostGIS・基本 RLS
+│   ├── migrations/                 # 001 審査 / 002 予約ステータス / 004 認証・RLS・業務 RPC / 005 診断対応
+│   └── seed/demo_seed.sql          # デモ用ダミーデータ（自動生成。本番では使わない）
+├── scripts/seed/
+│   ├── mockData.ts                 # ダミーデータの正本（アプリには含めない）
+│   └── generate_seed_sql.mjs       # mockData.ts → demo_seed.sql を生成
 ├── src/
+│   ├── proxy.ts                    # 認証 Cookie の更新・要ログインページのリダイレクト
 │   ├── app/
-│   │   ├── layout.tsx  # グローバルレイアウト & AppProvider
-│   │   ├── page.tsx    # ロール別画面切り替え & クイックスイッチャー
-│   │   └── globals.css
-│   ├── components/
-│   │   ├── Header.tsx  # ナビゲーション & ロール切替ドロップダウン
-│   │   ├── customer/   # 顧客向けUI (検索, 地図, 予約モーダル, GPS追跡, レビュー)
-│   │   ├── therapist/  # セラピスト向けUI (リクエスト承認, シフト, メニュー, 売上)
-│   │   └── admin/      # 管理者向けUI (KPI, 全予約監視, セラピスト審査, 手数料設定)
-│   ├── context/
-│   │   └── AppContext.tsx # 状態管理 (localStorage永続化 & Supabaseハイブリッド対応)
-│   ├── lib/
-│   │   ├── geo.ts      # 距離計算 (Haversine), 移動時間予測, フォーマッター
-│   │   ├── mockData.ts # 初期シードモックデータ
-│   │   └── supabase.ts # Supabase クライアント
-│   └── types/
-│       └── index.ts    # TypeScript 型定義 (Profile, Booking, Service, etc.)
-└── .env.example        # 環境変数テンプレート
+│   │   ├── admin/layout.tsx        # 管理者のみ（サーバー側で role を確認）
+│   │   ├── therapist/layout.tsx    # セラピスト本人と管理者のみ
+│   │   ├── auth/callback/          # OAuth・メール確認・LINE ログインのセッション確立
+│   │   └── api/                    # LINE ログイン / Stripe / 審査承認 / 経路計算
+│   ├── components/                 # 顧客・セラピスト・管理者の各画面
+│   ├── context/AppContext.tsx      # Supabase からの読み込みと更新（ブラウザには保存しない）
+│   └── lib/                        # Supabase クライアント・LINE・地図・審査ロジック
+└── .env.example                    # 環境変数テンプレート
 ```
 
 ---
 
-## 🚀 クイックスタート
+## 🔐 セキュリティ設計の要点
 
-### 1. 依存関係のインストール & 開発サーバー起動
+- **認証**: Supabase Auth（メール＋パスワード / Google / LINE）。セッションは Cookie に保存され、サーバーと共有されます。
+- **画面のアクセス制御**: `/admin` と `/therapist` はサーバー側の `layout.tsx` で `profiles.role` を確認してから表示します。
+- **データの権限**: すべて RLS で制御します。個人情報（電話・住所など）は本人・取引相手・管理者だけが見られます。未ログインの利用者には公開用 VIEW（`public_profiles` / `public_therapist_profiles`）だけを返します。
+- **金額・状態遷移**: 予約金額と手数料は DB の `create_booking` RPC がメニューから計算します。ステータス変更は `update_booking_status` で、役割ごとに許可された遷移だけを受け付けます。
+- **権限昇格の防止**: `role`、審査フラグ、評価値などはトリガーで保護しており、本人が書き換えることはできません。
+- **ブラウザ保存**: 業務データは localStorage 等に保存しません。旧バージョンが保存したデータは起動時に削除します。
+
+---
+
+## 🚀 セットアップ
+
+### 1. Supabase（SQL Editor で順番に実行）
+
+1. `supabase/schema.sql`
+2. `supabase/migrations/001_therapist_verification.sql`
+3. `supabase/migrations/002_add_awaiting_payment_status.sql`
+4. `supabase/migrations/004_production_auth_and_rls.sql`
+5. `supabase/migrations/005_advisor_hardening.sql`
+6. （デモ環境のみ）`supabase/seed/demo_seed.sql`：先頭の `demo_password`（デモアカウント共通）と `admin_password`（管理者 kotsuka@creativesd.net 用）を書き換えてから実行してください。管理者のアカウントが既にある場合は、パスワードを変えずに管理者へ昇格だけを行います。
+
+管理者は画面から登録できません。追加するときは、既存ユーザーを SQL で昇格させます。
+
+```sql
+update public.profiles set role = 'admin' where email = 'admin@example.com';
+```
+
+ダミーデータを変更したときは、`scripts/seed/mockData.ts` を編集してから `node scripts/seed/generate_seed_sql.mjs` で SQL を再生成します。
+
+### 2. Supabase Auth の設定（ダッシュボード）
+
+- **URL Configuration**: Site URL を本番 URL に設定し、Redirect URLs に `https://<ドメイン>/auth/callback`（開発時は `http://localhost:3000/auth/callback`）を追加します。
+- **Email Templates → Confirm signup**: リンクを次のように変更します。メールを別のブラウザやメールアプリで開いても登録が完了するようになります。
+  ```
+  {{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=email&next=/
+  ```
+- **Providers → Google**（使う場合）: Google Cloud の OAuth クライアント ID とシークレットを設定します。
+- **LINE Developers**: LINE Login チャネルのコールバック URL に `https://<ドメイン>/api/auth/line/callback` を登録します。
+
+### 3. 環境変数
+
+`.env.example` を `.env.local` にコピーして値を設定します。LINE ログインと審査の承認には `SUPABASE_SERVICE_ROLE_KEY` が必要です。
+
+### 4. 起動
 
 ```bash
 npm install
 npm run dev
 ```
 
-ブラウザで [http://localhost:3000](http://localhost:3000) を開きます。
-画面上部の**「ロールを切り替える」ボタン**（顧客 / セラピスト / 管理者）で、各ロールのUIと動作をワンクリックで切り替えて体験できます。
+### 決済モード
 
----
+`platform_settings` の `payment_mode` で切り替えます。
 
-## 🗄️ Supabase データベースのセットアップ
-
-実際の Supabase プロジェクトにスキーマを適用する場合：
-
-1. [Supabase](https://supabase.com) で新規プロジェクトを作成
-2. **Database** > **Extensions** で `postgis` を有効化（または `schema.sql` 実行で自動有効化）
-3. **SQL Editor** を開き、[`supabase/schema.sql`](file:///Users/kotsuka/Documents/systemDev/therapist/supabase/schema.sql) の内容を実行
-4. 続けて [`supabase/seed.sql`](file:///Users/kotsuka/Documents/systemDev/therapist/supabase/seed.sql) を実行して初期データを投入
-5. `.env.local` ファイルを作成し、プロジェクトのURLとキーを設定：
-   ```env
-   NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-   ```
+- `{"mode":"dummy"}`（初期値）: 実際の請求は発生せず、ボタン操作で決済済みになります。
+- `{"mode":"stripe"}`: Stripe Checkout / Connect と Webhook を使います。**正式リリース前に必ず切り替えてください。**

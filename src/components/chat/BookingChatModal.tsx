@@ -35,7 +35,7 @@ export const BookingChatModal: React.FC<BookingChatModalProps> = ({
   // 表示しているユーザーがセラピスト視点か顧客視点かを特定
   const isTherapist =
     viewerRole === 'therapist' ||
-    (activeUserId ? activeUserId === booking.therapist_id : currentUser.id === booking.therapist_id);
+    (activeUserId ? activeUserId === booking.therapist_id : currentUser?.id === booking.therapist_id);
 
   // 自分のIDとお相手のID
   const myUserId = isTherapist ? booking.therapist_id : booking.customer_id;
@@ -53,8 +53,8 @@ export const BookingChatModal: React.FC<BookingChatModalProps> = ({
 
   // 開いた時に既読処理
   useEffect(() => {
-    markMessagesAsRead(booking.id, myUserId);
-  }, [booking.id, bookingMessages.length, markMessagesAsRead, myUserId]);
+    markMessagesAsRead(booking.id);
+  }, [booking.id, bookingMessages.length, markMessagesAsRead]);
 
   // 新着メッセージで最下部へスクロール
   useEffect(() => {
@@ -83,7 +83,7 @@ export const BookingChatModal: React.FC<BookingChatModalProps> = ({
     setInputText('');
     setIsSending(true);
     try {
-      await sendChatMessage(booking.id, partnerId, text, myUserId);
+      await sendChatMessage(booking.id, partnerId, text);
     } catch (err) {
       console.error('Failed to send message:', err);
     } finally {

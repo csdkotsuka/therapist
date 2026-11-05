@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useApp } from '@/context/AppContext';
 import { formatPrice, formatDate } from '@/lib/geo';
-import { Service, Booking, ServiceCategory, VerificationDocKind } from '@/types';
+import { Service, Booking, Profile, ServiceCategory, VerificationDocKind } from '@/types';
 import { TherapistProfileEdit } from './TherapistProfileEdit';
 import { BookingChatModal } from '@/components/chat/BookingChatModal';
 import {
@@ -75,9 +75,26 @@ interface TherapistViewProps {
   activeSection?: TherapistSection;
 }
 
+// 対象セラピストと閲覧者（本人 or 管理者）の読み込みが終わるまで描画しない
 export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activeSection }) => {
+  const { currentUser, allUsers, isLoadingDb } = useApp();
+  const targetUser = (therapistId ? allUsers.find((u) => u.id === therapistId) : null) || currentUser;
+  if (!currentUser || !targetUser) {
+    return (
+      <div className="py-20 text-center text-xs text-slate-500">
+        {isLoadingDb ? '読み込み中...' : 'セラピスト情報が見つかりません。'}
+      </div>
+    );
+  }
+  return <TherapistViewInner activeSection={activeSection} currentUser={currentUser} targetUser={targetUser} />;
+};
+
+const TherapistViewInner: React.FC<{ activeSection?: TherapistSection; currentUser: Profile; targetUser: Profile }> = ({
+  activeSection,
+  currentUser,
+  targetUser,
+}) => {
   const {
-    currentUser,
     therapistProfiles,
     services,
     bookings,
@@ -99,8 +116,6 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
     rejectTherapistVerification,
   } = useApp();
 
-  // URLで指定されたセラピストIDがあればそれを、なければcurrentUserを対象とする
-  const targetUser = (therapistId ? allUsers.find((u) => u.id === therapistId) : null) || currentUser;
   const isAdminViewer = currentUser.role === 'admin';
 
   const therapist = therapistProfiles[targetUser.id];
@@ -208,51 +223,25 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
   const [isDrawing, setIsDrawing] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // 予約成立後（confirmedな出張予約）のGPS位置情報・常時自動送信（手動ボタン不要で常にバックグラウンド同期）
+  // 確定済みの出張予約がある間だけ、本人の端末の GPS 位置を送信する（管理者の閲覧時は送信しない）
+  const activeVisitIds = myBookings
+    .filter((b) => b.status === 'confirmed' && b.booking_type === 'visit')
+    .map((b) => b.id)
+    .join(',');
+  const updateLocationRef = useRef(updateTherapistLocation);
   useEffect(() => {
-    const activeVisitBookings = myBookings.filter(
-      (b) => b.status === 'confirmed' && b.booking_type === 'visit'
+    updateLocationRef.current = updateTherapistLocation;
+  });
+  useEffect(() => {
+    if (isAdminViewer || !activeVisitIds || typeof navigator === 'undefined' || !('geolocation' in navigator)) return;
+    const ids = activeVisitIds.split(',');
+    const watchId = navigator.geolocation.watchPosition(
+      (pos) => ids.forEach((id) => updateLocationRef.current(id, pos.coords.latitude, pos.coords.longitude)),
+      (err) => console.warn('Geolocation watch error:', err.message),
+      { enableHighAccuracy: true, maximumAge: 10000, timeout: 15000 }
     );
-    if (activeVisitBookings.length === 0) return;
-
-    let watchId: number | null = null;
-    if (typeof navigator !== 'undefined' && 'geolocation' in navigator) {
-      try {
-        watchId = navigator.geolocation.watchPosition(
-          (pos) => {
-            activeVisitBookings.forEach((b) => {
-              updateTherapistLocation(b.id, pos.coords.latitude, pos.coords.longitude);
-            });
-          },
-          (err) => {
-            console.warn('Geolocation watch error:', err);
-          },
-          { enableHighAccuracy: true, maximumAge: 10000, timeout: 15000 }
-        );
-      } catch (e) {
-        // ignore
-      }
-    }
-
-    // 定期タイマーでも確実に現在地を更新同期（5秒ごと）
-    const interval = setInterval(() => {
-      activeVisitBookings.forEach((b) => {
-        if (therapist?.lat && therapist?.lng) {
-          const delta = (Math.random() - 0.5) * 0.0003;
-          const currentLat = b.therapist_current_lat || therapist.lat;
-          const currentLng = b.therapist_current_lng || therapist.lng;
-          updateTherapistLocation(b.id, currentLat + delta, currentLng + delta);
-        }
-      });
-    }, 5000);
-
-    return () => {
-      if (watchId !== null && typeof navigator !== 'undefined' && 'geolocation' in navigator) {
-        navigator.geolocation.clearWatch(watchId);
-      }
-      clearInterval(interval);
-    };
-  }, [myBookings, therapist, updateTherapistLocation]);
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, [activeVisitIds, isAdminViewer]);
 
   // 売上統計の計算
   const completedBookings = myBookings.filter((b) => b.status === 'completed');
@@ -286,7 +275,7 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
     if (!newTitle.trim()) return;
 
     addService({
-      therapist_id: currentUser.id,
+      therapist_id: targetUser.id,
       title: newTitle,
       description: newDescription,
       price: parseInt(newPrice, 10),
@@ -1427,7 +1416,7 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
                         >
                           <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
                           <span>メッセージ</span>
-                          {messages.some((m) => m.booking_id === b.id && m.receiver_id === currentUser.id && !m.is_read) && (
+                          {messages.some((m) => m.booking_id === b.id && m.receiver_id === targetUser.id && !m.is_read) && (
                             <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
                           )}
                         </button>
@@ -1603,7 +1592,7 @@ export const TherapistView: React.FC<TherapistViewProps> = ({ therapistId, activ
                         >
                           <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
                           <span>メッセージ</span>
-                          {messages.some((m) => m.booking_id === b.id && m.receiver_id === currentUser.id && !m.is_read) && (
+                          {messages.some((m) => m.booking_id === b.id && m.receiver_id === targetUser.id && !m.is_read) && (
                             <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
                           )}
                         </button>

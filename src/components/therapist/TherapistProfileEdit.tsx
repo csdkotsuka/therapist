@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
+import type { Profile } from '@/types';
 import {
   geocodeAddress,
   getCurrentGpsPosition,
@@ -73,8 +74,14 @@ const COMMON_FACILITIES = [
 ];
 
 export const TherapistProfileEdit: React.FC<{ therapistId?: string }> = ({ therapistId }) => {
-  const { currentUser, allUsers, therapistProfiles, updateTherapistInfo } = useApp();
+  const { currentUser, allUsers } = useApp();
   const targetUser = (therapistId ? allUsers.find((u) => u.id === therapistId) : null) || currentUser;
+  if (!targetUser) return null;
+  return <TherapistProfileEditInner key={targetUser.id} targetUser={targetUser} />;
+};
+
+const TherapistProfileEditInner: React.FC<{ targetUser: Profile }> = ({ targetUser }) => {
+  const { therapistProfiles, updateTherapistInfo } = useApp();
   const therapist = therapistProfiles[targetUser.id];
 
   const [name, setName] = useState(targetUser.name || '');

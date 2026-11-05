@@ -1,15 +1,36 @@
 import { NextResponse } from 'next/server';
 import { calculateDistanceKm, estimateTravelTimeMinutes } from '@/lib/geo';
+import { createSupabaseServerClient } from '@/lib/server/supabaseServer';
 
+interface LatLng {
+  lat: number;
+  lng: number;
+}
+
+const isLatLng = (v: unknown): v is LatLng =>
+  typeof v === 'object' &&
+  v !== null &&
+  Number.isFinite((v as LatLng).lat) &&
+  Number.isFinite((v as LatLng).lng) &&
+  Math.abs((v as LatLng).lat) <= 90 &&
+  Math.abs((v as LatLng).lng) <= 180;
+
+// 経路・所要時間の計算（Google Routes API は従量課金のため、ログインユーザーのみ利用可）
 export async function POST(req: Request) {
   try {
-    const { origin, destination } = await req.json();
+    const supabase = await createSupabaseServerClient();
+    const { data: auth } = await supabase.auth.getUser();
+    if (!auth.user) {
+      return NextResponse.json({ error: 'ログインが必要です。' }, { status: 401 });
+    }
 
-    if (!origin || !destination) {
+    const { origin, destination } = (await req.json().catch(() => ({}))) as { origin?: unknown; destination?: unknown };
+    if (!isLatLng(origin) || !isLatLng(destination)) {
       return NextResponse.json({ error: 'Origin and destination are required' }, { status: 400 });
     }
 
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    // サーバー専用キーを優先（NEXT_PUBLIC_ のキーはブラウザにも配信されるため、HTTP リファラ制限を必ず設定すること）
+    const apiKey = process.env.GOOGLE_MAPS_SERVER_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
     // Google Routes API が利用可能な場合
     if (apiKey) {
@@ -73,7 +94,8 @@ export async function POST(req: Request) {
       durationMinutes,
       encodedPolyline: null,
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Server error' }, { status: 500 });
+  } catch (error) {
+    console.error('[routes] failed', error instanceof Error ? error.message : error);
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }

@@ -1,13 +1,13 @@
 // 愛媛県シミュレーションデータセット（愛媛県15市町・人口比率ベース・RFC 4122 v4 UUID準拠）
 // セラピスト: 36名, 顧客: 100名, 運営本部: 1名
-import { Profile, TherapistProfile, Service, Booking, Review, ChatMessage, TherapistOnboarding, VerificationLog } from '@/types';
+import { Profile, TherapistProfile, Service, Booking, Review, ChatMessage, TherapistOnboarding, VerificationLog } from '../../src/types';
 
 export const initialProfiles: Profile[] = [
   {
     "id": "6ecacd4b-8d2a-4b06-8cc3-a3cca87a3f12",
     "role": "admin",
     "name": "愛媛プラットフォーム運営本部",
-    "email": "admin@carehub.ehime.jp",
+    "email": "kotsuka@creativesd.net",
     "phone": "089-912-2111",
     "avatar_url": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150",
     "address": "愛媛県松山市一番町4丁目4-2 松山センタービル5F",

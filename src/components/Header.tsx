@@ -75,17 +75,17 @@ export const Header: React.FC = () => {
 
   // 未承認予約のリクエスト数（セラピスト用バッジ）
   const pendingRequestsCount = bookings.filter(
-    (b) => b.therapist_id === currentUser.id && b.status === 'pending'
+    (b) => b.therapist_id === currentUser?.id && b.status === 'pending'
   ).length;
 
   // 顧客の予約件数
   const myBookingsCount = bookings.filter(
-    (b) => b.customer_id === currentUser.id
+    (b) => b.customer_id === currentUser?.id
   ).length;
 
   // 顧客の決済待ち件数
   const awaitingPaymentCount = bookings.filter(
-    (b) => b.customer_id === currentUser.id && b.status === 'awaiting_payment'
+    (b) => b.customer_id === currentUser?.id && b.status === 'awaiting_payment'
   ).length;
 
   // 現在のページ種別
@@ -95,7 +95,11 @@ export const Header: React.FC = () => {
 
   // 現在の対象セラピストID（URLまたはcurrentUser）
   const therapistMatch = pathname.match(/\/therapist\/([^\/]+)/);
-  const currentTherapistId = therapistMatch ? therapistMatch[1] : currentUser.id;
+  const currentTherapistId = therapistMatch ? therapistMatch[1] : currentUser?.id ?? '';
+
+  // モード切替に表示してよい画面（実際のアクセス権はサーバー側 layout で確認する）
+  const canUseTherapistMode = currentUser?.role === 'therapist' || currentUser?.role === 'admin';
+  const canUseAdminMode = currentUser?.role === 'admin';
 
   // タグラインの旧名称安全補正 (旧名称の残骸を CareKuru に修正)
   const displayTagline =
@@ -141,7 +145,8 @@ export const Header: React.FC = () => {
     if (mode === 'admin') {
       target = '/admin/therapists';
     } else if (mode === 'therapist') {
-      target = `/therapist/${currentTherapistId}/requests`;
+      // セラピストは自分のポータルへ。管理者は閲覧中のセラピスト（なければ一覧）へ
+      target = therapistMatch ? `/therapist/${currentTherapistId}/requests` : '/therapist';
     }
     if (typeof window !== 'undefined') {
       window.location.href = target;
@@ -252,7 +257,7 @@ export const Header: React.FC = () => {
               )}
 
               {/* ユーザーアバター / ログインボタン */}
-              {isLoggedIn ? (
+              {isLoggedIn && currentUser ? (
                 <Link
                   href="/profile"
                   className="flex items-center gap-1.5 p-1 rounded-full hover:bg-slate-100/80 dark:hover:bg-white/10 transition active:scale-95"
@@ -449,6 +454,7 @@ export const Header: React.FC = () => {
           {/* Drawer Body (iOS Grouped Layout) */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {/* iOS Apple ID 風 ユーザーカード */}
+            {currentUser && (
             <div className="bg-white dark:bg-[#1c1c1e] rounded-2xl p-3.5 shadow-2xs border border-slate-200/60 dark:border-white/10 flex items-center justify-between">
               <div className="flex items-center gap-3 min-w-0">
                 <img
@@ -461,12 +467,13 @@ export const Header: React.FC = () => {
                     {currentUser.name}
                   </h4>
                   <p className="text-[11px] text-slate-400 dark:text-slate-500 truncate">
-                    {currentUser.email || 'carekuru.user@example.com'}
+                    {currentUser.email}
                   </p>
                 </div>
               </div>
               <div>{getRoleBadge(currentUser.role)}</div>
             </div>
+            )}
 
             {/* PWA ホーム画面追加プロンプト (ブラウザ閲覧時のみ表示) */}
             {!isStandalone && (
@@ -495,7 +502,8 @@ export const Header: React.FC = () => {
               </div>
             )}
 
-            {/* iOS Segmented Control モード切り替え */}
+            {/* iOS Segmented Control モード切り替え（権限のあるモードのみ表示） */}
+            {canUseTherapistMode && (
             <div className="bg-slate-200/80 dark:bg-white/10 p-1 rounded-2xl flex gap-1">
               <button
                 type="button"
@@ -523,6 +531,7 @@ export const Header: React.FC = () => {
                 <span>セラピスト</span>
               </button>
 
+              {canUseAdminMode && (
               <button
                 type="button"
                 onClick={() => handleModeChange('admin')}
@@ -535,7 +544,9 @@ export const Header: React.FC = () => {
                 <span>⚙️</span>
                 <span>管理</span>
               </button>
+              )}
             </div>
+            )}
 
             {/* ======================================================== */}
             {/* iOS Grouped List: セラピスト画面メニュー */}
@@ -755,7 +766,7 @@ export const Header: React.FC = () => {
           <div className="p-4 border-t border-slate-200/80 dark:border-white/10 bg-white/80 dark:bg-black/80 backdrop-blur-md pb-safe space-y-2.5">
             <div className="flex items-center justify-between text-xs">
               <span className="text-slate-500 dark:text-slate-400 truncate max-w-[200px]">
-                {isLoggedIn ? currentUser.name : 'ゲスト利用中'}
+                {currentUser ? currentUser.name : 'ゲスト利用中'}
               </span>
               {isLoggedIn ? (
                 <button

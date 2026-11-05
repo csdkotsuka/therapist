@@ -29,15 +29,11 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   onClose,
   onSuccess,
 }) => {
-  const { allUsers, services, updateBookingStatus } = useApp();
+  const { allUsers, services, payBooking } = useApp();
 
   const therapist = allUsers.find((u) => u.id === booking.therapist_id);
   const service = services.find((s) => s.id === booking.service_id);
 
-  const [cardNumber, setCardNumber] = useState<string>('4242 •••• •••• 4242');
-  const [cardExpiry, setCardExpiry] = useState<string>('12/28');
-  const [cardCvc, setCardCvc] = useState<string>('123');
-  const [cardHolder, setCardHolder] = useState<string>('TARO YAMADA');
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
 
@@ -46,11 +42,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     setIsProcessing(true);
 
     try {
-      // 決済シミュレーション
-      await new Promise((res) => setTimeout(res, 800));
-
-      // 予約ステータスを confirmed (確定) に更新
-      await updateBookingStatus(booking.id, 'confirmed');
+      // 決済（ダミー）→ 予約確定。可否は DB 側（pay_booking_dummy）で検証される
+      if (!(await payBooking(booking.id))) return;
 
       setIsSuccess(true);
       try {
@@ -148,65 +141,13 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 </div>
               </div>
 
-              {/* クレジットカード入力 */}
-              <div className="border border-slate-200 rounded-2xl p-4 space-y-3 bg-white shadow-2xs">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                  <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                    <Lock className="w-3.5 h-3.5 text-emerald-600" />
-                    クレジットカード情報入力 (Stripe安全決済)
-                  </span>
-                  <span className="text-[10px] text-slate-400">暗号化通信対応</span>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] text-slate-600 font-bold mb-1">カード番号</label>
-                  <input
-                    type="text"
-                    required
-                    value={cardNumber}
-                    onChange={(e) => setCardNumber(e.target.value)}
-                    placeholder="4242 4242 4242 4242"
-                    className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-800 focus:outline-emerald-500 focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[11px] text-slate-600 font-bold mb-1">有効期限 (月/年)</label>
-                    <input
-                      type="text"
-                      required
-                      value={cardExpiry}
-                      onChange={(e) => setCardExpiry(e.target.value)}
-                      placeholder="12/28"
-                      className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-800 focus:outline-emerald-500 focus:ring-1 focus:ring-emerald-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] text-slate-600 font-bold mb-1">セキュリティコード</label>
-                    <input
-                      type="password"
-                      required
-                      maxLength={4}
-                      value={cardCvc}
-                      onChange={(e) => setCardCvc(e.target.value)}
-                      placeholder="123"
-                      className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-800 focus:outline-emerald-500 focus:ring-1 focus:ring-emerald-500"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] text-slate-600 font-bold mb-1">カード名義人 (ローマ字)</label>
-                  <input
-                    type="text"
-                    required
-                    value={cardHolder}
-                    onChange={(e) => setCardHolder(e.target.value)}
-                    placeholder="TARO YAMADA"
-                    className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-800 uppercase focus:outline-emerald-500 focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
+              {/* 決済（Stripe 接続まではダミー。カード情報は自社では一切扱わず、本番は Stripe の決済画面で入力する） */}
+              <div className="border border-amber-200 rounded-2xl p-4 bg-amber-50 text-amber-900 text-xs leading-relaxed flex gap-2">
+                <Lock className="w-4 h-4 shrink-0 text-amber-600 mt-0.5" />
+                <p>
+                  現在はテスト運用中のため、<strong>実際の請求は発生しません</strong>。ボタンを押すと決済済みとして予約が確定します。
+                  正式リリース後は Stripe の安全な決済画面でカード情報を入力します。
+                </p>
               </div>
 
               <div className="pt-2">

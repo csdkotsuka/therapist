@@ -2,11 +2,10 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { useApp } from '@/context/AppContext';
-import { registerCustomerToSupabase } from '@/lib/supabase';
-import { registerCustomerToFirebase } from '@/lib/firebase';
+import { getSupabase } from '@/lib/supabase';
+import { lineLoginUrl } from '@/lib/line';
 import {
   geocodeAddress,
   getCurrentGpsPosition,
@@ -31,8 +30,7 @@ import {
 } from 'lucide-react';
 
 export default function CustomerRegisterPage() {
-  const router = useRouter();
-  const { addCustomerUser, setUserLocation } = useApp();
+  const { setUserLocation } = useApp();
 
   // フォームステート
   const [name, setName] = useState('');
@@ -115,43 +113,30 @@ export default function CustomerRegisterPage() {
           }
         }
       }
-    } catch (err: any) {
-      setErrorMessage(err.message || '現在地の取得に失敗しました');
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : '現在地の取得に失敗しました');
     } finally {
       setIsLoadingGps(false);
     }
   };
 
-  // ソーシャル / ワンクリック登録（LINE / Google）
-  const handleQuickRegister = (provider: 'line' | 'google') => {
-    const dummyName = provider === 'line' ? 'LINE登録ユーザー' : 'Google登録ユーザー';
-    const dummyEmail = `${provider}.user.${Date.now()}@example.com`;
-    const newCustomerProfile = {
-      id: `customer-${provider}-${Date.now()}`,
-      name: dummyName,
-      email: dummyEmail,
-      phone: '090-1234-5678',
-      role: 'customer' as const,
-      avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(dummyName)}`,
-      address: '愛媛県松山市一番町',
-      lat: 33.8416,
-      lng: 132.7657,
-    };
-    addCustomerUser(newCustomerProfile);
-    setUserLocation({
-      name: '愛媛県松山市一番町',
-      lat: 33.8416,
-      lng: 132.7657,
+  // ソーシャル登録（LINE はサーバーで本人確認、Google は Supabase OAuth）
+  const handleQuickRegister = async (provider: 'line' | 'google') => {
+    setErrorMessage(null);
+    if (provider === 'line') {
+      window.location.assign(lineLoginUrl('customer', '/'));
+      return;
+    }
+    const supabase = getSupabase();
+    if (!supabase) {
+      setErrorMessage('Supabase が設定されていません。');
+      return;
+    }
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/auth/callback?next=/` },
     });
-    setName(dummyName);
-    setEmail(dummyEmail);
-    setPhone('090-1234-5678');
-    setIsSuccess(true);
-    confetti({
-      particleCount: 80,
-      spread: 70,
-      origin: { y: 0.6 },
-    });
+    if (error) setErrorMessage('Google 登録は現在利用できません。メールアドレスで登録してください。');
   };
 
   // アカウント作成送信
@@ -167,8 +152,8 @@ export default function CustomerRegisterPage() {
       setErrorMessage('有効なメールアドレスを入力してください');
       return;
     }
-    if (!password || password.length < 6) {
-      setErrorMessage('パスワードは6文字以上で入力してください');
+    if (!password || password.length < 8) {
+      setErrorMessage('パスワードは8文字以上で入力してください');
       return;
     }
     const cleanPhone = phone.replace(/[^0-9]/g, '');
@@ -198,62 +183,41 @@ export default function CustomerRegisterPage() {
         finalLng = fallback.lng;
       }
 
-      // Supabase へ保存
-      const result = await registerCustomerToSupabase({
-        name: name.trim(),
+      // Supabase Auth でアカウント作成（profiles は DB トリガーがメタデータから自動作成する）
+      const supabase = getSupabase();
+      if (!supabase) throw new Error('Supabase が設定されていません。');
+      const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
         password,
-        phone: cleanPhone,
-        postalCode: postalCode.replace(/[^0-9]/g, ''),
-        prefecture,
-        city: city.trim(),
-        street: street.trim(),
-        building: building.trim(),
-        lat: finalLat,
-        lng: finalLng,
+        options: {
+          data: {
+            role: 'customer',
+            name: name.trim(),
+            phone: cleanPhone,
+            postal_code: postalCode.replace(/[^0-9]/g, ''),
+            address: fullAddress,
+            lat: finalLat,
+            lng: finalLng,
+          },
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/`,
+        },
       });
-
-      // Firebase（オプショナル）
-      try {
-        await registerCustomerToFirebase({
-          name: name.trim(),
-          email: email.trim(),
-          password,
-          phone: cleanPhone,
-          postalCode: postalCode.replace(/[^0-9]/g, ''),
-          prefecture,
-          city: city.trim(),
-          street: street.trim(),
-          building: building.trim(),
-          lat: finalLat,
-          lng: finalLng,
-        });
-      } catch {
-        // ignore
+      if (error) {
+        throw new Error(
+          /already registered|already exists/i.test(error.message)
+            ? 'このメールアドレスは既に登録されています。ログイン画面からログインしてください。'
+            : /password/i.test(error.message)
+              ? 'パスワードは8文字以上で、推測されにくいものを設定してください。'
+              : 'アカウントを作成できませんでした。入力内容を確認してください。'
+        );
       }
 
-      const newCustomerProfile = {
-        id: result.customer.id,
-        name: result.customer.name,
-        email: result.customer.email,
-        phone: result.customer.phone,
-        role: 'customer' as const,
-        avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(result.customer.name)}`,
-        address: result.customer.address,
-        lat: result.customer.lat,
-        lng: result.customer.lng,
-      };
-
-      addCustomerUser(newCustomerProfile);
-      setUserLocation({
-        name: `${prefecture} ${city}`,
-        lat: finalLat,
-        lng: finalLng,
-      });
-
-      if (result.isSavedToSupabase) {
-        setDatabaseStatus('Supabase Database へ保存完了');
-      }
+      setUserLocation({ name: `${prefecture} ${city}`, lat: finalLat, lng: finalLng });
+      setDatabaseStatus(
+        data.session
+          ? 'アカウントを作成し、ログインしました。'
+          : `確認メールを ${email.trim()} に送信しました。メール内のリンクを開くと登録が完了します。`
+      );
 
       setIsSuccess(true);
       confetti({
@@ -261,8 +225,8 @@ export default function CustomerRegisterPage() {
         spread: 70,
         origin: { y: 0.6 },
       });
-    } catch (err: any) {
-      setErrorMessage(err.message || 'アカウント作成中にエラーが発生しました');
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : 'アカウント作成中にエラーが発生しました');
     } finally {
       setIsSubmitting(false);
     }
@@ -313,7 +277,7 @@ export default function CustomerRegisterPage() {
             </div>
 
             <button
-              onClick={() => router.push('/')}
+              onClick={() => window.location.assign('/')}
               className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs shadow-md flex items-center justify-center gap-2 transition"
             >
               <span>セラピストを探す</span>
@@ -465,10 +429,10 @@ export default function CustomerRegisterPage() {
                     <input
                       type={showPassword ? 'text' : 'password'}
                       required
-                      minLength={6}
+                      minLength={8}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="6文字以上の英数字"
+                      placeholder="8文字以上"
                       className="w-full pl-9 pr-10 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
                     />
                     <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
