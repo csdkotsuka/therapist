@@ -7,10 +7,7 @@ import { AppProvider } from '@/context/AppContext';
 export const metadata: Metadata = {
   title: 'CareKuru - ON-DEMAND WELLNESS | 出張・店舗ヘルスケア＆ボディケア',
   description: '理学療法士、エステ、整体、カイロなどのプロによる出張＆店舗訪問オンデマンド予約・決済プラットフォーム「CareKuru」',
-  icons: {
-    icon: '/branding/icon_carearia_symbol.png',
-    apple: '/branding/icon_carearia_symbol.png',
-  },
+  // ファビコンは src/app/icon.png・apple-icon.png（ファイル規約）で自動設定される
 };
 
 export default async function RootLayout({
