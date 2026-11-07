@@ -48,7 +48,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
             <h2 className="text-base font-black text-slate-900 dark:text-white tracking-tight leading-tight">
               {currentBrand.japaneseName} ログイン
             </h2>
-            <p className="text-[10px] text-slate-400">LINE / Google / メールアドレス</p>
           </div>
         </div>
 

@@ -291,9 +291,6 @@ export default function CustomerRegisterPage() {
               <h1 className="text-2xl font-black text-slate-900 tracking-tight">
                 顧客アカウントを作成
               </h1>
-              <p className="text-xs text-slate-500">
-                LINE・Google・メールアドレスのいずれかで登録できます（ダミー即時体験可能）
-              </p>
             </div>
 
             {/* ソーシャル・ワンクリック登録ボタン（LINE / Google） */}

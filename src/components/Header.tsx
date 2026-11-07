@@ -487,9 +487,6 @@ export const Header: React.FC = () => {
                       <span>ホーム画面に追加</span>
                       <Sparkles className="w-3 h-3 text-amber-500" />
                     </h5>
-                    <p className="text-[10px] text-slate-600 dark:text-slate-400 truncate">
-                      URLバーが消え、全画面アプリに変わります
-                    </p>
                   </div>
                 </div>
                 <button

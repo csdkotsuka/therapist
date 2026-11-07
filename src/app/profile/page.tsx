@@ -47,9 +47,6 @@ export default function ProfilePage() {
                   顧客設定
                 </span>
               </div>
-              <p className="text-xs text-slate-500 mt-0.5">
-                氏名・電話番号・ご自宅やご指定の訪問先住所を変更できます。
-              </p>
             </div>
           </div>
 
@@ -81,9 +78,6 @@ export default function ProfilePage() {
               dangerouslySetInnerHTML={{ __html: currentBrand.iconSvg }}
             />
             <span className="font-bold text-slate-800">{currentBrand.name}</span>
-            <span className="text-[11px] text-slate-400">
-              - アカウント設定画面
-            </span>
           </div>
 
           <div className="flex items-center gap-4 text-slate-500">

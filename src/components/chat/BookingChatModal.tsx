@@ -173,9 +173,6 @@ export const BookingChatModal: React.FC<BookingChatModalProps> = ({
                 <MessageCircle className="w-6 h-6 text-slate-400" />
               </div>
               <p className="text-xs font-bold text-slate-600">メッセージはまだありません</p>
-              <p className="text-[11px] text-slate-400 mt-1 max-w-xs">
-                当日の訪問場所・駐車場の案内や、到着時刻のご連絡などにご活用ください。
-              </p>
             </div>
           ) : (
             bookingMessages.map((msg) => {

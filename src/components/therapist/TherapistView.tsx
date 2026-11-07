@@ -507,9 +507,6 @@ const TherapistViewInner: React.FC<{ activeSection?: TherapistSection; currentUs
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-slate-500 truncate hidden sm:block">
-                    {currentMenuItem.desc}
-                  </p>
                 </div>
               </div>
             </div>
@@ -583,9 +580,6 @@ const TherapistViewInner: React.FC<{ activeSection?: TherapistSection; currentUs
                   <h3 className="text-base font-black text-slate-900 mt-1.5">
                     セラピスト登録・審査の4ステップフロー
                   </h3>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    4つのステップを完了すると、本登録審査へ進みます。
-                  </p>
                 </div>
               </div>
 
@@ -634,7 +628,6 @@ const TherapistViewInner: React.FC<{ activeSection?: TherapistSection; currentUs
                         <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-100 text-amber-800">未完了</span>
                       )}
                     </div>
-                    <p className="text-[11px] text-slate-500 mt-1">{item.detail}</p>
                   </div>
                 ))}
               </div>
@@ -651,9 +644,6 @@ const TherapistViewInner: React.FC<{ activeSection?: TherapistSection; currentUs
                     <h4 className="font-black text-slate-900 text-sm">
                       【Step 1】審査手数料の決済
                     </h4>
-                    <p className="text-xs text-slate-500">
-                      審査手数料（{REVIEW_FEE_YEN.toLocaleString()}円）を決済します。
-                    </p>
                   </div>
                 </div>
                 {feePaid ? (
@@ -702,9 +692,6 @@ const TherapistViewInner: React.FC<{ activeSection?: TherapistSection; currentUs
                     <h4 className="font-black text-slate-900 text-sm">
                       【Step 2】口座登録 ＆ 本人確認（eKYC）
                     </h4>
-                    <p className="text-xs text-slate-500">
-                      報酬振込口座の登録と、本人確認を行います。
-                    </p>
                   </div>
                 </div>
                 {ekycDone ? (
@@ -753,9 +740,6 @@ const TherapistViewInner: React.FC<{ activeSection?: TherapistSection; currentUs
                     <h4 className="font-black text-slate-900 text-sm">
                       【Step 3】誓約書同意 ＆ 書類提出
                     </h4>
-                    <p className="text-xs text-slate-500">
-                      誓約事項への同意と、書類（資格証・保険証）を提出します。
-                    </p>
                   </div>
                 </div>
                 {termsDone && qualDone && insDone ? (
@@ -982,9 +966,6 @@ const TherapistViewInner: React.FC<{ activeSection?: TherapistSection; currentUs
                         ? '【Step 4】審査・承認パネル'
                         : '【Step 4】本登録の審査・承認'}
                     </h4>
-                    <p className="text-xs text-slate-500">
-                      Step 1〜3完了後、運営による審査が行われます。
-                    </p>
                   </div>
                 </div>
                 <span className={`px-3 py-1 rounded-full text-xs font-bold border ${stageMeta.badge}`}>
@@ -1457,9 +1438,6 @@ const TherapistViewInner: React.FC<{ activeSection?: TherapistSection; currentUs
                 <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
                 <span>承諾済み・お客様の決済待ち ({awaitingPaymentBookings.length}件)</span>
               </h3>
-              <p className="text-xs text-slate-500">
-                セラピストが空き時間を承諾した予約です。お客様がクレジットカード決済を完了すると「確定」になります。
-              </p>
 
               <div className="space-y-3">
                 {awaitingPaymentBookings.map((b) => {
@@ -1635,9 +1613,6 @@ const TherapistViewInner: React.FC<{ activeSection?: TherapistSection; currentUs
               <Clock className="w-5 h-5 text-emerald-600" />
               <span>稼働シフト・営業時間 & 出張エリア設定</span>
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              顧客が予約できる受付曜日・時間帯を設定します。出張訪問と店舗来店は1画面で共通または個別に管理できます。
-            </p>
           </div>
 
           {/* 曜日選択 */}
@@ -1646,9 +1621,6 @@ const TherapistViewInner: React.FC<{ activeSection?: TherapistSection; currentUs
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
                 受付可能曜日（稼働日） <span className="text-rose-500">*</span>
               </label>
-              <span className="text-[11px] text-slate-400">
-                選択されていない曜日は「定休日」として自動登録されます
-              </span>
             </div>
             <div className="flex flex-wrap gap-2">
               {daysOfWeek.map((d) => {
@@ -1680,11 +1652,6 @@ const TherapistViewInner: React.FC<{ activeSection?: TherapistSection; currentUs
               <div>
                 <span className="text-xs font-bold text-slate-800 block">
                   出張・店舗の受付時間の一括管理
-                </span>
-                <span className="text-[11px] text-slate-500">
-                  {isSeparateStoreHours
-                    ? '出張施術と店舗施術で別々の時間帯を設定します'
-                    : '出張施術と店舗施術で同じ受付時間帯を使用します（推奨・自動連動）'}
                 </span>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
@@ -1918,9 +1885,6 @@ const TherapistViewInner: React.FC<{ activeSection?: TherapistSection; currentUs
                     集客・成約率UP
                   </span>
                 </h3>
-                <p className="text-xs text-slate-500">
-                  お客様のトップ検索画面で「🎁 特典・キャンペーン」絞り込みにヒットし、目立つバッジが表示されます。
-                </p>
               </div>
             </div>
 
@@ -2016,7 +1980,6 @@ const TherapistViewInner: React.FC<{ activeSection?: TherapistSection; currentUs
                     placeholder="例: 初回1,000円引、20%OFF、ヘッドスパ無料"
                     className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-rose-600 focus:outline-rose-500 shadow-2xs"
                   />
-                  <p className="text-[11px] text-slate-400 mt-1">※写真カードの上にタグとして表示されます（全角10〜12文字推奨）</p>
                 </div>
 
                 <div>
@@ -2108,9 +2071,6 @@ const TherapistViewInner: React.FC<{ activeSection?: TherapistSection; currentUs
             <div className="py-8 text-center text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
               <Gift className="w-10 h-10 text-slate-300 mx-auto mb-2" />
               <p className="text-xs font-bold text-slate-600">現在、特典・キャンペーンは停止中です</p>
-              <p className="text-[11px] text-slate-400 mt-1 max-w-sm mx-auto">
-                右上の「キャンペーン掲載中」スイッチをオンにすると、初回割引や無料延長などの特典を設定・公開できます。
-              </p>
             </div>
           )}
 
@@ -2139,7 +2099,6 @@ const TherapistViewInner: React.FC<{ activeSection?: TherapistSection; currentUs
           <div className="flex items-center justify-between">
             <div>
               <h3 className="font-bold text-slate-900 text-base">施術メニュー設定</h3>
-              <p className="text-xs text-slate-500">料金や所要時間の変更、新メニューの追加を行えます。</p>
             </div>
             <button
               onClick={() => setIsAddServiceOpen(true)}
@@ -2297,7 +2256,6 @@ const TherapistViewInner: React.FC<{ activeSection?: TherapistSection; currentUs
             <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-xs">
               <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">プラットフォーム利用手数料 (20%)</span>
               <div className="text-2xl font-black text-rose-600 mt-1">-{formatPrice(totalPlatformFees)}</div>
-              <span className="text-[11px] text-slate-400 mt-1 block">集客・決済代行手数料</span>
             </div>
 
             <div className="bg-emerald-50/60 rounded-3xl p-5 border border-emerald-200 shadow-xs">
@@ -2415,7 +2373,6 @@ const TherapistViewInner: React.FC<{ activeSection?: TherapistSection; currentUs
               <div className="py-12 text-center text-slate-400 text-xs space-y-2">
                 <Star className="w-8 h-8 mx-auto text-slate-300 stroke-1" />
                 <p>現在まだレビューはありません。</p>
-                <p className="text-[11px] text-slate-400">施術完了後にお客様から投稿された口コミがここに表示されます。</p>
               </div>
             ) : (
               <div className="divide-y divide-slate-100">

@@ -146,9 +146,6 @@ export default function OperationsGuidePage() {
           <div className="p-6 bg-slate-100 rounded-3xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 print:hidden">
             <div>
               <h4 className="font-bold text-slate-900 text-base">実務コンソールへアクセス</h4>
-              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-                上記の運用手順に基づき、管理コンソールから各種審査・監視・設定業務を行えます。
-              </p>
             </div>
             <Link
               href="/admin"

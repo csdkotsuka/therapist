@@ -384,9 +384,6 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                 <h1 className="text-lg sm:text-xl font-black text-slate-900 truncate">
                   {currentSec.label}
                 </h1>
-                <p className="text-xs text-slate-500 truncate hidden sm:block">
-                  {currentSec.desc}
-                </p>
               </div>
             </div>
 
@@ -1620,9 +1617,6 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                   <MessageCircle className="w-4 h-4 text-purple-600" />
                   <span>全メッセージ監視（チャット履歴・直契約監視）</span>
                 </h4>
-                <p className="text-[11px] text-slate-500 mt-0.5">
-                  全 {messages.length} 件中 {filteredMessages.length} 件を表示中。ユーザー名をクリックすると管理者としてその画面へジャンプします。
-                </p>
               </div>
               <button
                 onClick={() => refreshFromSupabase()}
@@ -1829,7 +1823,6 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
               <div>
                 <h4 className="font-bold text-slate-900 text-sm">口コミ・レビュー管理 ({reviews.length}件)</h4>
-                <p className="text-xs text-slate-500">不適切なレビューの監視やソート確認を行えます。</p>
               </div>
 
               {/* ソートセレクター */}
@@ -1924,9 +1917,6 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                   <Palette className="w-5 h-5 text-emerald-600" />
                   <span>ブランド・アプリ名・アイコン設定</span>
                 </h4>
-                <p className="text-xs text-slate-500 mt-1 max-w-2xl leading-relaxed">
-                  アプリ名称は現在<strong>「CareKuru」</strong>を採用していますが、他の候補名称にもいつでも切り替え可能です。また、アプリアイコン・ファビコン・ヘッダー用ロゴはすべて共通のシンボルアイコンが適用されます。
-                </p>
               </div>
 
               {/* 切り替え完了トースト通知 */}
@@ -2012,9 +2002,6 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                   <Type className="w-4 h-4 text-emerald-600" />
                   <span>アプリ名称の選択・変更</span>
                 </h5>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  アプリ名は現状「CareKuru」を標準採用としていますが、過去の候補名称を含めて複数パターンからいつでも選択できます。
-                </p>
               </div>
             </div>
 
@@ -2128,9 +2115,6 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                 <Palette className="w-4 h-4 text-emerald-600" />
                 <span>ブランドアイコン設定（アプリアイコン・ファビコン・ヘッダー用ロゴ共通）</span>
               </h5>
-              <p className="text-xs text-slate-500 mt-0.5">
-                アプリアイコン、ブラウザのファビコン、ヘッダー左上に表示されるアイコンはすべて共通です。文字を含まない純粋なシンボルアイコンから選択できます。
-              </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -2215,9 +2199,6 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
         <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 max-w-xl space-y-6">
           <div>
             <h4 className="font-bold text-slate-900 text-base">プラットフォーム手数料率の設定</h4>
-            <p className="text-xs text-slate-500 mt-0.5">
-              決済時にプラットフォームが徴収する手数料率（Take Rate）を設定します。新規予約から自動適用されます。
-            </p>
           </div>
 
           <div className="p-4 bg-purple-50/50 rounded-2xl border border-purple-100 space-y-3">

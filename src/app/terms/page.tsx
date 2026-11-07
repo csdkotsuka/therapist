@@ -57,9 +57,6 @@ export default function TermsPage() {
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1">
               {currentBrand.name} プラットフォーム利用規約
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">
-              本規約は、LINE公式アカウント連携者、出張・店舗ご利用のすべてのお客様、および登録セラピストの皆様に共通して適用されます。
-            </p>
           </div>
 
           {/* 条文コンテンツ */}

@@ -74,9 +74,6 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ booking, onClose }) =>
                 <CheckCircle2 className="w-8 h-8" />
               </div>
               <h4 className="text-base font-bold text-slate-900">レビューを投稿しました！</h4>
-              <p className="text-xs text-slate-500 max-w-xs mx-auto">
-                貴重なご意見ありがとうございます。セラピストのプロフィールに反映されました。
-              </p>
               <button
                 onClick={onClose}
                 className="mt-4 px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow"
@@ -134,9 +131,8 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ booking, onClose }) =>
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="text-xs font-bold text-slate-700">
-                    感想・コメント <span className="text-[10px] text-slate-400 font-normal">（任意・星評価のみでも可）</span>
+                    感想・コメント
                   </label>
-                  <span className="text-[10px] text-slate-400">タップで簡単入力↓</span>
                 </div>
 
                 {/* クイック感想タグ */}

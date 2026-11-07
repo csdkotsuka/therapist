@@ -106,7 +106,6 @@ export function TherapistSectionClient({
               dangerouslySetInnerHTML={{ __html: currentBrand.iconSvg }}
             />
             <span className="font-bold text-slate-800">{currentBrand.name}</span>
-            <span className="text-[11px] text-slate-400">- セラピスト業務管理ポータル</span>
           </div>
 
           <div className="flex items-center gap-4 text-slate-500">

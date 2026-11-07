@@ -57,9 +57,6 @@ export default function PrivacyPage() {
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1">
               {currentBrand.name} プライバシーポリシー
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">
-              LINE公式アカウント連携、出張訪問・GPS、問診情報、および決済情報の取り扱いと保護方針について定めています。
-            </p>
           </div>
 
           {/* ポリシー本文 */}

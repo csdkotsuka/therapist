@@ -128,9 +128,6 @@ export default function BookingsPage() {
                   全 {myBookings.length} 件
                 </span>
               </div>
-              <p className="text-xs text-slate-500 mt-0.5">
-                セラピストへの出張・店舗予約状況やリアルタイム位置情報の確認、評価レビューを行えます。
-              </p>
             </div>
           </div>
 
@@ -160,9 +157,6 @@ export default function BookingsPage() {
               <Calendar className="w-8 h-8" />
             </div>
             <h4 className="font-bold text-slate-700 text-sm">予約がまだありません</h4>
-            <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-              近くの凄腕セラピストを検索して、リフレッシュや体のケアを始めましょう。
-            </p>
             <Link
               href="/"
               className="inline-flex items-center gap-1.5 mt-5 px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition shadow-2xs"
@@ -399,9 +393,6 @@ export default function BookingsPage() {
               dangerouslySetInnerHTML={{ __html: currentBrand.iconSvg }}
             />
             <span className="font-bold text-slate-800">{currentBrand.name}</span>
-            <span className="text-[11px] text-slate-400">
-              - マイ予約・履歴画面
-            </span>
           </div>
 
           <div className="flex items-center gap-4 text-slate-500">

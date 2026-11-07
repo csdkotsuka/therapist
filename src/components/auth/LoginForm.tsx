@@ -316,11 +316,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({ initialRole = 'customer', 
               {activeRole === 'therapist' && `セラピスト ${isRegister ? '新規パートナー登録' : 'ログイン'}`}
               {activeRole === 'admin' && '運営本部・管理者ログイン'}
             </h3>
-            <p className="text-xs text-slate-500">
-              {activeRole === 'admin'
-                ? '管理者アカウントのメールアドレスとパスワードでログインしてください。'
-                : 'LINE・Google・メールアドレスのいずれかでログイン・登録できます。'}
-            </p>
           </div>
 
           {activeRole !== 'admin' && (

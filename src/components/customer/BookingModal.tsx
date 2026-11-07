@@ -365,11 +365,6 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   </div>
                 </div>
               </div>
-
-              {/* 次へ進むアクション案内 */}
-              <div className="text-center text-xs text-slate-500">
-                このセラピストで予約を進める場合は下のボタンを押してください。
-              </div>
             </div>
           )}
 
@@ -466,7 +461,6 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                     </div>
                     <div>
                       <span className="text-xs font-bold text-slate-900 block">出張施術 (訪問)</span>
-                      <span className="text-[10px] text-slate-500">ご自宅・オフィスへ訪問</span>
                     </div>
                   </button>
 
@@ -485,7 +479,6 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                     </div>
                     <div>
                       <span className="text-xs font-bold text-slate-900 block">店舗訪問</span>
-                      <span className="text-[10px] text-slate-500">サロン・治療院へ来店</span>
                     </div>
                   </button>
                 </div>

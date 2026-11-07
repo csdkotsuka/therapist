@@ -965,9 +965,6 @@ export const CustomerView: React.FC = () => {
                         <p className="text-xs sm:text-[13px] font-medium text-slate-600 line-clamp-1 mt-0.5 group-hover:text-slate-800 transition">
                           {cat.subtitle}
                         </p>
-                        <p className="text-[11px] text-slate-500 line-clamp-1 mt-1">
-                          {cat.description}
-                        </p>
                       </div>
                     </button>
                   );
@@ -1017,9 +1014,6 @@ export const CustomerView: React.FC = () => {
                   <h3 className="font-black text-sm sm:text-base text-slate-900 leading-none">
                     {currentCategoryInfo.label}
                   </h3>
-                  <p className="text-[11px] text-slate-500 mt-0.5 hidden sm:block">
-                    {currentCategoryInfo.subtitle}
-                  </p>
                 </div>
               </div>
             )}
@@ -1221,9 +1215,6 @@ export const CustomerView: React.FC = () => {
                 <Filter className="w-8 h-8" />
               </div>
               <h4 className="font-bold text-slate-700 text-sm">該当するセラピストが見つかりませんでした</h4>
-              <p className="text-xs text-slate-500 mt-1">
-                フィルターの条件を緩めるか、別のキーワードでお試しください。
-              </p>
             </div>
           ) : (
             therapistsList.map((tp) => {

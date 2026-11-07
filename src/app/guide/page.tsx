@@ -81,9 +81,6 @@ export default function GuideHubPage() {
           <h2 className="text-xl sm:text-2xl font-black text-slate-900 mt-0.5">
             あなたはどちらをお探しですか？
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            お客様・セラピストそれぞれの利用方法・手続きに特化した説明ページへご案内します。
-          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
@@ -196,9 +193,6 @@ export default function GuideHubPage() {
           <h2 className="text-xl sm:text-2xl font-black text-slate-900 mt-0.5">
             公式規約・プライバシーポリシー（独立専用ページ）
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            LINE公式アカウント設定および各種手続きに紐付けされる独立した専用ページです。
-          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

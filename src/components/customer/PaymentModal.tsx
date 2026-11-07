@@ -77,7 +77,6 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
             </div>
             <div>
               <h3 className="font-bold text-slate-900 text-base">予約の決済手続き</h3>
-              <p className="text-xs text-slate-500">セラピスト承諾済み・予約の確定</p>
             </div>
           </div>
           {!isProcessing && (
@@ -98,9 +97,6 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 <CheckCircle2 className="w-10 h-10" />
               </div>
               <h4 className="text-xl font-black text-slate-900">決済が完了しました！</h4>
-              <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                予約が正式に確定しました。当日のご案内や現在地追跡が利用可能になります。
-              </p>
             </div>
           ) : (
             <form onSubmit={handlePay} className="space-y-4">

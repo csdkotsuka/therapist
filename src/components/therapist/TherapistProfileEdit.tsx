@@ -355,9 +355,6 @@ const TherapistProfileEditInner: React.FC<{ targetUser: Profile }> = ({ targetUs
               <User className="w-5 h-5 text-emerald-600" />
               <span>セラピスト基本情報・店舗・出張設定</span>
             </h3>
-            <p className="text-xs text-slate-500 mt-1">
-              顧客への公開プロフィール、店舗情報、専門分野、施術スタイル、出張対応エリア等を設定できます。
-            </p>
           </div>
           <span className="text-[11px] px-2.5 py-1 rounded-full font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
             {therapist?.is_approved ? '承認済セラピスト' : '審査中'}
@@ -541,9 +538,6 @@ const TherapistProfileEditInner: React.FC<{ targetUser: Profile }> = ({ targetUs
                     className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-teal-500 shadow-2xs"
                   />
                 </div>
-                <p className="text-[10px] text-slate-500 mt-1">
-                  ※「営業時間・シフト・出張設定」タブで設定した受付曜日・時間帯が自動連動して反映されます（ここでの直接微修正も可能です）。
-                </p>
               </div>
 
               {/* 店舗住所 */}
@@ -760,9 +754,6 @@ const TherapistProfileEditInner: React.FC<{ targetUser: Profile }> = ({ targetUs
                     集客力UP
                   </span>
                 </h4>
-                <p className="text-[11px] text-slate-500">
-                  トップ画面や検索結果で「🎁 特典・キャンペーンあり」として優先表示され、目立つバッジが付きます。
-                </p>
               </div>
             </div>
 
@@ -858,7 +849,6 @@ const TherapistProfileEditInner: React.FC<{ targetUser: Profile }> = ({ targetUs
                     placeholder="例: 初回1,000円引、20%OFF、ヘッドスパ無料"
                     className="w-full px-3 py-2 bg-white border border-amber-300 rounded-xl text-xs font-bold text-rose-600 focus:outline-rose-500"
                   />
-                  <p className="text-[10px] text-slate-400 mt-1">※全角12文字程度がおすすめです</p>
                 </div>
 
                 {/* キャンペーン見出し */}
@@ -949,11 +939,7 @@ const TherapistProfileEditInner: React.FC<{ targetUser: Profile }> = ({ targetUs
                 )}
               </div>
             </div>
-          ) : (
-            <div className="py-2 text-[11px] text-slate-500">
-              現在キャンペーンは設定されていません。「キャンペーン掲載中」に切り替えると、お客様の検索画面で優先表示されアピールできます。
-            </div>
-          )}
+          ) : null}
         </div>
 
         {/* 自己紹介 & 専門分野 */}

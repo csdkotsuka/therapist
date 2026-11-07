@@ -180,9 +180,6 @@ const CustomerProfileEditInner: React.FC<{ currentUser: Profile }> = ({ currentU
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
         <div>
           <h3 className="text-base font-bold text-slate-900">会員情報・出張先住所の変更</h3>
-          <p className="text-xs text-slate-500 mt-0.5">
-            ご登録の基本情報やお名前、出張先のご住所を変更・保存できます。
-          </p>
         </div>
 
         {/* 成功アラート */}
