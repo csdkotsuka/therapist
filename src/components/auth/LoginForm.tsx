@@ -31,6 +31,7 @@ const URL_ERRORS: Record<string, string> = {
   SERVER_NOT_CONFIGURED: 'サーバー設定（SUPABASE_SERVICE_ROLE_KEY）が未完了のため LINE ログインを利用できません。',
   SERVER_ERROR: 'サーバーエラーが発生しました。時間をおいて再度お試しください。',
   AUTH_CALLBACK_FAILED: 'ログイン処理を完了できませんでした。リンクの有効期限切れの可能性があります。',
+  UNAUTHORIZED_ACCOUNT: 'このアカウントは利用が許可されていません。指定された管理者またはセラピストのアカウントでログインしてください。',
 };
 
 function authErrorMessage(message: string): string {
@@ -45,12 +46,12 @@ function authErrorMessage(message: string): string {
 
 const homeFor = (role: UserRole | null | undefined) => (role === 'admin' ? '/admin' : role === 'therapist' ? '/therapist' : '/');
 
-export const LoginForm: React.FC<LoginFormProps> = ({ initialRole = 'customer', errorCode, onSuccess, redirectTo, isModal = false }) => {
+export const LoginForm: React.FC<LoginFormProps> = ({ initialRole = 'therapist', errorCode, onSuccess, redirectTo, isModal = false }) => {
   const { currentBrand } = useApp();
   const supabase = getSupabase();
 
-  const [activeRole, setActiveRole] = useState<UserRole>(initialRole);
-  const [authMode, setAuthMode] = useState<'login' | 'register'>(initialRole === 'admin' ? 'login' : 'register');
+  const [activeRole, setActiveRole] = useState<UserRole>(initialRole === 'admin' ? 'admin' : 'therapist');
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [step, setStep] = useState<'select_provider' | 'email_input' | 'working' | 'check_email'>('select_provider');
   const [statusText, setStatusText] = useState('');
   const [errorMessage, setErrorMessage] = useState(errorCode ? URL_ERRORS[errorCode] ?? 'ログインに失敗しました。' : '');
@@ -155,12 +156,17 @@ export const LoginForm: React.FC<LoginFormProps> = ({ initialRole = 'customer', 
       return setErrorMessage(authErrorMessage(error?.message ?? ''));
     }
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).maybeSingle();
-    finish((profile?.role as UserRole | undefined) ?? 'customer');
+    const role = (profile?.role as UserRole | undefined) ?? null;
+    if (role !== 'admin' && role !== 'therapist') {
+      await supabase.auth.signOut();
+      setStep('email_input');
+      return setErrorMessage('このアカウントは利用が許可されていません。指定された管理者またはセラピストのアカウントでログインしてください。');
+    }
+    finish(role);
   };
 
   const selectRole = (role: UserRole) => {
-    setActiveRole(role);
-    if (role === 'admin') setAuthMode('login');
+    setActiveRole(role === 'admin' ? 'admin' : 'therapist');
     setStep('select_provider');
     setErrorMessage('');
   };
@@ -179,31 +185,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ initialRole = 'customer', 
 
   return (
     <div className={isModal ? '' : 'w-full'}>
-      {/* 1. 登録 / ログイン タブ */}
-      {activeRole !== 'admin' && (
-        <div className="flex border-b border-slate-200 mb-4">
-          {(['register', 'login'] as const).map((mode) => (
-            <button
-              key={mode}
-              type="button"
-              onClick={() => {
-                setAuthMode(mode);
-                setStep('select_provider');
-                setErrorMessage('');
-              }}
-              className={`flex-1 py-2.5 text-xs sm:text-sm font-black border-b-2 transition ${
-                authMode === mode ? 'border-emerald-600 text-emerald-800' : 'border-transparent text-slate-400 hover:text-slate-700'
-              }`}
-            >
-              {mode === 'register' ? '新規アカウント登録' : 'ログイン'}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* 2. ロール選択 */}
+      {/* 1. ロール選択（セラピスト / 管理者） */}
       <div className="bg-slate-100 p-1 rounded-2xl flex items-center gap-1 mb-5 border border-slate-200/80">
-        {roleButton('customer', <><span className="text-sm">👤</span><span>お客様</span></>, 'bg-white text-emerald-700')}
         {roleButton('therapist', <><span className="text-sm">💆</span><span>セラピスト</span></>, 'bg-white text-indigo-700')}
         {roleButton('admin', <><ShieldCheck className="w-3.5 h-3.5 text-amber-400" /><span>管理・運営</span></>, 'bg-slate-900 text-white')}
       </div>

@@ -18,11 +18,25 @@ export async function GET(req: Request) {
   const supabase = await createSupabaseServerClient();
 
   if (code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) return NextResponse.redirect(new URL(next, url.origin));
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+    if (!error && data.user) {
+      const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).maybeSingle();
+      if (profile?.role !== 'admin' && profile?.role !== 'therapist') {
+        await supabase.auth.signOut();
+        return NextResponse.redirect(new URL('/login?error=UNAUTHORIZED_ACCOUNT', url.origin));
+      }
+      return NextResponse.redirect(new URL(next, url.origin));
+    }
   } else if (tokenHash && type) {
-    const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
-    if (!error) return NextResponse.redirect(new URL(next, url.origin));
+    const { data, error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
+    if (!error && data.user) {
+      const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).maybeSingle();
+      if (profile?.role !== 'admin' && profile?.role !== 'therapist') {
+        await supabase.auth.signOut();
+        return NextResponse.redirect(new URL('/login?error=UNAUTHORIZED_ACCOUNT', url.origin));
+      }
+      return NextResponse.redirect(new URL(next, url.origin));
+    }
   }
 
   return NextResponse.redirect(new URL('/login?error=AUTH_CALLBACK_FAILED', url.origin));
