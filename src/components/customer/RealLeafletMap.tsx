@@ -239,39 +239,48 @@ export const RealLeafletMap: React.FC<RealLeafletMapProps> = ({
   const selectedUser = selectedTherapistId ? allUsers.find((u) => u.id === selectedTherapistId) : null;
 
   return (
-    <div className="relative w-full h-[540px] rounded-3xl overflow-hidden shadow-xl border border-slate-200">
+    <div className="relative w-full h-[580px] sm:h-[640px] rounded-3xl overflow-hidden shadow-xl border border-slate-200">
       {/* Leaflet 地図コンテナ */}
       <div ref={mapContainerRef} className="w-full h-full z-0" />
 
       {/* マップ上部バー: 情報バナー ＆ 中心地検索入力 */}
-      <div className="absolute top-3 left-3 right-3 z-20 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
-        {/* 左側: マップ情報バナー */}
-        <div className="flex items-center gap-2 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-slate-200 text-xs text-slate-700 shadow-md pointer-events-auto">
-          <Compass className="w-3.5 h-3.5 text-emerald-600 animate-spin" style={{ animationDuration: '16s' }} />
-          <span className="font-bold">リアルマップ</span>
-          <span className="text-slate-400">|</span>
-          <span className="font-bold text-emerald-600">{therapistsList.length}名表示中</span>
+      <div className="absolute top-3 sm:top-4 left-3 right-3 sm:left-4 sm:right-4 z-20 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5 pointer-events-none">
+        {/* 左側: マップ情報バナー & 現在の中心地バッジ */}
+        <div className="flex flex-wrap items-center gap-2 pointer-events-auto">
+          <div className="flex items-center gap-2 bg-white/95 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-slate-200/90 text-xs font-bold text-slate-700 shadow-md">
+            <Compass className="w-4 h-4 text-emerald-600 animate-spin" style={{ animationDuration: '16s' }} />
+            <span>リアルマップ</span>
+            <span className="text-slate-300">|</span>
+            <span className="text-emerald-700">{therapistsList.length}名表示中</span>
+          </div>
+
+          {isCustomCenter && (
+            <div className="flex items-center gap-1.5 bg-emerald-700/95 backdrop-blur-md text-white px-3 py-1.5 rounded-2xl text-xs font-bold shadow-md animate-in fade-in">
+              <MapPin className="w-3.5 h-3.5 text-emerald-200" />
+              <span className="truncate max-w-[150px] sm:max-w-[200px]">中心地: {userLocation.name}</span>
+            </div>
+          )}
         </div>
 
         {/* 右側: 中心地入力バー & GPSリセットボタン */}
-        <div className="flex items-center gap-2 pointer-events-auto ml-auto">
+        <div className="flex items-center gap-2 pointer-events-auto w-full md:w-auto justify-end">
           <form
             onSubmit={handleMapSearchSubmit}
-            className="flex items-center bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200/90 shadow-md overflow-hidden text-xs pl-2.5 pr-1 py-1 gap-1.5"
+            className="flex-1 md:flex-initial flex items-center bg-white/98 backdrop-blur-md rounded-2xl border-2 border-emerald-600/30 hover:border-emerald-500 shadow-lg p-1 sm:p-1.5 pl-3 sm:pl-3.5 gap-2 transition"
           >
-            <MapPin className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+            <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 shrink-0" />
             <input
               type="text"
               value={mapCenterQuery}
               onChange={(e) => setMapCenterQuery(e.target.value)}
-              placeholder="中心地を入力（駅名・住所・地名）"
-              className="bg-transparent border-none text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none w-32 sm:w-56"
+              placeholder="中心地を入力（例: 松山駅、道後温泉）"
+              className="bg-transparent border-none text-xs sm:text-sm font-semibold text-slate-800 placeholder:text-slate-400 placeholder:font-normal focus:outline-none w-full sm:w-72 md:w-80"
             />
             {mapCenterQuery && (
               <button
                 type="button"
                 onClick={() => setMapCenterQuery('')}
-                className="text-slate-400 hover:text-slate-600 text-xs px-1 cursor-pointer"
+                className="text-slate-400 hover:text-slate-600 text-xs px-1.5 py-1 cursor-pointer shrink-0"
               >
                 ✕
               </button>
@@ -279,9 +288,9 @@ export const RealLeafletMap: React.FC<RealLeafletMapProps> = ({
             <button
               type="submit"
               disabled={isSearchingCenter || !mapCenterQuery.trim()}
-              className="px-2.5 py-1 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl transition disabled:opacity-40 flex items-center gap-1 cursor-pointer shrink-0"
+              className="px-3.5 py-1.5 sm:px-4 sm:py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-xs sm:text-sm rounded-xl transition shadow-sm disabled:opacity-40 flex items-center gap-1.5 cursor-pointer shrink-0 whitespace-nowrap"
             >
-              <Search className="w-3 h-3" />
+              <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5]" />
               <span>{isSearchingCenter ? '検索中...' : '中心に設定'}</span>
             </button>
           </form>
@@ -295,11 +304,11 @@ export const RealLeafletMap: React.FC<RealLeafletMapProps> = ({
                 mapInstanceRef.current.flyTo([userLocation.lat, userLocation.lng], 14, { duration: 1 });
               }
             }}
-            className="p-2 bg-white/95 backdrop-blur-md hover:bg-white text-slate-700 rounded-2xl shadow-md border border-slate-200 transition cursor-pointer shrink-0 flex items-center gap-1 text-xs font-bold"
+            className="p-2 sm:p-2.5 bg-white/98 backdrop-blur-md hover:bg-slate-50 text-slate-700 rounded-2xl shadow-md border border-slate-200 hover:border-slate-300 transition cursor-pointer shrink-0 flex items-center gap-1.5 text-xs sm:text-sm font-bold"
             title={isCustomCenter ? 'GPS現在地に戻す' : '現在地に移動'}
           >
-            <Navigation className={`w-3.5 h-3.5 ${isCustomCenter ? 'text-emerald-600' : 'text-sky-600'}`} />
-            <span className="hidden sm:inline text-[11px]">{isCustomCenter ? 'GPSに戻す' : '現在地'}</span>
+            <Navigation className={`w-4 h-4 sm:w-4 sm:h-4 ${isCustomCenter ? 'text-emerald-600' : 'text-sky-600'}`} />
+            <span className="hidden sm:inline">{isCustomCenter ? 'GPSに戻す' : '現在地'}</span>
           </button>
         </div>
       </div>
