@@ -310,10 +310,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               autoComplete="email"
               placeholder={
                 activeRole === 'admin'
-                  ? 'kotsuka@creativesd.net'
+                  ? '例: admin@example.com'
                   : activeRole === 'therapist'
-                  ? 'therapist.1@carehub.ehime.jp'
-                  : 'customer.1@example.com'
+                  ? '例: therapist@example.com'
+                  : '例: customer@example.com'
               }
               value={emailInput}
               onChange={(e) => setEmailInput(e.target.value)}
