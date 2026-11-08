@@ -151,7 +151,10 @@ export type ServiceCategory =
   | 'personal_training'
   | 'footcare'
   | 'counseling'
-  | 'parenting';
+  | 'parenting'
+  | 'hair_salon'
+  | 'nail'
+  | 'dressing';
 
 export interface Service {
   id: string;
@@ -162,6 +165,14 @@ export interface Service {
   duration_minutes: number;
   category: ServiceCategory;
   is_active: boolean;
+  is_option?: boolean;
+}
+
+export interface BookingOption {
+  id: string;
+  title: string;
+  price: number;
+  duration_minutes: number;
 }
 
 export interface Booking {
@@ -186,6 +197,7 @@ export interface Booking {
   therapist_notes?: string;
   therapist_current_lat?: number;
   therapist_current_lng?: number;
+  selected_options?: BookingOption[];
   created_at: string;
 }
 

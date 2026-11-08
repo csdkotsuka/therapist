@@ -11,6 +11,7 @@ import type {
   AppBrandConfig,
   AppBrandId,
   Booking,
+  BookingOption,
   BookingStatus,
   ChatMessage,
   CustomBrandingSettings,
@@ -75,6 +76,7 @@ export interface CreateBookingInput {
   /** 表示用に渡されても無視する（金額は DB 側でメニューから算出） */
   total_amount?: number;
   customer_id?: string;
+  selected_options?: BookingOption[];
 }
 
 interface AppContextType {
@@ -195,6 +197,7 @@ function toBooking(row: Row): Booking {
   void _location;
   return {
     ...rest,
+    selected_options: Array.isArray(row.selected_options) ? row.selected_options : [],
     therapist_current_lat: row.therapist_current_lat == null ? undefined : num(row.therapist_current_lat),
     therapist_current_lng: row.therapist_current_lng == null ? undefined : num(row.therapist_current_lng),
     lat: row.lat == null ? undefined : num(row.lat),
@@ -473,6 +476,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       p_lat: isVisit ? userLocation.lat : null,
       p_lng: isVisit ? userLocation.lng : null,
       p_customer_notes: input.customer_notes ?? null,
+      p_selected_options: input.selected_options ?? [],
     });
     if (error || !data) throw new Error(toUserMessage(error, '予約リクエストの送信に失敗しました。'));
     return replaceBooking(data as Row);

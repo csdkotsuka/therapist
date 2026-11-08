@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { formatPrice, calculateDistanceKm, estimateTravelTimeMinutes } from '@/lib/geo';
+import { BookingOption } from '@/types';
 import {
   X,
   Star,
@@ -23,6 +24,8 @@ import {
   Award,
   ChevronRight,
   User,
+  Check,
+  Plus,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -50,6 +53,12 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   const user = allUsers.find((u) => u.id === therapistId);
   const therapistServices = services.filter((s) => s.therapist_id === therapistId && s.is_active);
 
+  // 基本コース（通常施術）と追加オプションを分離
+  const baseCourses = therapistServices.filter((s) => !s.is_option);
+  const optionServices = therapistServices.filter((s) => s.is_option);
+  // 万一すべてのメニューがオプションまたは通常だった場合のフォールバック
+  const effectiveBaseCourses = baseCourses.length > 0 ? baseCourses : therapistServices;
+
   // 今日のYYYY-MM-DD文字列
   const getTodayString = (addDays = 0) => {
     const d = new Date();
@@ -62,7 +71,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
   // 4段階ステップ管理:
   // 1: 人を選ぶ (セラピスト確認)
-  // 2: メニューを選ぶ
+  // 2: メニューを選ぶ (基本コース単一選択 + オプション複数選択)
   // 3: 日時を選ぶ (大きめ日付 ＆ 30分単位時間ボタン)
   // 4: 予約確認・確定
   // 5: 完了画面
@@ -70,8 +79,17 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
   // 予約フォーム状態
   const [selectedServiceId, setSelectedServiceId] = useState<string>(
-    therapistServices[0]?.id || ''
+    effectiveBaseCourses[0]?.id || ''
   );
+  // 選択されたオプションID一覧（複数選択可能）
+  const [selectedOptionIds, setSelectedOptionIds] = useState<string[]>([]);
+
+  const toggleOption = (id: string) => {
+    setSelectedOptionIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
   const [bookingType, setBookingType] = useState<'visit' | 'store'>(
     therapist?.is_visit_based ? 'visit' : 'store'
   );
@@ -109,7 +127,13 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
   if (!therapist || !user) return null;
 
-  const currentService = therapistServices.find((s) => s.id === selectedServiceId) || therapistServices[0];
+  const currentService = effectiveBaseCourses.find((s) => s.id === selectedServiceId) || effectiveBaseCourses[0];
+  const selectedOptions = optionServices.filter((s) => selectedOptionIds.includes(s.id));
+  const optionsPrice = selectedOptions.reduce((sum, o) => sum + o.price, 0);
+  const optionsMinutes = selectedOptions.reduce((sum, o) => sum + (o.duration_minutes || 0), 0);
+  const totalMinutes = (currentService?.duration_minutes || 0) + optionsMinutes;
+  const totalAmount = (currentService?.price || 0) + optionsPrice;
+
   const distance = calculateDistanceKm(userLocation.lat, userLocation.lng, therapist.lat, therapist.lng);
   const travelTime = estimateTravelTimeMinutes(distance);
 
@@ -117,9 +141,9 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   const calculateEndTime = (startTime: string, durationMinutes = 60) => {
     try {
       const [h, m] = startTime.split(':').map(Number);
-      const totalMinutes = h * 60 + m + durationMinutes;
-      const endH = Math.floor(totalMinutes / 60) % 24;
-      const endM = totalMinutes % 60;
+      const totalMins = h * 60 + m + durationMinutes;
+      const endH = Math.floor(totalMins / 60) % 24;
+      const endM = totalMins % 60;
       return `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
     } catch {
       return '';
@@ -171,6 +195,13 @@ export const BookingModal: React.FC<BookingModalProps> = ({
     setIsSubmitting(true);
     try {
       const scheduledAt = getCalculatedDate().toISOString();
+      const optionObjects: BookingOption[] = selectedOptions.map((o) => ({
+        id: o.id,
+        title: o.title,
+        price: o.price,
+        duration_minutes: o.duration_minutes || 0,
+      }));
+
       const newBooking = await createBooking({
         therapist_id: therapistId,
         service_id: currentService.id,
@@ -178,6 +209,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
         booking_type: bookingType,
         visit_address: bookingType === 'visit' ? visitAddress : therapist.store_address || therapist.address,
         customer_notes: notes,
+        selected_options: optionObjects,
       });
 
       setCreatedBookingId(newBooking.id);
@@ -369,7 +401,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
           )}
 
           {/* ========================================================
-              STEP 2: メニューを選ぶ
+              STEP 2: メニューを選ぶ (基本コース + 複数選択オプション)
              ======================================================== */}
           {step === 2 && (
             <div className="space-y-4 animate-fadeIn">
@@ -378,50 +410,155 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   STEP 2: 施術メニュー選択
                 </span>
                 <h3 className="text-lg sm:text-xl font-black text-slate-900">
-                  ご希望のコースを選んでください
+                  コースとオプションを選んでください
                 </h3>
               </div>
 
-              <div className="space-y-2.5">
-                {therapistServices.map((service) => {
-                  const isSelected = selectedServiceId === service.id;
-                  return (
-                    <div
-                      key={service.id}
-                      onClick={() => setSelectedServiceId(service.id)}
-                      className={`p-4 rounded-3xl border-2 cursor-pointer transition-all flex items-center justify-between gap-3 ${
-                        isSelected
-                          ? 'border-emerald-600 bg-emerald-50/50 shadow-sm ring-2 ring-emerald-500/20'
-                          : 'border-slate-200 hover:border-slate-300 bg-white'
-                      }`}
-                    >
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${isSelected ? 'border-emerald-600 bg-emerald-600' : 'border-slate-300'}`}>
-                            {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                          </div>
-                          <h4 className="text-sm font-black text-slate-900 truncate">{service.title}</h4>
-                        </div>
-                        <p className="text-xs text-slate-500 mt-1.5 line-clamp-2 pl-6">
-                          {service.description}
-                        </p>
-                        <div className="flex items-center gap-2 mt-2 pl-6">
-                          <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 font-bold flex items-center gap-1">
-                            <Clock className="w-3 h-3 text-slate-500" />
-                            {service.duration_minutes}分コース
-                          </span>
-                        </div>
-                      </div>
+              {/* 1. 基本コース（単一選択） */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black text-slate-800 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-600 inline-block" />
+                    基本コースを選択（時間別）
+                  </span>
+                  <span className="text-[11px] text-slate-500 font-medium">1つ選択</span>
+                </div>
 
-                      <div className="text-right shrink-0">
-                        <span className="text-base sm:text-lg font-black text-emerald-700 block">
-                          {formatPrice(service.price)}
-                        </span>
-                        <span className="text-[10px] text-slate-400 font-medium">(税込・交通費込)</span>
+                <div className="space-y-2">
+                  {effectiveBaseCourses.map((service) => {
+                    const isSelected = selectedServiceId === service.id;
+                    const duration = service.duration_minutes;
+                    const courseBadge =
+                      duration <= 45
+                        ? { label: '短時間', bg: 'bg-sky-50 text-sky-700 border-sky-200' }
+                        : duration <= 75
+                        ? { label: '標準', bg: 'bg-emerald-50 text-emerald-700 border-emerald-200' }
+                        : { label: 'ロング', bg: 'bg-amber-50 text-amber-800 border-amber-200' };
+
+                    return (
+                      <div
+                        key={service.id}
+                        onClick={() => setSelectedServiceId(service.id)}
+                        className={`p-3.5 rounded-2xl border-2 cursor-pointer transition-all flex items-center justify-between gap-3 ${
+                          isSelected
+                            ? 'border-emerald-600 bg-emerald-50/50 shadow-sm ring-2 ring-emerald-500/20'
+                            : 'border-slate-200 hover:border-slate-300 bg-white'
+                        }`}
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${isSelected ? 'border-emerald-600 bg-emerald-600' : 'border-slate-300'}`}>
+                              {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                            </div>
+                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border shrink-0 ${courseBadge.bg}`}>
+                              {courseBadge.label}
+                            </span>
+                            <h4 className="text-xs sm:text-sm font-black text-slate-900 truncate">{service.title}</h4>
+                          </div>
+                          {service.description && (
+                            <p className="text-[11px] text-slate-500 mt-1 line-clamp-1 pl-6">
+                              {service.description}
+                            </p>
+                          )}
+                          <div className="flex items-center gap-2 mt-1.5 pl-6">
+                            <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-bold flex items-center gap-1">
+                              <Clock className="w-3 h-3 text-slate-500" />
+                              {service.duration_minutes}分
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="text-right shrink-0">
+                          <span className="text-sm sm:text-base font-black text-emerald-700 block">
+                            {formatPrice(service.price)}
+                          </span>
+                          <span className="text-[10px] text-slate-400 font-medium">(税込)</span>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 2. オプション（複数選択可） */}
+              {optionServices.length > 0 && (
+                <div className="space-y-2 pt-2 border-t border-slate-200">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black text-slate-800 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                      追加オプション（複数選択可能）
+                    </span>
+                    <span className="text-[11px] text-emerald-700 font-bold">
+                      {selectedOptionIds.length > 0 ? `${selectedOptionIds.length}点選択中` : 'お好みで選択'}
+                    </span>
+                  </div>
+
+                  <div className="space-y-2">
+                    {optionServices.map((opt) => {
+                      const isChecked = selectedOptionIds.includes(opt.id);
+                      return (
+                        <div
+                          key={opt.id}
+                          onClick={() => toggleOption(opt.id)}
+                          className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                            isChecked
+                              ? 'border-emerald-600 bg-emerald-50/60 shadow-xs ring-1 ring-emerald-500/20'
+                              : 'border-slate-200 hover:border-slate-300 bg-white'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div
+                              className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 transition ${
+                                isChecked
+                                  ? 'bg-emerald-600 border-emerald-600 text-white'
+                                  : 'border-slate-300 bg-white'
+                              }`}
+                            >
+                              {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5">
+                                <h5 className="text-xs font-bold text-slate-900 truncate">{opt.title}</h5>
+                                {opt.duration_minutes > 0 && (
+                                  <span className="text-[10px] text-slate-500 font-medium shrink-0">
+                                    (+{opt.duration_minutes}分)
+                                  </span>
+                                )}
+                              </div>
+                              {opt.description && (
+                                <p className="text-[11px] text-slate-400 line-clamp-1">{opt.description}</p>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="text-right shrink-0">
+                            <span className="text-xs font-black text-emerald-800 block">
+                              +{formatPrice(opt.price)}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* 現在の選択合計フローティングバナー */}
+              <div className="p-3 bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border border-emerald-200 rounded-2xl flex items-center justify-between text-xs">
+                <div className="space-y-0.5">
+                  <span className="text-[11px] text-slate-600 font-medium block">
+                    選択合計 ({currentService?.duration_minutes}分 {selectedOptions.length > 0 && `+ オプション${optionsMinutes}分`})
+                  </span>
+                  <span className="font-bold text-emerald-900">
+                    所要時間: 約 {totalMinutes} 分
+                  </span>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] text-slate-500 block">お支払い総額</span>
+                  <span className="text-base font-black text-emerald-700">
+                    {formatPrice(totalAmount)}
+                  </span>
+                </div>
               </div>
             </div>
           )}
@@ -586,11 +723,11 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-emerald-700" />
                   <span>
-                    予約日時: <strong className="text-slate-900">{getFormattedSelectedDateString()} {selectedTimeSlot}</strong> 〜 {calculateEndTime(selectedTimeSlot, currentService?.duration_minutes)}
+                    予約日時: <strong className="text-slate-900">{getFormattedSelectedDateString()} {selectedTimeSlot}</strong> 〜 {calculateEndTime(selectedTimeSlot, totalMinutes)}
                   </span>
                 </div>
                 <span className="text-xs bg-emerald-700 text-white px-2.5 py-0.5 rounded-full font-bold">
-                  {currentService?.duration_minutes}分
+                  計{totalMinutes}分
                 </span>
               </div>
             </div>
@@ -659,19 +796,42 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   <span className="font-bold text-slate-900">{user.name}</span>
                 </div>
                 <div className="flex justify-between items-center pb-2 border-b border-slate-200">
-                  <span className="text-slate-500">選択コース</span>
-                  <span className="font-bold text-slate-900">{currentService?.title} ({currentService?.duration_minutes}分)</span>
+                  <span className="text-slate-500">基本コース</span>
+                  <div className="text-right">
+                    <span className="font-bold text-slate-900 block">{currentService?.title} ({currentService?.duration_minutes}分)</span>
+                    <span className="text-[11px] text-slate-500">{formatPrice(currentService?.price || 0)}</span>
+                  </div>
+                </div>
+                {selectedOptions.length > 0 && (
+                  <div className="pb-2 border-b border-slate-200 space-y-1.5">
+                    <div className="flex justify-between items-center text-slate-500">
+                      <span>追加オプション ({selectedOptions.length}点)</span>
+                      <span className="font-bold text-emerald-800">+{formatPrice(optionsPrice)}</span>
+                    </div>
+                    <div className="space-y-1 pl-2 border-l-2 border-emerald-200">
+                      {selectedOptions.map((opt) => (
+                        <div key={opt.id} className="flex justify-between items-center text-[11px] text-slate-700">
+                          <span>{opt.title} {opt.duration_minutes > 0 ? `(+${opt.duration_minutes}分)` : ''}</span>
+                          <span className="font-medium">+{formatPrice(opt.price)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+                  <span className="text-slate-500">総施術時間</span>
+                  <span className="font-bold text-slate-900">約 {totalMinutes} 分</span>
                 </div>
                 <div className="flex justify-between items-center pb-2 border-b border-slate-200">
                   <span className="text-slate-500">予約希望日時</span>
                   <span className="font-bold text-emerald-800">
-                    {getFormattedSelectedDateString()} {selectedTimeSlot}〜
+                    {getFormattedSelectedDateString()} {selectedTimeSlot}〜{calculateEndTime(selectedTimeSlot, totalMinutes)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center pt-1 text-sm">
                   <span className="font-bold text-slate-900">合計金額 (税込)</span>
                   <span className="text-lg font-black text-emerald-700">
-                    {formatPrice(currentService?.price || 0)}
+                    {formatPrice(totalAmount)}
                   </span>
                 </div>
               </div>
@@ -718,7 +878,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">お支払い予定額:</span>
-                  <span className="font-bold text-slate-900">{formatPrice(currentService.price)}</span>
+                  <span className="font-bold text-slate-900">{formatPrice(totalAmount)}</span>
                 </div>
               </div>
 

@@ -291,6 +291,38 @@ const ParentingCategoryIcon: React.FC<{ className?: string }> = ({ className }) 
   </svg>
 );
 
+// 出張美容師アイコン (ハサミとスタイリング)
+const HairSalonCategoryIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <circle cx="6" cy="6" r="3" />
+    <circle cx="6" cy="18" r="3" />
+    <line x1="20" y1="4" x2="8.12" y2="15.88" />
+    <line x1="14.47" y1="14.48" x2="20" y2="20" />
+    <line x1="8.12" y1="8.12" x2="12" y2="12" />
+  </svg>
+);
+
+// 出張ネイルアイコン (美爪ネイルチップ＆スパークル)
+const NailCategoryIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M7 11V6a5 5 0 0 1 10 0v5" />
+    <path d="M5 11h14v8a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4v-8z" />
+    <path d="M9 11V7a3 3 0 0 1 6 0v4" />
+    <path d="M19 4l.5 1 1 .5-1 .5-.5 1-.5-1-1-.5 1-.5z" fill="currentColor" stroke="none" />
+  </svg>
+);
+
+// 出張着付けアイコン (和装・着物の衿元と帯)
+const DressingCategoryIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M12 2L4 7v13a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7l-8-5z" />
+    <path d="M4 7l8 6 8-6" />
+    <path d="M12 13v9" />
+    <path d="M7 15h10" />
+    <path d="M7 18h10" />
+  </svg>
+);
+
 export const CustomerView: React.FC = () => {
   const {
     currentUser,
@@ -350,18 +382,18 @@ export const CustomerView: React.FC = () => {
   const genres = [
     {
       id: 'bodycare',
-      name: 'ボディケア & リフレッシュ',
-      badge: '癒やし・美容',
-      subtitle: 'もみほぐし・アロマ・ヘッドスパ・エステ・骨盤矯正',
-      description: '筋肉疲労の深層もみほぐし、極上精油アロマ、快眠スパ、美肌フェイシャルエステ、姿勢骨盤矯正',
-      tags: ['もみほぐし', 'アロマ', 'ヘッドスパ', 'エステ', 'カイロ骨盤'],
+      name: 'ボディケア & 美容・身だしなみ',
+      badge: '癒やし・美容・専門職',
+      subtitle: 'もみほぐし・アロマ・ヘッドスパ・エステ・美容師・ネイル・着付け',
+      description: '筋肉疲労のもみほぐし、極上精油アロマ、快眠スパ、美肌エステ、出張美容師カット、ネイル、和装専門着付け',
+      tags: ['もみほぐし', 'アロマ', 'ヘッドスパ', '出張美容師', 'ネイル', '着付け'],
       icon: BodyCareGroupIcon,
       themeColor: 'text-amber-700',
       iconBg: 'bg-amber-500/15 text-amber-700',
       cardBg: 'bg-gradient-to-br from-amber-50/95 via-orange-50/60 to-yellow-50/50',
       borderColor: 'border-amber-200 hover:border-amber-500',
       badgeBg: 'bg-white/95 text-amber-800 border border-amber-200/80',
-      categoryIds: ['massage', 'aroma', 'beauty', 'esthetic', 'chiropractic'],
+      categoryIds: ['massage', 'aroma', 'beauty', 'esthetic', 'chiropractic', 'hair_salon', 'nail', 'dressing'],
     },
     {
       id: 'conditioning',
@@ -490,6 +522,45 @@ export const CustomerView: React.FC = () => {
       cardBg: 'bg-gradient-to-br from-indigo-50/90 via-indigo-50/50 to-purple-50/60',
       borderColor: 'border-indigo-200/90 hover:border-indigo-500',
       badgeBg: 'bg-white/95 text-indigo-800 border border-indigo-200/80',
+    },
+    {
+      id: 'hair_salon',
+      genreId: 'bodycare',
+      label: '出張美容師',
+      subtitle: '自宅カット・カラー・ヘアセット',
+      description: '国家資格美容師による出張ヘアカット・ブロー・シニア訪問美容',
+      icon: HairSalonCategoryIcon,
+      iconColor: 'text-rose-600',
+      bgColor: 'bg-rose-500/15',
+      cardBg: 'bg-gradient-to-br from-rose-50/90 via-pink-50/50 to-orange-50/60',
+      borderColor: 'border-rose-200/90 hover:border-rose-500',
+      badgeBg: 'bg-white/95 text-rose-800 border border-rose-200/80',
+    },
+    {
+      id: 'nail',
+      genreId: 'bodycare',
+      label: '出張ネイル',
+      subtitle: 'ジェルネイル・ハンドケア',
+      description: '自宅でくつろぎながら楽しむデザインジェルネイル・ネイルケア',
+      icon: NailCategoryIcon,
+      iconColor: 'text-fuchsia-600',
+      bgColor: 'bg-fuchsia-500/15',
+      cardBg: 'bg-gradient-to-br from-fuchsia-50/90 via-pink-50/50 to-purple-50/60',
+      borderColor: 'border-fuchsia-200/90 hover:border-fuchsia-500',
+      badgeBg: 'bg-white/95 text-fuchsia-800 border border-fuchsia-200/80',
+    },
+    {
+      id: 'dressing',
+      genreId: 'bodycare',
+      label: '出張着付け',
+      subtitle: '訪問着・留袖・振袖・浴衣',
+      description: '着崩れず苦しくないプロの出張着付け・記念日・晴れの日対応',
+      icon: DressingCategoryIcon,
+      iconColor: 'text-violet-600',
+      bgColor: 'bg-violet-500/15',
+      cardBg: 'bg-gradient-to-br from-violet-50/90 via-indigo-50/50 to-purple-50/60',
+      borderColor: 'border-violet-200/90 hover:border-violet-500',
+      badgeBg: 'bg-white/95 text-violet-800 border border-violet-200/80',
     },
 
     // --- 【大カテゴリ 2】専門コンディショニング & 姿勢 ---
