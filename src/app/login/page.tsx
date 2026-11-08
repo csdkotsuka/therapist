@@ -1,26 +1,36 @@
 'use client';
 
-import React, { Suspense } from 'react';
+// ========================================================
+// お客様（顧客）専用ログイン画面（独立ページ・フルスクリーン）
+// ========================================================
+import React, { Suspense, useEffect } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { useApp } from '@/context/AppContext';
-import { UserRole } from '@/types';
-import { Sparkles, ArrowLeft, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, User, Sparkles, Building2 } from 'lucide-react';
 
-function LoginContent() {
+function CustomerLoginContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const { currentBrand } = useApp();
 
-  const roleParam = searchParams.get('role') as UserRole | null;
+  const roleParam = searchParams.get('role');
   const redirectParam = searchParams.get('redirect') || undefined;
 
-  const validRole: UserRole = roleParam === 'therapist' || roleParam === 'admin' ? roleParam : 'customer';
+  // 以前の ?role=admin や ?role=therapist で来訪した場合はそれぞれの専用URLへ転送
+  useEffect(() => {
+    if (roleParam === 'admin') {
+      router.replace(`/admin/login${redirectParam ? `?redirect=${encodeURIComponent(redirectParam)}` : ''}`);
+    } else if (roleParam === 'therapist') {
+      router.replace(`/therapist/login${redirectParam ? `?redirect=${encodeURIComponent(redirectParam)}` : ''}`);
+    }
+  }, [roleParam, redirectParam, router]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-emerald-50/20 to-slate-100 flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
       {/* 戻るリンク */}
-      <div className="max-w-md w-full mx-auto mb-4">
+      <div className="max-w-md w-full mx-auto mb-4 flex items-center justify-between">
         <Link
           href="/"
           className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-800 transition"
@@ -28,6 +38,9 @@ function LoginContent() {
           <ArrowLeft className="w-3.5 h-3.5" />
           トップページへ戻る
         </Link>
+        <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+          お客様専用
+        </span>
       </div>
 
       <div className="max-w-md w-full mx-auto">
@@ -57,18 +70,47 @@ function LoginContent() {
               </span>
             </div>
           </Link>
-          <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-            スムーズ認証ログイン
+          <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center justify-center gap-2">
+            <User className="w-5 h-5 text-emerald-600" />
+            <span>お客様ログイン</span>
           </h2>
+          <p className="text-xs text-slate-500 mt-1">
+            ご予約の確認・注文履歴・お気に入りセラピストの管理
+          </p>
         </div>
 
         {/* ログインカード */}
         <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/60 border border-slate-200/80 p-6 sm:p-8 backdrop-blur-md">
-          <LoginForm initialRole={validRole} redirectTo={redirectParam} errorCode={searchParams.get('error') ?? undefined} />
+          <LoginForm
+            targetRole="customer"
+            redirectTo={redirectParam}
+            errorCode={searchParams.get('error') ?? undefined}
+          />
+        </div>
+
+        {/* 別ロール向け導線 */}
+        <div className="mt-6 bg-white/70 rounded-2xl border border-slate-200/80 p-3.5 space-y-2 text-xs">
+          <div className="text-[11px] font-bold text-slate-400 text-center">その他の専用ログイン</div>
+          <div className="flex items-center justify-center gap-4 text-xs font-bold divide-x divide-slate-200">
+            <Link
+              href="/therapist/login"
+              className="inline-flex items-center gap-1.5 text-indigo-700 hover:text-indigo-900 hover:underline pl-0"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>セラピストの方はこちら ↗</span>
+            </Link>
+            <Link
+              href="/admin/login"
+              className="inline-flex items-center gap-1.5 text-slate-700 hover:text-slate-900 hover:underline pl-4"
+            >
+              <Building2 className="w-3.5 h-3.5" />
+              <span>管理・運営本部はこちら ↗</span>
+            </Link>
+          </div>
         </div>
 
         {/* フッターセキュリティ注記 */}
-        <div className="mt-6 text-center">
+        <div className="mt-5 text-center">
           <div className="inline-flex items-center gap-1.5 text-[11px] font-medium text-slate-400">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
             <span>暗号化通信（HTTPS）で保護されています</span>
@@ -79,7 +121,7 @@ function LoginContent() {
   );
 }
 
-export default function LoginPage() {
+export default function CustomerLoginPage() {
   return (
     <Suspense
       fallback={
@@ -88,7 +130,7 @@ export default function LoginPage() {
         </div>
       }
     >
-      <LoginContent />
+      <CustomerLoginContent />
     </Suspense>
   );
 }

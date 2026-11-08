@@ -82,14 +82,25 @@ export async function proxy(request: NextRequest) {
   const { data } = await supabase.auth.getUser();
 
   const { pathname, search } = request.nextUrl;
-  const isProtected = PROTECTED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+  const isAuthPath =
+    pathname === '/login' ||
+    pathname === '/therapist/login' ||
+    pathname === '/admin/login' ||
+    pathname.startsWith('/login/') ||
+    pathname.startsWith('/api/auth/');
+
+  const isProtected = !isAuthPath && PROTECTED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
   if (isProtected && !data.user) {
     const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = '/login';
+    if (pathname.startsWith('/admin')) {
+      loginUrl.pathname = '/admin/login';
+    } else if (pathname.startsWith('/therapist')) {
+      loginUrl.pathname = '/therapist/login';
+    } else {
+      loginUrl.pathname = '/login';
+    }
     loginUrl.search = '';
     loginUrl.searchParams.set('redirect', `${pathname}${search}`);
-    if (pathname.startsWith('/admin')) loginUrl.searchParams.set('role', 'admin');
-    else if (pathname.startsWith('/therapist')) loginUrl.searchParams.set('role', 'therapist');
     const redirect = NextResponse.redirect(loginUrl);
     response.cookies.getAll().forEach((c) => redirect.cookies.set(c));
     return redirect;

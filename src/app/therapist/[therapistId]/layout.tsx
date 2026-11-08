@@ -11,7 +11,7 @@ export default async function TherapistIdLayout({
 }) {
   const { therapistId } = await params;
   const user = await getSessionUser();
-  if (!user) redirect('/login?role=therapist&redirect=/therapist');
+  if (!user) redirect(`/therapist/login?redirect=/therapist/${therapistId}`);
   if (user.role === 'therapist' && user.id !== therapistId) redirect(`/therapist/${user.id}`);
   if (user.role !== 'therapist' && user.role !== 'admin') redirect('/');
   return <>{children}</>;

@@ -2,8 +2,8 @@
 
 // ========================================================
 // ログイン・新規登録フォーム（Supabase Auth）
-//   - メール＋パスワード / Google（Supabase OAuth）/ LINE（サーバーで ID トークンを検証）
-//   - 管理者アカウントは新規登録できない（既存ユーザーを DB で昇格させる）
+//   - targetRole ('customer' | 'therapist' | 'admin') に応じた専用画面
+//   - 役割不一致アカウントの厳格遮断
 // ========================================================
 import React, { useEffect, useState } from 'react';
 import { ShieldCheck, AlertCircle, Mail, Loader2, CheckCircle2 } from 'lucide-react';
@@ -14,6 +14,7 @@ import { safeRedirectPath } from '@/lib/redirect';
 import type { UserRole } from '@/types';
 
 interface LoginFormProps {
+  targetRole?: UserRole;
   initialRole?: UserRole;
   /** URL の ?error= の値（ログイン失敗時にサーバーから戻される） */
   errorCode?: string;
@@ -31,7 +32,7 @@ const URL_ERRORS: Record<string, string> = {
   SERVER_NOT_CONFIGURED: 'サーバー設定（SUPABASE_SERVICE_ROLE_KEY）が未完了のため LINE ログインを利用できません。',
   SERVER_ERROR: 'サーバーエラーが発生しました。時間をおいて再度お試しください。',
   AUTH_CALLBACK_FAILED: 'ログイン処理を完了できませんでした。リンクの有効期限切れの可能性があります。',
-  UNAUTHORIZED_ACCOUNT: 'このアカウントは利用が許可されていません。指定された管理者またはセラピストのアカウントでログインしてください。',
+  UNAUTHORIZED_ACCOUNT: 'このアカウントは利用が許可されていません。指定されたアカウントでログインしてください。',
 };
 
 function authErrorMessage(message: string): string {
@@ -46,13 +47,24 @@ function authErrorMessage(message: string): string {
 
 const homeFor = (role: UserRole | null | undefined) => (role === 'admin' ? '/admin' : role === 'therapist' ? '/therapist' : '/');
 
-export const LoginForm: React.FC<LoginFormProps> = ({ initialRole = 'customer', errorCode, onSuccess, redirectTo, isModal = false }) => {
+export const LoginForm: React.FC<LoginFormProps> = ({
+  targetRole,
+  initialRole = 'customer',
+  errorCode,
+  onSuccess,
+  redirectTo,
+  isModal = false,
+}) => {
   const { currentBrand } = useApp();
   const supabase = getSupabase();
 
-  const [activeRole, setActiveRole] = useState<UserRole>(initialRole);
-  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
-  const [step, setStep] = useState<'select_provider' | 'email_input' | 'working' | 'check_email'>('select_provider');
+  const effectiveRole: UserRole = targetRole ?? initialRole;
+  const [activeRole, setActiveRole] = useState<UserRole>(effectiveRole);
+  const [authMode] = useState<'login' | 'register'>('login');
+  
+  // セラピスト・管理者は直接メール・パスワード入力画面を開く
+  const initialStep = effectiveRole === 'therapist' || effectiveRole === 'admin' ? 'email_input' : 'select_provider';
+  const [step, setStep] = useState<'select_provider' | 'email_input' | 'working' | 'check_email'>(initialStep);
   const [statusText, setStatusText] = useState('');
   const [errorMessage, setErrorMessage] = useState(errorCode ? URL_ERRORS[errorCode] ?? 'ログインに失敗しました。' : '');
 
@@ -65,7 +77,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({ initialRole = 'customer', 
 
   const finish = (role: UserRole | null) => {
     if (onSuccess && role) onSuccess(role);
-    // サーバー側のレイアウト（権限チェック）を確実に通すためフルリロードで遷移
     window.location.assign(safeRedirect ?? homeFor(role));
   };
 
@@ -77,7 +88,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ initialRole = 'customer', 
       setStep('working');
       setStatusText('LINE アカウントでログインしています...');
       try {
-        window.location.assign(await signInWithLiffToken(idToken, initialRole, safeRedirect ?? '/'));
+        window.location.assign(await signInWithLiffToken(idToken, activeRole, safeRedirect ?? '/'));
       } catch (e) {
         setStep('select_provider');
         setErrorMessage(e instanceof Error ? e.message : 'LINE ログインに失敗しました。');
@@ -121,40 +132,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({ initialRole = 'customer', 
     if (!email || !passwordInput) return setErrorMessage('メールアドレスとパスワードを入力してください。');
 
     setStep('working');
-
-    if (isRegister) {
-      if (passwordInput.length < 8) {
-        setStep('email_input');
-        return setErrorMessage('パスワードは8文字以上で設定してください。');
-      }
-      setStatusText('アカウントを作成しています...');
-      const next = safeRedirect ?? homeFor(activeRole);
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password: passwordInput,
-        options: {
-          data: { name: nameInput.trim() || undefined, role: activeRole === 'therapist' ? 'therapist' : 'customer' },
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
-        },
-      });
-      if (error) {
-        setStep('email_input');
-        return setErrorMessage(authErrorMessage(error.message));
-      }
-      if (!data.session) {
-        // メール確認が有効な場合はここで止まる
-        setStep('check_email');
-        return;
-      }
-      return finish(activeRole === 'therapist' ? 'therapist' : 'customer');
-    }
-
     setStatusText('ログインしています...');
+
     const { data, error } = await supabase.auth.signInWithPassword({ email, password: passwordInput });
     if (error || !data.user) {
       setStep('email_input');
       return setErrorMessage(authErrorMessage(error?.message ?? ''));
     }
+
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).maybeSingle();
     const actualRole = (profile?.role as UserRole | undefined) ?? null;
 
@@ -164,17 +149,18 @@ export const LoginForm: React.FC<LoginFormProps> = ({ initialRole = 'customer', 
       return setErrorMessage('アカウントの役割情報が見つかりません。管理者にお問い合わせください。');
     }
 
-    // 役割不一致チェック: その役割のページにしかログインできないように制御
-    if (activeRole !== actualRole) {
+    const expectedRole = targetRole ?? activeRole;
+    if (actualRole !== expectedRole) {
       await supabase.auth.signOut();
       setStep('email_input');
-      const roleNames: Record<UserRole, string> = {
-        admin: '管理・運営本部',
-        therapist: 'セラピスト',
-        customer: 'お客様（顧客）',
+      const rolePortals: Record<UserRole, { name: string; url: string }> = {
+        admin: { name: '管理・運営本部', url: '/admin/login' },
+        therapist: { name: 'セラピスト', url: '/therapist/login' },
+        customer: { name: 'お客様（顧客）', url: '/login' },
       };
+      const portal = rolePortals[actualRole] ?? { name: '別区分', url: '/login' };
       return setErrorMessage(
-        `このアカウントは「${roleNames[actualRole]}」として登録されています。上の「${roleNames[actualRole]} ログイン」を選択してログインしてください。`
+        `このアカウントは「${portal.name}」用です。「${portal.name}専用ログイン画面（${portal.url}）」からログインしてください。`
       );
     }
 
@@ -183,7 +169,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ initialRole = 'customer', 
 
   const selectRole = (role: UserRole) => {
     setActiveRole(role);
-    setStep('select_provider');
+    setStep(role === 'therapist' || role === 'admin' ? 'email_input' : 'select_provider');
     setErrorMessage('');
   };
 
@@ -240,39 +226,42 @@ export const LoginForm: React.FC<LoginFormProps> = ({ initialRole = 'customer', 
 
   return (
     <div className={isModal ? '' : 'w-full'}>
-      {/* ログイン区分（縦並びのロール選択カード） */}
-      <div className="space-y-2 mb-5">
-        {roleCard(
-          'customer',
-          '👤',
-          'お客様（顧客）ログイン',
-          '予約確認・セラピスト検索・予約履歴',
-          'border-emerald-600',
-          'bg-emerald-50/50',
-          'bg-emerald-100 text-emerald-800',
-          '一般'
-        )}
-        {roleCard(
-          'therapist',
-          '💆',
-          'セラピスト ログイン',
-          '受付管理・スケジュール設定・プロフィール',
-          'border-indigo-600',
-          'bg-indigo-50/50',
-          'bg-indigo-100 text-indigo-800',
-          'セラピスト'
-        )}
-        {roleCard(
-          'admin',
-          <ShieldCheck className="w-4 h-4 text-amber-500" />,
-          '管理・運営本部 ログイン',
-          'プラットフォーム全体管理・セラピスト審査',
-          'border-slate-800',
-          'bg-slate-100/70',
-          'bg-slate-900 text-amber-400',
-          '管理者'
-        )}
-      </div>
+      {/* 独立した画面（targetRole 指定時）は切り替えボタンを非表示、未指定時のみ縦並びカードを表示 */}
+      {!targetRole && (
+        <div className="space-y-2 mb-5">
+          <label className="block text-xs font-bold text-slate-500 mb-1.5">ログイン区分を選択してください</label>
+          {roleCard(
+            'customer',
+            '👤',
+            'お客様（顧客）ログイン',
+            '予約確認・セラピスト検索・予約履歴',
+            'border-emerald-600',
+            'bg-emerald-50/50',
+            'bg-emerald-100 text-emerald-800',
+            '一般'
+          )}
+          {roleCard(
+            'therapist',
+            '💆',
+            'セラピスト ログイン',
+            '受付管理・スケジュール設定・プロフィール',
+            'border-indigo-600',
+            'bg-indigo-50/50',
+            'bg-indigo-100 text-indigo-800',
+            'セラピスト'
+          )}
+          {roleCard(
+            'admin',
+            <ShieldCheck className="w-4 h-4 text-amber-500" />,
+            '管理・運営本部 ログイン',
+            'プラットフォーム全体管理・セラピスト審査',
+            'border-slate-800',
+            'bg-slate-100/70',
+            'bg-slate-900 text-amber-400',
+            '管理者'
+          )}
+        </div>
+      )}
 
       {errorMessage && (
         <div className="mb-4 p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex gap-2 animate-fadeIn">
@@ -304,33 +293,28 @@ export const LoginForm: React.FC<LoginFormProps> = ({ initialRole = 'customer', 
 
       {step === 'email_input' && (
         <form onSubmit={handleEmailSubmit} className="space-y-4 animate-fadeIn">
-          <h3 className="text-base font-bold text-slate-900 text-center">
-            メールアドレスで{isRegister ? 'アカウント登録' : 'ログイン'}
-          </h3>
-
-          {isRegister && (
-            <div>
-              <label htmlFor="auth-name" className="block text-xs font-bold text-slate-700 mb-1">お名前（表示名）</label>
-              <input
-                id="auth-name"
-                type="text"
-                autoComplete="name"
-                placeholder="例: 山田 太郎"
-                value={nameInput}
-                onChange={(e) => setNameInput(e.target.value)}
-                className="w-full text-xs sm:text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-800 focus:outline-emerald-500"
-              />
-            </div>
+          {targetRole !== 'admin' && targetRole !== 'therapist' && (
+            <h3 className="text-base font-bold text-slate-900 text-center">
+              メールアドレスでログイン
+            </h3>
           )}
 
           <div>
-            <label htmlFor="auth-email" className="block text-xs font-bold text-slate-700 mb-1">メールアドレス</label>
+            <label htmlFor="auth-email" className="block text-xs font-bold text-slate-700 mb-1">
+              メールアドレス（ログインID）
+            </label>
             <input
               id="auth-email"
               type="email"
               required
               autoComplete="email"
-              placeholder="例: user@example.com"
+              placeholder={
+                activeRole === 'admin'
+                  ? 'kotsuka@creativesd.net'
+                  : activeRole === 'therapist'
+                  ? 'therapist.1@carehub.ehime.jp'
+                  : 'customer.1@example.com'
+              }
               value={emailInput}
               onChange={(e) => setEmailInput(e.target.value)}
               className="w-full text-xs sm:text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-800 focus:outline-emerald-500"
@@ -339,14 +323,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({ initialRole = 'customer', 
 
           <div>
             <label htmlFor="auth-password" className="block text-xs font-bold text-slate-700 mb-1">
-              パスワード{isRegister && '（8文字以上）'}
+              パスワード
             </label>
             <input
               id="auth-password"
               type="password"
               required
-              minLength={isRegister ? 8 : undefined}
-              autoComplete={isRegister ? 'new-password' : 'current-password'}
+              autoComplete="current-password"
+              placeholder="••••••••••••"
               value={passwordInput}
               onChange={(e) => setPasswordInput(e.target.value)}
               className="w-full text-xs sm:text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-800 focus:outline-emerald-500"
@@ -356,18 +340,24 @@ export const LoginForm: React.FC<LoginFormProps> = ({ initialRole = 'customer', 
           <div className="pt-2 space-y-2">
             <button
               type="submit"
-              className="w-full py-3.5 px-4 rounded-xl font-bold text-sm text-white bg-slate-900 hover:bg-slate-800 shadow-md transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+              className={`w-full py-3.5 px-4 rounded-xl font-bold text-sm text-white shadow-md transition-all active:scale-[0.98] flex items-center justify-center gap-2 ${
+                activeRole === 'admin'
+                  ? 'bg-slate-900 hover:bg-slate-800'
+                  : activeRole === 'therapist'
+                  ? 'bg-indigo-600 hover:bg-indigo-700'
+                  : 'bg-emerald-600 hover:bg-emerald-700'
+              }`}
             >
               <Mail className="w-4 h-4" />
-              <span>{isRegister ? '登録して始める' : 'ログインする'}</span>
+              <span>ログインする</span>
             </button>
-            {activeRole !== 'admin' && (
+            {activeRole === 'customer' && !targetRole && (
               <button
                 type="button"
                 onClick={() => setStep('select_provider')}
                 className="w-full py-2 text-xs text-slate-500 hover:text-slate-800 transition"
               >
-                ← 認証方法の選択に戻る
+                ← LINE・Googleログインに戻る
               </button>
             )}
           </div>
@@ -376,42 +366,34 @@ export const LoginForm: React.FC<LoginFormProps> = ({ initialRole = 'customer', 
 
       {step === 'select_provider' && (
         <div className="space-y-4 animate-fadeIn">
-          <div className="text-center space-y-1 mb-2">
-            <h3 className="text-base font-bold text-slate-900">
-              {activeRole === 'customer' && `お客様 ${isRegister ? '新規アカウント登録' : 'ログイン'}`}
-              {activeRole === 'therapist' && `セラピスト ${isRegister ? '新規パートナー登録' : 'ログイン'}`}
-              {activeRole === 'admin' && '運営本部・管理者ログイン'}
-            </h3>
-          </div>
+          {activeRole === 'customer' && (
+            <>
+              <button
+                type="button"
+                onClick={handleLine}
+                className="w-full py-3.5 px-4 rounded-2xl font-bold text-sm text-white shadow-sm transition-all active:scale-[0.98] flex items-center justify-center gap-3 hover:brightness-105"
+                style={{ backgroundColor: '#06C755' }}
+              >
+                <svg className="w-5 h-5 fill-current shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 4.269 8.846 10.019 9.572.391.082.923.254 1.058.583.12.295.079.757.038 1.053l-.161 1.059c-.048.318-.237 1.243 1.09.678 1.327-.565 7.165-4.223 9.774-7.227 1.48-1.637 2.182-3.344 2.182-5.718z" />
+                </svg>
+                <span className="tracking-wide">LINE でログイン</span>
+              </button>
 
-          {activeRole !== 'admin' && (
-            <button
-              type="button"
-              onClick={handleLine}
-              className="w-full py-3.5 px-4 rounded-2xl font-bold text-sm text-white shadow-sm transition-all active:scale-[0.98] flex items-center justify-center gap-3 hover:brightness-105"
-              style={{ backgroundColor: '#06C755' }}
-            >
-              <svg className="w-5 h-5 fill-current shrink-0" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 4.269 8.846 10.019 9.572.391.082.923.254 1.058.583.12.295.079.757.038 1.053l-.161 1.059c-.048.318-.237 1.243 1.09.678 1.327-.565 7.165-4.223 9.774-7.227 1.48-1.637 2.182-3.344 2.182-5.718z" />
-              </svg>
-              <span className="tracking-wide">LINE で{isRegister ? '登録' : 'ログイン'}</span>
-            </button>
-          )}
-
-          {(activeRole === 'customer' || !isRegister) && activeRole !== 'admin' && (
-            <button
-              type="button"
-              onClick={handleGoogle}
-              className="w-full py-3.5 px-4 rounded-2xl font-bold text-sm text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 shadow-xs transition-all active:scale-[0.98] flex items-center justify-center gap-3"
-            >
-              <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
-                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.05h3.87c2.26-2.09 3.675-5.17 3.675-9.15z" />
-                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.87-3.05c-1.08.72-2.45 1.16-4.06 1.16-3.13 0-5.78-2.11-6.73-4.96H1.28v3.15C3.26 21.36 7.34 24 12 24z" />
-                <path fill="#FBBC05" d="M5.27 14.24c-.25-.72-.38-1.49-.38-2.24s.13-1.52.38-2.24V6.61H1.28C.46 8.23 0 10.06 0 12s.46 3.77 1.28 5.39l3.99-3.15z" />
-                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.28 6.61l3.99 3.15c.95-2.85 3.6-4.96 6.73-4.96z" />
-              </svg>
-              <span className="tracking-wide">Google アカウントで{isRegister ? '登録' : 'ログイン'}</span>
-            </button>
+              <button
+                type="button"
+                onClick={handleGoogle}
+                className="w-full py-3.5 px-4 rounded-2xl font-bold text-sm text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 shadow-xs transition-all active:scale-[0.98] flex items-center justify-center gap-3"
+              >
+                <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.05h3.87c2.26-2.09 3.675-5.17 3.675-9.15z" />
+                  <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.87-3.05c-1.08.72-2.45 1.16-4.06 1.16-3.13 0-5.78-2.11-6.73-4.96H1.28v3.15C3.26 21.36 7.34 24 12 24z" />
+                  <path fill="#FBBC05" d="M5.27 14.24c-.25-.72-.38-1.49-.38-2.24s.13-1.52.38-2.24V6.61H1.28C.46 8.23 0 10.06 0 12s.46 3.77 1.28 5.39l3.99-3.15z" />
+                  <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.28 6.61l3.99 3.15c.95-2.85 3.6-4.96 6.73-4.96z" />
+                </svg>
+                <span className="tracking-wide">Google アカウントでログイン</span>
+              </button>
+            </>
           )}
 
           <button
@@ -423,11 +405,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({ initialRole = 'customer', 
             className="w-full py-3.5 px-4 rounded-2xl font-bold text-sm text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 shadow-2xs transition-all active:scale-[0.98] flex items-center justify-center gap-3"
           >
             <Mail className="w-5 h-5 text-slate-600 shrink-0" />
-            <span className="tracking-wide">メールアドレスで{isRegister ? '登録' : 'ログイン'}</span>
+            <span className="tracking-wide">メールアドレスとパスワードでログイン</span>
           </button>
 
           <p className="text-[11px] text-center text-slate-400 pt-2 leading-relaxed">
-            登録またはログインすることで、{currentBrand.name}の
+            ログインすることで、{currentBrand.name}の
             <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-emerald-700 hover:underline mx-0.5">利用規約</a>
             および
             <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-emerald-700 hover:underline mx-0.5">プライバシーポリシー</a>

@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
-import { AuthModal } from '@/components/auth/AuthModal';
 import {
   KeyRound,
   Calendar,
@@ -47,7 +46,6 @@ export const Header: React.FC = () => {
     currentBrand,
   } = useApp();
 
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
   const [isPwaModalOpen, setIsPwaModalOpen] = useState(false);
@@ -273,14 +271,13 @@ export const Header: React.FC = () => {
                   </span>
                 </Link>
               ) : (
-                <button
-                  type="button"
-                  onClick={() => setIsAuthModalOpen(true)}
+                <Link
+                  href="/login"
                   className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-xs font-bold text-white shadow-xs transition active:scale-95"
                 >
                   <KeyRound className="w-3.5 h-3.5" />
                   <span>ログイン</span>
-                </button>
+                </Link>
               )}
 
               {/* セラピスト・管理者画面の時だけ右上にメニューボタンを配置 (業務項目が多いため集約) */}
@@ -368,14 +365,13 @@ export const Header: React.FC = () => {
                 <span className="text-xs tracking-tight">マイページ</span>
               </Link>
             ) : (
-              <button
-                type="button"
-                onClick={() => setIsAuthModalOpen(true)}
+              <Link
+                href="/login"
                 className="flex items-center gap-1.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white font-semibold transition active:scale-95"
               >
                 <KeyRound className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-[2]" />
                 <span className="text-xs tracking-tight">ログイン</span>
-              </button>
+              </Link>
             )}
 
             {/* Tab 4: メニュー (More / Drawer) */}
@@ -777,16 +773,13 @@ export const Header: React.FC = () => {
                   設定を開く
                 </button>
               ) : (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsDrawerOpen(false);
-                    setIsAuthModalOpen(true);
-                  }}
+                <Link
+                  href="/login"
+                  onClick={() => setIsDrawerOpen(false)}
                   className="font-bold text-emerald-700 dark:text-emerald-400 hover:underline"
                 >
-                  ログイン / 新規登録
-                </button>
+                  ログイン
+                </Link>
               )}
             </div>
 
@@ -817,6 +810,25 @@ export const Header: React.FC = () => {
               </Link>
             </div>
 
+            {/* 他ポータルへのログイン導線 */}
+            <div className="flex items-center justify-center gap-3 text-[11px] text-slate-500 dark:text-slate-400 pt-1">
+              <Link
+                href="/therapist/login"
+                onClick={() => setIsDrawerOpen(false)}
+                className="hover:underline hover:text-indigo-600 dark:hover:text-indigo-400"
+              >
+                セラピストログイン
+              </Link>
+              <span>•</span>
+              <Link
+                href="/admin/login"
+                onClick={() => setIsDrawerOpen(false)}
+                className="hover:underline hover:text-purple-600 dark:hover:text-purple-400"
+              >
+                管理者ログイン
+              </Link>
+            </div>
+
             {/* コピーライトクレジット (顧客画面のWebフッターをメニュー内に集約) */}
             <div className="pt-2 text-center text-[10px] text-slate-400 dark:text-slate-600 border-t border-slate-200/60 dark:border-white/5">
               <span>© {currentBrand.name}. All rights reserved.</span>
@@ -824,9 +836,6 @@ export const Header: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Supabase Auth Modal */}
-      {isAuthModalOpen && <AuthModal onClose={() => setIsAuthModalOpen(false)} />}
 
       {/* PWA インストール手順モーダル */}
       {isPwaModalOpen && (
