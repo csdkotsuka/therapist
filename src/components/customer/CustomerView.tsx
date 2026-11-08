@@ -344,11 +344,31 @@ export const CustomerView: React.FC = () => {
   const [onlyCampaign, setOnlyCampaign] = useState<boolean>(false); // 特典・キャンペーン有無
   const [sortBy, setSortBy] = useState<SortOption>('recommended');
   const [viewMode, setViewMode] = useState<'card' | 'list' | 'map'>('card');
+  const [isGpsLoading, setIsGpsLoading] = useState<boolean>(false);
 
   // モーダル管理
   const [bookingTherapistId, setBookingTherapistId] = useState<string | null>(null);
   const [bookedSuccessInfo, setBookedSuccessInfo] = useState<{ id: string; name: string } | null>(null);
   const [chatBooking, setChatBooking] = useState<Booking | null>(null);
+
+  // GPS現在地の手動更新
+  const fetchCurrentGpsManual = async () => {
+    setIsGpsLoading(true);
+    try {
+      const pos = await getCurrentGpsPosition();
+      const addr = await reverseGeocode(pos.lat, pos.lng);
+      const name = addr || `現在地 (${pos.lat.toFixed(4)}, ${pos.lng.toFixed(4)})`;
+      setUserLocation({
+        name,
+        lat: pos.lat,
+        lng: pos.lng,
+      });
+    } catch {
+      alert('現在地を取得できませんでした。ブラウザの位置情報許可をご確認ください。');
+    } finally {
+      setIsGpsLoading(false);
+    }
+  };
 
   // GPS現在地の自動取得（デフォルトでオン、裏で静かに現在地を更新）
   useEffect(() => {
@@ -747,8 +767,8 @@ export const CustomerView: React.FC = () => {
     }).length;
   };
 
-  // セラピスト一覧画面を表示するフラグ (メニューが選択されているか、検索クエリが入力されている場合)
-  const isViewingTherapists = selectedCategory !== null || searchQuery.trim().length > 0;
+  // 登録承認済みセラピストの総数
+  const totalApprovedTherapistsCount = Object.values(therapistProfiles).filter((tp) => tp.is_approved).length;
   
   // 現在選択中のジャンル情報
   const currentGenreInfo = genres.find((g) => g.id === selectedGenre);
@@ -785,7 +805,7 @@ export const CustomerView: React.FC = () => {
       const user = allUsers.find((u) => u.id === tp.user_id);
       const userServices = services.filter((s) => s.therapist_id === tp.user_id);
 
-      // カテゴリフィルター
+      // カテゴリ・ジャンルフィルター
       if (selectedCategory && selectedCategory !== 'all') {
         if (selectedCategory.startsWith('genre_')) {
           const targetGenreId = selectedCategory.replace('genre_', '');
@@ -798,16 +818,25 @@ export const CustomerView: React.FC = () => {
           const hasCat = userServices.some((s) => s.category === selectedCategory);
           if (!hasCat) return false;
         }
+      } else if (selectedGenre) {
+        // 詳細カテゴリ未選択で大ジャンルが選ばれている場合
+        const genreObj = genres.find((g) => g.id === selectedGenre);
+        if (genreObj) {
+          const hasCat = userServices.some((s) => genreObj.categoryIds.includes(s.category));
+          if (!hasCat) return false;
+        }
       }
 
-      // フリーワード検索
+      // フリーワード検索 (セラピスト名、自己紹介、特技、キャンペーン、メニュー名、施術内容、エリア)
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const matchesName = user?.name.toLowerCase().includes(q);
         const matchesBio = tp.bio.toLowerCase().includes(q);
         const matchesSpeciality = tp.specialities.some((s) => s.toLowerCase().includes(q));
         const matchesCampaign = tp.campaign?.badge.toLowerCase().includes(q) || tp.campaign?.title?.toLowerCase().includes(q);
-        if (!matchesName && !matchesBio && !matchesSpeciality && !matchesCampaign) return false;
+        const matchesAddress = (tp.address || '').toLowerCase().includes(q) || (tp.store_address || '').toLowerCase().includes(q);
+        const matchesServices = userServices.some((s) => s.title.toLowerCase().includes(q) || (s.description || '').toLowerCase().includes(q));
+        if (!matchesName && !matchesBio && !matchesSpeciality && !matchesCampaign && !matchesAddress && !matchesServices) return false;
       }
 
       return true;
@@ -898,377 +927,362 @@ export const CustomerView: React.FC = () => {
         </div>
       )}
 
-      {!isViewingTherapists ? (
-        /* ========================================================
-           メニュー選択画面 (2段階ステップ: ①大ジャンル選択 → ②詳細カテゴリー選択)
-           ======================================================== */
-        selectedGenre === null ? (
-          /* --------------------------------------------------------
-             Step 1: 大ジャンル (グループ) 選択画面
-             -------------------------------------------------------- */
-          <div className="space-y-4 pt-1 animate-fadeIn">
-            <div>
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
-                施術ジャンルから探す
-              </h2>
-            </div>
+      {/* 検索フィールド & 現在地・距離順クイック切り替えバー */}
+      <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/90 shadow-sm space-y-3.5">
+        {/* 検索入力ボックス */}
+        <div className="relative">
+          <Search className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="セラピスト名、メニュー（もみほぐし・美容師・ネイル・整体等）、お悩み、エリアで検索..."
+            className="w-full pl-11 pr-10 py-3 bg-slate-50 hover:bg-slate-100/80 focus:bg-white rounded-2xl border border-slate-200 focus:border-emerald-500 text-xs sm:text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 transition"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-600 flex items-center justify-center text-xs transition cursor-pointer"
+              title="検索条件をクリア"
+            >
+              ✕
+            </button>
+          )}
+        </div>
 
-            {/* 4つの大ジャンルカード (2x2グリッド) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4.5 pt-1">
-              {genres.map((genre) => {
-                const Icon = genre.icon;
-                const count = getGenreCount(genre.categoryIds);
-
-                return (
-                  <button
-                    key={genre.id}
-                    onClick={() => setSelectedGenre(genre.id)}
-                    className={`group relative ${genre.cardBg} border-2 ${genre.borderColor} rounded-3xl p-5 sm:p-6 text-left shadow-xs hover:shadow-lg transition-all duration-200 active:scale-[0.98] flex flex-col justify-between min-h-[160px] sm:min-h-[175px] overflow-hidden cursor-pointer`}
-                  >
-                    <div className="absolute inset-0 bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-
-                    {/* 上部: アイコン & 在籍人数バッジ */}
-                    <div className="flex items-center justify-between gap-2 relative z-10">
-                      <div
-                        className={`w-13 h-13 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center transition-all group-hover:scale-105 shadow-2xs ${genre.iconBg}`}
-                      >
-                        <Icon className="w-7 h-7 sm:w-8 sm:h-8" />
-                      </div>
-                      <div className="flex flex-col items-end gap-1">
-                        <span className={`text-xs font-black px-2.5 py-1 rounded-full shadow-2xs ${genre.badgeBg}`}>
-                          計{count}名
-                        </span>
-                        <span className="text-[10px] font-bold text-slate-500">
-                          {genre.badge}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* 下部: ジャンル名 & 主なメニューピル */}
-                    <div className="mt-4 relative z-10">
-                      <div className="flex items-center justify-between gap-1">
-                        <h3 className="font-black text-lg sm:text-xl text-slate-900 group-hover:text-slate-950 transition tracking-tight">
-                          {genre.name}
-                        </h3>
-                        <div className="w-7 h-7 rounded-full bg-white/90 group-hover:bg-slate-900 group-hover:text-white flex items-center justify-center text-slate-400 shadow-2xs transition shrink-0">
-                          <ChevronRight className="w-4 h-4" />
-                        </div>
-                      </div>
-
-                      {/* 専門種目ピルタグ (重複文言を解消) */}
-                      <div className="mt-3 flex items-center gap-1.5 flex-wrap">
-                        {genre.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-white/85 text-slate-700 border border-slate-200/60 shadow-2xs"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
+        {/* 現在地情報 ＆ 距離順クイック切り替えボタン */}
+        <div className="flex flex-wrap items-center justify-between gap-2.5 pt-1 border-t border-slate-100 text-xs">
+          <div className="flex items-center gap-2 text-slate-600 min-w-0">
+            <MapPin className="w-4 h-4 text-rose-500 shrink-0" />
+            <span className="font-medium truncate max-w-[220px] sm:max-w-md">
+              現在地: <strong className="text-slate-900 font-bold">{userLocation.name}</strong>
+            </span>
+            <button
+              onClick={fetchCurrentGpsManual}
+              disabled={isGpsLoading}
+              className="text-[11px] text-emerald-700 hover:text-emerald-800 font-bold px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition shrink-0 cursor-pointer disabled:opacity-50"
+            >
+              {isGpsLoading ? '取得中...' : '現在地を更新'}
+            </button>
           </div>
-        ) : (
-          /* --------------------------------------------------------
-             Step 2: 詳細カテゴリー (各職種) 選択画面
-             -------------------------------------------------------- */
-          <div className="space-y-4 pt-1 animate-fadeIn">
-            {/* 上部ナビゲーション: ジャンル一覧に戻るボタン（色付きで目立たせる） & 現在のジャンル表示 */}
-            <div className="flex items-center justify-between gap-3 pb-2 border-b border-slate-200">
-              <button
-                onClick={() => setSelectedGenre(null)}
-                className="px-4 py-2 rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-black shadow-md hover:shadow-lg transition flex items-center gap-2 active:scale-95 cursor-pointer shrink-0"
-              >
-                <ArrowLeft className="w-4 h-4 text-emerald-200" />
-                <span>ジャンル一覧に戻る</span>
-              </button>
 
-              {currentGenreInfo && (
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-slate-100 border border-slate-200 text-xs">
-                  <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">選択中:</span>
-                  <span className="text-slate-900 font-black text-xs sm:text-sm">{currentGenreInfo.name}</span>
-                </div>
-              )}
+          <button
+            onClick={() => setSortBy('distance')}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 cursor-pointer shadow-2xs ${
+              sortBy === 'distance'
+                ? 'bg-emerald-600 text-white ring-2 ring-emerald-500/30 shadow-xs'
+                : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200'
+            }`}
+          >
+            <Navigation className={`w-3.5 h-3.5 ${sortBy === 'distance' ? 'text-white' : 'text-emerald-700'}`} />
+            <span>距離が近い順に並び替え</span>
+            {sortBy === 'distance' && <Check className="w-3 h-3 stroke-[3]" />}
+          </button>
+        </div>
+      </div>
+
+      {/* 施術ジャンル・カテゴリーセレクター */}
+      <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/90 shadow-sm space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-black text-slate-900 flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+            施術ジャンルから絞り込む
+          </span>
+          {(selectedGenre || (selectedCategory && selectedCategory !== 'all')) && (
+            <button
+              onClick={() => {
+                setSelectedGenre(null);
+                setSelectedCategory('all');
+              }}
+              className="text-xs text-emerald-700 hover:text-emerald-800 font-bold flex items-center gap-1 cursor-pointer"
+            >
+              <span>すべて表示に戻す</span>
+            </button>
+          )}
+        </div>
+
+        {/* 5つのジャンルカード（「すべて」＋4大ジャンル） */}
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-2.5">
+          {/* すべて */}
+          <button
+            onClick={() => {
+              setSelectedGenre(null);
+              setSelectedCategory('all');
+            }}
+            className={`p-3 rounded-2xl border-2 text-left transition flex items-center gap-2.5 cursor-pointer ${
+              !selectedGenre && (selectedCategory === 'all' || !selectedCategory)
+                ? 'border-emerald-600 bg-emerald-50/80 shadow-xs ring-2 ring-emerald-500/20'
+                : 'border-slate-200 bg-white hover:border-slate-300'
+            }`}
+          >
+            <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+              <Sparkles className="w-4.5 h-4.5" />
             </div>
+            <div className="min-w-0">
+              <span className="text-xs font-black text-slate-900 block truncate">すべて</span>
+              <span className="text-[10px] text-slate-500 font-bold">{totalApprovedTherapistsCount}名</span>
+            </div>
+          </button>
 
-            {/* ジャンルに属する詳細カテゴリーボタン一覧 */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5 sm:gap-4.5">
+          {/* 4つの大ジャンル */}
+          {genres.map((genre) => {
+            const isGenreSelected = selectedGenre === genre.id;
+            const Icon = genre.icon;
+            const count = getGenreCount(genre.categoryIds);
+            return (
+              <button
+                key={genre.id}
+                onClick={() => {
+                  if (selectedGenre === genre.id) {
+                    setSelectedGenre(null);
+                    setSelectedCategory('all');
+                  } else {
+                    setSelectedGenre(genre.id);
+                    setSelectedCategory(null);
+                  }
+                }}
+                className={`p-3 rounded-2xl border-2 text-left transition flex items-center gap-2.5 cursor-pointer ${
+                  isGenreSelected
+                    ? 'border-emerald-600 bg-emerald-50/80 shadow-xs ring-2 ring-emerald-500/20'
+                    : 'border-slate-200 bg-white hover:border-slate-300'
+                }`}
+              >
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${genre.iconBg}`}>
+                  <Icon className="w-4.5 h-4.5" />
+                </div>
+                <div className="min-w-0">
+                  <span className="text-xs font-black text-slate-900 block truncate">{genre.name}</span>
+                  <span className="text-[10px] text-slate-500 font-bold">{count}名</span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* 選択中の大ジャンルに属する詳細カテゴリー（サブピル） */}
+        {selectedGenre && currentGenreInfo && (
+          <div className="pt-2 border-t border-slate-100 space-y-1.5 animate-fadeIn">
+            <span className="text-[11px] font-bold text-slate-500 block">
+              {currentGenreInfo.name} の職種・専門分野:
+            </span>
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-0.5 no-scrollbar">
+              <button
+                onClick={() => setSelectedCategory(null)}
+                className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition cursor-pointer ${
+                  !selectedCategory
+                    ? 'bg-emerald-700 text-white shadow-xs'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                }`}
+              >
+                全員 ({getGenreCount(currentGenreInfo.categoryIds)}名)
+              </button>
               {categories
-                .filter((cat) => currentGenreInfo?.categoryIds.includes(cat.id))
+                .filter((cat) => currentGenreInfo.categoryIds.includes(cat.id))
                 .map((cat) => {
-                  const Icon = cat.icon;
+                  const isCatSelected = selectedCategory === cat.id;
                   const count = getCategoryCount(cat.id);
-
                   return (
                     <button
                       key={cat.id}
-                      onClick={() => setSelectedCategory(cat.id)}
-                      className={`group relative ${cat.cardBg} border-2 ${cat.borderColor} rounded-3xl p-4 sm:p-5 text-left shadow-xs hover:shadow-lg transition-all duration-200 active:scale-[0.98] flex flex-col justify-between min-h-[145px] sm:min-h-[160px] overflow-hidden cursor-pointer`}
+                      onClick={() => setSelectedCategory(isCatSelected ? null : cat.id)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 cursor-pointer ${
+                        isCatSelected
+                          ? 'bg-emerald-700 text-white shadow-xs'
+                          : 'bg-white text-slate-700 border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/40'
+                      }`}
                     >
-                      <div className="absolute inset-0 bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-
-                      {/* 上部: アイコン & 在籍人数バッジ */}
-                      <div className="flex items-center justify-between gap-2 relative z-10">
-                        <div
-                          className={`w-12 h-12 sm:w-13 sm:h-13 rounded-2xl flex items-center justify-center transition-all group-hover:scale-105 shadow-2xs ${cat.bgColor} ${cat.iconColor}`}
-                        >
-                          <Icon className="w-6 h-6 sm:w-6.5 sm:h-6.5" />
-                        </div>
-                        <span className={`text-xs font-black px-2.5 py-1 rounded-full shadow-2xs ${cat.badgeBg}`}>
-                          {count}名
-                        </span>
-                      </div>
-
-                      {/* 下部: メニュー名 & サブタイトル & 矢印 */}
-                      <div className="mt-3.5 relative z-10">
-                        <div className="flex items-center justify-between gap-1">
-                          <h3 className="font-black text-base sm:text-lg text-slate-900 group-hover:text-slate-950 transition tracking-tight">
-                            {cat.label}
-                          </h3>
-                          <div className="w-6 h-6 rounded-full bg-white/90 group-hover:bg-slate-900 group-hover:text-white flex items-center justify-center text-slate-400 shadow-2xs transition shrink-0">
-                            <ChevronRight className="w-3.5 h-3.5" />
-                          </div>
-                        </div>
-                        <p className="text-xs sm:text-[13px] font-medium text-slate-600 line-clamp-1 mt-0.5 group-hover:text-slate-800 transition">
-                          {cat.subtitle}
-                        </p>
-                      </div>
+                      <span>{cat.label}</span>
+                      <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${isCatSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                        {count}
+                      </span>
                     </button>
                   );
                 })}
             </div>
           </div>
-        )
-      ) : (
-        /* ========================================================
-           セラピスト表示画面: 戻るボタン・絞り込み・ソート・ビュー切替・一覧
-           ======================================================== */
-        <div className="space-y-4 animate-fadeIn">
-          {/* 上部ナビゲーション: 戻るボタン ＆ 選択中のジャンル/カテゴリー表示 */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-200">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => {
-                  setSelectedCategory(null);
-                  setSearchQuery('');
-                }}
-                className="px-4 py-2 rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-black shadow-md hover:shadow-lg transition flex items-center gap-2 active:scale-95 shrink-0 cursor-pointer"
-              >
-                <ArrowLeft className="w-4 h-4 text-emerald-200" />
-                <span>{selectedGenre ? 'カテゴリー選択に戻る' : 'メニュー一覧に戻る'}</span>
-              </button>
+        )}
+      </div>
 
-              {selectedGenre && (
-                <button
-                  onClick={() => {
-                    setSelectedCategory(null);
-                    setSelectedGenre(null);
-                    setSearchQuery('');
-                  }}
-                  className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border border-slate-200 transition cursor-pointer"
-                >
-                  ジャンル一覧へ
-                </button>
-              )}
-            </div>
+      {/* 絞り込み＆ソート ボタングループ */}
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-center gap-2 pb-1 pt-1">
+          {/* ソート: 距離が近い順 (目立つよう先頭に配置) */}
+          <button
+            onClick={() => setSortBy('distance')}
+            className={`px-3.5 py-1.5 rounded-full text-xs font-black whitespace-nowrap transition flex items-center gap-1.5 shadow-2xs cursor-pointer ${
+              sortBy === 'distance'
+                ? 'bg-emerald-600 text-white shadow-xs ring-2 ring-emerald-500/20'
+                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            <Navigation className={`w-3.5 h-3.5 ${sortBy === 'distance' ? 'text-white' : 'text-emerald-600'}`} />
+            <span>距離が近い順</span>
+          </button>
 
-            {currentCategoryInfo && (
-              <div className="flex items-center gap-2">
-                <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${currentCategoryInfo.bgColor} ${currentCategoryInfo.iconColor}`}>
-                  {React.createElement(currentCategoryInfo.icon, { className: 'w-4 h-4' })}
-                </div>
-                <div>
-                  <h3 className="font-black text-sm sm:text-base text-slate-900 leading-none">
-                    {currentCategoryInfo.label}
-                  </h3>
-                </div>
-              </div>
-            )}
+          {/* ソート: オススメ順 */}
+          <button
+            onClick={() => setSortBy('recommended')}
+            className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 shadow-2xs cursor-pointer ${
+              sortBy === 'recommended'
+                ? 'bg-slate-900 text-white shadow-xs'
+                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            <Sparkles className={`w-3.5 h-3.5 ${sortBy === 'recommended' ? 'text-amber-300' : 'text-slate-400'}`} />
+            <span>オススメ順</span>
+          </button>
+
+          {/* ソート: 評価が高い順 */}
+          <button
+            onClick={() => setSortBy('rating')}
+            className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 shadow-2xs cursor-pointer ${
+              sortBy === 'rating'
+                ? 'bg-amber-500 text-white shadow-xs'
+                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            <Star className={`w-3.5 h-3.5 ${sortBy === 'rating' ? 'fill-white' : 'text-amber-400 fill-amber-400'}`} />
+            <span>評価が高い順</span>
+          </button>
+
+          {/* ソート: 料金が安い順 */}
+          <button
+            onClick={() => setSortBy('price_asc')}
+            className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 shadow-2xs cursor-pointer ${
+              sortBy === 'price_asc'
+                ? 'bg-slate-900 text-white shadow-xs'
+                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            <Coins className={`w-3.5 h-3.5 ${sortBy === 'price_asc' ? 'text-emerald-300' : 'text-slate-400'}`} />
+            <span>料金が安い順</span>
+          </button>
+
+          {/* ソート: 料金が高い順 */}
+          <button
+            onClick={() => setSortBy('price_desc')}
+            className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 shadow-2xs cursor-pointer ${
+              sortBy === 'price_desc'
+                ? 'bg-slate-900 text-white shadow-xs'
+                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            <Coins className={`w-3.5 h-3.5 ${sortBy === 'price_desc' ? 'text-emerald-300' : 'text-slate-400'}`} />
+            <span>料金が高い順</span>
+          </button>
+
+          {/* フィルター: 特典・キャンペーン有無 */}
+          <button
+            onClick={() => setOnlyCampaign(!onlyCampaign)}
+            className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 shadow-2xs cursor-pointer ${
+              onlyCampaign
+                ? 'bg-emerald-600 text-white shadow-xs ring-2 ring-emerald-600/30'
+                : 'bg-white text-slate-700 border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/50'
+            }`}
+          >
+            <BadgePercent className={`w-3.5 h-3.5 ${onlyCampaign ? 'text-white' : 'text-emerald-600'}`} />
+            <span>🎁 特典・キャンペーンあり</span>
+            {onlyCampaign && <Check className="w-3 h-3 ml-0.5" />}
+          </button>
+
+          {/* フィルター: 出張のみ */}
+          <button
+            onClick={() => setFilterStyle(filterStyle === 'visit' ? 'all' : 'visit')}
+            className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 cursor-pointer ${
+              filterStyle === 'visit'
+                ? 'bg-teal-700 text-white shadow-xs'
+                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            <Home className="w-3.5 h-3.5 text-emerald-500" />
+            <span>出張のみ</span>
+            {filterStyle === 'visit' && <Check className="w-3 h-3 ml-0.5" />}
+          </button>
+
+          {/* フィルター: 店舗あり */}
+          <button
+            onClick={() => setFilterStyle(filterStyle === 'store' ? 'all' : 'store')}
+            className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 cursor-pointer ${
+              filterStyle === 'store'
+                ? 'bg-teal-700 text-white shadow-xs'
+                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            <Building className="w-3.5 h-3.5 text-teal-600" />
+            <span>店舗あり</span>
+            {filterStyle === 'store' && <Check className="w-3 h-3 ml-0.5" />}
+          </button>
+
+          {/* フィルターリセット */}
+          {activeFiltersCount > 0 && (
+            <button
+              onClick={() => {
+                setOnlyCampaign(false);
+                setFilterStyle('all');
+                setSelectedGenre(null);
+                setSelectedCategory('all');
+                setSortBy('recommended');
+                setSearchQuery('');
+              }}
+              className="text-[11px] text-slate-400 hover:text-slate-600 font-bold px-2 py-1 underline whitespace-nowrap cursor-pointer"
+            >
+              条件をリセット
+            </button>
+          )}
+        </div>
+
+        {/* 該当件数 ＆ ビュー切替 */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2 pb-1 border-t border-slate-100">
+          <div className="text-xs text-slate-500 font-medium">
+            該当 <strong className="text-slate-900 font-bold text-sm">{therapistsList.length}</strong> 名のセラピスト
+            {sortBy === 'distance' && <span className="ml-1 text-emerald-600 font-black">（現在地から近い順）</span>}
+            {sortBy === 'recommended' && <span className="ml-1 text-slate-600 font-bold">（オススメ順）</span>}
+            {sortBy === 'rating' && <span className="ml-1 text-amber-600 font-bold">（評価が高い順）</span>}
+            {sortBy === 'price_asc' && <span className="ml-1 text-indigo-600 font-bold">（料金が安い順）</span>}
+            {sortBy === 'price_desc' && <span className="ml-1 text-indigo-600 font-bold">（料金が高い順）</span>}
+            {searchQuery && <span className="ml-1 text-slate-700">（「{searchQuery}」の検索結果）</span>}
           </div>
 
-          {/* 絞り込み＆ソート ボタングループ */}
-          <div className="flex flex-wrap items-center gap-2 pb-1 pt-1">
-            {/* ソート: オススメ順 */}
+          <div className="flex items-center self-end sm:self-auto bg-slate-100/90 p-1 rounded-2xl">
             <button
-              onClick={() => setSortBy('recommended')}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 shadow-2xs ${
-                sortBy === 'recommended'
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+              onClick={() => setViewMode('card')}
+              className={`p-1.5 px-3 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                viewMode === 'card'
+                  ? 'bg-white text-slate-900 shadow-2xs'
+                  : 'text-slate-500 hover:text-slate-800'
               }`}
+              title="カード表示"
             >
-              <Sparkles className={`w-3.5 h-3.5 ${sortBy === 'recommended' ? 'text-amber-300' : 'text-slate-400'}`} />
-              <span>オススメ順</span>
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span>カード</span>
             </button>
-
-            {/* ソート: 評価が高い順 */}
             <button
-              onClick={() => setSortBy('rating')}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 shadow-2xs ${
-                sortBy === 'rating'
-                  ? 'bg-amber-500 text-white shadow-xs'
-                  : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+              onClick={() => setViewMode('list')}
+              className={`p-1.5 px-3 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                viewMode === 'list'
+                  ? 'bg-white text-slate-900 shadow-2xs'
+                  : 'text-slate-500 hover:text-slate-800'
               }`}
+              title="リスト表示"
             >
-              <Star className={`w-3.5 h-3.5 ${sortBy === 'rating' ? 'fill-white' : 'text-amber-400 fill-amber-400'}`} />
-              <span>評価が高い順</span>
+              <List className="w-3.5 h-3.5" />
+              <span>リスト</span>
             </button>
-
-            {/* ソート: 距離が近い順 */}
             <button
-              onClick={() => setSortBy('distance')}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 shadow-2xs ${
-                sortBy === 'distance'
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+              onClick={() => setViewMode('map')}
+              className={`p-1.5 px-3 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                viewMode === 'map'
+                  ? 'bg-white text-slate-900 shadow-2xs'
+                  : 'text-slate-500 hover:text-slate-800'
               }`}
+              title="マップ表示"
             >
-              <Navigation className={`w-3.5 h-3.5 ${sortBy === 'distance' ? 'text-white' : 'text-emerald-600'}`} />
-              <span>距離が近い順</span>
+              <MapIcon className="w-3.5 h-3.5" />
+              <span>マップ</span>
             </button>
-
-            {/* ソート: 料金が安い順 */}
-            <button
-              onClick={() => setSortBy('price_asc')}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 shadow-2xs ${
-                sortBy === 'price_asc'
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
-              }`}
-            >
-              <Coins className={`w-3.5 h-3.5 ${sortBy === 'price_asc' ? 'text-emerald-300' : 'text-slate-400'}`} />
-              <span>料金が安い順</span>
-            </button>
-
-            {/* ソート: 料金が高い順 */}
-            <button
-              onClick={() => setSortBy('price_desc')}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 shadow-2xs ${
-                sortBy === 'price_desc'
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
-              }`}
-            >
-              <Coins className={`w-3.5 h-3.5 ${sortBy === 'price_desc' ? 'text-emerald-300' : 'text-slate-400'}`} />
-              <span>料金が高い順</span>
-            </button>
-
-            {/* フィルター: 特典・キャンペーン有無 */}
-            <button
-              onClick={() => setOnlyCampaign(!onlyCampaign)}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 shadow-2xs ${
-                onlyCampaign
-                  ? 'bg-emerald-600 text-white shadow-xs ring-2 ring-emerald-600/30'
-                  : 'bg-white text-slate-700 border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/50'
-              }`}
-            >
-              <BadgePercent className={`w-3.5 h-3.5 ${onlyCampaign ? 'text-white' : 'text-emerald-600'}`} />
-              <span>🎁 特典・キャンペーンあり</span>
-              {onlyCampaign && <Check className="w-3 h-3 ml-0.5" />}
-            </button>
-
-            {/* フィルター: 出張のみ */}
-            <button
-              onClick={() => setFilterStyle(filterStyle === 'visit' ? 'all' : 'visit')}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 ${
-                filterStyle === 'visit'
-                  ? 'bg-teal-700 text-white shadow-xs'
-                  : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
-              }`}
-            >
-              <Home className="w-3.5 h-3.5 text-emerald-500" />
-              <span>出張のみ</span>
-              {filterStyle === 'visit' && <Check className="w-3 h-3 ml-0.5" />}
-            </button>
-
-            {/* フィルター: 店舗あり */}
-            <button
-              onClick={() => setFilterStyle(filterStyle === 'store' ? 'all' : 'store')}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 ${
-                filterStyle === 'store'
-                  ? 'bg-teal-700 text-white shadow-xs'
-                  : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
-              }`}
-            >
-              <Building className="w-3.5 h-3.5 text-teal-600" />
-              <span>店舗あり</span>
-              {filterStyle === 'store' && <Check className="w-3 h-3 ml-0.5" />}
-            </button>
-
-            {/* フィルターリセット */}
-            {activeFiltersCount > 0 && (
-              <button
-                onClick={() => {
-                  setOnlyCampaign(false);
-                  setFilterStyle('all');
-                  setSortBy('recommended');
-                  setSearchQuery('');
-                }}
-                className="text-[11px] text-slate-400 hover:text-slate-600 font-bold px-2 py-1 underline whitespace-nowrap"
-              >
-                条件をリセット
-              </button>
-            )}
           </div>
-
-          {/* 絞り込みやソートボタンの下: 該当件数 ＆ ビュー切替 (カード / リスト / マップ) */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2 pb-1 border-t border-slate-100">
-            <div className="text-xs text-slate-500 font-medium">
-              該当 <strong className="text-slate-900 font-bold">{therapistsList.length}</strong> 名のセラピスト
-              {sortBy === 'recommended' && <span className="ml-1 text-slate-500 font-bold">（オススメ順）</span>}
-              {sortBy === 'rating' && <span className="ml-1 text-amber-600 font-bold">（評価が高い順）</span>}
-              {sortBy === 'distance' && <span className="ml-1 text-emerald-600 font-bold">（現在地から近い順）</span>}
-              {sortBy === 'price_asc' && <span className="ml-1 text-indigo-600 font-bold">（料金が安い順）</span>}
-              {sortBy === 'price_desc' && <span className="ml-1 text-indigo-600 font-bold">（料金が高い順）</span>}
-              {onlyCampaign && (
-                <span className="ml-1.5 text-emerald-600 font-bold">🎁 特典・キャンペーン対象</span>
-              )}
-            </div>
-
-            {/* ビュー切替 (カード / リスト / マップ) */}
-            <div className="flex items-center self-end sm:self-auto bg-slate-100/90 p-1 rounded-2xl">
-              <button
-                onClick={() => setViewMode('card')}
-                className={`p-1.5 px-3 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
-                  viewMode === 'card'
-                    ? 'bg-white text-slate-900 shadow-2xs'
-                    : 'text-slate-500 hover:text-slate-800'
-                }`}
-                title="カード表示"
-              >
-                <LayoutGrid className="w-3.5 h-3.5" />
-                <span>カード</span>
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-1.5 px-3 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
-                  viewMode === 'list'
-                    ? 'bg-white text-slate-900 shadow-2xs'
-                    : 'text-slate-500 hover:text-slate-800'
-                }`}
-                title="リスト表示"
-              >
-                <List className="w-3.5 h-3.5" />
-                <span>リスト</span>
-              </button>
-              <button
-                onClick={() => setViewMode('map')}
-                className={`p-1.5 px-3 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
-                  viewMode === 'map'
-                    ? 'bg-white text-slate-900 shadow-2xs'
-                    : 'text-slate-500 hover:text-slate-800'
-                }`}
-                title="マップ表示"
-              >
-                <MapIcon className="w-3.5 h-3.5" />
-                <span>マップ</span>
-              </button>
-            </div>
-          </div>
+        </div>
+      </div>
 
       {/* セラピスト一覧 ビュー表示 */}
       {viewMode === 'map' ? (
@@ -1549,8 +1563,6 @@ export const CustomerView: React.FC = () => {
               );
             })
           )}
-        </div>
-      )}
         </div>
       )}
 
