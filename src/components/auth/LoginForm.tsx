@@ -46,11 +46,11 @@ function authErrorMessage(message: string): string {
 
 const homeFor = (role: UserRole | null | undefined) => (role === 'admin' ? '/admin' : role === 'therapist' ? '/therapist' : '/');
 
-export const LoginForm: React.FC<LoginFormProps> = ({ initialRole = 'therapist', errorCode, onSuccess, redirectTo, isModal = false }) => {
+export const LoginForm: React.FC<LoginFormProps> = ({ initialRole = 'customer', errorCode, onSuccess, redirectTo, isModal = false }) => {
   const { currentBrand } = useApp();
   const supabase = getSupabase();
 
-  const [activeRole, setActiveRole] = useState<UserRole>(initialRole === 'admin' ? 'admin' : 'therapist');
+  const [activeRole, setActiveRole] = useState<UserRole>(initialRole);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [step, setStep] = useState<'select_provider' | 'email_input' | 'working' | 'check_email'>('select_provider');
   const [statusText, setStatusText] = useState('');
@@ -156,39 +156,122 @@ export const LoginForm: React.FC<LoginFormProps> = ({ initialRole = 'therapist',
       return setErrorMessage(authErrorMessage(error?.message ?? ''));
     }
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).maybeSingle();
-    const role = (profile?.role as UserRole | undefined) ?? null;
-    if (role !== 'admin' && role !== 'therapist') {
+    const actualRole = (profile?.role as UserRole | undefined) ?? null;
+
+    if (!actualRole) {
       await supabase.auth.signOut();
       setStep('email_input');
-      return setErrorMessage('このアカウントは利用が許可されていません。指定された管理者またはセラピストのアカウントでログインしてください。');
+      return setErrorMessage('アカウントの役割情報が見つかりません。管理者にお問い合わせください。');
     }
-    finish(role);
+
+    // 役割不一致チェック: その役割のページにしかログインできないように制御
+    if (activeRole !== actualRole) {
+      await supabase.auth.signOut();
+      setStep('email_input');
+      const roleNames: Record<UserRole, string> = {
+        admin: '管理・運営本部',
+        therapist: 'セラピスト',
+        customer: 'お客様（顧客）',
+      };
+      return setErrorMessage(
+        `このアカウントは「${roleNames[actualRole]}」として登録されています。上の「${roleNames[actualRole]} ログイン」を選択してログインしてください。`
+      );
+    }
+
+    finish(actualRole);
   };
 
   const selectRole = (role: UserRole) => {
-    setActiveRole(role === 'admin' ? 'admin' : 'therapist');
+    setActiveRole(role);
     setStep('select_provider');
     setErrorMessage('');
   };
 
-  const roleButton = (role: UserRole, label: React.ReactNode, activeClass: string) => (
-    <button
-      type="button"
-      onClick={() => selectRole(role)}
-      className={`flex-1 py-2 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
-        activeRole === role ? `${activeClass} shadow-xs scale-[1.02]` : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
-      }`}
-    >
-      {label}
-    </button>
-  );
+  const roleCard = (
+    role: UserRole,
+    icon: React.ReactNode,
+    title: string,
+    desc: string,
+    activeBorder: string,
+    activeBg: string,
+    activeText: string,
+    badgeText: string
+  ) => {
+    const isSelected = activeRole === role;
+    return (
+      <button
+        type="button"
+        onClick={() => selectRole(role)}
+        className={`w-full p-3 sm:p-3.5 rounded-2xl border text-left transition-all flex items-center justify-between gap-3 ${
+          isSelected
+            ? `${activeBorder} ${activeBg} shadow-xs ring-2 ring-emerald-500/10`
+            : 'border-slate-200 bg-white hover:bg-slate-50/80 text-slate-700'
+        }`}
+      >
+        <div className="flex items-center gap-3 min-w-0">
+          <div
+            className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-base font-bold transition ${
+              isSelected ? activeText : 'bg-slate-100 text-slate-500'
+            }`}
+          >
+            {icon}
+          </div>
+          <div className="min-w-0">
+            <div className={`text-xs sm:text-sm ${isSelected ? 'text-slate-900 font-black' : 'text-slate-700 font-bold'}`}>
+              {title}
+            </div>
+            <div className="text-[11px] text-slate-400 truncate">{desc}</div>
+          </div>
+        </div>
+        <div className="shrink-0 flex items-center">
+          <span
+            className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+              isSelected
+                ? 'bg-emerald-600 text-white border-emerald-600'
+                : 'bg-slate-50 text-slate-400 border-slate-200'
+            }`}
+          >
+            {isSelected ? '選択中' : badgeText}
+          </span>
+        </div>
+      </button>
+    );
+  };
 
   return (
     <div className={isModal ? '' : 'w-full'}>
-      {/* 1. ロール選択（セラピスト / 管理者） */}
-      <div className="bg-slate-100 p-1 rounded-2xl flex items-center gap-1 mb-5 border border-slate-200/80">
-        {roleButton('therapist', <><span className="text-sm">💆</span><span>セラピスト</span></>, 'bg-white text-indigo-700')}
-        {roleButton('admin', <><ShieldCheck className="w-3.5 h-3.5 text-amber-400" /><span>管理・運営</span></>, 'bg-slate-900 text-white')}
+      {/* ログイン区分（縦並びのロール選択カード） */}
+      <div className="space-y-2 mb-5">
+        {roleCard(
+          'customer',
+          '👤',
+          'お客様（顧客）ログイン',
+          '予約確認・セラピスト検索・予約履歴',
+          'border-emerald-600',
+          'bg-emerald-50/50',
+          'bg-emerald-100 text-emerald-800',
+          '一般'
+        )}
+        {roleCard(
+          'therapist',
+          '💆',
+          'セラピスト ログイン',
+          '受付管理・スケジュール設定・プロフィール',
+          'border-indigo-600',
+          'bg-indigo-50/50',
+          'bg-indigo-100 text-indigo-800',
+          'セラピスト'
+        )}
+        {roleCard(
+          'admin',
+          <ShieldCheck className="w-4 h-4 text-amber-500" />,
+          '管理・運営本部 ログイン',
+          'プラットフォーム全体管理・セラピスト審査',
+          'border-slate-800',
+          'bg-slate-100/70',
+          'bg-slate-900 text-amber-400',
+          '管理者'
+        )}
       </div>
 
       {errorMessage && (

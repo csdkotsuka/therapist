@@ -21,7 +21,7 @@ export async function GET(req: Request) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error && data.user) {
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).maybeSingle();
-      if (profile?.role !== 'admin' && profile?.role !== 'therapist') {
+      if (!profile?.role) {
         await supabase.auth.signOut();
         return NextResponse.redirect(new URL('/login?error=UNAUTHORIZED_ACCOUNT', url.origin));
       }
@@ -31,7 +31,7 @@ export async function GET(req: Request) {
     const { data, error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
     if (!error && data.user) {
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).maybeSingle();
-      if (profile?.role !== 'admin' && profile?.role !== 'therapist') {
+      if (!profile?.role) {
         await supabase.auth.signOut();
         return NextResponse.redirect(new URL('/login?error=UNAUTHORIZED_ACCOUNT', url.origin));
       }
