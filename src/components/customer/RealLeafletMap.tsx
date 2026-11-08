@@ -2,8 +2,8 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { useApp } from '@/context/AppContext';
-import { calculateDistanceKm, estimateTravelTimeMinutes, formatPrice } from '@/lib/geo';
-import { MapPin, Navigation, Compass, Star, Clock, Home, Building, Sparkles } from 'lucide-react';
+import { calculateDistanceKm, estimateTravelTimeMinutes, formatPrice, geocodeLocation } from '@/lib/geo';
+import { MapPin, Navigation, Compass, Star, Clock, Home, Building, Sparkles, Search } from 'lucide-react';
 import L from 'leaflet';
 import { escapeHtml, safeUrlAttr } from '@/lib/escapeHtml';
 
@@ -13,18 +13,62 @@ interface RealLeafletMapProps {
   onSelectTherapist: (therapistId: string) => void;
   filterType?: 'all' | 'visit' | 'store';
   therapists?: (TherapistProfile & { distance?: number })[];
+  isCustomCenter?: boolean;
+  onSetCustomCenter?: (result: { name: string; lat: number; lng: number }) => void;
+  onResetToGps?: () => void;
 }
 
 export const RealLeafletMap: React.FC<RealLeafletMapProps> = ({
   onSelectTherapist,
   filterType = 'all',
   therapists,
+  isCustomCenter = false,
+  onSetCustomCenter,
+  onResetToGps,
 }) => {
-  const { userLocation, therapistProfiles, allUsers } = useApp();
+  const { userLocation, setUserLocation, therapistProfiles, allUsers } = useApp();
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.LayerGroup | null>(null);
   const [selectedTherapistId, setSelectedTherapistId] = useState<string | null>(null);
+
+  const [mapCenterQuery, setMapCenterQuery] = useState('');
+  const [isSearchingCenter, setIsSearchingCenter] = useState(false);
+
+  const handleMapSearchSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = mapCenterQuery.trim();
+    if (!q) return;
+
+    setIsSearchingCenter(true);
+    try {
+      const res = await geocodeLocation(q);
+      if (res) {
+        if (onSetCustomCenter) {
+          onSetCustomCenter({
+            name: res.displayName,
+            lat: res.lat,
+            lng: res.lng,
+          });
+        } else {
+          setUserLocation({
+            name: res.displayName,
+            lat: res.lat,
+            lng: res.lng,
+          });
+        }
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.flyTo([res.lat, res.lng], 14, { duration: 1.2 });
+        }
+      } else {
+        alert(`「${q}」の位置が見つかりませんでした。別の駅名や市区町村名でお試しください。`);
+      }
+    } catch {
+      alert('位置情報の取得に失敗しました。');
+    } finally {
+      setIsSearchingCenter(false);
+    }
+  };
 
   // therapists が渡された場合は絞り込み済みリストをそのまま使用し、未指定の場合はデフォルトのフィルタリングを行う
   const therapistsList = therapists ?? Object.values(therapistProfiles).filter((tp) => {
@@ -78,8 +122,17 @@ export const RealLeafletMap: React.FC<RealLeafletMapProps> = ({
 
     group.clearLayers();
 
-    // 1. ユーザー現在地マーカー（アニメーション付きブルーサークル）
-    const userMarkerHtml = `
+    // 1. 中心地／現在地マーカー（アニメーション付きサークル）
+    const userMarkerHtml = isCustomCenter
+      ? `
+      <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px;">
+        <span style="position: absolute; width: 36px; height: 36px; background: rgba(16, 185, 129, 0.35); border-radius: 50%; animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;"></span>
+        <div style="width: 22px; height: 22px; background: #059669; border: 3px solid white; border-radius: 50%; box-shadow: 0 4px 8px -1px rgba(0,0,0,0.35); display: flex; align-items: center; justify-content: center;">
+          <div style="width: 6px; height: 6px; background: white; border-radius: 50%;"></div>
+        </div>
+      </div>
+    `
+      : `
       <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;">
         <span style="position: absolute; width: 32px; height: 32px; background: rgba(14, 165, 233, 0.3); border-radius: 50%; animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;"></span>
         <div style="width: 18px; height: 18px; background: #0284c7; border: 3px solid white; border-radius: 50%; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3);"></div>
@@ -89,19 +142,23 @@ export const RealLeafletMap: React.FC<RealLeafletMapProps> = ({
     const userIcon = L.divIcon({
       html: userMarkerHtml,
       className: 'custom-user-marker',
-      iconSize: [40, 40],
-      iconAnchor: [20, 20],
+      iconSize: isCustomCenter ? [44, 44] : [40, 40],
+      iconAnchor: isCustomCenter ? [22, 22] : [20, 20],
     });
 
+    const markerLabel = isCustomCenter
+      ? `📍 指定中心地 (${escapeHtml(userLocation.name)})`
+      : `📍 あなたの現在地 (${escapeHtml(userLocation.name)})`;
+
     L.marker([userLocation.lat, userLocation.lng], { icon: userIcon })
-      .bindTooltip(`📍 あなたの現在地 (${escapeHtml(userLocation.name)})`, {
+      .bindTooltip(markerLabel, {
         permanent: false,
         direction: 'top',
         className: 'font-sans text-xs font-bold rounded-lg px-2 py-1',
       })
       .addTo(group);
 
-    // 現在地へ視点を移動
+    // 中心地へ視点を移動
     map.panTo([userLocation.lat, userLocation.lng]);
 
     // 2. セラピストマーカー群
@@ -176,22 +233,75 @@ export const RealLeafletMap: React.FC<RealLeafletMapProps> = ({
 
       marker.addTo(group);
     });
-  }, [userLocation, therapistProfiles, allUsers, filterType, therapists]);
+  }, [userLocation, therapistProfiles, allUsers, filterType, therapists, isCustomCenter]);
 
   const selectedTherapist = selectedTherapistId ? therapistProfiles[selectedTherapistId] : null;
   const selectedUser = selectedTherapistId ? allUsers.find((u) => u.id === selectedTherapistId) : null;
 
   return (
-    <div className="relative w-full h-[500px] rounded-3xl overflow-hidden shadow-xl border border-slate-200">
+    <div className="relative w-full h-[540px] rounded-3xl overflow-hidden shadow-xl border border-slate-200">
       {/* Leaflet 地図コンテナ */}
       <div ref={mapContainerRef} className="w-full h-full z-0" />
 
-      {/* マップ情報バナー */}
-      <div className="absolute top-4 left-4 z-20 flex items-center gap-2 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-slate-200 text-xs text-slate-700 shadow-md">
-        <Compass className="w-3.5 h-3.5 text-emerald-600 animate-spin" style={{ animationDuration: '16s' }} />
-        <span className="font-bold">リアルマップ</span>
-        <span className="text-slate-400">|</span>
-        <span className="font-bold text-emerald-600">{therapistsList.length}名表示中</span>
+      {/* マップ上部バー: 情報バナー ＆ 中心地検索入力 */}
+      <div className="absolute top-3 left-3 right-3 z-20 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
+        {/* 左側: マップ情報バナー */}
+        <div className="flex items-center gap-2 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-slate-200 text-xs text-slate-700 shadow-md pointer-events-auto">
+          <Compass className="w-3.5 h-3.5 text-emerald-600 animate-spin" style={{ animationDuration: '16s' }} />
+          <span className="font-bold">リアルマップ</span>
+          <span className="text-slate-400">|</span>
+          <span className="font-bold text-emerald-600">{therapistsList.length}名表示中</span>
+        </div>
+
+        {/* 右側: 中心地入力バー & GPSリセットボタン */}
+        <div className="flex items-center gap-2 pointer-events-auto ml-auto">
+          <form
+            onSubmit={handleMapSearchSubmit}
+            className="flex items-center bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200/90 shadow-md overflow-hidden text-xs pl-2.5 pr-1 py-1 gap-1.5"
+          >
+            <MapPin className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+            <input
+              type="text"
+              value={mapCenterQuery}
+              onChange={(e) => setMapCenterQuery(e.target.value)}
+              placeholder="中心地を入力（駅名・住所・地名）"
+              className="bg-transparent border-none text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none w-32 sm:w-56"
+            />
+            {mapCenterQuery && (
+              <button
+                type="button"
+                onClick={() => setMapCenterQuery('')}
+                className="text-slate-400 hover:text-slate-600 text-xs px-1 cursor-pointer"
+              >
+                ✕
+              </button>
+            )}
+            <button
+              type="submit"
+              disabled={isSearchingCenter || !mapCenterQuery.trim()}
+              className="px-2.5 py-1 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl transition disabled:opacity-40 flex items-center gap-1 cursor-pointer shrink-0"
+            >
+              <Search className="w-3 h-3" />
+              <span>{isSearchingCenter ? '検索中...' : '中心に設定'}</span>
+            </button>
+          </form>
+
+          {/* 現在地へセンタリング / GPSリセットボタン */}
+          <button
+            onClick={() => {
+              if (onResetToGps) {
+                onResetToGps();
+              } else if (mapInstanceRef.current) {
+                mapInstanceRef.current.flyTo([userLocation.lat, userLocation.lng], 14, { duration: 1 });
+              }
+            }}
+            className="p-2 bg-white/95 backdrop-blur-md hover:bg-white text-slate-700 rounded-2xl shadow-md border border-slate-200 transition cursor-pointer shrink-0 flex items-center gap-1 text-xs font-bold"
+            title={isCustomCenter ? 'GPS現在地に戻す' : '現在地に移動'}
+          >
+            <Navigation className={`w-3.5 h-3.5 ${isCustomCenter ? 'text-emerald-600' : 'text-sky-600'}`} />
+            <span className="hidden sm:inline text-[11px]">{isCustomCenter ? 'GPSに戻す' : '現在地'}</span>
+          </button>
+        </div>
       </div>
 
       {/* 0件時のアラート */}
@@ -200,21 +310,6 @@ export const RealLeafletMap: React.FC<RealLeafletMapProps> = ({
           絞り込み条件に一致するセラピストが見つかりませんでした
         </div>
       )}
-
-      {/* 現在地へセンタリングするボタン */}
-      <div className="absolute top-4 right-4 z-20">
-        <button
-          onClick={() => {
-            if (mapInstanceRef.current) {
-              mapInstanceRef.current.flyTo([userLocation.lat, userLocation.lng], 14, { duration: 1 });
-            }
-          }}
-          className="p-2.5 bg-white/90 backdrop-blur-md hover:bg-white text-slate-700 rounded-2xl shadow-md border border-slate-200 transition"
-          title="現在地に移動"
-        >
-          <Navigation className="w-4 h-4 text-sky-600" />
-        </button>
-      </div>
 
       {/* 選択されたセラピストカード（下部スライドアップ） */}
       {selectedTherapist && selectedUser && (
@@ -238,7 +333,8 @@ export const RealLeafletMap: React.FC<RealLeafletMapProps> = ({
               <div className="flex items-center gap-3 mt-1 text-xs font-medium text-slate-600">
                 <span className="inline-flex items-center gap-1 text-emerald-600 font-bold">
                   <MapPin className="w-3.5 h-3.5" />
-                  現在地から {calculateDistanceKm(userLocation.lat, userLocation.lng, selectedTherapist.lat, selectedTherapist.lng)}km
+                  {isCustomCenter ? '中心地から ' : '現在地から '}
+                  {calculateDistanceKm(userLocation.lat, userLocation.lng, selectedTherapist.lat, selectedTherapist.lng)}km
                 </span>
                 <span className="inline-flex items-center gap-1 text-slate-500">
                   <Clock className="w-3.5 h-3.5" />
@@ -251,13 +347,13 @@ export const RealLeafletMap: React.FC<RealLeafletMapProps> = ({
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <button
               onClick={() => setSelectedTherapistId(null)}
-              className="px-3 py-2 text-xs text-slate-500 hover:text-slate-700 rounded-xl hover:bg-slate-100 transition"
+              className="px-3 py-2 text-xs text-slate-500 hover:text-slate-700 rounded-xl hover:bg-slate-100 transition cursor-pointer"
             >
               閉じる
             </button>
             <button
               onClick={() => onSelectTherapist(selectedTherapist.user_id)}
-              className="flex-1 sm:flex-none px-4 py-2 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-500/20 transition flex items-center justify-center gap-1.5"
+              className="flex-1 sm:flex-none px-4 py-2 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-500/20 transition flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <Sparkles className="w-3.5 h-3.5" />
               メニューを見て予約する

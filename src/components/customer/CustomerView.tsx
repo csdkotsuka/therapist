@@ -10,6 +10,7 @@ import {
   estimateTravelTimeMinutes,
   getCurrentGpsPosition,
   reverseGeocode,
+  geocodeLocation,
 } from '@/lib/geo';
 import { BookingModal } from './BookingModal';
 import { BookingChatModal } from '@/components/chat/BookingChatModal';
@@ -346,6 +347,11 @@ export const CustomerView: React.FC = () => {
   const [viewMode, setViewMode] = useState<'card' | 'list' | 'map'>('card');
   const [isGpsLoading, setIsGpsLoading] = useState<boolean>(false);
 
+  // 中心地指定機能のステート
+  const [centerInput, setCenterInput] = useState<string>('');
+  const [isGeocoding, setIsGeocoding] = useState<boolean>(false);
+  const [isCustomCenter, setIsCustomCenter] = useState<boolean>(false);
+
   // モーダル管理
   const [bookingTherapistId, setBookingTherapistId] = useState<string | null>(null);
   const [bookedSuccessInfo, setBookedSuccessInfo] = useState<{ id: string; name: string } | null>(null);
@@ -363,11 +369,48 @@ export const CustomerView: React.FC = () => {
         lat: pos.lat,
         lng: pos.lng,
       });
+      setIsCustomCenter(false);
+      setCenterInput('');
     } catch {
       alert('現在地を取得できませんでした。ブラウザの位置情報許可をご確認ください。');
     } finally {
       setIsGpsLoading(false);
     }
+  };
+
+  // 中心地（住所・駅名・地名）を手動設定して近い順にソートする関数
+  const handleSetCenterLocation = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const query = centerInput.trim();
+    if (!query) return;
+
+    setIsGeocoding(true);
+    try {
+      const result = await geocodeLocation(query);
+      if (result) {
+        setUserLocation({
+          name: result.displayName,
+          lat: result.lat,
+          lng: result.lng,
+        });
+        setIsCustomCenter(true);
+        // 設定した中心地からの近い順にソート
+        setSortBy('distance');
+      } else {
+        alert(`「${query}」の位置情報が見つかりませんでした。別の駅名や市区町村名でお試しください。`);
+      }
+    } catch {
+      alert('位置情報の取得に失敗しました。');
+    } finally {
+      setIsGeocoding(false);
+    }
+  };
+
+  // GPS現在地へリセット
+  const handleResetToGps = async () => {
+    setIsCustomCenter(false);
+    setCenterInput('');
+    await fetchCurrentGpsManual();
   };
 
   // GPS現在地の自動取得（デフォルトでオン、裏で静かに現在地を更新）
@@ -950,34 +993,85 @@ export const CustomerView: React.FC = () => {
           )}
         </div>
 
-        {/* 現在地情報 ＆ 距離順クイック切り替えボタン */}
-        <div className="flex flex-wrap items-center justify-between gap-2.5 pt-1 border-t border-slate-100 text-xs">
-          <div className="flex items-center gap-2 text-slate-600 min-w-0">
-            <MapPin className="w-4 h-4 text-rose-500 shrink-0" />
-            <span className="font-medium truncate max-w-[220px] sm:max-w-md">
-              現在地: <strong className="text-slate-900 font-bold">{userLocation.name}</strong>
-            </span>
+        {/* 現在地情報 ＆ 中心地指定フォーム ＆ 距離順クイック切り替えボタン */}
+        <div className="pt-1 border-t border-slate-100 text-xs space-y-2.5">
+          <div className="flex flex-wrap items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2 text-slate-600 min-w-0">
+              <MapPin className={`w-4 h-4 shrink-0 ${isCustomCenter ? 'text-emerald-600' : 'text-rose-500'}`} />
+              <span className="font-medium truncate max-w-[220px] sm:max-w-md">
+                {isCustomCenter ? '指定中心地:' : '現在地:'} <strong className="text-slate-900 font-bold">{userLocation.name}</strong>
+              </span>
+              <button
+                onClick={fetchCurrentGpsManual}
+                disabled={isGpsLoading}
+                className="text-[11px] text-emerald-700 hover:text-emerald-800 font-bold px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition shrink-0 cursor-pointer disabled:opacity-50"
+              >
+                {isGpsLoading ? '取得中...' : isCustomCenter ? 'GPS現在地に戻す' : '現在地を更新'}
+              </button>
+            </div>
+
             <button
-              onClick={fetchCurrentGpsManual}
-              disabled={isGpsLoading}
-              className="text-[11px] text-emerald-700 hover:text-emerald-800 font-bold px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition shrink-0 cursor-pointer disabled:opacity-50"
+              onClick={() => setSortBy('distance')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 cursor-pointer shadow-2xs ${
+                sortBy === 'distance'
+                  ? 'bg-emerald-600 text-white ring-2 ring-emerald-500/30 shadow-xs'
+                  : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200'
+              }`}
             >
-              {isGpsLoading ? '取得中...' : '現在地を更新'}
+              <Navigation className={`w-3.5 h-3.5 ${sortBy === 'distance' ? 'text-white' : 'text-emerald-700'}`} />
+              <span>{isCustomCenter ? '中心地から近い順' : '距離が近い順に並び替え'}</span>
+              {sortBy === 'distance' && <Check className="w-3 h-3 stroke-[3]" />}
             </button>
           </div>
 
-          <button
-            onClick={() => setSortBy('distance')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 cursor-pointer shadow-2xs ${
-              sortBy === 'distance'
-                ? 'bg-emerald-600 text-white ring-2 ring-emerald-500/30 shadow-xs'
-                : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200'
-            }`}
+          {/* 中心地（駅名・住所・地名）入力フォーム */}
+          <form
+            onSubmit={handleSetCenterLocation}
+            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-slate-50 p-2 sm:p-2.5 rounded-2xl border border-slate-200/80"
           >
-            <Navigation className={`w-3.5 h-3.5 ${sortBy === 'distance' ? 'text-white' : 'text-emerald-700'}`} />
-            <span>距離が近い順に並び替え</span>
-            {sortBy === 'distance' && <Check className="w-3 h-3 stroke-[3]" />}
-          </button>
+            <div className="flex items-center gap-1.5 font-bold text-slate-700 shrink-0 text-xs">
+              <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+              <span>中心地を指定:</span>
+            </div>
+            <div className="relative flex-1">
+              <input
+                type="text"
+                value={centerInput}
+                onChange={(e) => setCenterInput(e.target.value)}
+                placeholder="駅名・住所・エリアを入力（例: 松山駅、道後温泉、渋谷など）"
+                className="w-full px-3 py-1.5 rounded-xl bg-white border border-slate-200 focus:border-emerald-500 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none shadow-2xs"
+              />
+              {centerInput && (
+                <button
+                  type="button"
+                  onClick={() => setCenterInput('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="submit"
+                disabled={isGeocoding || !centerInput.trim()}
+                className="w-full sm:w-auto px-3.5 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl shadow-xs transition disabled:opacity-40 flex items-center justify-center gap-1 cursor-pointer text-xs"
+              >
+                <Search className="w-3 h-3" />
+                <span>{isGeocoding ? '検索中...' : '中心地に設定して近い順にソート'}</span>
+              </button>
+              {isCustomCenter && (
+                <button
+                  type="button"
+                  onClick={handleResetToGps}
+                  className="px-2.5 py-1.5 bg-white hover:bg-slate-100 text-slate-600 font-bold rounded-xl border border-slate-200 transition cursor-pointer text-xs whitespace-nowrap"
+                  title="GPS現在地に戻す"
+                >
+                  GPSに戻す
+                </button>
+              )}
+            </div>
+          </form>
         </div>
       </div>
 
@@ -1235,7 +1329,11 @@ export const CustomerView: React.FC = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2 pb-1 border-t border-slate-100">
           <div className="text-xs text-slate-500 font-medium">
             該当 <strong className="text-slate-900 font-bold text-sm">{therapistsList.length}</strong> 名のセラピスト
-            {sortBy === 'distance' && <span className="ml-1 text-emerald-600 font-black">（現在地から近い順）</span>}
+            {sortBy === 'distance' && (
+              <span className="ml-1 text-emerald-600 font-black">
+                （{isCustomCenter ? '指定中心地から近い順' : '現在地から近い順'}）
+              </span>
+            )}
             {sortBy === 'recommended' && <span className="ml-1 text-slate-600 font-bold">（オススメ順）</span>}
             {sortBy === 'rating' && <span className="ml-1 text-amber-600 font-bold">（評価が高い順）</span>}
             {sortBy === 'price_asc' && <span className="ml-1 text-indigo-600 font-bold">（料金が安い順）</span>}
@@ -1290,6 +1388,13 @@ export const CustomerView: React.FC = () => {
           onSelectTherapist={(id) => setBookingTherapistId(id)}
           filterType={filterStyle}
           therapists={therapistsList}
+          isCustomCenter={isCustomCenter}
+          onSetCustomCenter={(res) => {
+            setUserLocation(res);
+            setIsCustomCenter(true);
+            setSortBy('distance');
+          }}
+          onResetToGps={handleResetToGps}
         />
       ) : viewMode === 'card' ? (
         /* Uber風 カードグリッド表示 (Grid Card View) */
@@ -1360,7 +1465,7 @@ export const CustomerView: React.FC = () => {
                         <div className="flex items-center gap-2 mt-1.5 text-[11px]">
                           <span className="inline-flex items-center gap-1 text-emerald-800 bg-emerald-50 font-bold px-2 py-0.5 rounded-lg border border-emerald-200">
                             <MapPin className="w-3 h-3 text-emerald-600" />
-                            {tp.distance}km
+                            {isCustomCenter ? '中心地から' : ''} {tp.distance}km
                           </span>
                           <span className="inline-flex items-center gap-1 text-slate-500 bg-slate-100 font-medium px-2 py-0.5 rounded-lg">
                             <Clock className="w-3 h-3 text-slate-400" />
@@ -1481,7 +1586,7 @@ export const CustomerView: React.FC = () => {
 
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-600 text-white shadow-2xs">
                           <MapPin className="w-3 h-3" />
-                          現在地から {tp.distance} km
+                          {isCustomCenter ? '中心地から' : '現在地から'} {tp.distance} km
                         </span>
 
                         <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">

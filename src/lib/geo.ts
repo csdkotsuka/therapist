@@ -178,31 +178,70 @@ export function getFallbackCoordinates(prefecture: string): { lat: number; lng: 
   return { lat: 35.6580, lng: 139.7016 };
 }
 
+export interface GeocodeResult {
+  lat: number;
+  lng: number;
+  displayName: string;
+}
+
 /**
- * 住所から緯度経度を取得するジオコーディング
+ * 地名・駅名・住所・ランドマークから緯度経度・正式地名を取得するジオコーディング
  */
-export async function geocodeAddress(address: string): Promise<{ lat: number; lng: number } | null> {
+export async function geocodeLocation(query: string): Promise<GeocodeResult | null> {
+  const trimmed = query.trim();
+  if (!trimmed) return null;
+
   try {
     const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`,
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(trimmed)}&countrycodes=jp&limit=1`,
       {
         headers: {
           'Accept-Language': 'ja',
         },
       }
     );
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (data && data.length > 0) {
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.length > 0) {
+        const rawName = (data[0].display_name as string) || '';
+        const parts = rawName
+          .split(',')
+          .map((s) => s.trim())
+          .filter((s) => s && s !== '日本');
+        const cleanName = parts.length > 0 ? parts.slice(0, 3).join(' ') : trimmed;
+
+        return {
+          lat: parseFloat(data[0].lat),
+          lng: parseFloat(data[0].lon),
+          displayName: cleanName || trimmed,
+        };
+      }
+    }
+  } catch {
+    // ネットワークエラー等の場合はフォールバックへ
+  }
+
+  // 都道府県名が含まれている場合の代表座標フォールバック
+  for (const [pref, coords] of Object.entries(PREFECTURE_COORDINATES)) {
+    if (trimmed.includes(pref) || pref.includes(trimmed)) {
       return {
-        lat: parseFloat(data[0].lat),
-        lng: parseFloat(data[0].lon),
+        lat: coords.lat,
+        lng: coords.lng,
+        displayName: pref,
       };
     }
-    return null;
-  } catch (e) {
-    return null;
   }
+
+  return null;
+}
+
+/**
+ * 住所から緯度経度を取得するジオコーディング（後方互換用）
+ */
+export async function geocodeAddress(address: string): Promise<{ lat: number; lng: number } | null> {
+  const res = await geocodeLocation(address);
+  if (!res) return null;
+  return { lat: res.lat, lng: res.lng };
 }
 
 /**
