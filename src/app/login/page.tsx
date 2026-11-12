@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { useApp } from '@/context/AppContext';
-import { ArrowLeft, ShieldCheck, User, Sparkles, Building2 } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, User } from 'lucide-react';
 
 function CustomerLoginContent() {
   const router = useRouter();
@@ -88,26 +88,7 @@ function CustomerLoginContent() {
           />
         </div>
 
-        {/* 別ロール向け導線 */}
-        <div className="mt-6 bg-white/70 rounded-2xl border border-slate-200/80 p-3.5 space-y-2 text-xs">
-          <div className="text-[11px] font-bold text-slate-400 text-center">その他の専用ログイン</div>
-          <div className="flex items-center justify-center gap-4 text-xs font-bold divide-x divide-slate-200">
-            <Link
-              href="/therapist/login"
-              className="inline-flex items-center gap-1.5 text-indigo-700 hover:text-indigo-900 hover:underline pl-0"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>セラピストの方はこちら ↗</span>
-            </Link>
-            <Link
-              href="/admin/login"
-              className="inline-flex items-center gap-1.5 text-slate-700 hover:text-slate-900 hover:underline pl-4"
-            >
-              <Building2 className="w-3.5 h-3.5" />
-              <span>管理・運営本部はこちら ↗</span>
-            </Link>
-          </div>
-        </div>
+
 
         {/* フッターセキュリティ注記 */}
         <div className="mt-5 text-center">

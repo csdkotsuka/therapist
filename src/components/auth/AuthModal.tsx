@@ -3,7 +3,7 @@
 import React from 'react';
 import { LoginForm } from './LoginForm';
 import { useApp } from '@/context/AppContext';
-import { X, ShieldCheck } from 'lucide-react';
+import { X } from 'lucide-react';
 
 interface AuthModalProps {
   onClose: () => void;
@@ -53,6 +53,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
 
         {/* ログインフォームコンポーネント */}
         <LoginForm
+          targetRole="customer"
           initialRole="customer"
           onSuccess={() => {
             setTimeout(() => {

@@ -6,7 +6,7 @@
 //   - 役割不一致アカウントの厳格遮断
 // ========================================================
 import React, { useEffect, useState } from 'react';
-import { ShieldCheck, AlertCircle, Mail, Loader2, CheckCircle2 } from 'lucide-react';
+import { AlertCircle, Mail, Loader2, CheckCircle2 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { getSupabase } from '@/lib/supabase';
 import { getLiffIdToken, lineLoginUrl, signInWithLiffToken } from '@/lib/line';
@@ -24,25 +24,25 @@ interface LoginFormProps {
 }
 
 const URL_ERRORS: Record<string, string> = {
-  LINE_NOT_CONFIGURED: 'LINE ログインはまだ設定されていません（LINE Channel ID / Secret が未設定です）。',
+  LINE_NOT_CONFIGURED: 'LINE ログインを利用できません。',
   AUTH_CANCELLED: 'ログインがキャンセルされました。',
-  INVALID_STATE: 'ログインの有効期限が切れました。もう一度お試しください。',
-  TOKEN_EXCHANGE_FAILED: 'LINE との認証に失敗しました。もう一度お試しください。',
-  ID_TOKEN_INVALID: 'LINE の認証情報を確認できませんでした。',
-  SERVER_NOT_CONFIGURED: 'サーバー設定（SUPABASE_SERVICE_ROLE_KEY）が未完了のため LINE ログインを利用できません。',
+  INVALID_STATE: '認証の有効期限が切れました。もう一度お試しください。',
+  TOKEN_EXCHANGE_FAILED: '認証に失敗しました。もう一度お試しください。',
+  ID_TOKEN_INVALID: '認証情報を確認できませんでした。',
+  SERVER_NOT_CONFIGURED: 'サーバーエラーが発生しました。',
   SERVER_ERROR: 'サーバーエラーが発生しました。時間をおいて再度お試しください。',
-  AUTH_CALLBACK_FAILED: 'ログイン処理を完了できませんでした。リンクの有効期限切れの可能性があります。',
-  UNAUTHORIZED_ACCOUNT: 'このアカウントは利用が許可されていません。指定されたアカウントでログインしてください。',
+  AUTH_CALLBACK_FAILED: 'ログイン処理に失敗しました。',
+  UNAUTHORIZED_ACCOUNT: 'このアカウントではログインできません。',
 };
 
 function authErrorMessage(message: string): string {
   if (/invalid login credentials/i.test(message)) return 'メールアドレスまたはパスワードが正しくありません。';
-  if (/email not confirmed/i.test(message)) return 'メールアドレスの確認が完了していません。届いた確認メールのリンクを開いてください。';
-  if (/already registered|already exists/i.test(message)) return 'このメールアドレスは既に登録されています。ログインしてください。';
-  if (/password should be at least|weak password/i.test(message)) return 'パスワードは8文字以上で、推測されにくいものを設定してください。';
-  if (/provider is not enabled|unsupported provider/i.test(message)) return 'この認証方法は現在利用できません（Supabase で未設定です）。';
-  if (/rate limit/i.test(message)) return '試行回数が多すぎます。しばらく待ってから再度お試しください。';
-  return '認証に失敗しました。入力内容を確認してもう一度お試しください。';
+  if (/email not confirmed/i.test(message)) return 'メールアドレスの確認が完了していません。';
+  if (/already registered|already exists/i.test(message)) return 'このメールアドレスは既に登録されています。';
+  if (/password should be at least|weak password/i.test(message)) return 'パスワードは8文字以上で設定してください。';
+  if (/provider is not enabled|unsupported provider/i.test(message)) return 'この認証方法は利用できません。';
+  if (/rate limit/i.test(message)) return '時間をおいて再度お試しください。';
+  return 'ログインに失敗しました。';
 }
 
 const homeFor = (role: UserRole | null | undefined) => (role === 'admin' ? '/admin' : role === 'therapist' ? '/therapist' : '/');
@@ -58,21 +58,17 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   const { currentBrand } = useApp();
   const supabase = getSupabase();
 
-  const effectiveRole: UserRole = targetRole ?? initialRole;
-  const [activeRole, setActiveRole] = useState<UserRole>(effectiveRole);
-  const [authMode] = useState<'login' | 'register'>('login');
+  const activeRole: UserRole = targetRole ?? initialRole;
   
   // セラピスト・管理者は直接メール・パスワード入力画面を開く
-  const initialStep = effectiveRole === 'therapist' || effectiveRole === 'admin' ? 'email_input' : 'select_provider';
+  const initialStep = activeRole === 'therapist' || activeRole === 'admin' ? 'email_input' : 'select_provider';
   const [step, setStep] = useState<'select_provider' | 'email_input' | 'working' | 'check_email'>(initialStep);
   const [statusText, setStatusText] = useState('');
   const [errorMessage, setErrorMessage] = useState(errorCode ? URL_ERRORS[errorCode] ?? 'ログインに失敗しました。' : '');
 
-  const [nameInput, setNameInput] = useState('');
   const [emailInput, setEmailInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
 
-  const isRegister = authMode === 'register' && activeRole !== 'admin';
   const safeRedirect = redirectTo ? safeRedirectPath(redirectTo) : null;
 
   const finish = (role: UserRole | null) => {
@@ -146,122 +142,21 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     if (!actualRole) {
       await supabase.auth.signOut();
       setStep('email_input');
-      return setErrorMessage('アカウントの役割情報が見つかりません。管理者にお問い合わせください。');
+      return setErrorMessage('ログインに失敗しました。');
     }
 
     const expectedRole = targetRole ?? activeRole;
     if (actualRole !== expectedRole) {
       await supabase.auth.signOut();
       setStep('email_input');
-      const rolePortals: Record<UserRole, { name: string; url: string }> = {
-        admin: { name: '管理・運営本部', url: '/admin/login' },
-        therapist: { name: 'セラピスト', url: '/therapist/login' },
-        customer: { name: 'お客様（顧客）', url: '/login' },
-      };
-      const portal = rolePortals[actualRole] ?? { name: '別区分', url: '/login' };
-      return setErrorMessage(
-        `このアカウントは「${portal.name}」用です。「${portal.name}専用ログイン画面（${portal.url}）」からログインしてください。`
-      );
+      return setErrorMessage('このアカウントではログインできません。');
     }
 
     finish(actualRole);
   };
 
-  const selectRole = (role: UserRole) => {
-    setActiveRole(role);
-    setStep(role === 'therapist' || role === 'admin' ? 'email_input' : 'select_provider');
-    setErrorMessage('');
-  };
-
-  const roleCard = (
-    role: UserRole,
-    icon: React.ReactNode,
-    title: string,
-    desc: string,
-    activeBorder: string,
-    activeBg: string,
-    activeText: string,
-    badgeText: string
-  ) => {
-    const isSelected = activeRole === role;
-    return (
-      <button
-        type="button"
-        onClick={() => selectRole(role)}
-        className={`w-full p-3 sm:p-3.5 rounded-2xl border text-left transition-all flex items-center justify-between gap-3 ${
-          isSelected
-            ? `${activeBorder} ${activeBg} shadow-xs ring-2 ring-emerald-500/10`
-            : 'border-slate-200 bg-white hover:bg-slate-50/80 text-slate-700'
-        }`}
-      >
-        <div className="flex items-center gap-3 min-w-0">
-          <div
-            className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-base font-bold transition ${
-              isSelected ? activeText : 'bg-slate-100 text-slate-500'
-            }`}
-          >
-            {icon}
-          </div>
-          <div className="min-w-0">
-            <div className={`text-xs sm:text-sm ${isSelected ? 'text-slate-900 font-black' : 'text-slate-700 font-bold'}`}>
-              {title}
-            </div>
-            <div className="text-[11px] text-slate-400 truncate">{desc}</div>
-          </div>
-        </div>
-        <div className="shrink-0 flex items-center">
-          <span
-            className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-              isSelected
-                ? 'bg-emerald-600 text-white border-emerald-600'
-                : 'bg-slate-50 text-slate-400 border-slate-200'
-            }`}
-          >
-            {isSelected ? '選択中' : badgeText}
-          </span>
-        </div>
-      </button>
-    );
-  };
-
   return (
     <div className={isModal ? '' : 'w-full'}>
-      {/* 独立した画面（targetRole 指定時）は切り替えボタンを非表示、未指定時のみ縦並びカードを表示 */}
-      {!targetRole && (
-        <div className="space-y-2 mb-5">
-          <label className="block text-xs font-bold text-slate-500 mb-1.5">ログイン区分を選択してください</label>
-          {roleCard(
-            'customer',
-            '👤',
-            'お客様（顧客）ログイン',
-            '予約確認・セラピスト検索・予約履歴',
-            'border-emerald-600',
-            'bg-emerald-50/50',
-            'bg-emerald-100 text-emerald-800',
-            '一般'
-          )}
-          {roleCard(
-            'therapist',
-            '💆',
-            'セラピスト ログイン',
-            '受付管理・スケジュール設定・プロフィール',
-            'border-indigo-600',
-            'bg-indigo-50/50',
-            'bg-indigo-100 text-indigo-800',
-            'セラピスト'
-          )}
-          {roleCard(
-            'admin',
-            <ShieldCheck className="w-4 h-4 text-amber-500" />,
-            '管理・運営本部 ログイン',
-            'プラットフォーム全体管理・セラピスト審査',
-            'border-slate-800',
-            'bg-slate-100/70',
-            'bg-slate-900 text-amber-400',
-            '管理者'
-          )}
-        </div>
-      )}
 
       {errorMessage && (
         <div className="mb-4 p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex gap-2 animate-fadeIn">
@@ -351,7 +246,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               <Mail className="w-4 h-4" />
               <span>ログインする</span>
             </button>
-            {activeRole === 'customer' && !targetRole && (
+            {activeRole === 'customer' && (
               <button
                 type="button"
                 onClick={() => setStep('select_provider')}

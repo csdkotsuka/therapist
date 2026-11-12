@@ -810,24 +810,7 @@ export const Header: React.FC = () => {
               </Link>
             </div>
 
-            {/* 他ポータルへのログイン導線 */}
-            <div className="flex items-center justify-center gap-3 text-[11px] text-slate-500 dark:text-slate-400 pt-1">
-              <Link
-                href="/therapist/login"
-                onClick={() => setIsDrawerOpen(false)}
-                className="hover:underline hover:text-indigo-600 dark:hover:text-indigo-400"
-              >
-                セラピストログイン
-              </Link>
-              <span>•</span>
-              <Link
-                href="/admin/login"
-                onClick={() => setIsDrawerOpen(false)}
-                className="hover:underline hover:text-purple-600 dark:hover:text-purple-400"
-              >
-                管理者ログイン
-              </Link>
-            </div>
+
 
             {/* コピーライトクレジット (顧客画面のWebフッターをメニュー内に集約) */}
             <div className="pt-2 text-center text-[10px] text-slate-400 dark:text-slate-600 border-t border-slate-200/60 dark:border-white/5">
