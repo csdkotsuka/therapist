@@ -22,7 +22,6 @@ import {
   Home,
   Building,
   Map as MapIcon,
-  List,
   LayoutGrid,
   Sparkles,
   ArrowRight,
@@ -343,7 +342,7 @@ export const CustomerView: React.FC = () => {
   const [filterStyle, setFilterStyle] = useState<'all' | 'visit' | 'store'>('all');
   const [onlyCampaign, setOnlyCampaign] = useState<boolean>(false); // 特典・キャンペーン有無
   const [sortBy, setSortBy] = useState<SortOption>('recommended');
-  const [viewMode, setViewMode] = useState<'card' | 'list' | 'map'>('card');
+  const [viewMode, setViewMode] = useState<'card' | 'map'>('card');
   const [isGpsLoading, setIsGpsLoading] = useState<boolean>(false);
 
   // 中心地指定機能のステート（マップ内で指定された場合にtrueになる）
@@ -1265,22 +1264,10 @@ export const CustomerView: React.FC = () => {
                   ? 'bg-white text-slate-900 shadow-2xs'
                   : 'text-slate-500 hover:text-slate-800'
               }`}
-              title="カード表示"
+              title="一覧表示"
             >
               <LayoutGrid className="w-3.5 h-3.5" />
-              <span>カード</span>
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`p-1.5 px-3 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
-                viewMode === 'list'
-                  ? 'bg-white text-slate-900 shadow-2xs'
-                  : 'text-slate-500 hover:text-slate-800'
-              }`}
-              title="リスト表示"
-            >
-              <List className="w-3.5 h-3.5" />
-              <span>リスト</span>
+              <span>一覧</span>
             </button>
             <button
               onClick={() => setViewMode('map')}
@@ -1312,7 +1299,7 @@ export const CustomerView: React.FC = () => {
           }}
           onResetToGps={handleResetToGps}
         />
-      ) : viewMode === 'card' ? (
+      ) : (
         /* Uber風 カードグリッド表示 (Grid Card View) */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {therapistsList.length === 0 ? (
@@ -1332,7 +1319,16 @@ export const CustomerView: React.FC = () => {
               return (
                 <div
                   key={tp.user_id}
-                  className="bg-white rounded-3xl border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-xl transition-all duration-300 flex flex-col group hover:-translate-y-0.5"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setBookingTherapistId(tp.user_id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setBookingTherapistId(tp.user_id);
+                    }
+                  }}
+                  className="bg-white rounded-3xl border border-slate-200/90 hover:border-emerald-300 overflow-hidden shadow-2xs hover:shadow-xl transition-all duration-300 flex flex-col group hover:-translate-y-0.5 cursor-pointer text-left"
                 >
                   {/* カード上部カバー/アバター */}
                   <div className="relative p-5 pb-3">
@@ -1444,140 +1440,16 @@ export const CustomerView: React.FC = () => {
                     </div>
 
                     <button
-                      onClick={() => setBookingTherapistId(tp.user_id)}
-                      className="px-4 py-2 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white rounded-xl text-xs font-bold shadow-2xs transition flex items-center gap-1.5 active:scale-95"
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setBookingTherapistId(tp.user_id);
+                      }}
+                      className="px-4 py-2 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white rounded-xl text-xs font-bold shadow-2xs transition flex items-center gap-1.5 active:scale-95 cursor-pointer"
                     >
                       <Sparkles className="w-3.5 h-3.5" />
                       <span>予約する</span>
                       <ArrowRight className="w-3.5 h-3.5 ml-0.5 transition-transform group-hover:translate-x-0.5" />
-                    </button>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
-      ) : (
-        /* リスト表示 (List View) */
-        <div className="space-y-3.5">
-          {therapistsList.length === 0 ? (
-            <div className="bg-white rounded-3xl p-12 text-center border border-slate-200">
-              <p className="text-slate-500 text-xs">条件に該当するセラピストが見つかりませんでした。</p>
-            </div>
-          ) : (
-            therapistsList.map((tp) => {
-              const user = allUsers.find((u) => u.id === tp.user_id);
-              const userServices = services.filter((s) => s.therapist_id === tp.user_id && s.is_active);
-              const leadService = userServices[0];
-              const travelTime = estimateTravelTimeMinutes(tp.distance);
-
-              return (
-                <div
-                  key={tp.user_id}
-                  className="bg-white rounded-3xl border border-slate-200/90 hover:border-emerald-300 p-4 sm:p-5 shadow-2xs hover:shadow-md transition-all duration-200 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 group"
-                >
-                  <div className="flex items-start sm:items-center gap-3.5 sm:gap-4 flex-1 min-w-0">
-                    <img
-                      src={user?.avatar_url || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150'}
-                      alt={user?.name}
-                      className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover ring-2 ring-emerald-500/20 group-hover:scale-105 transition-transform shrink-0"
-                    />
-
-                    <div className="flex-1 min-w-0 space-y-1.5">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="font-bold text-slate-900 text-sm sm:text-base group-hover:text-emerald-700 transition">
-                          {user?.name}
-                        </h3>
-                        <span title="認証済">
-                          <Shield className="w-3.5 h-3.5 text-emerald-500" />
-                        </span>
-
-                        {/* 特典・キャンペーンバッジ */}
-                        {tp.campaign && (
-                          <span className="inline-flex items-center gap-1 bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-2xs">
-                            <Tag className="w-2.5 h-2.5" />
-                            {tp.campaign.badge}
-                          </span>
-                        )}
-
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-600 text-white shadow-2xs">
-                          <MapPin className="w-3 h-3" />
-                          {isCustomCenter ? '中心地から' : '現在地から'} {tp.distance} km
-                        </span>
-
-                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">
-                          <Clock className="w-3 h-3 text-slate-500" />
-                          約{travelTime}分
-                        </span>
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-2.5 text-xs">
-                        {tp.reviews_count > 0 ? (
-                          <div className="flex items-center text-amber-500 font-bold">
-                            <Star className="w-3.5 h-3.5 fill-amber-400" />
-                            <span className="ml-1 text-slate-900 font-black">{tp.rating_avg.toFixed(1)}</span>
-                            <span className="text-slate-400 font-normal ml-0.5">({tp.reviews_count}件)</span>
-                          </div>
-                        ) : (
-                          <span className="text-slate-400 text-[11px]">口コミはまだありません</span>
-                        )}
-
-                        <div className="flex items-center gap-1.5">
-                          {tp.is_visit_based && (
-                            <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                              出張可
-                            </span>
-                          )}
-                          {tp.is_store_based && (
-                            <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-teal-50 text-teal-700 border border-teal-200">
-                              店舗あり
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="flex flex-wrap gap-1.5 pt-0.5">
-                        {tp.specialities.map((spec) => (
-                          <span
-                            key={spec}
-                            className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-lg text-[10px] font-medium"
-                          >
-                            {spec}
-                          </span>
-                        ))}
-                      </div>
-
-                      <p className="text-xs text-slate-500 line-clamp-1 leading-relaxed">
-                        {tp.bio}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex md:flex-col items-center md:items-end justify-between md:justify-center gap-3 shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100 md:min-w-[190px]">
-                    {leadService ? (
-                      <div className="text-left md:text-right">
-                        <div className="text-[10px] text-slate-400 font-medium">
-                          {leadService.duration_minutes}分コース
-                        </div>
-                        <div className="text-xs font-bold text-slate-800 line-clamp-1 max-w-[170px]">
-                          {leadService.title}
-                        </div>
-                        <div className="text-sm font-black text-slate-900 mt-0.5">
-                          {formatPrice(leadService.price)}
-                          <span className="text-[10px] font-normal text-slate-400 ml-1">税込</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-xs text-slate-400">メニュー準備中</div>
-                    )}
-
-                    <button
-                      onClick={() => setBookingTherapistId(tp.user_id)}
-                      className="px-4 py-2 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white rounded-xl text-xs font-bold shadow-2xs transition flex items-center gap-1.5 shrink-0 active:scale-95"
-                    >
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>予約・メニュー</span>
-                      <ArrowRight className="w-3.5 h-3.5 ml-0.5 transition-transform group-hover:translate-x-1" />
                     </button>
                   </div>
                 </div>

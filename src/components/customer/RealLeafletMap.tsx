@@ -322,7 +322,18 @@ export const RealLeafletMap: React.FC<RealLeafletMapProps> = ({
 
       {/* 選択されたセラピストカード（下部スライドアップ） */}
       {selectedTherapist && selectedUser && (
-        <div className="absolute bottom-4 left-4 right-4 z-30 bg-white/95 backdrop-blur-md rounded-2xl p-4 shadow-2xl border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-in fade-in slide-in-from-bottom-4">
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => onSelectTherapist(selectedTherapist.user_id)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              onSelectTherapist(selectedTherapist.user_id);
+            }
+          }}
+          className="absolute bottom-4 left-4 right-4 z-30 bg-white/95 backdrop-blur-md rounded-2xl p-4 shadow-2xl border border-slate-200 hover:border-emerald-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-in fade-in slide-in-from-bottom-4 cursor-pointer transition"
+        >
           <div className="flex items-center gap-3">
             <img
               src={selectedUser.avatar_url}
@@ -355,13 +366,21 @@ export const RealLeafletMap: React.FC<RealLeafletMapProps> = ({
 
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <button
-              onClick={() => setSelectedTherapistId(null)}
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedTherapistId(null);
+              }}
               className="px-3 py-2 text-xs text-slate-500 hover:text-slate-700 rounded-xl hover:bg-slate-100 transition cursor-pointer"
             >
               閉じる
             </button>
             <button
-              onClick={() => onSelectTherapist(selectedTherapist.user_id)}
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelectTherapist(selectedTherapist.user_id);
+              }}
               className="flex-1 sm:flex-none px-4 py-2 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-500/20 transition flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <Sparkles className="w-3.5 h-3.5" />
