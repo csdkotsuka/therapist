@@ -146,13 +146,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     }
 
     const expectedRole = targetRole ?? activeRole;
-    if (actualRole !== expectedRole) {
+    if (actualRole !== expectedRole && actualRole !== 'admin') {
       await supabase.auth.signOut();
       setStep('email_input');
       return setErrorMessage('このアカウントではログインできません。');
     }
 
-    finish(actualRole);
+    finish(actualRole === 'admin' ? expectedRole : actualRole);
   };
 
   return (
