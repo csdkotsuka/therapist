@@ -2,7 +2,7 @@
 // セラピスト本登録審査（4ステップ）の共通定数・判定ロジック
 // ※ このファイルはクライアント/サーバー両方から import 可能（副作用なし）
 // ========================================================
-import type { TherapistOnboarding, TherapistProfile, VerificationDocKind } from '@/types';
+import type { ServiceCategory, TherapistOnboarding, TherapistProfile, VerificationDocKind } from '@/types';
 
 /** 審査手数料（返金不可） */
 export const REVIEW_FEE_YEN = 5000;
@@ -50,66 +50,215 @@ export function isPdfName(name?: string | null): boolean {
 }
 
 // --------------------------------------------------------
-// 資格名の選択肢（承認ログの qualification_type に記録される）
+// 資格名の選択肢（国家資格・民間資格・実務経験を明確に区分）
+// ※ 承認ログの qualification_type に記録される
 // --------------------------------------------------------
-export const QUALIFICATION_TYPES = [
-  '理学療法士（PT）',
-  '作業療法士（OT）',
-  '言語聴覚士（ST）',
-  '助産師',
-  '看護師・保健師',
-  '歯科衛生士',
-  'はり師・きゅう師',
-  'あん摩マッサージ指圧師',
-  '柔道整復師',
-  '管理栄養士',
-  '視能訓練士',
-  '公認心理師・臨床心理士',
-  '民間資格（整体・カイロ・リフレ等）',
-  'エステ・アロマ・リラクゼーション認定',
-  'ネイル・アイ・美容関連ディプロマ・修了証',
-  'パーソナルトレーナー・インストラクター認定',
-  'スクール修了証・技術認定証',
-  '実務経験者枠・独自技術（資格不問）',
-  'その他',
+export type QualificationTier = 'national' | 'private' | 'experience';
+
+export interface QualificationDefinition {
+  label: string;
+  tier: QualificationTier;
+  tierLabel: string;
+  /** この資格で提供可能なサービスカテゴリ */
+  allowedCategories: ServiceCategory[];
+}
+
+const GENERAL_RELAXATION_CATEGORIES: ServiceCategory[] = [
+  'massage',
+  'aroma',
+  'chiropractic',
+  'beauty',
+  'esthetic',
+  'personal_training',
+  'footcare',
+  'counseling',
+  'parenting',
+  'nail',
+  'dressing',
+];
+
+export const QUALIFICATION_DEFINITIONS: readonly QualificationDefinition[] = [
+  // --- 国家資格（医療・保健・衛生・美容系） ---
+  {
+    label: '理学療法士（PT）',
+    tier: 'national',
+    tierLabel: '国家資格',
+    allowedCategories: ['physical_therapy', 'personal_training', ...GENERAL_RELAXATION_CATEGORIES],
+  },
+  {
+    label: '作業療法士（OT）',
+    tier: 'national',
+    tierLabel: '国家資格',
+    allowedCategories: ['occupational_therapy', 'physical_therapy', ...GENERAL_RELAXATION_CATEGORIES],
+  },
+  {
+    label: '言語聴覚士（ST）',
+    tier: 'national',
+    tierLabel: '国家資格',
+    allowedCategories: ['speech_therapy', ...GENERAL_RELAXATION_CATEGORIES],
+  },
+  {
+    label: '助産師',
+    tier: 'national',
+    tierLabel: '国家資格',
+    allowedCategories: ['midwife', 'parenting', ...GENERAL_RELAXATION_CATEGORIES],
+  },
+  {
+    label: '看護師・保健師',
+    tier: 'national',
+    tierLabel: '国家資格',
+    allowedCategories: ['midwife', 'parenting', 'footcare', ...GENERAL_RELAXATION_CATEGORIES],
+  },
+  {
+    label: '歯科衛生士',
+    tier: 'national',
+    tierLabel: '国家資格',
+    allowedCategories: ['dental_hygiene', ...GENERAL_RELAXATION_CATEGORIES],
+  },
+  {
+    label: 'はり師・きゅう師',
+    tier: 'national',
+    tierLabel: '国家資格',
+    allowedCategories: ['acupuncture', ...GENERAL_RELAXATION_CATEGORIES],
+  },
+  {
+    label: 'あん摩マッサージ指圧師',
+    tier: 'national',
+    tierLabel: '国家資格',
+    allowedCategories: ['massage', 'physical_therapy', ...GENERAL_RELAXATION_CATEGORIES],
+  },
+  {
+    label: '柔道整復師',
+    tier: 'national',
+    tierLabel: '国家資格',
+    allowedCategories: ['physical_therapy', 'chiropractic', 'personal_training', ...GENERAL_RELAXATION_CATEGORIES],
+  },
+  {
+    label: '管理栄養士',
+    tier: 'national',
+    tierLabel: '国家資格',
+    allowedCategories: ['dietitian', 'parenting', ...GENERAL_RELAXATION_CATEGORIES],
+  },
+  {
+    label: '視能訓練士',
+    tier: 'national',
+    tierLabel: '国家資格',
+    allowedCategories: ['orthoptist', ...GENERAL_RELAXATION_CATEGORIES],
+  },
+  {
+    label: '公認心理師・臨床心理士',
+    tier: 'national',
+    tierLabel: '国家資格・専門資格',
+    allowedCategories: ['counseling', 'parenting', ...GENERAL_RELAXATION_CATEGORIES],
+  },
+  {
+    label: '美容師（国家資格）',
+    tier: 'national',
+    tierLabel: '国家資格',
+    allowedCategories: ['hair_salon', ...GENERAL_RELAXATION_CATEGORIES],
+  },
+  // --- 民間資格・認定ディプロマ ---
+  {
+    label: '民間資格（整体・カイロ・リフレ等）',
+    tier: 'private',
+    tierLabel: '民間資格',
+    allowedCategories: [...GENERAL_RELAXATION_CATEGORIES],
+  },
+  {
+    label: 'エステ・アロマ・リラクゼーション認定',
+    tier: 'private',
+    tierLabel: '民間資格',
+    allowedCategories: [...GENERAL_RELAXATION_CATEGORIES],
+  },
+  {
+    label: 'ネイル・アイ・美容関連ディプロマ・修了証',
+    tier: 'private',
+    tierLabel: '民間資格',
+    allowedCategories: [...GENERAL_RELAXATION_CATEGORIES],
+  },
+  {
+    label: 'パーソナルトレーナー・インストラクター認定',
+    tier: 'private',
+    tierLabel: '民間資格',
+    allowedCategories: [...GENERAL_RELAXATION_CATEGORIES],
+  },
+  {
+    label: 'スクール修了証・技術認定証',
+    tier: 'private',
+    tierLabel: '民間資格',
+    allowedCategories: [...GENERAL_RELAXATION_CATEGORIES],
+  },
+  // --- 実務経験・その他 ---
+  {
+    label: '実務経験者枠・独自技術（資格不問）',
+    tier: 'experience',
+    tierLabel: '実務経験・専門技術',
+    allowedCategories: [...GENERAL_RELAXATION_CATEGORIES],
+  },
+  {
+    label: 'その他',
+    tier: 'experience',
+    tierLabel: '実務経験・専門技術',
+    allowedCategories: [...GENERAL_RELAXATION_CATEGORIES],
+  },
 ] as const;
+
+export const QUALIFICATION_TYPES = QUALIFICATION_DEFINITIONS.map((q) => q.label);
+
+export function getQualificationMeta(label?: string | null): QualificationDefinition | undefined {
+  if (!label) return undefined;
+  return QUALIFICATION_DEFINITIONS.find((q) => q.label === label);
+}
+
+export function isCategoryAllowedForQualification(
+  qualificationLabel: string | null | undefined,
+  category: ServiceCategory
+): boolean {
+  const meta = getQualificationMeta(qualificationLabel);
+  if (!meta) return GENERAL_RELAXATION_CATEGORIES.includes(category);
+  return meta.allowedCategories.includes(category);
+}
 
 // --------------------------------------------------------
 // 電子誓約書（Step3）
-// ※ 文面は運用開始前に必ず法務確認を行ってください
 // --------------------------------------------------------
-export const TERMS_VERSION = '2026-10-v1';
+export const TERMS_VERSION = '2026-11-v2';
 
 export const TERMS_ITEMS: { id: string; title: string; body: string }[] = [
   {
     id: 'tos',
-    title: '利用規約への同意',
-    body: '本サービスの利用規約およびプライバシーポリシーの内容を確認し、これに同意します。',
+    title: '施術者向け利用規約・プライバシーポリシーへの同意',
+    body: '本サービスの施術者向け利用規約およびプライバシーポリシーの全文を確認し、これに同意します。',
+  },
+  {
+    id: 'independent',
+    title: '独立事業者としての地位および責任',
+    body: '当社と雇用・代理・委任関係にない独立した事業者としてサービスを提供し、施術契約の当事者として施術内容・技術・安全性に関する一切の責任を負うことを理解しました。',
+  },
+  {
+    id: 'compliance_ad',
+    title: '業法・広告規制およびサービス区分の遵守',
+    body: '医師法・あはき法・柔道整復師法・美容師法・薬機法・景品表示法等の関連法令を遵守し、自身の保有資格の範囲を超えた施術および医療行為と誤認される表現・誇大広告を行いません。',
+  },
+  {
+    id: 'safety_insurance',
+    title: '安全管理義務・保険加入維持および事故報告',
+    body: '事前の問診・禁忌確認・衛生管理等の安全管理義務を遵守し、業務上の対人・対物損害賠償責任保険に有効に加入・維持します。万一事故・トラブルが発生した場合は直ちに安全確保と当社への報告を行います。',
   },
   {
     id: 'no_direct',
-    title: '直契約の禁止',
-    body: '本サービスを通じて紹介を受けた顧客と、プラットフォームを介さずに直接契約・取引（個人間での予約・決済・連絡先交換による継続施術など）を行いません。',
-  },
-  {
-    id: 'no_poaching',
-    title: '引き抜き行為の禁止',
-    body: '本サービスに登録する他のセラピストおよび顧客を、本サービス外への取引へ勧誘・引き抜く行為を行いません。',
+    title: '直接取引（中抜き）および引き抜きの禁止',
+    body: '本プラットフォームを通じて知り得た顧客および他の施術者に対し、最終予約日または登録終了日から1年間、本プラットフォームを介さない直接契約・直接決済・勧誘を行いません（違反時は手数料相当額の2倍等の規約所定の違約金を支払います）。',
   },
   {
     id: 'authenticity',
-    title: '提出書類の真正性',
-    body: '提出する資格証および損害賠償責任保険の証票は真正かつ有効期間内のものであり、虚偽があった場合は登録の取消しに異議を述べません。',
+    title: '提出書類の真正性と取扱いの理解',
+    body: '提出する資格証・保険証票は真正かつ有効なものであり、資格証・保険証票の原本データは審査完了・差戻し時に一時保管領域から即時完全削除され承認記録テキストのみ保持されること、身分証画像はStripeが直接取得し当社が保持しないことを理解しました。',
   },
   {
-    id: 'privacy',
-    title: '書類の取扱いの理解',
-    body: '身分証明書（運転免許証等）の画像は Stripe が取得し運営は保持しないこと、資格証・保険証票は審査のためだけに一時保管され承認完了と同時に完全削除されることを理解しました。',
-  },
-  {
-    id: 'fee',
-    title: '審査手数料',
-    body: `審査手数料（${REVIEW_FEE_YEN.toLocaleString('ja-JP')}円）は審査の結果にかかわらず返金されないことを理解しました。`,
+    id: 'stripe_fee',
+    title: 'Stripe Connect 決済および審査手数料',
+    body: `Stripe Connect アカウントの開設および利用規約に同意し、プラットフォーム手数料控除後の報酬受領・返金処理の仕組みを理解しました。また審査手数料（${REVIEW_FEE_YEN.toLocaleString('ja-JP')}円）は審査結果にかかわらず返金されないことを理解しました。`,
   },
 ];
 

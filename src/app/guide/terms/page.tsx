@@ -23,7 +23,7 @@ export default function GuideTermsPage() {
           {currentBrand.name} プラットフォーム利用規約
         </h1>
         <p className="text-sm sm:text-base text-emerald-100 mt-3 max-w-3xl leading-relaxed">
-          LINE公式アカウント連携者、出張・店舗ご利用のすべてのお客様、および提携セラピストの皆様に共通して適用される公式利用規約です。
+          「利用者（お客様）向け利用規約」と「施術者（セラピスト）向け利用規約」をそれぞれ定めています。該当するタブを選択してご確認ください。
         </p>
 
         {/* 相互リンク */}

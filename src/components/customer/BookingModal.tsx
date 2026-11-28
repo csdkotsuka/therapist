@@ -251,7 +251,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 </div>
               </div>
               <p className="text-[10px] text-slate-500 truncate">
-                {therapist.specialities?.[0] || '認定セラピスト'} • {distance}km
+                {therapist.specialities?.[0] || '登録セラピスト'} • {distance}km
               </p>
             </div>
           </div>
@@ -354,7 +354,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                       </span>
                     </div>
                     <p className="text-xs font-bold text-emerald-800 line-clamp-1">
-                      {therapist.specialities?.join(' • ') || '国家資格・認定施術者'}
+                      {therapist.specialities?.join(' • ') || '登録セラピスト（本人確認・保険加入済）'}
                     </p>
                     <div className="flex items-center gap-1 text-xs font-bold text-amber-500">
                       <Star className="w-3.5 h-3.5 fill-amber-400" />

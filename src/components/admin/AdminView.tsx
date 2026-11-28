@@ -12,6 +12,7 @@ import {
   getVerificationStage,
   STAGE_META,
   QUALIFICATION_TYPES,
+  QUALIFICATION_DEFINITIONS,
   REVIEW_FEE_YEN,
   STORAGE_BUCKET,
   VerificationStage,
@@ -846,7 +847,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                     <div>審査手数料</div>
                     <div>電子誓約書</div>
                     <div>本人確認</div>
-                    <div>国家資格証</div>
+                    <div>資格証・認定証</div>
                     <div>損害保険</div>
                   </div>
                   <div className="w-[190px] shrink-0 text-right pr-2">操作・判定</div>
@@ -1292,11 +1293,27 @@ export const AdminView: React.FC<AdminViewProps> = ({ activeSection = 'therapist
                               onChange={(e) => setApprovalQualificationType(e.target.value)}
                               className="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-900"
                             >
-                              {QUALIFICATION_TYPES.map((q) => (
-                                <option key={q} value={q}>
-                                  {q}
-                                </option>
-                              ))}
+                              <optgroup label="国家資格">
+                                {QUALIFICATION_DEFINITIONS.filter((q) => q.tier === 'national').map((q) => (
+                                  <option key={q.label} value={q.label}>
+                                    {q.label}
+                                  </option>
+                                ))}
+                              </optgroup>
+                              <optgroup label="民間資格・認定ディプロマ">
+                                {QUALIFICATION_DEFINITIONS.filter((q) => q.tier === 'private').map((q) => (
+                                  <option key={q.label} value={q.label}>
+                                    {q.label}
+                                  </option>
+                                ))}
+                              </optgroup>
+                              <optgroup label="実務経験・その他">
+                                {QUALIFICATION_DEFINITIONS.filter((q) => q.tier === 'experience').map((q) => (
+                                  <option key={q.label} value={q.label}>
+                                    {q.label}
+                                  </option>
+                                ))}
+                              </optgroup>
                             </select>
                           </div>
 

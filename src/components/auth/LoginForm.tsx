@@ -305,7 +305,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
           <p className="text-[11px] text-center text-slate-400 pt-2 leading-relaxed">
             ログインすることで、{currentBrand.name}の
-            <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-emerald-700 hover:underline mx-0.5">利用規約</a>
+            <a href="/terms?tab=customer" target="_blank" rel="noopener noreferrer" className="text-emerald-700 hover:underline mx-0.5">利用規約</a>
             および
             <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-emerald-700 hover:underline mx-0.5">プライバシーポリシー</a>
             に同意したものとみなされます。

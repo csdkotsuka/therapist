@@ -101,7 +101,7 @@ export default function TherapistGuidePage() {
               </span>
             </div>
             <p className="text-sm text-slate-700 leading-relaxed">
-              適正なプラットフォーム品質と安全なマッチング環境を担保するため、登録審査手数料（3,300円・Stripe決済）をお支払いいただき、利用規約・直契約禁止・コンプライアンスに関する電子誓約書に署名同意します。
+              適正なプラットフォーム品質と安全なマッチング環境を担保するため、登録審査手数料（5,000円・Stripe決済）をお支払いいただき、施術者向け利用規約・直契約禁止（1年間）・安全管理義務・コンプライアンスに関する電子誓約書に署名同意します。
             </p>
             <div className="p-3.5 bg-indigo-50 rounded-2xl text-xs sm:text-sm text-indigo-950 font-medium">
               💡 審査完了後、管理本部より「本登録・専門認定」バッジが付与され、マップ上にピンが表示されます。
@@ -220,7 +220,7 @@ export default function TherapistGuidePage() {
 
             <div className="pt-3 border-t border-rose-100 flex flex-wrap items-center gap-3">
               <Link
-                href="/terms"
+                href="/terms?tab=therapist"
                 className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition"
               >
                 <FileText className="w-3.5 h-3.5" />

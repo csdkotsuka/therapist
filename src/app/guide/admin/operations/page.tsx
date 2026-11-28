@@ -67,7 +67,7 @@ export default function OperationsGuidePage() {
                 <CreditCard className="w-6 h-6 print:stroke-[2.5]" />
               </div>
               <h3 className="text-base sm:text-lg font-bold text-slate-900">
-                2. 審査手数料（3,300円）決済 ＆ 電子誓約書・Stripe連携
+                2. 審査手数料（5,000円）決済 ＆ 電子誓約書・Stripe連携
               </h3>
               <p className="text-sm text-slate-700 leading-relaxed">
                 不正登録の防止と冷やかし排除のため、セラピストは事前審査料（Stripe決済）と電子誓約書（法令遵守・直契約禁止規約への同意）の締結が必要です。管理画面の提出書類一覧の見出しサマリーで各人のステータス（済/未）を瞬時に確認できます。

@@ -11,6 +11,8 @@ import {
   REVIEW_FEE_YEN,
   STORAGE_BUCKET,
   QUALIFICATION_TYPES,
+  QUALIFICATION_DEFINITIONS,
+  isCategoryAllowedForQualification,
   TERMS_VERSION,
   TERMS_ITEMS,
   getChecklist,
@@ -481,7 +483,7 @@ const TherapistViewInner: React.FC<{ activeSection?: TherapistSection; currentUs
             icon: ShieldCheck,
             badge: stageMeta.label,
             badgeColor: stageMeta.badge,
-            desc: '国家資格証・損害保険の提出と認証ステータス',
+            desc: '資格証・認定証・損害保険の提出と認証ステータス',
           },
         ];
 
@@ -755,9 +757,19 @@ const TherapistViewInner: React.FC<{ activeSection?: TherapistSection; currentUs
 
               {/* 3-A: 電子誓約書 */}
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-black text-slate-900">① 電子誓約書（利用規約・直契約禁止・引き抜き禁止等への同意）</span>
-                  <span className="text-[11px] font-mono text-slate-400">Ver: {TERMS_VERSION}</span>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-xs font-black text-slate-900">① 電子誓約書（施術者向け利用規約・直契約禁止・安全管理等への同意）</span>
+                  <div className="flex items-center gap-2">
+                    <a
+                      href="/terms?tab=therapist"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[11px] font-bold text-indigo-600 hover:underline"
+                    >
+                      施術者向け規約を読む ↗
+                    </a>
+                    <span className="text-[11px] font-mono text-slate-400">Ver: {TERMS_VERSION}</span>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -784,17 +796,33 @@ const TherapistViewInner: React.FC<{ activeSection?: TherapistSection; currentUs
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-700 mb-1">申請する保有資格種別</label>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">申請する保有資格種別（国家資格・民間資格を区別）</label>
                     <select
                       value={claimedQualification}
                       onChange={(e) => setClaimedQualification(e.target.value)}
                       className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-900"
                     >
-                      {QUALIFICATION_TYPES.map((q) => (
-                        <option key={q} value={q}>
-                          {q}
-                        </option>
-                      ))}
+                      <optgroup label="国家資格">
+                        {QUALIFICATION_DEFINITIONS.filter((q) => q.tier === 'national').map((q) => (
+                          <option key={q.label} value={q.label}>
+                            {q.label}
+                          </option>
+                        ))}
+                      </optgroup>
+                      <optgroup label="民間資格・認定ディプロマ">
+                        {QUALIFICATION_DEFINITIONS.filter((q) => q.tier === 'private').map((q) => (
+                          <option key={q.label} value={q.label}>
+                            {q.label}
+                          </option>
+                        ))}
+                      </optgroup>
+                      <optgroup label="実務経験・その他">
+                        {QUALIFICATION_DEFINITIONS.filter((q) => q.tier === 'experience').map((q) => (
+                          <option key={q.label} value={q.label}>
+                            {q.label}
+                          </option>
+                        ))}
+                      </optgroup>
                     </select>
                   </div>
                   <div>
@@ -882,7 +910,7 @@ const TherapistViewInner: React.FC<{ activeSection?: TherapistSection; currentUs
                       ? '運営承認完了に伴い、一時保管バケットから完全削除されました。'
                       : onboarding?.qualification_file_name
                       ? `提出ファイル: ${onboarding.qualification_file_name}`
-                      : '国家資格免状、民間認定証、各種ディプロマ、スクール修了証などの画像またはPDF（10MB以下）を選択してください。※リラクゼーション・ネイル等で資格不問の場合は、実績や経験が分かる資料・修了証でも可。'}
+                      : '国家資格免状、民間認定証、各種ディプロマ、スクール修了証などの画像またはPDF（10MB以下）を選択してください。※利用目的：資格種別の確認審査のみ／保存期間：審査完了または差戻しと同時に即時完全削除／閲覧権限：最小限の運営管理者のみ。'}
                   </p>
                   {!isCertified && (
                     <div className="flex flex-wrap items-center gap-2">
@@ -1151,18 +1179,34 @@ const TherapistViewInner: React.FC<{ activeSection?: TherapistSection; currentUs
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                        認定する国家資格種別
+                        認定する資格種別（国家資格・民間資格区分）
                       </label>
                       <select
                         value={adminQualType}
                         onChange={(e) => setAdminQualType(e.target.value)}
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-900"
                       >
-                        {QUALIFICATION_TYPES.map((q) => (
-                          <option key={q} value={q}>
-                            {q}
-                          </option>
-                        ))}
+                        <optgroup label="国家資格">
+                          {QUALIFICATION_DEFINITIONS.filter((q) => q.tier === 'national').map((q) => (
+                            <option key={q.label} value={q.label}>
+                              {q.label}
+                            </option>
+                          ))}
+                        </optgroup>
+                        <optgroup label="民間資格・認定ディプロマ">
+                          {QUALIFICATION_DEFINITIONS.filter((q) => q.tier === 'private').map((q) => (
+                            <option key={q.label} value={q.label}>
+                              {q.label}
+                            </option>
+                          ))}
+                        </optgroup>
+                        <optgroup label="実務経験・その他">
+                          {QUALIFICATION_DEFINITIONS.filter((q) => q.tier === 'experience').map((q) => (
+                            <option key={q.label} value={q.label}>
+                              {q.label}
+                            </option>
+                          ))}
+                        </optgroup>
                       </select>
                     </div>
 
@@ -2195,29 +2239,46 @@ const TherapistViewInner: React.FC<{ activeSection?: TherapistSection; currentUs
                   </div>
 
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1">カテゴリ</label>
+                    <label className="block font-bold text-slate-700 mb-1">
+                      カテゴリ（保有資格で提供可能な区分のみ選択可）
+                    </label>
                     <select
                       value={newCategory}
                       onChange={(e) => setNewCategory(e.target.value as any)}
                       className="w-full px-3 py-2 border rounded-xl bg-white"
                     >
-                      <option value="physical_therapy">理学療法 (PT)</option>
-                      <option value="occupational_therapy">作業療法 (OT)</option>
-                      <option value="speech_therapy">言語聴覚 (ST)</option>
-                      <option value="dental_hygiene">歯科衛生・訪問口腔ケア</option>
-                      <option value="acupuncture">鍼灸・経絡治療</option>
-                      <option value="dietitian">管理栄養・食事指導</option>
-                      <option value="midwife">助産・産前産後ケア</option>
-                      <option value="orthoptist">視能訓練・アイケア</option>
-                      <option value="massage">もみほぐし・整体</option>
-                      <option value="aroma">アロマ・リンパ</option>
-                      <option value="chiropractic">カイロプラクティック</option>
-                      <option value="beauty">睡眠・ドライヘッドスパ</option>
-                      <option value="esthetic">エステ・フェイシャル</option>
-                      <option value="personal_training">パーソナルトレーニング</option>
-                      <option value="footcare">フットケア・巻き爪・ネイル</option>
-                      <option value="counseling">心理カウンセリング・メンタル</option>
-                      <option value="parenting">離乳食・育児相談</option>
+                      {(
+                        [
+                          { value: 'physical_therapy', label: '理学療法・コンディショニング (PT)' },
+                          { value: 'occupational_therapy', label: '作業療法・生活機能サポート (OT)' },
+                          { value: 'speech_therapy', label: '言語聴覚・ことばのサポート (ST)' },
+                          { value: 'dental_hygiene', label: '歯科衛生・訪問口腔ケア' },
+                          { value: 'acupuncture', label: '鍼灸・経絡ケア' },
+                          { value: 'dietitian', label: '管理栄養・食事指導' },
+                          { value: 'midwife', label: '助産・産前産後ケア' },
+                          { value: 'orthoptist', label: '視能訓練・アイケア' },
+                          { value: 'hair_salon', label: '出張美容師（カット・ヘアセット）' },
+                          { value: 'massage', label: 'もみほぐし・ボディケア' },
+                          { value: 'aroma', label: 'アロマ・リンパ' },
+                          { value: 'chiropractic', label: 'カイロプラクティック・姿勢ケア' },
+                          { value: 'beauty', label: '睡眠・ドライヘッドスパ' },
+                          { value: 'esthetic', label: 'エステ・フェイシャル' },
+                          { value: 'personal_training', label: 'パーソナルトレーニング' },
+                          { value: 'footcare', label: 'フットケア・ネイルケア' },
+                          { value: 'counseling', label: '心理カウンセリング・メンタル' },
+                          { value: 'parenting', label: '離乳食・育児相談' },
+                          { value: 'nail', label: '出張ネイル' },
+                          { value: 'dressing', label: '出張着付け' },
+                        ] as { value: ServiceCategory; label: string }[]
+                      )
+                        .filter((opt) =>
+                          isCategoryAllowedForQualification(onboarding?.claimed_qualification_type, opt.value)
+                        )
+                        .map((opt) => (
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </option>
+                        ))}
                     </select>
                   </div>
 

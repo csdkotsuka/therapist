@@ -152,7 +152,7 @@ export default function CustomerGuidePage() {
             </div>
             <ul className="text-sm text-slate-700 space-y-2 list-disc list-inside leading-relaxed">
               <li>
-                <strong>国家資格・身元審査の徹底:</strong> 全ての施術者は本人確認書類および資格免許証の厳格な審査を完了しています。
+                <strong>資格・身元審査の徹底:</strong> 全ての施術者は本人確認書類および保有資格証・認定証等の厳格な審査を完了しています（国家資格と民間資格・実務経験を区別して表示しています）。
               </li>
               <li>
                 <strong>損害賠償保険の加入:</strong> 万が一の対人・対物事故に備え、全セラピストが賠償責任保険を適用しています。
@@ -164,7 +164,7 @@ export default function CustomerGuidePage() {
 
             <div className="pt-3 border-t border-emerald-100 flex flex-wrap items-center gap-3">
               <Link
-                href="/terms"
+                href="/terms?tab=customer"
                 className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition"
               >
                 <FileText className="w-3.5 h-3.5" />
